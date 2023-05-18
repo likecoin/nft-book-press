@@ -24,7 +24,7 @@
               {{ b.classId }}
             </NuxtLink>
           </td>
-          <td>{{ b.price }}</td>
+          <td>{{ b.prices?.map((p: any) => p.price).join(', ') }}</td>
           <td>{{ b.pendingNFTCount }}</td>
           <td>{{ b.sold }}</td>
           <td>{{ b.stock }}</td>

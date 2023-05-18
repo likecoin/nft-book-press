@@ -18,7 +18,7 @@
           <td>Remaining Stock</td>
         </tr>
         <tr>
-          <td>{{ classListingInfo.price }}</td>
+          <td>{{ classListingInfo.prices?.map((p: any) => p.price).join(', ') }}</td>
           <td>{{ classListingInfo.pendingNFTCount }}</td>
           <td>{{ classListingInfo.sold }}</td>
           <td>{{ classListingInfo.stock }}</td>
@@ -80,6 +80,14 @@
       <hr>
       <h3>Copy Purchase Link</h3>
       <p>
+        <label>Price (Optional)</label>
+        <select v-model="priceIndex">
+          <option v-for="p, i in classListingInfo?.prices" :key="p.price" :value="i">
+            {{ p.price }}
+          </option>
+        </select>
+      </p>
+      <p>
         <label>Sales channel for this link (Optional)</label>
         <input v-model="fromChannel" placeholder="Channel ID">
       </p>
@@ -108,12 +116,17 @@ const error = ref('')
 const isLoading = ref(false)
 const classId = ref(route.params.classId)
 const fromChannel = ref<string | undefined>(undefined)
+const priceIndex = ref(0)
 const classListingInfo = ref<any>({})
 const purchaseList = ref<any[]>([])
 const chainExplorerURL = CHAIN_EXPLORER_URL
 
 const purchaseLink = computed(() => {
-  const queryString = fromChannel.value ? `?from=${fromChannel.value}` : ''
+  const payload: Record<string, string> = {
+    from: fromChannel.value || '',
+    price: priceIndex.value.toString()
+  }
+  const queryString = `?${new URLSearchParams(payload).toString()}`
   return `https://api.${IS_TESTNET ? 'rinkeby.' : ''}like.co/likernft/book/purchase/${classId.value}/new${queryString}`
 })
 const salesChannelMap = computed(() => {
@@ -177,7 +190,7 @@ onMounted(async () => {
 })
 
 async function copyPurchaseLink () {
-  await navigator.clipboard.writeText(purchaseLink.value);
+  await navigator.clipboard.writeText(purchaseLink.value)
 }
 
 </script>
