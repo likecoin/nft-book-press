@@ -80,7 +80,7 @@
       <hr>
       <h3>Copy Purchase Link</h3>
       <p>
-        <label>Price (Optional)</label>
+        <label>Price (Required)</label>
         <select v-model="priceIndex">
           <option v-for="p, i in classListingInfo?.prices" :key="p.price" :value="i">
             {{ p.price }}

@@ -29,9 +29,13 @@
       <p><label>Enter Author's Message (optional)</label></p>
       <input v-model="memo" placeholder="default memo">
       <p><label>Enter NFT ID (optional)</label></p>
-      <input v-model="nftId" placeholder="default memo">
-      <button :disabled="isLoading" style="margin-top: 16px" @click="onSendNFTStart">
+      <img v-if="nftImage" :src="nftImage" height="128"><br>
+      <input v-model="nftId" placeholder="(leave empty to auto fetch)">
+      <button v-if="nftId" :disabled="isLoading" style="margin-top: 16px" @click="onSendNFTStart">
         Sign and Send
+      </button>
+      <button v-else :disabled="isLoading" style="margin-top: 16px" @click="fetchNftId">
+        Fetch NFT ID to Send
       </button>
     </section>
   </div>
@@ -40,9 +44,10 @@
 <script setup lang="ts">
 import { DeliverTxResponse } from '@cosmjs/stargate'
 import { storeToRefs } from 'pinia'
-import { LIKE_CO_API } from '~/constant'
+import { LIKE_CO_API, LCD_URL } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
+import { parseImageURLFromMetadata } from '~/utils'
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
@@ -61,9 +66,27 @@ const paymentId = ref(route.query.payment_id as string)
 const memo = ref('')
 const nftId = ref('')
 const orderInfo = ref<any>({})
+const nftImage = ref('')
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
+})
+
+watch(nftId, async (newNftId) => {
+  if (newNftId) {
+    const { data, error: fetchError } = await useFetch(`${LCD_URL}/cosmos/nft/v1beta1/nfts/${classId.value}/${newNftId}`)
+    console.log(data.value)
+    if (fetchError.value) {
+      nftImage.value = ''
+      error.value = fetchError.value.toString()
+      return
+    }
+    const image = (data.value as any)?.nft?.data?.metadata?.image || ''
+    console.log(image)
+    nftImage.value = parseImageURLFromMetadata(image)
+  } else {
+    nftImage.value = ''
+  }
 })
 
 onMounted(async () => {
@@ -84,6 +107,26 @@ onMounted(async () => {
   }
 })
 
+async function fetchNftId () {
+  try {
+    isLoading.value = true
+    if (!wallet.value || !signer.value) {
+      await connect()
+    }
+    if (!wallet.value) { return }
+    const { nfts } = await getNFTs({
+      classId: classId.value,
+      owner: wallet.value,
+      needCount: 1
+    })
+    if (nfts.length) {
+      nftId.value = nfts[0].id
+    }
+  } finally {
+    isLoading.value = false
+  }
+}
+
 async function onSendNFTStart () {
   try {
     isLoading.value = true
@@ -97,18 +140,10 @@ async function onSendNFTStart () {
       if (owner !== wallet.value) {
         throw new Error(`NFT classId: ${classId} nftId:${nftId} is not owned by sender!`)
       }
-      targetNftId = nftId.value
     } else {
-      const { nfts } = await getNFTs({
-        classId: classId.value,
-        owner: wallet.value,
-        needCount: 1
-      })
-      if (!nfts.length) {
-        throw new Error(`Sender does not own any class id: ${classId.value} `)
-      }
-      targetNftId = nfts[0].id
+      await fetchNftId()
     }
+    targetNftId = nftId.value
 
     const signingClient = await getSigningClientWithSigner(signer.value)
     const client = signingClient.getSigningStargateClient()

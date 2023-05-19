@@ -21,3 +21,7 @@ export function downloadBlob (content: string, filename: string, contentType: st
   pom.setAttribute('download', filename)
   pom.click()
 }
+
+export function parseImageURLFromMetadata (image: string): string {
+  return image.replace('ar://', 'https://arweave.net/').replace('ipfs://', 'https://ipfs.io/ipfs/')
+}
