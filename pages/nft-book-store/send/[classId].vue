@@ -75,14 +75,12 @@ watch(isLoading, (newIsLoading) => {
 watch(nftId, async (newNftId) => {
   if (newNftId) {
     const { data, error: fetchError } = await useFetch(`${LCD_URL}/cosmos/nft/v1beta1/nfts/${classId.value}/${newNftId}`)
-    console.log(data.value)
     if (fetchError.value) {
       nftImage.value = ''
       error.value = fetchError.value.toString()
       return
     }
     const image = (data.value as any)?.nft?.data?.metadata?.image || ''
-    console.log(image)
     nftImage.value = parseImageURLFromMetadata(image)
   } else {
     nftImage.value = ''
