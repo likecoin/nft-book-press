@@ -49,17 +49,19 @@ function updatePrice (e: InputEvent, key: string, index: number) {
 }
 
 function addMorePrice () {
-  prices.value.push({})
+  prices.value.push([{ price: 0, stock: 0 }])
 }
 
 async function onSubmit () {
   try {
     isLoading.value = true
-    const p = prices.value.map(p => ({
-      priceInDecimal: Number(p.price) * 100,
-      price: Number(p.price),
-      stock: Number(p.stock)
-    }))
+    const p = prices.value
+      .filter(p => p.price > 0)
+      .map(p => ({
+        priceInDecimal: Number(p.price) * 100,
+        price: Number(p.price),
+        stock: Number(p.stock)
+      }))
     await newBookListing(classIdInput.value, {
       prices: p
     })
