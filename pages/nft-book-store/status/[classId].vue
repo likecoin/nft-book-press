@@ -124,7 +124,7 @@ const chainExplorerURL = CHAIN_EXPLORER_URL
 const purchaseLink = computed(() => {
   const payload: Record<string, string> = {
     from: fromChannel.value || '',
-    price: priceIndex.value.toString()
+    price_index: priceIndex.value.toString()
   }
   const queryString = `?${new URLSearchParams(payload).toString()}`
   return `https://api.${IS_TESTNET ? 'rinkeby.' : ''}like.co/likernft/book/purchase/${classId.value}/new${queryString}`
