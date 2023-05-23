@@ -11,11 +11,15 @@
     <section v-if="bookStoreApiStore.isAuthenticated">
       <p><label>NFT Class ID:</label></p>
       <input v-model="classIdInput" placeholder="likenft....">
+      <p>Total number of NFT for sale: {{ totalStock }}</p>
+      <hr>
       <div v-for="p, index in prices" :key="index">
         <p><label>Price(USD) per NFT Book</label></p>
         <input :value="p.price" type="number" @input="e => updatePrice(e, 'price', index)">
         <p><label>Total number of NFT for sale at this price</label></p>
         <input :value="p.stock" type="number" @input="e => updatePrice(e, 'stock', index)">
+        <p><label>Product name of this price</label></p>
+        <input :value="p.name" @input="e => updatePrice(e, 'name', index)">
         <hr>
       </div>
       <button @click="addMorePrice">Add more prices</button>
@@ -38,7 +42,12 @@ const error = ref('')
 const isLoading = ref(false)
 
 const classIdInput = ref(route.query.class_id as string || '')
-const prices = ref<any[]>([{ price: 0, stock: Number(route.query.count as string || 0) }])
+const prices = ref<any[]>([{
+  price: 0,
+  stock: Number(route.query.count as string || 0),
+  name: 'Standard Edition'
+}])
+const totalStock = computed(() => prices.value.reduce((acc, p) => acc + Number(p.stock), 0))
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
@@ -49,7 +58,7 @@ function updatePrice (e: InputEvent, key: string, index: number) {
 }
 
 function addMorePrice () {
-  prices.value.push([{ price: 0, stock: 0 }])
+  prices.value.push({ price: 0, stock: 0, name: `Tier ${prices.value.length}` })
 }
 
 async function onSubmit () {
@@ -58,6 +67,7 @@ async function onSubmit () {
     const p = prices.value
       .filter(p => p.price > 0)
       .map(p => ({
+        name: p.name,
         priceInDecimal: Number(p.price) * 100,
         price: Number(p.price),
         stock: Number(p.stock)
