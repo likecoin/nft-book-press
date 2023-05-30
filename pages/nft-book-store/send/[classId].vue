@@ -10,17 +10,23 @@
     <hr>
     <section v-if="bookStoreApiStore.isAuthenticated">
       <table>
-        <tr>
-          <td>email</td>
-          <td>status</td>
-          <td>wallet</td>
-          <td>buyer message</td>
-          <td>sales channel</td>
-        </tr>
+        <thead>
+          <tr>
+            <th>Buyer Email</th>
+            <th>Status</th>
+            <th>Buyer Wallet</th>
+            <th>Price Name</th>
+            <th>Price</th>
+            <th>Buyer message</th>
+            <th>Sales channel</th>
+          </tr>
+        </thead>
         <tr>
           <td>{{ orderInfo.email }}</td>
           <td>{{ orderInfo.status }}</td>
           <td>{{ orderInfo.wallet }}</td>
+          <td>{{ orderInfo.priceName }}</td>
+          <td>{{ orderInfo.price }}</td>
           <td>{{ orderInfo.message }}</td>
           <td>{{ orderInfo.from }}</td>
         </tr>

@@ -26,18 +26,24 @@
       </table>
       <h3>Orders</h3>
       <table>
-        <tr>
-          <td>email</td>
-          <td>status</td>
-          <td>wallet</td>
-          <td>buyer message</td>
-          <td>sales channel</td>
-          <td>Action</td>
-        </tr>
+        <thead>
+          <tr>
+            <th>Buyer Email</th>
+            <th>Status</th>
+            <th>Buyer Wallet</th>
+            <th>Price Name</th>
+            <th>Price</th>
+            <th>Buyer message</th>
+            <th>Sales channel</th>
+            <th>Action</th>
+          </tr>
+        </thead>
         <tr v-for="p in purchaseList" :key="p.classId">
           <td>{{ p.email }}</td>
           <td>{{ p.status }}</td>
           <td>{{ p.wallet }}</td>
+          <td>{{ p.priceName }}</td>
+          <td>{{ p.price }}</td>
           <td>{{ p.message }}</td>
           <td>{{ p.from }}</td>
           <td>
