@@ -17,7 +17,7 @@
         <p><label>Price(USD) per NFT Book</label></p>
         <input :value="p.price" type="number" @input="e => updatePrice(e, 'price', index)">
         <p><label>Total number of NFT for sale at this price</label></p>
-        <input :value="p.stock" type="number" @input="e => updatePrice(e, 'stock', index)">
+        <input :value="p.stock" type="number" :min="MINIMAL_PRICE" @input="e => updatePrice(e, 'stock', index)">
         <p><label>Product name of this price</label></p>
         <input :value="p.name" @input="e => updatePrice(e, 'name', index)">
         <hr>
@@ -37,6 +37,8 @@ const bookStoreApiStore = useBookStoreApiStore()
 const { newBookListing } = bookStoreApiStore
 const router = useRouter()
 const route = useRoute()
+
+const MINIMAL_PRICE = 5
 
 const error = ref('')
 const isLoading = ref(false)
