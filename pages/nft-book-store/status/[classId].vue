@@ -70,6 +70,19 @@
           </td>
         </tr>
       </table>
+
+      <p><label>Share sales data to wallets:</label></p>
+      <ul v-if="classListingInfo.moderatorWallets?.length">
+        <li v-for="m in classListingInfo.moderatorWallets" :key="m">
+          {{ m }}
+        </li>
+      </ul><span v-else>None</span>
+      <p><label>Email to receive sales notifications</label></p>
+      <ul v-if="classListingInfo.notificationEmails?.length">
+        <li v-for="e in classListingInfo.notificationEmails" :key="e">
+          {{ e }}
+        </li>
+      </ul><span v-else>None</span>
       <h3>Sales Channel Summary</h3>
       <table>
         <tr>

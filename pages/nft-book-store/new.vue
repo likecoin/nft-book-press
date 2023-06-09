@@ -23,6 +23,21 @@
         <hr>
       </div>
       <button @click="addMorePrice">Add more prices</button>
+      <p><label>Share sales data to wallets:</label></p>
+      <ul>
+        <li v-for="m in moderatorWallets" :key="m">
+          {{ m }}
+        </li>
+      </ul>
+      <input v-model="moderatorWalletInput" placeholder="like1..."><button @click="addModeratorWallet">Add</button>
+      <p><label>Email to receive sales notifications</label></p>
+      <ul>
+        <li v-for="e in notificationEmails" :key="e">
+          {{ e }}
+        </li>
+      </ul>
+      <input v-model="notificationEmailInput"><button @click="addNotificationEmail">Add</button>
+      <hr>
       <button :disabled="isLoading" @click="onSubmit">
         Submit
       </button>
@@ -49,6 +64,10 @@ const prices = ref<any[]>([{
   stock: Number(route.query.count as string || 0),
   name: 'Standard Edition'
 }])
+const moderatorWallets = ref<string[]>([])
+const notificationEmails = ref<string[]>([])
+const moderatorWalletInput = ref('')
+const notificationEmailInput = ref('')
 const totalStock = computed(() => prices.value.reduce((acc, p) => acc + Number(p.stock), 0))
 
 watch(isLoading, (newIsLoading) => {
@@ -63,6 +82,14 @@ function addMorePrice () {
   prices.value.push({ price: 0, stock: 0, name: `Tier ${prices.value.length}` })
 }
 
+function addModeratorWallet () {
+  moderatorWallets.value.push(moderatorWalletInput.value)
+}
+
+function addNotificationEmail () {
+  notificationEmails.value.push(notificationEmailInput.value)
+}
+
 async function onSubmit () {
   try {
     isLoading.value = true
@@ -75,6 +102,8 @@ async function onSubmit () {
         stock: Number(p.stock)
       }))
     await newBookListing(classIdInput.value, {
+      moderatorWallets,
+      notificationEmails,
       prices: p
     })
     router.push({ name: 'nft-book-store' })
