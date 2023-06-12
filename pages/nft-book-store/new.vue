@@ -19,7 +19,11 @@
         <p><label>Total number of NFT for sale at this price</label></p>
         <input :value="p.stock" type="number" @input="e => updatePrice(e, 'stock', index)">
         <p><label>Product name of this price</label></p>
-        <input :value="p.name" @input="e => updatePrice(e, 'name', index)">
+        <input placeholder="Product name in English" :value="p.nameEn" @input="e => updatePrice(e, 'nameEn', index)"><br>
+        <input placeholder="產品中文名字" :value="p.nameZh" @input="e => updatePrice(e, 'nameZh', index)">
+        <p><label>Product name of this price</label></p>
+        <textarea placeholder="Product description in English" :value="p.descriptionEn" @input="e => updatePrice(e, 'descriptionEn', index)" /><br>
+        <textarea placeholder="產品中文描述" :value="p.descriptionZh" @input="e => updatePrice(e, 'descriptionZh', index)" />
         <hr>
       </div>
       <button @click="addMorePrice">Add more prices</button>
@@ -62,7 +66,10 @@ const classIdInput = ref(route.query.class_id as string || '')
 const prices = ref<any[]>([{
   price: 0,
   stock: Number(route.query.count as string || 0),
-  name: 'Standard Edition'
+  nameEn: 'Standard Edition',
+  nameZh: '標準版',
+  descriptionEn: 'Content of standard edition',
+  descriptionZh: '標準版內容'
 }])
 const moderatorWallets = ref<string[]>([])
 const notificationEmails = ref<string[]>([])
@@ -79,7 +86,12 @@ function updatePrice (e: InputEvent, key: string, index: number) {
 }
 
 function addMorePrice () {
-  prices.value.push({ price: 0, stock: 0, name: `Tier ${prices.value.length}` })
+  prices.value.push({
+    price: 0,
+    stock: 0,
+    nameEn: `Tier ${prices.value.length}`,
+    nameZh: `級別 ${prices.value.length}`
+  })
 }
 
 function addModeratorWallet () {
@@ -99,7 +111,8 @@ async function onSubmit () {
     const p = prices.value
       .filter(p => p.price > 0)
       .map(p => ({
-        name: p.name,
+        name: { en: p.nameEn, zh: p.nameZh },
+        description: { en: p.descriptionEn, zh: p.descriptionZh },
         priceInDecimal: Number(p.price) * 100,
         price: Number(p.price),
         stock: Number(p.stock)

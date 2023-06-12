@@ -106,7 +106,7 @@
         <label>Price (Required)</label>
         <select v-model="priceIndex">
           <option v-for="p, i in classListingInfo?.prices" :key="p.price" :value="i">
-            {{ `${p.name} - ${p.price}` }}
+            {{ `${p.name.en || p.name} - $${p.price}` }}
           </option>
         </select>
       </p>
