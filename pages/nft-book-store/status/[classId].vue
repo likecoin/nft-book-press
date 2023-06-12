@@ -72,17 +72,21 @@
       </table>
 
       <p><label>Share sales data to wallets:</label></p>
-      <ul v-if="classListingInfo.moderatorWallets?.length">
-        <li v-for="m in classListingInfo.moderatorWallets" :key="m">
-          {{ m }}
+      <ul>
+        <li v-for="m, i in moderatorWallets" :key="m">
+          {{ m }}<button @click="()=> moderatorWallets.splice(i, 1)">x</button>
         </li>
-      </ul><span v-else>None</span>
+      </ul>
+      <input v-model="moderatorWalletInput" placeholder="like1..."><button @click="addModeratorWallet">Add</button>
       <p><label>Email to receive sales notifications</label></p>
-      <ul v-if="classListingInfo.notificationEmails?.length">
-        <li v-for="e in classListingInfo.notificationEmails" :key="e">
-          {{ e }}
+      <ul>
+        <li v-for="e, i in notificationEmails" :key="e">
+          {{ e }}<button @click="()=> notificationEmails.splice(i, 1)">x</button>
         </li>
-      </ul><span v-else>None</span>
+      </ul>
+      <input v-model="notificationEmailInput"><button @click="addNotificationEmail">Add</button>
+      <p><button @click="updateSettings">Update</button></p>
+      <hr>
       <h3>Sales Channel Summary</h3>
       <table>
         <tr>
@@ -128,6 +132,7 @@ import { useBookStoreApiStore } from '~/stores/book-store-api'
 
 const bookStoreApiStore = useBookStoreApiStore()
 const { token } = storeToRefs(bookStoreApiStore)
+const { updateBookListingSetting } = bookStoreApiStore
 
 const route = useRoute()
 
@@ -139,6 +144,11 @@ const priceIndex = ref(0)
 const classListingInfo = ref<any>({})
 const purchaseList = ref<any[]>([])
 const chainExplorerURL = CHAIN_EXPLORER_URL
+
+const moderatorWallets = ref<string[]>([])
+const notificationEmails = ref<string[]>([])
+const moderatorWalletInput = ref('')
+const notificationEmailInput = ref('')
 
 const purchaseLink = computed(() => {
   const payload: Record<string, string> = {
@@ -188,6 +198,12 @@ onMounted(async () => {
       throw classFetchError.value
     }
     classListingInfo.value = classData.value
+    const {
+      moderatorWallets: classModeratorWallets,
+      notificationEmails: classNotificationEmails
+    } = classData.value as any
+    moderatorWallets.value = classModeratorWallets
+    notificationEmails.value = classNotificationEmails
     const { data: ordersData, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
       {
         headers: {
@@ -207,6 +223,23 @@ onMounted(async () => {
     error.value = (err as Error).toString()
   }
 })
+
+function addModeratorWallet () {
+  moderatorWallets.value.push(moderatorWalletInput.value)
+}
+
+function addNotificationEmail () {
+  notificationEmails.value.push(notificationEmailInput.value)
+}
+
+async function updateSettings () {
+  await updateBookListingSetting(classId.value as string, {
+    moderatorWallets,
+    notificationEmails
+  })
+  moderatorWalletInput.value = ''
+  notificationEmailInput.value = ''
+}
 
 async function copyPurchaseLink () {
   await navigator.clipboard.writeText(purchaseLink.value)

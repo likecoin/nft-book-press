@@ -25,15 +25,15 @@
       <button @click="addMorePrice">Add more prices</button>
       <p><label>Share sales data to wallets:</label></p>
       <ul>
-        <li v-for="m in moderatorWallets" :key="m">
-          {{ m }}
+        <li v-for="m, i in moderatorWallets" :key="m">
+          {{ m }}<button @click="()=> moderatorWallets.splice(i, 1)">x</button>
         </li>
       </ul>
       <input v-model="moderatorWalletInput" placeholder="like1..."><button @click="addModeratorWallet">Add</button>
       <p><label>Email to receive sales notifications</label></p>
       <ul>
-        <li v-for="e in notificationEmails" :key="e">
-          {{ e }}
+        <li v-for="e, i in notificationEmails" :key="e">
+          {{ e }}<button @click="()=> notificationEmails.splice(i, 1)">x</button>
         </li>
       </ul>
       <input v-model="notificationEmailInput"><button @click="addNotificationEmail">Add</button>
