@@ -134,7 +134,7 @@ async function fetchNftId () {
 }
 
 async function onSendNFTStart () {
-  if (isSendButtonDisabled) { return }
+  if (isSendButtonDisabled.value) { return }
   try {
     isLoading.value = true
     if (!wallet.value || !signer.value) {
