@@ -350,7 +350,9 @@ async function onMintNFTStart () {
     }
     if (!wallet.value || !signer.value) { return }
     if (!nftMintDefaultData.value) { throw new Error('NO_MINT_DATA') }
-    if (nftMintListData.value.length && nftMintListData.value.length !== nftMintCount.value) { throw new Error('NFT data length and nft count not match') }
+    if (nftMintListData.value.length && nftMintListData.value.length !== nftMintCount.value) { 
+      throw new Error(`NFT csv data length ${nftMintListData.value.length} must match nft mint amount ${nftMintCount.value}`)
+    }
     const defaultURI = nftMintDefaultData.value.uri
     const defaultMetadata = nftMintDefaultData.value.metadata
     const nfts = [...Array(nftMintCount.value).keys()].map((i) => {
