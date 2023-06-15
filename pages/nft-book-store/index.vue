@@ -53,8 +53,8 @@
             <td>{{ b.stock }}</td>
           </tr>
         </table>
+        <hr>
       </template>
-      <hr>
       <NuxtLink :to="{ name: 'nft-book-store-new' }">New Listing</NuxtLink>
     </section>
   </div>

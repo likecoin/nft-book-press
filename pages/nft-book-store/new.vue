@@ -26,14 +26,14 @@
       <p><label>Share sales data to wallets:</label></p>
       <ul>
         <li v-for="m, i in moderatorWallets" :key="m">
-          {{ m }}<button @click="()=> moderatorWallets.splice(i, 1)">x</button>
+          {{ m }}<button style="margin-left: 4px" @click="() => moderatorWallets.splice(i, 1)">x</button>
         </li>
       </ul>
-      <input v-model="moderatorWalletInput" placeholder="like1..."><button @click="addModeratorWallet">Add</button>
+      <input v-model="moderatorWalletInput" placeholder="like1..."><button style="margin-left: 4px" @click="addModeratorWallet">Add</button>
       <p><label>Email to receive sales notifications</label></p>
       <ul>
         <li v-for="e, i in notificationEmails" :key="e">
-          {{ e }}<button @click="()=> notificationEmails.splice(i, 1)">x</button>
+          {{ e }}<button style="margin-left: 4px" @click="() => notificationEmails.splice(i, 1)">x</button>
         </li>
       </ul>
       <input v-model="notificationEmailInput"><button @click="addNotificationEmail">Add</button>
