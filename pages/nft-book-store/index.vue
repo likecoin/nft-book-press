@@ -97,7 +97,7 @@ onMounted(async () => {
   if (fetchError.value) {
     error.value = fetchError.value.toString()
   }
-  moderatedBookList.value = (data.value as any)?.list
+  moderatedBookList.value = (data.value as any)?.list || []
 })
 
 </script>
