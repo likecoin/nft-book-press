@@ -21,7 +21,7 @@
         <p><label>Product name of this price</label></p>
         <input placeholder="Product name in English" :value="p.nameEn" @input="e => updatePrice(e, 'nameEn', index)"><br>
         <input placeholder="產品中文名字" :value="p.nameZh" @input="e => updatePrice(e, 'nameZh', index)">
-        <p><label>Product name of this price</label></p>
+        <p><label>Product description of this price</label></p>
         <textarea placeholder="Product description in English" :value="p.descriptionEn" @input="e => updatePrice(e, 'descriptionEn', index)" /><br>
         <textarea placeholder="產品中文描述" :value="p.descriptionZh" @input="e => updatePrice(e, 'descriptionZh', index)" />
         <hr>
