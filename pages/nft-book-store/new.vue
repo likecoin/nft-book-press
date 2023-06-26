@@ -27,7 +27,7 @@
         <hr>
       </div>
       <button @click="addMorePrice">Add more prices</button>
-      <p><label>Share sales data to wallets:</label></p>
+      <p><label>Share sales data to wallets (moderator):</label></p>
       <ul>
         <li v-for="m, i in moderatorWallets" :key="m">
           {{ m }}<button style="margin-left: 4px" @click="() => moderatorWallets.splice(i, 1)">x</button>
@@ -96,16 +96,24 @@ function addMorePrice () {
 
 function addModeratorWallet () {
   moderatorWallets.value.push(moderatorWalletInput.value)
+  moderatorWalletInput.value = ''
 }
 
 function addNotificationEmail () {
   notificationEmails.value.push(notificationEmailInput.value)
+  notificationEmailInput.value = ''
 }
 
 async function onSubmit () {
   try {
     if (!classIdInput.value) {
       throw new Error('Please input NFT class ID')
+    }
+    if (moderatorWalletInput.value) {
+      throw new Error('Please press "Add" button to add moderator wallet')
+    }
+    if (notificationEmailInput.value) {
+      throw new Error('Please press "Add" button to add notification email')
     }
     isLoading.value = true
     const p = prices.value
