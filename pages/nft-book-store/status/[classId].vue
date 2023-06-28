@@ -187,6 +187,7 @@ watch(isLoading, (newIsLoading) => {
 })
 
 onMounted(async () => {
+  isLoading.value = true
   try {
     const { data: classData, error: classFetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`,
       {
@@ -221,24 +222,41 @@ onMounted(async () => {
   } catch (err) {
     console.error(err)
     error.value = (err as Error).toString()
+  } finally {
+    isLoading.value = false
   }
 })
 
 function addModeratorWallet () {
   moderatorWallets.value.push(moderatorWalletInput.value)
+  moderatorWalletInput.value = ''
 }
 
 function addNotificationEmail () {
   notificationEmails.value.push(notificationEmailInput.value)
+  notificationEmailInput.value = ''
 }
 
 async function updateSettings () {
-  await updateBookListingSetting(classId.value as string, {
-    moderatorWallets,
-    notificationEmails
-  })
-  moderatorWalletInput.value = ''
-  notificationEmailInput.value = ''
+  try {
+    if (moderatorWalletInput.value) {
+      throw new Error('Please press "Add" button to add moderator wallet')
+    }
+    if (notificationEmailInput.value) {
+      throw new Error('Please press "Add" button to add notification email')
+    }
+    isLoading.value = true
+    await updateBookListingSetting(classId.value as string, {
+      moderatorWallets,
+      notificationEmails
+    })
+  } catch (err) {
+    const errorData = (err as any).data || err
+    console.error(errorData)
+    error.value = errorData
+  } finally {
+    isLoading.value = false
+  }
 }
 
 async function copyPurchaseLink () {
