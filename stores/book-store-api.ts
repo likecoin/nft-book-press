@@ -10,6 +10,11 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
 
   const isAuthenticated = computed(() => storeWallet.value === sessionWallet.value && !!token.value)
 
+  function restoreSession (inputWallet: string, inputToken: string) {
+    token.value = inputToken
+    sessionWallet.value = inputWallet
+  }
+
   async function authenticate (inputWallet: string, signature: any) {
     const { error, data } = await useFetch(`${LIKE_CO_API}/wallet/authorize`, {
       method: 'POST',
@@ -53,6 +58,7 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
     token,
     wallet: sessionWallet,
     isAuthenticated,
+    restoreSession,
     authenticate,
     newBookListing,
     updateBookListingSetting

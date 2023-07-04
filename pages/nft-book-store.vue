@@ -29,13 +29,25 @@ const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const { wallet, signer } = storeToRefs(walletStore)
 const { connect, signMessageMemo } = walletStore
-const { authenticate } = bookStoreApiStore
+const { authenticate, restoreSession } = bookStoreApiStore
+const { token, wallet: sessionWallet } = storeToRefs(bookStoreApiStore)
 
 const error = ref('')
 const isLoading = ref(false)
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
+})
+
+onMounted(async () => {
+  try {
+    const payload = window.sessionStorage.getItem('likecoin_nft_book_press_token')
+    if (payload) {
+      const { wallet: storedWallet, token } = JSON.parse(payload)
+      restoreSession(storedWallet, token)
+      await connect()
+    }
+  } catch {}
 })
 
 async function onClickAuth () {
@@ -47,6 +59,9 @@ async function onClickAuth () {
     if (!wallet.value || !signer.value) { return }
     const signature = await signMessageMemo('authorize', ['read:nftbook', 'write:nftbook'])
     await authenticate(wallet.value, signature)
+    try {
+      window.sessionStorage.setItem('likecoin_nft_book_press_token', JSON.stringify({ wallet: sessionWallet.value, token: token.value }))
+    } catch (err) {}
   } catch (err) {
     console.error(err)
     error.value = (err as Error).toString()
