@@ -83,7 +83,12 @@ watch(isLoading, (newIsLoading) => {
 })
 
 onMounted(async () => {
-  let { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/list?wallet=${wallet.value}`)
+  let { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/list?wallet=${wallet.value}`,
+    {
+      headers: {
+        authorization: token.value ? `Bearer ${token.value}` : ''
+      }
+    })
   if (fetchError.value) {
     error.value = fetchError.value.toString()
   }
