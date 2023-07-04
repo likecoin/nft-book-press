@@ -29,6 +29,22 @@
       <button @click="addMorePrice">
         Add more prices
       </button>
+
+      <hr>
+      <div>
+        <h3>Connect to your own Stripe Account</h3>
+        <div v-if="connectStatus?.isReady">
+          <input v-model="isStripeConnectChecked" name="stripe" type="checkbox"><label>Use my stripe account for receiving all payment</label>
+        </div>
+        <div v-else>
+          No stripe account connected yet.
+          <NuxtLink :to="{ name: 'nft-book-store-user' }">
+            Create one here
+          </NuxtLink>
+        </div>
+      </div>
+
+      <h3>Other Settings</h3>
       <p><label>Share sales data to wallets (moderator):</label></p>
       <ul>
         <li v-for="m, i in moderatorWallets" :key="m">
@@ -60,9 +76,15 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useWalletStore } from '~/stores/wallet'
 
+const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
+const { wallet } = storeToRefs(walletStore)
+const { token } = storeToRefs(bookStoreApiStore)
 const { newBookListing } = bookStoreApiStore
 const router = useRouter()
 const route = useRoute()
@@ -71,6 +93,7 @@ const MINIMAL_PRICE = 5
 
 const error = ref('')
 const isLoading = ref(false)
+const connectStatus = ref<any>({})
 
 const classIdInput = ref(route.query.class_id as string || '')
 const prices = ref<any[]>([{
@@ -85,7 +108,30 @@ const moderatorWallets = ref<string[]>([])
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
+const isStripeConnectChecked = ref(false)
 const totalStock = computed(() => prices.value.reduce((acc, p) => acc + Number(p.stock), 0))
+
+onMounted(async () => {
+  try {
+    isLoading.value = true
+    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${wallet.value}`,
+      {
+        headers: {
+          authorization: `Bearer ${token.value}`
+        }
+      }
+    )
+    if (fetchError.value && fetchError.value?.statusCode !== 404) {
+      throw new Error(fetchError.value.toString())
+    }
+    connectStatus.value = (data.value as any) || {}
+  } catch (e) {
+    console.error(e)
+    error.value = (e as Error).toString()
+  } finally {
+    isLoading.value = false
+  }
+})
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
@@ -135,7 +181,14 @@ async function onSubmit () {
         price: Number(p.price),
         stock: Number(p.stock)
       }))
+
+    const connectedWallets = isStripeConnectChecked.value
+      ? {
+          [wallet.value]: 100
+        }
+      : null
     await newBookListing(classIdInput.value, {
+      connectedWallets,
       moderatorWallets,
       notificationEmails,
       prices: p

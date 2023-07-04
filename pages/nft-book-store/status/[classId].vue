@@ -71,6 +71,21 @@
         </tr>
       </table>
 
+      <hr>
+      <div v-if="userIsOwner">
+        <h3>Connect to your own Stripe Account</h3>
+        <div v-if="connectStatus?.isReady">
+          <input v-model="isStripeConnectChecked" name="stripe" type="checkbox"><label>Use my stripe account for receiving all payment</label>
+        </div>
+        <div v-else>
+          No stripe account connected yet.
+          <NuxtLink :to="{ name: 'nft-book-store-user' }">
+            Create one here
+          </NuxtLink>
+        </div>
+      </div>
+
+      <h3>Other Settings</h3>
       <p><label>Share sales data to wallets:</label></p>
       <ul>
         <li v-for="m, i in moderatorWallets" :key="m">
@@ -143,9 +158,12 @@
 import { storeToRefs } from 'pinia'
 import { CHAIN_EXPLORER_URL, IS_TESTNET, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useWalletStore } from '~/stores/wallet'
 
+const store = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const { token } = storeToRefs(bookStoreApiStore)
+const { wallet } = storeToRefs(store)
 const { updateBookListingSetting } = bookStoreApiStore
 
 const route = useRoute()
@@ -157,13 +175,17 @@ const fromChannel = ref<string | undefined>(undefined)
 const priceIndex = ref(0)
 const classListingInfo = ref<any>({})
 const purchaseList = ref<any[]>([])
+const connectStatus = ref<any>({})
 const chainExplorerURL = CHAIN_EXPLORER_URL
 
 const moderatorWallets = ref<string[]>([])
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
+const isStripeConnectChecked = ref(false)
 
+const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
+const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
 const purchaseLink = computed(() => {
   const payload: Record<string, string> = {
     from: fromChannel.value || '',
@@ -215,10 +237,12 @@ onMounted(async () => {
     classListingInfo.value = classData.value
     const {
       moderatorWallets: classModeratorWallets,
-      notificationEmails: classNotificationEmails
+      notificationEmails: classNotificationEmails,
+      connectedWallets: classConnectedWallets
     } = classData.value as any
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
+    isStripeConnectChecked.value = !!(classConnectedWallets && Object.keys(classConnectedWallets).find(w => w === ownerWallet.value))
     const { data: ordersData, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
       {
         headers: {
@@ -233,6 +257,18 @@ onMounted(async () => {
       }
     }
     purchaseList.value = (ordersData.value as any).orders
+
+    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${wallet.value}`,
+      {
+        headers: {
+          authorization: `Bearer ${token.value}`
+        }
+      }
+    )
+    if (fetchError.value && fetchError.value?.statusCode !== 404) {
+      throw new Error(fetchError.value.toString())
+    }
+    connectStatus.value = (data.value as any) || {}
   } catch (err) {
     console.error(err)
     error.value = (err as Error).toString()
@@ -260,9 +296,15 @@ async function updateSettings () {
       throw new Error('Please press "Add" button to add notification email')
     }
     isLoading.value = true
+    const connectedWallets = isStripeConnectChecked.value
+      ? {
+          [ownerWallet.value]: 100
+        }
+      : null
     await updateBookListingSetting(classId.value as string, {
       moderatorWallets,
-      notificationEmails
+      notificationEmails,
+      connectedWallets
     })
   } catch (err) {
     const errorData = (err as any).data || err
