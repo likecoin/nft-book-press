@@ -8,8 +8,20 @@
       </li>
       <li>
         <NuxtLink :to="{ name: 'nft-book-store' }">
-          Manage NFT Books
+          NFT Book Press
         </NuxtLink>
+        <ul>
+          <li>
+            <NuxtLink :to="{ name: 'nft-book-store' }">
+              Manage NFT Books
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink :to="{ name: 'nft-book-store-user' }">
+              Manage Stripe Account
+            </NuxtLink>
+          </li>
+        </ul>
       </li>
       <li>
         <a :href="toolsURL" target="_blank">
