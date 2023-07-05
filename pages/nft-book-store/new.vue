@@ -33,9 +33,20 @@
       <hr>
       <div>
         <h3>Connect to your own Stripe Account</h3>
-        <div v-if="connectStatus?.isReady">
-          <input v-model="isStripeConnectChecked" name="stripe" type="checkbox"><label>Use my stripe account for receiving all payment</label>
-        </div>
+        <input v-model="isStripeConnectChecked" name="stripe" type="checkbox"><label>Use a stripe connect account for receiving all payment</label>
+        <br>
+        <template v-if="isStripeConnectChecked">
+          <input v-model="stripeConnectWallet" type="radio" :disabled="!(connectStatus?.isReady)" :value="ownerWallet"><span v-if="connectStatus?.isReady">Use my account</span>
+          <span v-else>
+            No stripe account connected yet.
+            <NuxtLink :to="{ name: 'nft-book-store-user' }">
+              Create one here
+            </NuxtLink>
+          </span>
+          <br>
+          <input v-model="stripeConnectWallet" type="radio" :value="stripeConnectWalletInput"> Enter a wallet address with connected account:
+          <input v-if="stripeConnectWallet !== ownerWallet" v-model="stripeConnectWalletInput" placeholder="like1..." @input="onStripeConnectWalletInput">
+        </template>
         <div v-else>
           No stripe account connected yet.
           <NuxtLink :to="{ name: 'nft-book-store-user' }">
@@ -109,6 +120,8 @@ const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
+const stripeConnectWallet = ref('')
+const stripeConnectWalletInput = ref('')
 const totalStock = computed(() => prices.value.reduce((acc, p) => acc + Number(p.stock), 0))
 
 onMounted(async () => {
@@ -160,6 +173,10 @@ function addNotificationEmail () {
   notificationEmailInput.value = ''
 }
 
+function onStripeConnectWalletInput () {
+  stripeConnectWallet.value = stripeConnectWalletInput.value.trim()
+}
+
 async function onSubmit () {
   try {
     if (!classIdInput.value) {
@@ -182,9 +199,19 @@ async function onSubmit () {
         stock: Number(p.stock)
       }))
 
-    const connectedWallets = isStripeConnectChecked.value
+    if (isStripeConnectChecked.value && stripeConnectWallet.value) {
+      const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${stripeConnectWallet.value}`)
+      if (fetchError.value && fetchError.value?.statusCode !== 404) {
+        throw new Error(fetchError.value.toString())
+      }
+      if (!(data?.value as any)?.isReady) {
+        throw new Error('CONNECTED_WALLET_STRIPE_ACCOUNT_NOT_READY')
+      }
+    }
+
+    const connectedWallets = (isStripeConnectChecked.value && stripeConnectWallet.value)
       ? {
-          [wallet.value]: 100
+          [stripeConnectWallet.value]: 100
         }
       : null
     await newBookListing(classIdInput.value, {

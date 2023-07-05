@@ -74,15 +74,20 @@
       <hr>
       <div v-if="userIsOwner">
         <h3>Connect to your own Stripe Account</h3>
-        <div v-if="connectStatus?.isReady">
-          <input v-model="isStripeConnectChecked" name="stripe" type="checkbox"><label>Use my stripe account for receiving all payment</label>
-        </div>
-        <div v-else>
-          No stripe account connected yet.
-          <NuxtLink :to="{ name: 'nft-book-store-user' }">
-            Create one here
-          </NuxtLink>
-        </div>
+        <input v-model="isStripeConnectChecked" name="stripe" type="checkbox"><label>Use a stripe connect account for receiving all payment</label>
+        <br>
+        <template v-if="isStripeConnectChecked">
+          <input v-model="stripeConnectWallet" type="radio" :disabled="!(connectStatus?.isReady)" :value="ownerWallet"><span v-if="connectStatus?.isReady">Use my account</span>
+          <span v-else>
+            No stripe account connected yet.
+            <NuxtLink :to="{ name: 'nft-book-store-user' }">
+              Create one here
+            </NuxtLink>
+          </span>
+          <br>
+          <input v-model="stripeConnectWallet" type="radio" :value="stripeConnectWalletInput"> Enter a wallet address with connected account:
+          <input v-if="stripeConnectWallet !== ownerWallet" v-model="stripeConnectWalletInput" placeholder="like1..." @input="onStripeConnectWalletInput">
+        </template>
       </div>
 
       <h3>Other Settings</h3>
@@ -183,6 +188,8 @@ const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
+const stripeConnectWallet = ref('')
+const stripeConnectWalletInput = ref('')
 
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
 const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
@@ -242,7 +249,11 @@ onMounted(async () => {
     } = classData.value as any
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
-    isStripeConnectChecked.value = !!(classConnectedWallets && Object.keys(classConnectedWallets).find(w => w === ownerWallet.value))
+    isStripeConnectChecked.value = !!(classConnectedWallets && Object.keys(classConnectedWallets).length)
+    stripeConnectWallet.value = classConnectedWallets && Object.keys(classConnectedWallets)[0]
+    if (stripeConnectWallet.value !== ownerWallet.value) {
+      stripeConnectWalletInput.value = stripeConnectWallet.value
+    }
     const { data: ordersData, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
       {
         headers: {
@@ -287,6 +298,10 @@ function addNotificationEmail () {
   notificationEmailInput.value = ''
 }
 
+function onStripeConnectWalletInput () {
+  stripeConnectWallet.value = stripeConnectWalletInput.value.trim()
+}
+
 async function updateSettings () {
   try {
     if (moderatorWalletInput.value) {
@@ -296,9 +311,20 @@ async function updateSettings () {
       throw new Error('Please press "Add" button to add notification email')
     }
     isLoading.value = true
-    const connectedWallets = isStripeConnectChecked.value
+
+    if (isStripeConnectChecked.value && stripeConnectWallet.value) {
+      const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${stripeConnectWallet.value}`)
+      if (fetchError.value && fetchError.value?.statusCode !== 404) {
+        throw new Error(fetchError.value.toString())
+      }
+      if (!(data?.value as any)?.isReady) {
+        throw new Error('CONNECTED_WALLET_STRIPE_ACCOUNT_NOT_READY')
+      }
+    }
+
+    const connectedWallets = (isStripeConnectChecked.value && stripeConnectWallet.value)
       ? {
-          [ownerWallet.value]: 100
+          [stripeConnectWallet.value]: 100
         }
       : null
     await updateBookListingSetting(classId.value as string, {
