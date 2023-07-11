@@ -1,4 +1,5 @@
 import { defineStore, storeToRefs } from 'pinia'
+import * as jwt from 'jsonwebtoken'
 import { useWalletStore } from './wallet'
 import { LIKE_CO_API } from '~/constant'
 
@@ -8,7 +9,14 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
   const token = ref('')
   const sessionWallet = ref('')
 
-  const isAuthenticated = computed(() => storeWallet.value === sessionWallet.value && !!token.value)
+  const isAuthenticated = computed(() => {
+    const isWalletMatch = storeWallet.value === sessionWallet.value
+    const tokenExists = !!token.value
+    if (!isWalletMatch || !tokenExists) { return false }
+    const decoded = jwt.decode(token.value) as jwt.JwtPayload
+    if (!decoded) { return false }
+    return decoded.exp && (decoded.exp > (Date.now() / 1000))
+  })
 
   function restoreSession (inputWallet: string, inputToken: string) {
     token.value = inputToken
