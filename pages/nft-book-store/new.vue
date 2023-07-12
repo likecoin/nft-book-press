@@ -49,7 +49,7 @@
         </template>
         <div v-else>
           No stripe account connected yet.
-          <NuxtLink :to="{ name: 'nft-book-store-user' }">
+          <NuxtLink :to="{ name: 'nft-book-store-user' }" target="_blank">
             Create one here
           </NuxtLink>
         </div>

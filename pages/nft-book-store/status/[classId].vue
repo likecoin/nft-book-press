@@ -80,7 +80,7 @@
           <input v-model="stripeConnectWallet" type="radio" :disabled="!(connectStatus?.isReady)" :value="ownerWallet"><span v-if="connectStatus?.isReady">Use my account</span>
           <span v-else>
             No stripe account connected yet.
-            <NuxtLink :to="{ name: 'nft-book-store-user' }">
+            <NuxtLink :to="{ name: 'nft-book-store-user' }" target="_blank">
               Create one here
             </NuxtLink>
           </span>

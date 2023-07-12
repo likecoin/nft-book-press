@@ -92,19 +92,21 @@ onMounted(async () => {
   if (fetchError.value) {
     error.value = fetchError.value.toString()
   }
-  bookList.value = (data.value as any)?.list;
+  bookList.value = (data.value as any)?.list
 
-  ({ data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/list/moderated?wallet=${wallet.value}`,
-    {
-      headers: {
-        authorization: `Bearer ${token.value}`
+  if (token.value) {
+    ({ data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/list/moderated?wallet=${wallet.value}`,
+      {
+        headers: {
+          authorization: `Bearer ${token.value}`
+        }
       }
+    ))
+    if (fetchError.value) {
+      error.value = fetchError.value.toString()
     }
-  ))
-  if (fetchError.value) {
-    error.value = fetchError.value.toString()
+    moderatedBookList.value = (data.value as any)?.list || []
   }
-  moderatedBookList.value = (data.value as any)?.list || []
 })
 
 </script>
