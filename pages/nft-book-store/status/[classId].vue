@@ -299,6 +299,7 @@ function addNotificationEmail () {
 }
 
 function onStripeConnectWalletInput () {
+  // force stripeConnectWallet to update when stripeConnectWalletInput is updated
   stripeConnectWallet.value = stripeConnectWalletInput.value.trim()
 }
 
