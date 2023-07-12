@@ -57,13 +57,31 @@
 
       <h3>Other Settings</h3>
       <p><label>Share sales data to wallets (moderator):</label></p>
-      <ul>
-        <li v-for="m, i in moderatorWallets" :key="m">
-          {{ m }}<button style="margin-left: 4px" @click="() => moderatorWallets.splice(i, 1)">
-            x
-          </button>
-        </li>
-      </ul>
+      <table>
+        <tr>
+          <td>Wallet</td>
+          <td>Send NFT grant Status</td>
+          <td>Remove</td>
+        </tr>
+        <tr v-for="m, i in moderatorWallets" :key="m">
+          <td>{{ m }}</td>
+          <td>
+            <NuxtLink :to="{ name: 'authz', query: { grantee: m } }" target="_blank">
+              <span v-if="moderatorWalletsGrants[m]">
+                Granted
+              </span>
+              <span v-else>
+                Click to grant
+              </span>
+            </NuxtLink>
+          </td>
+          <td>
+            <button @click="()=> moderatorWallets.splice(i, 1)">
+              x
+            </button>
+          </td>
+        </tr>
+      </table>
       <input v-model="moderatorWalletInput" placeholder="like1..."><button style="margin-left: 4px" @click="addModeratorWallet">
         Add
       </button>
@@ -91,12 +109,14 @@ import { storeToRefs } from 'pinia'
 import { LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
+import { getNFTAuthzGrants } from '~/utils/cosmos'
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const { wallet } = storeToRefs(walletStore)
 const { token } = storeToRefs(bookStoreApiStore)
 const { newBookListing } = bookStoreApiStore
+
 const router = useRouter()
 const route = useRoute()
 
@@ -116,6 +136,7 @@ const prices = ref<any[]>([{
   descriptionZh: '標準版內容'
 }])
 const moderatorWallets = ref<string[]>([])
+const moderatorWalletsGrants = ref<any>({})
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
@@ -148,6 +169,16 @@ onMounted(async () => {
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
+})
+
+watch(moderatorWallets, (newModeratorWallets) => {
+  newModeratorWallets.forEach(async (m) => {
+    if (!moderatorWalletsGrants.value[m]) {
+      try {
+        moderatorWalletsGrants.value[m] = await getNFTAuthzGrants(wallet.value, m)
+      } catch {}
+    }
+  })
 })
 
 function updatePrice (e: InputEvent, key: string, index: number) {
