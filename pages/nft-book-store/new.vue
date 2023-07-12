@@ -88,7 +88,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { LIKE_CO_API } from '~/constant'
+import { LCD_URL, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 
@@ -189,6 +189,16 @@ async function onSubmit () {
     if (notificationEmailInput.value) {
       throw new Error('Please press "Add" button to add notification email')
     }
+
+    const { data, error: fetchError } = await useFetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${classIdInput.value}`)
+    if (fetchError.value && fetchError.value?.statusCode !== 404) {
+      throw new Error(fetchError.value.toString())
+    }
+    const collectionId = (data?.value as any)?.class?.metadata?.nft_meta_collection_id || ''
+    if (!collectionId.includes('nft_book') && !collectionId.includes('book_nft')) {
+      throw new Error('NFT Class not in NFT BOOK meta collection')
+    }
+
     isLoading.value = true
     const p = prices.value
       .filter(p => p.price > 0)
