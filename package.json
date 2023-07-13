@@ -21,6 +21,7 @@
     "fast-json-stable-stringify": "^2.1.0",
     "jsonwebtoken": "^9.0.1",
     "pinia": "^2.0.34",
+    "qr-code-styling": "^1.6.0-rc.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
