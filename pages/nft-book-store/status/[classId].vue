@@ -156,7 +156,12 @@
       </button>
       <hr>
       <h3>Purchase Link QRCode</h3>
-      <QRCode :data="purchaseLink" :file-name="`${classId}-${fromChannel || ''}`" width="500" height="500" />
+      <QRCode
+        :data="purchaseLink"
+        :file-name="`${classId}-price_${priceIndex}-channel_${fromChannel || ''}`"
+        width="500"
+        height="500"
+      />
     </section>
   </div>
 </template>
