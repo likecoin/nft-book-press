@@ -159,8 +159,8 @@
       <QRCode
         :data="purchaseLink"
         :file-name="`${classId}-price_${priceIndex}-channel_${fromChannel || ''}`"
-        width="500"
-        height="500"
+        :width="500"
+        :height="500"
       />
     </section>
   </div>

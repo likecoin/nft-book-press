@@ -110,6 +110,7 @@ onMounted(async () => {
 })
 
 function download () {
+  qrCode.value?.update(options.value)
   qrCode.value?.download({ extension: extension.value as FileExtension, name: props.fileName })
 }
 
