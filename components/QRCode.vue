@@ -109,9 +109,10 @@ onMounted(async () => {
   }
 })
 
-function download () {
-  qrCode.value?.update(options.value)
-  qrCode.value?.download({ extension: extension.value as FileExtension, name: props.fileName })
+async function download () {
+  const { default: QRCodeStyling } = await import('qr-code-styling')
+  const tempInstance = new QRCodeStyling(options.value)
+  tempInstance.download({ extension: extension.value as FileExtension, name: props.fileName })
 }
 
 </script>
