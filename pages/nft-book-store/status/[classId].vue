@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>NFT Book Status {{ classId }}</h1>
+    <h1>NFT Book Status "{{ nftClassName || classId }}"</h1>
     <div v-if="error" style="color: red">
       {{ error }}
     </div>
@@ -158,7 +158,7 @@
       <h3>Purchase Link QRCode</h3>
       <QRCode
         :data="purchaseLink"
-        :file-name="`${classId}-price_${priceIndex}-channel_${fromChannel || ''}`"
+        :file-name="`${nftClassName || classId}-price_${priceIndex}-channel_${fromChannel || ''}`"
         :width="500"
         :height="500"
       />
@@ -170,13 +170,16 @@
 import { storeToRefs } from 'pinia'
 import { CHAIN_EXPLORER_URL, IS_TESTNET, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useNftStore } from '~/stores/nft'
 import { useWalletStore } from '~/stores/wallet'
 
 const store = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
+const nftStore = useNftStore()
 const { token } = storeToRefs(bookStoreApiStore)
 const { wallet } = storeToRefs(store)
 const { updateBookListingSetting } = bookStoreApiStore
+const { lazyFetchClassMetadataById } = nftStore
 
 const route = useRoute()
 
@@ -198,6 +201,7 @@ const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
 const stripeConnectWalletInput = ref('')
 
+const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
 const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
 const purchaseLink = computed(() => {
@@ -287,6 +291,7 @@ onMounted(async () => {
       throw new Error(fetchError.value.toString())
     }
     connectStatus.value = (data.value as any) || {}
+    lazyFetchClassMetadataById(classId.value as string)
   } catch (err) {
     console.error(err)
     error.value = (err as Error).toString()

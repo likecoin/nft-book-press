@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Deliver NFT Book {{ classId }}</h1>
+    <h1>Deliver NFT Book "{{ nftClassName || classId }}"</h1>
     <div v-if="error" style="color: red">
       {{ error }}
     </div>
@@ -53,6 +53,7 @@ import { storeToRefs } from 'pinia'
 import { LIKE_CO_API, LCD_URL } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
+import { useNftStore } from '~/stores/nft'
 import { parseImageURLFromMetadata } from '~/utils'
 
 const store = useWalletStore()
@@ -61,6 +62,9 @@ const { connect } = store
 
 const bookStoreApiStore = useBookStoreApiStore()
 const { token } = storeToRefs(bookStoreApiStore)
+
+const nftStore = useNftStore()
+const { lazyFetchClassMetadataById } = nftStore
 
 const route = useRoute()
 const router = useRouter()
@@ -75,6 +79,8 @@ const orderInfo = ref<any>({})
 const nftImage = ref('')
 
 const isSendButtonDisabled = computed(() => !nftId.value || isLoading.value)
+
+const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
@@ -111,6 +117,7 @@ onMounted(async () => {
   } else {
     orderInfo.value = (data.value as any)
   }
+  lazyFetchClassMetadataById(classId.value as string)
 })
 
 async function fetchNftId () {

@@ -13,6 +13,7 @@
       <table>
         <tr>
           <td>Class Id</td>
+          <td>Class Name</td>
           <td>Price in USD</td>
           <td>Pending action</td>
           <td>Sold</td>
@@ -24,6 +25,7 @@
               {{ b.classId }}
             </NuxtLink>
           </td>
+          <td>{{ nftStore.getClassMetadataById(b.classId)?.name }}</td>
           <td>{{ b.prices?.map((p: any) => p.price).join(', ') }}</td>
           <td>{{ b.pendingNFTCount }}</td>
           <td>{{ b.sold }}</td>
@@ -36,6 +38,7 @@
         <table>
           <tr>
             <td>Class Id</td>
+            <td>Class Name</td>
             <td>Price in USD</td>
             <td>Pending action</td>
             <td>Sold</td>
@@ -47,6 +50,7 @@
                 {{ b.classId }}
               </NuxtLink>
             </td>
+            <td>{{ nftStore.getClassMetadataById(b.classId)?.name }}</td>
             <td>{{ b.prices?.map((p: any) => p.price).join(', ') }}</td>
             <td>{{ b.pendingNFTCount }}</td>
             <td>{{ b.sold }}</td>
@@ -66,12 +70,15 @@
 import { storeToRefs } from 'pinia'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
+import { useNftStore } from '~/stores/nft'
 import { LIKE_CO_API } from '~/constant'
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
+const nftStore = useNftStore()
 const { wallet } = storeToRefs(walletStore)
 const { token } = storeToRefs(bookStoreApiStore)
+const { lazyFetchClassMetadataById } = nftStore
 
 const error = ref('')
 const isLoading = ref(false)
@@ -107,6 +114,9 @@ onMounted(async () => {
     }
     moderatedBookList.value = (data.value as any)?.list || []
   }
+
+  const classIds: Set<string> = new Set(bookList.value.map(b => b.classId).concat(moderatedBookList.value.map(m => m.classId)))
+  classIds.forEach(classId => lazyFetchClassMetadataById(classId))
 })
 
 </script>
