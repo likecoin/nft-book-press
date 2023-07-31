@@ -46,7 +46,6 @@
             :toolbars="toolbarOptions"
             :sanitize="sanitizeHtml"
           />
-          <hr>text =>
           <p v-if="hasMultiplePrices">
             <button @click="deletePrice(index)">
               Delete
