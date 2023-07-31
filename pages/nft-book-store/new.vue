@@ -22,9 +22,23 @@
         <input placeholder="Product name in English" :value="p.nameEn" @input="e => updatePrice(e, 'nameEn', index)"><br>
         <input placeholder="產品中文名字" :value="p.nameZh" @input="e => updatePrice(e, 'nameZh', index)">
         <p><label>Product description of this price</label></p>
-        <md-editor v-model="p.descriptionEn" :editor-id="`en-${index}`" :placeholder="mdEditorPlaceholder.en" :toolbars="toolbarOptions" :sanitize="sanitizeHtml" />
-        <md-editor v-model="p.descriptionZh" :editor-id="`zh-${index}`" :placeholder="mdEditorPlaceholder.zh" :toolbars="toolbarOptions" :sanitize="sanitizeHtml" />
-        <hr>
+        <md-editor
+          v-model="p.descriptionEn"
+          language="en-US"
+          :editor-id="`en-${index}`"
+          :placeholder="mdEditorPlaceholder.en"
+          :toolbars="toolbarOptions"
+          :sanitize="sanitizeHtml"
+        />
+        <md-editor
+          v-model="p.descriptionZh"
+          language="en-US"
+          :editor-id="`zh-${index}`"
+          :placeholder="mdEditorPlaceholder.zh"
+          :toolbars="toolbarOptions"
+          :sanitize="sanitizeHtml"
+        />
+        <hr>text =>
       </div>
       <button @click="addMorePrice">
         Add more prices
@@ -88,7 +102,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { MdEditor } from 'md-editor-v3'
+import { MdEditor, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
@@ -135,7 +149,6 @@ const totalStock = computed(() => prices.value.reduce((acc, p) => acc + Number(p
 
 const toolbarOptions = ref<string[]>([
   'bold',
-  'underline',
   'italic',
   '-',
   'strikeThrough',
@@ -149,6 +162,12 @@ const toolbarOptions = ref<string[]>([
   '=',
   'preview'
 ])
+
+config({
+  markdownItConfig (mdit: any) {
+    mdit.options.html = false
+  }
+})
 
 onMounted(async () => {
   try {
@@ -206,6 +225,10 @@ function onStripeConnectWalletInput () {
   stripeConnectWallet.value = stripeConnectWalletInput.value.trim()
 }
 
+function esacpeHtml (text = '') {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function sanitizeHtml (html: string) {
   return DOMPurify.sanitize(html)
 }
@@ -236,7 +259,10 @@ async function onSubmit () {
       .filter(p => p.price > 0)
       .map(p => ({
         name: { en: p.nameEn, zh: p.nameZh },
-        description: { en: p.descriptionEn, zh: p.descriptionZh },
+        description: {
+          en: esacpeHtml(p.descriptionEn),
+          zh: esacpeHtml(p.descriptionZh)
+        },
         priceInDecimal: Math.round(Number(p.price) * 100),
         price: Number(p.price),
         stock: Number(p.stock)
