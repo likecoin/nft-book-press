@@ -9,16 +9,45 @@
     </div>
     <hr>
     <section v-if="bookStoreApiStore.isAuthenticated">
+      <h3>Editions</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Name</th>
+            <th>Price (USD)</th>
+            <th v-if="userIsOwner">Sort</th>
+          </tr>
+        </thead>
+        <Draggable
+          v-model="prices"
+          tag="tbody"
+          item-key="index"
+          handle="td:last-child"
+          :disabled="!userIsOwner || isUpdatingPricesOrder"
+          @end="handlePriceReorder"
+        >
+          <template #item="{ element, index }">
+            <tr>
+              <td>{{ index + 1 }}</td>
+              <td>{{ element.name }}</td>
+              <td style="text-align: right;">
+                {{ element.price }}
+              </td>
+              <td v-if="userIsOwner" style="text-align: center;cursor: grab">::</td>
+            </tr>
+          </template>
+        </Draggable>
+      </table>
+
       <h3>Status</h3>
       <table>
         <tr>
-          <td>Price in USD</td>
-          <td>Pending action</td>
-          <td>Sold</td>
-          <td>Remaining Stock</td>
+          <th>Pending action</th>
+          <th>Sold</th>
+          <th>Remaining Stock</th>
         </tr>
         <tr>
-          <td>{{ classListingInfo.prices?.map((p: any) => p.price).join(', ') }}</td>
           <td>{{ classListingInfo.pendingNFTCount }}</td>
           <td>{{ classListingInfo.sold }}</td>
           <td>{{ classListingInfo.stock }}</td>
@@ -137,7 +166,7 @@
       <p>
         <label>Price (Required)</label>
         <select v-model="priceIndex">
-          <option v-for="p, i in classListingInfo?.prices" :key="p.price" :value="i">
+          <option v-for="p in classListingInfo?.prices" :key="p.index" :value="p.index">
             {{ `${p.name.en || p.name} - $${p.price}` }}
           </option>
         </select>
@@ -168,6 +197,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import Draggable from 'vuedraggable'
 import { CHAIN_EXPLORER_URL, IS_TESTNET, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
@@ -189,6 +219,8 @@ const classId = ref(route.params.classId)
 const fromChannel = ref<string | undefined>(undefined)
 const priceIndex = ref(0)
 const classListingInfo = ref<any>({})
+const prices = ref<any[]>([])
+const isUpdatingPricesOrder = ref(false)
 const purchaseList = ref<any[]>([])
 const connectStatus = ref<any>({})
 const chainExplorerURL = CHAIN_EXPLORER_URL
@@ -253,6 +285,7 @@ onMounted(async () => {
       throw classFetchError.value
     }
     classListingInfo.value = classData.value
+    prices.value = classListingInfo.value.prices
     const {
       moderatorWallets: classModeratorWallets,
       notificationEmails: classNotificationEmails,
@@ -299,6 +332,38 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+
+async function handlePriceReorder ({
+  newIndex: newOrder,
+  oldIndex: oldOrder
+}: any) {
+  if (newOrder === oldOrder) {
+    return
+  }
+  try {
+    isUpdatingPricesOrder.value = true
+    const priceIndex = prices.value[newOrder].index
+    const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}/price/${priceIndex}/order`, {
+      method: 'PUT',
+      headers: {
+        authorization: `Bearer ${token.value}`
+      },
+      body: {
+        order: newOrder
+      }
+    })
+    if (fetchError.value && fetchError.value?.statusCode !== 200) {
+      throw new Error(`${fetchError.value.data} ${fetchError.value.toString()}`)
+    }
+    prices.value = prices.value.map((p, order) => ({ ...p, order }))
+    classListingInfo.value.prices = prices.value
+  } catch (err) {
+    prices.value = classListingInfo.value.prices
+    error.value = (err as Error).toString()
+  } finally {
+    isUpdatingPricesOrder.value = false
+  }
+}
 
 function addModeratorWallet () {
   moderatorWallets.value.push(moderatorWalletInput.value)
