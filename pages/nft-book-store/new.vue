@@ -13,36 +13,47 @@
       <input v-model="classIdInput" class="classIdInput" placeholder="likenft....">
       <p>Total number of NFT for sale: {{ totalStock }}</p>
       <hr>
-      <div v-for="p, index in prices" :key="index">
-        <p><label>Price(USD) per NFT Book (Minimal ${{ MINIMAL_PRICE }})</label></p>
-        <input :value="p.price" type="number" step="0.01" :min="MINIMAL_PRICE" @input="e => updatePrice(e, 'price', index)">
-        <p><label>Total number of NFT for sale at this price</label></p>
-        <input :value="p.stock" type="number" @input="e => updatePrice(e, 'stock', index)">
-        <p><label>Product name of this price</label></p>
-        <input placeholder="Product name in English" :value="p.nameEn" @input="e => updatePrice(e, 'nameEn', index)"><br>
-        <input placeholder="產品中文名字" :value="p.nameZh" @input="e => updatePrice(e, 'nameZh', index)">
-        <p><label>Product description of this price</label></p>
-        <md-editor
-          v-model="p.descriptionEn"
-          language="en-US"
-          :editor-id="`en-${index}`"
-          :placeholder="mdEditorPlaceholder.en"
-          :toolbars="toolbarOptions"
-          :sanitize="sanitizeHtml"
-        />
-        <md-editor
-          v-model="p.descriptionZh"
-          language="en-US"
-          :editor-id="`zh-${index}`"
-          :placeholder="mdEditorPlaceholder.zh"
-          :toolbars="toolbarOptions"
-          :sanitize="sanitizeHtml"
-        />
-        <hr>text =>
-      </div>
-      <button @click="addMorePrice">
-        Add more prices
-      </button>
+
+      <h3>
+        Pricing and Availability <button @click="addMorePrice">
+          Add Edition
+        </button>
+      </h3>
+      <component :is="hasMultiplePrices ? 'ul' : 'div'">
+        <component :is="hasMultiplePrices ? 'li' : 'div'" v-for="p, index in prices" :key="p.index">
+          <hr v-if="index > 0">
+          <p><label>Price(USD) of this {{ priceItemLabel }} (Minimal ${{ MINIMAL_PRICE }})</label></p>
+          <input :value="p.price" type="number" step="0.01" :min="MINIMAL_PRICE" @input="e => updatePrice(e, 'price', index)">
+          <p><label>Total number of NFT for sale of this {{ priceItemLabel }}</label></p>
+          <input :value="p.stock" type="number" @input="e => updatePrice(e, 'stock', index)">
+          <p><label>Product name of this {{ priceItemLabel }}</label></p>
+          <input placeholder="Product name in English" :value="p.nameEn" @input="e => updatePrice(e, 'nameEn', index)"><br>
+          <input placeholder="產品中文名字" :value="p.nameZh" @input="e => updatePrice(e, 'nameZh', index)">
+          <p><label>Product description of this {{ priceItemLabel }}</label></p>
+          <md-editor
+            v-model="p.descriptionEn"
+            language="en-US"
+            :editor-id="`en-${index}`"
+            :placeholder="mdEditorPlaceholder.en"
+            :toolbars="toolbarOptions"
+            :sanitize="sanitizeHtml"
+          />
+          <md-editor
+            v-model="p.descriptionZh"
+            language="en-US"
+            :editor-id="`zh-${index}`"
+            :placeholder="mdEditorPlaceholder.zh"
+            :toolbars="toolbarOptions"
+            :sanitize="sanitizeHtml"
+          />
+          <hr>text =>
+          <p v-if="hasMultiplePrices">
+            <button @click="deletePrice(index)">
+              Delete
+            </button>
+          </p>
+        </component>
+      </component>
 
       <hr>
       <div>
@@ -106,6 +117,7 @@ import { MdEditor, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
+import { v4 as uuidv4 } from 'uuid'
 import { LCD_URL, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
@@ -130,14 +142,17 @@ const mdEditorPlaceholder = ref({
 })
 
 const classIdInput = ref(route.query.class_id as string || '')
+const nextPriceIndex = ref(1)
 const prices = ref<any[]>([{
-  price: 0,
-  stock: Number(route.query.count as string || 0),
+  price: MINIMAL_PRICE,
+  stock: Number(route.query.count as string || 1),
   nameEn: 'Standard Edition',
   nameZh: '標準版',
   descriptionEn: '',
   descriptionZh: ''
 }])
+const hasMultiplePrices = computed(() => prices.value.length > 1)
+const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
 const moderatorWallets = ref<string[]>([])
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
@@ -200,14 +215,20 @@ function updatePrice (e: InputEvent, key: string, index: number) {
 }
 
 function addMorePrice () {
+  nextPriceIndex.value += 1
   prices.value.push({
-    price: 0,
-    stock: 0,
-    nameEn: `Tier ${prices.value.length}`,
-    nameZh: `級別 ${prices.value.length}`,
+    index: uuidv4(),
+    price: MINIMAL_PRICE,
+    stock: 1,
+    nameEn: `Tier ${nextPriceIndex.value}`,
+    nameZh: `級別 ${nextPriceIndex.value}`,
     descriptionEn: '',
     descriptionZh: ''
   })
+}
+
+function deletePrice (index: number) {
+  prices.value.splice(index, 1)
 }
 
 function addModeratorWallet () {
@@ -226,7 +247,7 @@ function onStripeConnectWalletInput () {
 }
 
 function esacpeHtml (text = '') {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
 function sanitizeHtml (html: string) {
