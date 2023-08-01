@@ -71,12 +71,6 @@
           <input v-model="stripeConnectWallet" type="radio" :value="stripeConnectWalletInput"> Enter a wallet address with connected account:
           <input v-if="stripeConnectWallet !== ownerWallet" v-model="stripeConnectWalletInput" placeholder="like1..." @input="onStripeConnectWalletInput">
         </template>
-        <div v-else>
-          No stripe account connected yet.
-          <NuxtLink :to="{ name: 'nft-book-store-user' }" target="_blank">
-            Create one here
-          </NuxtLink>
-        </div>
       </div>
 
       <h3>Other Settings</h3>
