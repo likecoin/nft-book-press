@@ -164,10 +164,9 @@ const totalStock = computed(() => prices.value.reduce((acc, p) => acc + Number(p
 const toolbarOptions = ref<string[]>([
   'bold',
   'italic',
-  '-',
   'strikeThrough',
   'title',
-  'quote',
+  '-',
   'unorderedList',
   'orderedList',
   '-',
