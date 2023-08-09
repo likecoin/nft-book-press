@@ -12,8 +12,8 @@
       <h2>Current status</h2>
       <table>
         <tr>
-          <td>Account Created</td>
-          <td>Set up completed</td>
+          <td>Setup initiated</td>
+          <td>Setup completed</td>
         </tr>
         <tr>
           <td>{{ connectStatus?.hasAccount || false }}</td>
