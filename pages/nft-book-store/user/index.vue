@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Stripe connect status</h1>
+    <h1>Stripe Connect status</h1>
     <div v-if="error" style="color: red">
       {{ error }}
     </div>

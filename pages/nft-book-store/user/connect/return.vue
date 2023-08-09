@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Stripe connect status</h1>
+    <h1>Stripe Connect status</h1>
     <div v-if="error" style="color: red">
       {{ error }}
     </div>
@@ -9,7 +9,7 @@
     </div>
     <hr>
     <section v-if="bookStoreApiStore.isAuthenticated">
-      <h2>Refreshing Stripe connect Account status</h2>
+      <h2>Refreshing Stripe Connect account status</h2>
       <div>
         <p>Refreshing...</p>
       </div>

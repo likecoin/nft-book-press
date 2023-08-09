@@ -103,7 +103,7 @@
       <hr>
       <div v-if="userIsOwner">
         <h3>Connect to your own Stripe Account</h3>
-        <input v-model="isStripeConnectChecked" name="stripe" type="checkbox"><label>Use a stripe connect account for receiving all payment</label>
+        <input v-model="isStripeConnectChecked" name="stripe" type="checkbox"><label>Use a Stripe Connect account for receiving all payment</label>
         <br>
         <template v-if="isStripeConnectChecked">
           <input v-model="stripeConnectWallet" type="radio" :disabled="!(connectStatus?.isReady)" :value="ownerWallet"><span v-if="connectStatus?.isReady">Use my account</span>
