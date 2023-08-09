@@ -20,6 +20,7 @@
           <td>{{ connectStatus?.isReady || false }}</td>
         </tr>
       </table>
+      <br>
       <div v-if="connectStatus?.isReady">
         <button @click="onLoginToStripe">
           Login to Stripe account
