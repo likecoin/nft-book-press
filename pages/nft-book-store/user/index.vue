@@ -10,7 +10,7 @@
     <hr>
     <section v-if="bookStoreApiStore.isAuthenticated">
       <h2>Current status</h2>
-      <table>
+      <table style="margin-bottom: 24px;">
         <tr>
           <td>Setup initiated</td>
           <td>Setup completed</td>
@@ -20,7 +20,6 @@
           <td>{{ connectStatus?.isReady || false }}</td>
         </tr>
       </table>
-      <br>
       <div v-if="connectStatus?.isReady">
         <button @click="onLoginToStripe">
           Login to Stripe account
