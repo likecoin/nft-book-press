@@ -74,9 +74,9 @@
             <button
               v-if="p.status === 'pendingNFT'"
               style="margin-top: 6px;"
-              @click="manualSetStatusToCompleted(p)"
+              @click="hardSetStatusToCompleted(p)"
             >
-              set to completed
+              hard set to completed
             </button>
           </td>
           <td>{{ p.wallet }}</td>
@@ -374,7 +374,12 @@ async function handlePriceReorder ({
   }
 }
 
-async function manualSetStatusToCompleted (purchase: any) {
+async function hardSetStatusToCompleted (purchase: any) {
+  const userConfirmed = confirm('Do you want to skip the \'Send NFT\' action and hard set this payment status to \'completed\'?')
+  if (!userConfirmed) {
+    return
+  }
+
   const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/sent/${purchase.id}`,
     {
       method: 'POST',
