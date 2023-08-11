@@ -76,7 +76,7 @@
               style="margin-top: 6px;"
               @click="hardSetStatusToCompleted(p)"
             >
-              hard set to completed
+              Mark Complete
             </button>
           </td>
           <td>{{ p.wallet }}</td>
@@ -375,7 +375,7 @@ async function handlePriceReorder ({
 }
 
 async function hardSetStatusToCompleted (purchase: any) {
-  const userConfirmed = confirm('Do you want to skip the \'Send NFT\' action and hard set this payment status to \'completed\'?')
+  const userConfirmed = confirm('Do you want to skip the \'Send NFT\' action and override this payment status to \'completed\'?')
   if (!userConfirmed) {
     return
   }
