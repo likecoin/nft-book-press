@@ -69,7 +69,16 @@
         </thead>
         <tr v-for="p in purchaseList" :key="p.classId">
           <td>{{ p.email }}</td>
-          <td>{{ p.status }}</td>
+          <td>
+            {{ p.status }}
+            <button
+              v-if="p.status === 'pendingNFT'"
+              style="margin-top: 6px;"
+              @click="manualSetStatusToCompleted(p)"
+            >
+              set to completed
+            </button>
+          </td>
           <td>{{ p.wallet }}</td>
           <td>{{ p.priceName }}</td>
           <td>{{ p.price }}</td>
@@ -363,6 +372,22 @@ async function handlePriceReorder ({
   } finally {
     isUpdatingPricesOrder.value = false
   }
+}
+
+async function manualSetStatusToCompleted (purchase: any) {
+  const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/sent/${purchase.id}`,
+    {
+      method: 'POST',
+      body: { txHash: null },
+      headers: {
+        authorization: `Bearer ${token.value}`
+      }
+    })
+  if (fetchError.value) {
+    throw fetchError.value
+  }
+  purchase.status = 'completed'
+  classListingInfo.value.pendingNFTCount -= 1
 }
 
 function addModeratorWallet () {
