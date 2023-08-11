@@ -99,7 +99,7 @@
             >
               Send NFT
             </NuxtLink>
-            <a v-else-if="p.status === 'completed'" :href="`${chainExplorerURL}/${p.txHash}`" target="_blank">
+            <a v-else-if="p.status === 'completed' && p.txHash" :href="`${chainExplorerURL}/${p.txHash}`" target="_blank">
               View Transaction
             </a>
             <span v-else>
