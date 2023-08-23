@@ -1040,22 +1040,22 @@
     "@lezer/highlight" "^1.0.0"
     "@lezer/lr" "^1.0.0"
 
-"@likecoin/iscn-js@^0.5.0":
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/@likecoin/iscn-js/-/iscn-js-0.5.2.tgz#e988e9f2761abad76c152f13d63eceea7e5a902b"
-  integrity sha512-HCgK9hRYxzCFk3ceNOMGUdwpJtbooyOYa1n2NPUMxcITA10wT/7w6PWwPpk3eejaLRYT3J3XlrKZ21BEWOMiQg==
+"@likecoin/iscn-js@^0.6.8":
+  version "0.6.8"
+  resolved "https://registry.yarnpkg.com/@likecoin/iscn-js/-/iscn-js-0.6.8.tgz#bb733daf3cb1961b3fc86052c41451b265fa2bb7"
+  integrity sha512-+vBBr9rNUFyM3Wej8LiQ4LT1XJG00DtrfJLtXG5loPffQVk+X4uDomo1U/DBh1HDCGQNeKQmtnR0nvwVleUvew==
   dependencies:
-    "@likecoin/iscn-message-types" "^0.0.5"
+    "@likecoin/iscn-message-types" "0.0.7"
     axios "^0.27.2"
     bech32 "^2.0.0"
     bignumber.js "^9.0.1"
     buffer "^6.0.3"
     fast-json-stable-stringify "^2.1.0"
 
-"@likecoin/iscn-message-types@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@likecoin/iscn-message-types/-/iscn-message-types-0.0.5.tgz#1b1d883b89e2e1a7fcb10d25c0f2c4f5ee64dfa0"
-  integrity sha512-YJ0rwCREeFT2sk8gn8iGb0uQ7JGnSL8EhB5vZy9tDRxIgyy7BQsadxvFZLcX6OnJPbMBYWCyclUjC0Dih98FTg==
+"@likecoin/iscn-message-types@0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@likecoin/iscn-message-types/-/iscn-message-types-0.0.7.tgz#fde2693bb5c650932e62b30279458256c804eed9"
+  integrity sha512-xcYcFvvH2NXlalRwxRG/jrwbXWOPHQy1sVZRztuGcdFyssDTdF8YfAxN0wdMVhIuijdVzN7jSnOWRPX5Uch2qg==
   dependencies:
     buffer "^6.0.3"
 
@@ -7337,17 +7337,17 @@ vue@^3.2.47:
     "@vue/server-renderer" "3.2.47"
     "@vue/shared" "3.2.47"
 
-w3c-keyname@^2.2.4:
-  version "2.2.8"
-  resolved "https://registry.yarnpkg.com/w3c-keyname/-/w3c-keyname-2.2.8.tgz#7b17c8c6883d4e8b86ac8aba79d39e880f8869c5"
-  integrity sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==
-
 vuedraggable@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/vuedraggable/-/vuedraggable-4.1.0.tgz#edece68adb8a4d9e06accff9dfc9040e66852270"
   integrity sha512-FU5HCWBmsf20GpP3eudURW3WdWTKIbEIQxh9/8GE806hydR9qZqRRxRE3RjqX7PkuLuMQG/A7n3cfj9rCEchww==
   dependencies:
     sortablejs "1.14.0"
+
+w3c-keyname@^2.2.4:
+  version "2.2.8"
+  resolved "https://registry.yarnpkg.com/w3c-keyname/-/w3c-keyname-2.2.8.tgz#7b17c8c6883d4e8b86ac8aba79d39e880f8869c5"
+  integrity sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==
 
 wcwidth@^1.0.1:
   version "1.0.1"
