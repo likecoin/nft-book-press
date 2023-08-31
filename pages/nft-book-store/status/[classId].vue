@@ -43,7 +43,12 @@
                 ::
               </td>
               <td>
-                <NuxtLink :to="{ name: 'nft-book-store-new', query: { class_id: classId, edition_index: index } }">
+                <NuxtLink
+                  :to="{
+                    name: 'nft-book-store-status-editingClassId-edit-editionIndex',
+                    params: { editingClassId: classId, editionIndex: index }
+                  }"
+                >
                   ✏️
                 </NuxtLink>
               </td>

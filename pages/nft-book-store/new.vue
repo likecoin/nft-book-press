@@ -123,8 +123,10 @@ const { token } = storeToRefs(bookStoreApiStore)
 const { newBookListing, updateEditionPrice } = bookStoreApiStore
 const router = useRouter()
 const route = useRoute()
-const classId = ref(route.query.class_id as string)
-const editionIndex = ref(route.query.edition_index as string)
+// params.editingClassId and params.editionIndex is only available when editing an existing class
+// query.class_id is only available when creating a new class
+const classId = ref(route.params.editingClassId || route.query.class_id as string)
+const editionIndex = ref(route.params.editionIndex as string)
 
 const MINIMAL_PRICE = 0.9
 
@@ -173,7 +175,7 @@ const toolbarOptions = ref<string[]>([
   'preview'
 ])
 
-const isEditMode = computed(() => classId.value && editionIndex.value)
+const isEditMode = computed(() => route.params.editingClassId && editionIndex.value)
 const pageTitle = computed(() => isEditMode.value ? 'Edit Current Edition' : 'New NFT Book Listing')
 const submitButtonText = computed(() => isEditMode.value ? 'Save Changes' : 'Submit')
 const editionInfo = ref<any>({})
