@@ -10,7 +10,10 @@
     <hr>
     <section v-if="bookStoreApiStore.isAuthenticated">
       <p><label>NFT Class ID:</label></p>
-      <input v-model="classIdInput" class="classIdInput" placeholder="likenft...." :disabled="isEditMode">
+      <input v-if="!isEditMode" v-model="classIdInput" class="classIdInput" placeholder="likenft....">
+      <p v-else style="font-weight: bold">
+        {{ classId }}
+      </p>
       <p>Total number of NFT for sale: {{ totalStock }}</p>
       <hr>
 
@@ -360,7 +363,7 @@ async function onSubmit () {
         price: p[0]
       })
     } else {
-      await newBookListing(classIdInput.value, {
+      await newBookListing(classIdInput.value as string, {
         connectedWallets,
         moderatorWallets,
         notificationEmails,
