@@ -308,71 +308,87 @@ function sanitizeHtml (html: string) {
   return DOMPurify.sanitize(html)
 }
 
-async function onSubmit () {
+function mapPrices (prices:any) {
+  return prices
+    .filter(p => p.price > 0)
+    .map(p => ({
+      name: { en: p.nameEn, zh: p.nameZh },
+      description: {
+        en: escapeHtml(p.descriptionEn),
+        zh: escapeHtml(p.descriptionZh)
+      },
+      priceInDecimal: Math.round(Number(p.price) * 100),
+      price: Number(p.price),
+      stock: Number(p.stock)
+    }))
+}
+
+async function checkStripeConnect () {
+  if (isStripeConnectChecked.value && stripeConnectWallet.value) {
+    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${stripeConnectWallet.value}`)
+    if (fetchError.value && fetchError.value?.statusCode !== 404) {
+      throw new Error(fetchError.value.toString())
+    }
+    if (!(data?.value as any)?.isReady) {
+      throw new Error('CONNECTED_WALLET_STRIPE_ACCOUNT_NOT_READY')
+    }
+  }
+}
+
+async function submitNewClass () {
   try {
-    if (!isEditMode.value) {
-      if (!classIdInput.value) {
-        throw new Error('Please input NFT class ID')
-      }
-      if (moderatorWalletInput.value) {
-        throw new Error('Please press "Add" button to add moderator wallet')
-      }
-      if (notificationEmailInput.value) {
-        throw new Error('Please press "Add" button to add notification email')
-      }
-
-      const { data, error: fetchError } = await useFetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${classIdInput.value}`)
-      if (fetchError.value && fetchError.value?.statusCode !== 404) {
-        throw new Error(fetchError.value.toString())
-      }
-      const collectionId = (data?.value as any)?.class?.data?.metadata?.nft_meta_collection_id || ''
-      if (!collectionId.includes('nft_book') && !collectionId.includes('book_nft')) {
-        throw new Error('NFT Class not in NFT BOOK meta collection')
-      }
+    if (!classIdInput.value) {
+      throw new Error('Please input NFT class ID')
+    }
+    if (moderatorWalletInput.value) {
+      throw new Error('Please press "Add" button to add moderator wallet')
+    }
+    if (notificationEmailInput.value) {
+      throw new Error('Please press "Add" button to add notification email')
     }
 
-    isLoading.value = true
-    const p = prices.value
-      .filter(p => p.price > 0)
-      .map(p => ({
-        name: { en: p.nameEn, zh: p.nameZh },
-        description: {
-          en: escapeHtml(p.descriptionEn),
-          zh: escapeHtml(p.descriptionZh)
-        },
-        priceInDecimal: Math.round(Number(p.price) * 100),
-        price: Number(p.price),
-        stock: Number(p.stock)
-      }))
-
-    if (isStripeConnectChecked.value && stripeConnectWallet.value) {
-      const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${stripeConnectWallet.value}`)
-      if (fetchError.value && fetchError.value?.statusCode !== 404) {
-        throw new Error(fetchError.value.toString())
-      }
-      if (!(data?.value as any)?.isReady) {
-        throw new Error('CONNECTED_WALLET_STRIPE_ACCOUNT_NOT_READY')
-      }
+    const { data, error: fetchError } = await useFetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${classIdInput.value}`)
+    if (fetchError.value && fetchError.value?.statusCode !== 404) {
+      throw new Error(fetchError.value.toString())
     }
+    const collectionId = (data?.value as any)?.class?.data?.metadata?.nft_meta_collection_id || ''
+    if (!collectionId.includes('nft_book') && !collectionId.includes('book_nft')) {
+      throw new Error('NFT Class not in NFT BOOK meta collection')
+    }
+    const p = mapPrices(prices.value)
+    await checkStripeConnect()
 
     const connectedWallets = (isStripeConnectChecked.value && stripeConnectWallet.value)
       ? {
           [stripeConnectWallet.value]: 100
         }
       : null
+    await newBookListing(classIdInput.value as string, {
+      connectedWallets,
+      moderatorWallets,
+      notificationEmails,
+      prices: p
+    })
+    router.push({ name: 'nft-book-store' })
+  } catch (err) {
+    const errorData = (err as any).data || err
+    console.error(errorData)
+    error.value = errorData
+  } finally {
+    isLoading.value = false
+  }
+}
 
-    if (isEditMode.value) {
-      await updateEditionPrice(classId.value as string, editionIndex.value, {
-        price: p[0]
-      })
-    } else {
-      await newBookListing(classIdInput.value as string, {
-        connectedWallets,
-        moderatorWallets,
-        notificationEmails,
-        prices: p
-      })
-    }
+async function submitEditedClass () {
+  try {
+    isLoading.value = true
+
+    const p = mapPrices(prices.value)
+    await checkStripeConnect()
+
+    await updateEditionPrice(classId.value as string, editionIndex.value, {
+      price: p[0]
+    })
 
     router.push({ name: 'nft-book-store' })
   } catch (err) {
@@ -382,6 +398,10 @@ async function onSubmit () {
   } finally {
     isLoading.value = false
   }
+}
+
+function onSubmit () {
+  return isEditMode.value ? submitEditedClass() : submitNewClass()
 }
 
 </script>
