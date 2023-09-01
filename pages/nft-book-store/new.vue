@@ -193,23 +193,33 @@ config({
 onMounted(async () => {
   try {
     isLoading.value = true
-    if (isEditMode.value) {
-      const { data: classData, error: classFetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`,
-        {
+
+    const fetchClassDataPromise = isEditMode.value
+      ? useFetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`, {
+        headers: {
+          authorization: `Bearer ${token.value}`
+        }
+      })
+      : Promise.resolve({ data: null })
+
+    const fetchConnectStatusPromise =
+        useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${wallet.value}`, {
           headers: {
             authorization: `Bearer ${token.value}`
           }
         })
-      if (classFetchError.value) {
-        throw classFetchError.value
-      }
 
-      classOwnerWallet.value = classData.value
+    const [classData, connectStatusData] = await Promise.all([fetchClassDataPromise, fetchConnectStatusPromise])
+
+    if (classData?.data?.value) {
+      const data = classData.data?.value
+      classOwnerWallet.value = data
+
       if (classOwnerWallet?.value?.ownerWallet !== wallet.value) {
         throw new Error('NOT_OWNER_OF_NFT_CLASS')
       }
 
-      editionInfo.value = classData.value
+      editionInfo.value = data
       const currentEdition = editionInfo.value.prices.filter(e => e.index.toString() === editionIndex.value)[0]
       if (currentEdition) {
         prices.value = [
@@ -227,24 +237,17 @@ onMounted(async () => {
         moderatorWallets: classModeratorWallets,
         notificationEmails: classNotificationEmails,
         connectedWallets: classConnectedWallets
-      } = classData.value as any
+      } = data as any
       moderatorWallets.value = classModeratorWallets
       notificationEmails.value = classNotificationEmails
       isStripeConnectChecked.value = !!(classConnectedWallets && Object.keys(classConnectedWallets).length)
       stripeConnectWallet.value = classConnectedWallets && Object.keys(classConnectedWallets)[0]
     }
 
-    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${wallet.value}`,
-      {
-        headers: {
-          authorization: `Bearer ${token.value}`
-        }
-      }
-    )
-    if (fetchError.value && fetchError.value?.statusCode !== 404) {
-      throw new Error(fetchError.value.toString())
+    if (connectStatusData.error?.value && connectStatusData.error?.value?.statusCode !== 404) {
+      throw new Error(connectStatusData.error.value.toString())
     }
-    connectStatus.value = (data.value as any) || {}
+    connectStatus.value = (connectStatusData?.data?.value as any) || {}
   } catch (e) {
     console.error(e)
     error.value = (e as Error).toString()
