@@ -381,13 +381,28 @@ async function submitNewClass () {
 
 async function submitEditedClass () {
   try {
+    if (!isEditMode.value) {
+      throw new Error('Unable to submit edit: Missing edition index or class ID')
+    }
+    const p = mapPrices(prices.value)
+    const price = p[0]
+
+    if (!price || !price.price) {
+      throw new Error('Please input price of edition')
+    }
+
+    if (!price.stock) {
+      throw new Error('Please input stock of edition')
+    }
+
+    if (!price.name.en || !price.name.zh) {
+      throw new Error('Please input product name')
+    }
+
     isLoading.value = true
 
-    const p = mapPrices(prices.value)
-    await checkStripeConnect()
-
     await updateEditionPrice(classId.value as string, editionIndex.value, {
-      price: p[0]
+      price
     })
 
     router.push({ name: 'nft-book-store' })
