@@ -50,6 +50,11 @@
             :toolbars="toolbarOptions"
             :sanitize="sanitizeHtml"
           />
+          <div>
+            <h3>Physical Goods</h3>
+            <input type="checkbox" @input="e => updatePrice(e, 'hasShipping', index)">
+            <label>Includes physical good that requires shipping</label>
+          </div>
           <p v-if="hasMultiplePrices">
             <button @click="deletePrice(index)">
               Delete
@@ -57,7 +62,22 @@
           </p>
         </component>
       </component>
-
+      <div v-if="hasShipping">
+        <hr>
+        <h3>Shipping Options and Prices</h3><button @click="addMoreShippingRate">
+          Add Option
+        </button>
+        <component :is="hasMultipleShippingRates ? 'ul' : 'div'">
+          <component :is="hasMultipleShippingRates ? 'li' : 'div'" v-for="s, index in shippingRates" :key="s.index">
+            <hr v-if="index > 0">
+            <p><label>Price(USD) of this shipping option</label></p>
+            <input :value="s.price" type="number" step="0.01" :min="0" @input="e => updateShippingRate(e, 'price', index)">
+            <p><label>Name of this shipping option</label></p>
+            <input placeholder="Shipping option name" :value="s.nameEn" @input="e => updateShippingRate(e, 'nameEn', index)"><br>
+            <input placeholder="運送選項名稱" :value="s.nameZh" @input="e => updateShippingRate(e, 'nameZh', index)">
+          </component>
+        </component>
+      </div>
       <hr>
       <div>
         <h3>Connect to your own Stripe Account</h3>
@@ -79,13 +99,31 @@
 
       <h3>Other Settings</h3>
       <p><label>Share sales data to wallets (moderator):</label></p>
-      <ul>
-        <li v-for="m, i in moderatorWallets" :key="m">
-          {{ m }}<button style="margin-left: 4px" @click="() => moderatorWallets.splice(i, 1)">
-            x
-          </button>
-        </li>
-      </ul>
+      <table>
+        <tr>
+          <td>Wallet</td>
+          <td>Send NFT grant Status</td>
+          <td>Remove</td>
+        </tr>
+        <tr v-for="m, i in moderatorWallets" :key="m">
+          <td>{{ m }}</td>
+          <td>
+            <NuxtLink :to="{ name: 'authz', query: { grantee: m } }" target="_blank">
+              <span v-if="moderatorWalletsGrants[m]">
+                Granted
+              </span>
+              <span v-else>
+                Click to grant
+              </span>
+            </NuxtLink>
+          </td>
+          <td>
+            <button @click="()=> moderatorWallets.splice(i, 1)">
+              x
+            </button>
+          </td>
+        </tr>
+      </table>
       <input v-model="moderatorWalletInput" placeholder="like1..."><button style="margin-left: 4px" @click="addModeratorWallet">
         Add
       </button>
@@ -118,12 +156,14 @@ import { v4 as uuidv4 } from 'uuid'
 import { LCD_URL, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
+import { getNFTAuthzGrants } from '~/utils/cosmos'
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const { wallet } = storeToRefs(walletStore)
 const { token } = storeToRefs(bookStoreApiStore)
 const { newBookListing, updateEditionPrice } = bookStoreApiStore
+
 const router = useRouter()
 const route = useRoute()
 // params.editingClassId and params.editionIndex is only available when editing an existing class
@@ -152,9 +192,17 @@ const prices = ref<any[]>([{
   descriptionEn: '',
   descriptionZh: ''
 }])
+const shippingRates = ref<any[]>([{
+  price: 10.0,
+  nameEn: 'Standard Shipping',
+  nameZh: '標準寄送'
+}])
 const hasMultiplePrices = computed(() => prices.value.length > 1)
+const hasShipping = computed(() => prices.value.find(p => p.hasShipping))
+const hasMultipleShippingRates = computed(() => shippingRates.value.length > 1)
 const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
 const moderatorWallets = ref<string[]>([])
+const moderatorWalletsGrants = ref<any>({})
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
@@ -260,6 +308,16 @@ watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
 })
 
+watch(moderatorWallets, (newModeratorWallets) => {
+  newModeratorWallets.forEach(async (m) => {
+    if (!moderatorWalletsGrants.value[m]) {
+      try {
+        moderatorWalletsGrants.value[m] = await getNFTAuthzGrants(wallet.value, m)
+      } catch {}
+    }
+  })
+})
+
 function updatePrice (e: InputEvent, key: string, index: number) {
   prices.value[index][key] = (e.target as HTMLInputElement)?.value
 }
@@ -279,6 +337,19 @@ function addMorePrice () {
 
 function deletePrice (index: number) {
   prices.value.splice(index, 1)
+}
+
+function updateShippingRate (e: InputEvent, key: string, index: number) {
+  shippingRates.value[index][key] = (e.target as HTMLInputElement)?.value
+}
+
+function addMoreShippingRate () {
+  shippingRates.value.push({
+    index: uuidv4(),
+    price: 20,
+    nameEn: 'International Shipping',
+    nameZh: '國際寄送'
+  })
 }
 
 function addModeratorWallet () {
@@ -319,7 +390,8 @@ function mapPrices (prices:any) {
       },
       priceInDecimal: Math.round(Number(p.price) * 100),
       price: Number(p.price),
-      stock: Number(p.stock)
+      stock: Number(p.stock),
+      hasShipping: p.hasShipping || false
     }))
 }
 
@@ -355,6 +427,7 @@ async function submitNewClass () {
     if (!collectionId.includes('nft_book') && !collectionId.includes('book_nft')) {
       throw new Error('NFT Class not in NFT BOOK meta collection')
     }
+
     const p = mapPrices(prices.value)
     await checkStripeConnect()
 
@@ -363,11 +436,21 @@ async function submitNewClass () {
           [stripeConnectWallet.value]: 100
         }
       : null
+    const s = hasShipping.value
+      ? shippingRates.value
+        .map(rate => ({
+          name: { en: rate.nameEn, zh: rate.nameZh },
+          priceInDecimal: Math.round(Number(rate.price) * 100),
+          price: Number(rate.price)
+        }))
+      : undefined
+
     await newBookListing(classIdInput.value as string, {
       connectedWallets,
       moderatorWallets,
       notificationEmails,
-      prices: p
+      prices: p,
+      shippingRates: s
     })
     router.push({ name: 'nft-book-store' })
   } catch (err) {

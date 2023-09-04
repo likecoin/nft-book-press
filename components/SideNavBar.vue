@@ -24,6 +24,11 @@
         </ul>
       </li>
       <li>
+        <NuxtLink :to="{ name: 'authz' }">
+          NFT authz grants
+        </NuxtLink>
+      </li>
+      <li>
         <a :href="toolsURL" target="_blank">
           More NFT tools
         </a>

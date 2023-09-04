@@ -55,6 +55,7 @@ import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { parseImageURLFromMetadata } from '~/utils'
+import { signExecNFTSendAuthz, signSendNFT } from '~/utils/cosmos'
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
@@ -73,11 +74,13 @@ const error = ref('')
 const isLoading = ref(false)
 const classId = ref(route.params.classId as string)
 const paymentId = ref(route.query.payment_id as string)
+const ownerWallet = ref(route.query.owner_wallet as string || wallet.value)
 const memo = ref('')
 const nftId = ref('')
 const orderInfo = ref<any>({})
 const nftImage = ref('')
 
+const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
 const isSendButtonDisabled = computed(() => !nftId.value || isLoading.value)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
@@ -126,10 +129,10 @@ async function fetchNftId () {
     if (!wallet.value || !signer.value) {
       await connect()
     }
-    if (!wallet.value) { return }
+    if (!ownerWallet.value) { return }
     const { nfts } = await getNFTs({
       classId: classId.value,
-      owner: wallet.value,
+      owner: ownerWallet.value,
       needCount: 1
     })
     if (nfts.length) {
@@ -151,7 +154,7 @@ async function onSendNFTStart () {
     let targetNftId = ''
     if (nftId.value) {
       const { owner } = await getNFTOwner(classId.value, nftId.value)
-      if (owner !== wallet.value) {
+      if (owner !== ownerWallet.value) {
         throw new Error(`NFT classId: ${classId} nftId:${nftId} is not owned by sender!`)
       }
     } else {
@@ -163,13 +166,27 @@ async function onSendNFTStart () {
     const client = signingClient.getSigningStargateClient()
     if (!client) { throw new Error('Signing client not exists') }
 
-    const res = await signingClient.sendNFTs(
-      wallet.value,
-      orderInfo.value.wallet,
-      classId.value,
-      [targetNftId],
-      { memo: memo.value }
-    ) as DeliverTxResponse
+    let res: DeliverTxResponse | undefined
+    if (userIsOwner.value) {
+      res = await signSendNFT(
+        orderInfo.value.wallet,
+        classId.value,
+        targetNftId,
+        signer.value,
+        wallet.value,
+        memo.value
+      )
+    } else {
+      res = await signExecNFTSendAuthz(
+        orderInfo.value.wallet,
+        ownerWallet.value,
+        classId.value,
+        targetNftId,
+        signer.value,
+        wallet.value,
+        memo.value
+      )
+    }
 
     if (res.transactionHash && res.code === 0) {
       const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/sent/${paymentId.value}`,

@@ -57,6 +57,28 @@
         </Draggable>
       </table>
 
+      <template v-if="classListingInfo.shippingRates">
+        <h3>Shipping Options</h3>
+        <table>
+          <thead>
+            <tr>
+              <th />
+              <th>Name</th>
+              <th>Price (USD)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(element, index) in classListingInfo.shippingRates" :key="index">
+              <td>{{ index + 1 }}</td>
+              <td>{{ element.name }}</td>
+              <td style="text-align: right;">
+                {{ element.priceInDecimal / 100 }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </template>
+
       <h3>Status</h3>
       <table>
         <tr>
@@ -76,27 +98,36 @@
           <tr>
             <th>Buyer Email</th>
             <th>Status</th>
+            <th v-if="orderHasShipping">
+              Shipping Status
+            </th>
             <th>Buyer Wallet</th>
             <th>Price Name</th>
             <th>Price</th>
             <th>Buyer message</th>
             <th>Sales channel</th>
-            <th>Action</th>
+            <th v-if="userCanSendNFT">
+              Action
+            </th>
           </tr>
         </thead>
         <tr v-for="p in purchaseList" :key="p.classId">
           <td>{{ p.email }}</td>
-          <td>{{ p.status }}</td>
-          <td>{{ p.wallet }}</td>
-          <td>{{ p.priceName }}</td>
-          <td>{{ p.price }}</td>
-          <td>{{ p.message }}</td>
-          <td>{{ p.from }}</td>
           <td>
-            <NuxtLink
+            {{ p.status }}
+            <button
               v-if="p.status === 'pendingNFT'"
+              style="margin-top: 6px;"
+              @click="hardSetStatusToCompleted(p)"
+            >
+              Mark Complete
+            </button>
+          </td>
+          <td v-if="orderHasShipping">
+            <NuxtLink
+              v-if="p.shippingStatus === 'pending'"
               :to="{
-                name: 'nft-book-store-send-classId',
+                name: 'nft-book-store-send-shipping-classId',
                 params: {
                   classId: p.classId
                 },
@@ -105,9 +136,34 @@
                 }
               }"
             >
+              Pending, Handle Shipping
+            </NuxtLink>
+            <span v-else>
+              {{ p.shippingStatus }}
+            </span>
+          </td>
+          <td>{{ p.wallet }}</td>
+          <td>{{ p.priceName }}</td>
+          <td>{{ p.price }}</td>
+          <td>{{ p.message }}</td>
+          <td>{{ p.from }}</td>
+          <td v-if="userCanSendNFT">
+            <NuxtLink
+              v-if="p.status === 'pendingNFT'"
+              :to="{
+                name: 'nft-book-store-send-classId',
+                params: {
+                  classId: p.classId
+                },
+                query: {
+                  owner_wallet: ownerWallet,
+                  payment_id: p.id
+                }
+              }"
+            >
               Send NFT
             </NuxtLink>
-            <a v-else-if="p.status === 'completed'" :href="`${chainExplorerURL}/${p.txHash}`" target="_blank">
+            <a v-else-if="p.status === 'completed' && p.txHash" :href="`${chainExplorerURL}/${p.txHash}`" target="_blank">
               View Transaction
             </a>
             <span v-else>
@@ -138,13 +194,35 @@
 
       <h3>Other Settings</h3>
       <p><label>Share sales data to wallets:</label></p>
-      <ul>
-        <li v-for="m, i in moderatorWallets" :key="m">
-          {{ m }}<button @click="()=> moderatorWallets.splice(i, 1)">
-            x
-          </button>
-        </li>
-      </ul>
+      <table>
+        <tr>
+          <td>Wallet</td>
+          <td v-if="userIsOwner">
+            Send NFT grant Status
+          </td>
+          <td v-if="userIsOwner">
+            Remove
+          </td>
+        </tr>
+        <tr v-for="m, i in moderatorWallets" :key="m">
+          <td>{{ m }}</td>
+          <td v-if="userIsOwner">
+            <NuxtLink :to="{ name: 'authz', query: { grantee: m } }" target="_blank">
+              <span v-if="moderatorWalletsGrants[m]">
+                Granted
+              </span>
+              <span v-else>
+                Click to grant
+              </span>
+            </NuxtLink>
+          </td>
+          <td v-if="userIsOwner">
+            <button @click="()=> moderatorWallets.splice(i, 1)">
+              x
+            </button>
+          </td>
+        </tr>
+      </table>
       <input v-model="moderatorWalletInput" placeholder="like1..."><button style="margin-left: 4px" @click="addModeratorWallet">
         Add
       </button>
@@ -219,6 +297,7 @@ import { CHAIN_EXPLORER_URL, IS_TESTNET, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useWalletStore } from '~/stores/wallet'
+import { getNFTAuthzGrants } from '~/utils/cosmos'
 
 const store = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
@@ -243,6 +322,7 @@ const connectStatus = ref<any>({})
 const chainExplorerURL = CHAIN_EXPLORER_URL
 
 const moderatorWallets = ref<string[]>([])
+const moderatorWalletsGrants = ref<any>({})
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
@@ -252,7 +332,9 @@ const stripeConnectWalletInput = ref('')
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
+const orderHasShipping = computed(() => purchaseList.value.find(p => !!p.shippingStatus))
 const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
+const userCanSendNFT = computed(() => userIsOwner.value || (wallet.value && moderatorWalletsGrants.value[wallet.value]))
 const purchaseLink = computed(() => {
   const payload: Record<string, string> = {
     from: fromChannel.value || '',
@@ -287,6 +369,16 @@ const salesChannelMap = computed(() => {
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
+})
+
+watch(moderatorWallets, (newModeratorWallets) => {
+  newModeratorWallets.forEach(async (m) => {
+    if (!moderatorWalletsGrants.value[m]) {
+      try {
+        moderatorWalletsGrants.value[m] = await getNFTAuthzGrants(ownerWallet.value, m)
+      } catch {}
+    }
+  })
 })
 
 onMounted(async () => {
@@ -380,6 +472,27 @@ async function handlePriceReorder ({
   } finally {
     isUpdatingPricesOrder.value = false
   }
+}
+
+async function hardSetStatusToCompleted (purchase: any) {
+  const userConfirmed = confirm('Do you want to skip the \'Send NFT\' action and override this payment status to \'completed\'?')
+  if (!userConfirmed) {
+    return
+  }
+
+  const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/sent/${purchase.id}`,
+    {
+      method: 'POST',
+      body: { txHash: null },
+      headers: {
+        authorization: `Bearer ${token.value}`
+      }
+    })
+  if (fetchError.value) {
+    throw fetchError.value
+  }
+  purchase.status = 'completed'
+  classListingInfo.value.pendingNFTCount -= 1
 }
 
 function addModeratorWallet () {
