@@ -23,6 +23,11 @@
           Add Edition
         </button>
       </h3>
+      <p><label>Default display currency when user checkout (note that prices setting below are always in USD)</label></p>
+      <input v-model="defaultPaymentCurrency" name="USD" type="radio" value="USD">
+      <label for="USD">USD</label>
+      <input v-model="defaultPaymentCurrency" name="HKD" type="radio" value="HKD">
+      <label for="HKD">HKD</label>
       <component :is="hasMultiplePrices ? 'ul' : 'div'">
         <component :is="hasMultiplePrices ? 'li' : 'div'" v-for="p, index in prices" :key="p.index">
           <hr v-if="index > 0">
@@ -184,6 +189,7 @@ const mdEditorPlaceholder = ref({
 
 const classIdInput = ref(classId || '')
 const nextPriceIndex = ref(1)
+const defaultPaymentCurrency = ref('USD')
 const prices = ref<any[]>([{
   price: MINIMAL_PRICE,
   stock: Number(route.query.count as string || 1),
@@ -284,12 +290,14 @@ onMounted(async () => {
       const {
         moderatorWallets: classModeratorWallets,
         notificationEmails: classNotificationEmails,
-        connectedWallets: classConnectedWallets
+        connectedWallets: classConnectedWallets,
+        defaultPaymentCurrency: classDefaultPaymentCurrency
       } = data as any
       moderatorWallets.value = classModeratorWallets
       notificationEmails.value = classNotificationEmails
       isStripeConnectChecked.value = !!(classConnectedWallets && Object.keys(classConnectedWallets).length)
       stripeConnectWallet.value = classConnectedWallets && Object.keys(classConnectedWallets)[0]
+      if (classDefaultPaymentCurrency) { defaultPaymentCurrency.value = classDefaultPaymentCurrency }
     }
 
     if (connectStatusData.error?.value && connectStatusData.error?.value?.statusCode !== 404) {
@@ -446,6 +454,7 @@ async function submitNewClass () {
       : undefined
 
     await newBookListing(classIdInput.value as string, {
+      defaultPaymentCurrency,
       connectedWallets,
       moderatorWallets,
       notificationEmails,
