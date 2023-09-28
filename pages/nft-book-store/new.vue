@@ -34,7 +34,7 @@
           <p><label>Price(USD) of this {{ priceItemLabel }} (Minimal ${{ MINIMAL_PRICE }})</label></p>
           <input :value="p.price" type="number" step="0.01" :min="MINIMAL_PRICE" @input="e => updatePrice(e, 'price', index)">
           <p><label>Total number of NFT for sale of this {{ priceItemLabel }}</label></p>
-          <input :value="p.stock" type="number" @input="e => updatePrice(e, 'stock', index)">
+          <input :value="p.stock" min="0" type="number" @input="e => updatePrice(e, 'stock', index)">
           <p><label>Product name of this {{ priceItemLabel }}</label></p>
           <input placeholder="Product name in English" :value="p.nameEn" @input="e => updatePrice(e, 'nameEn', index)"><br>
           <input placeholder="產品中文名字" :value="p.nameZh" @input="e => updatePrice(e, 'nameZh', index)">
@@ -483,8 +483,12 @@ async function submitEditedClass () {
       throw new Error('Please input price of edition')
     }
 
-    if (!price.stock) {
+    if (!price.stock && price.stock !== 0) {
       throw new Error('Please input stock of edition')
+    }
+
+    if (price.stock < 0) {
+      throw new Error('Stock cannot be negative')
     }
 
     if (!price.name.en || !price.name.zh) {
