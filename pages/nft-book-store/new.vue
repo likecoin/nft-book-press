@@ -32,7 +32,7 @@
         <component :is="hasMultiplePrices ? 'li' : 'div'" v-for="p, index in prices" :key="p.index">
           <hr v-if="index > 0">
           <p><label>Price(USD) of this {{ priceItemLabel }} (Minimal ${{ MINIMAL_PRICE }})</label></p>
-          <input :value="p.price" type="number" step="0.01" :min="MINIMAL_PRICE" @input="e => updatePrice(e, 'price', index)">
+          <input :value="p.price" type="number" step="0.01" :min="0" @input="e => updatePrice(e, 'price', index)">
           <p><label>Total number of NFT for sale of this {{ priceItemLabel }}</label></p>
           <input :value="p.stock" min="0" type="number" @input="e => updatePrice(e, 'stock', index)">
           <p><label>Product name of this {{ priceItemLabel }}</label></p>
@@ -389,7 +389,6 @@ function sanitizeHtml (html: string) {
 
 function mapPrices (prices:any) {
   return prices
-    .filter(p => p.price > 0)
     .map(p => ({
       name: { en: p.nameEn, zh: p.nameZh },
       description: {
@@ -437,6 +436,9 @@ async function submitNewClass () {
     }
 
     const p = mapPrices(prices.value)
+    if (p.find(price => price.price !== 0 && price.price < MINIMAL_PRICE)) {
+      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE}`)
+    }
     await checkStripeConnect()
 
     const connectedWallets = (isStripeConnectChecked.value && stripeConnectWallet.value)
@@ -479,8 +481,11 @@ async function submitEditedClass () {
     const p = mapPrices(prices.value)
     const price = p[0]
 
-    if (!price || !price.price) {
+    if (!price || price.price === undefined) {
       throw new Error('Please input price of edition')
+    }
+    if (price.price !== 0 && price.price < MINIMAL_PRICE) {
+      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE}`)
     }
 
     if (!price.stock && price.stock !== 0) {
