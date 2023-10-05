@@ -26,6 +26,57 @@ export function parseImageURLFromMetadata (image: string): string {
   return image.replace('ar://', 'https://arweave.net/').replace('ipfs://', 'https://ipfs.io/ipfs/')
 }
 
+export function downloadFile ({ data, fileName, fileType }:{data:any, fileName:string, fileType:string}) {
+  let fileData
+  let mimeType
+  if (fileType === 'json') {
+    fileData = JSON.stringify(data, null, 2)
+    mimeType = 'application/json'
+  } else if (fileType === 'csv') {
+    fileData = data.join('\n')
+    mimeType = 'text/csv'
+  } else {
+    throw new Error('Unsupported file type')
+  }
+
+  const fileBlob = new Blob([fileData], { type: mimeType })
+  const fileUrl = URL.createObjectURL(fileBlob)
+  const fileLink = document.createElement('a')
+  fileLink.href = fileUrl
+  fileLink.download = fileName
+  fileLink.style.display = 'none'
+
+  document.body.appendChild(fileLink)
+  fileLink.click()
+  document.body.removeChild(fileLink)
+}
+
+export function generateCsvData ({
+  prefix,
+  nftMintCount,
+  imgUrl,
+  uri
+}: {
+  prefix: string;
+  nftMintCount: number;
+  imgUrl: string;
+  uri: string ;
+}) {
+  const csvData = []
+  csvData.push('"nftId","uri","image","metadata"')
+  const isEnglishPrefix = /[a-zA-Z]/.test(prefix)
+  for (let i = 0; i <= nftMintCount - 1; i++) {
+    let nftId
+    if (isEnglishPrefix) {
+      nftId = `${prefix.toUpperCase()}-${i.toString().padStart(4, '0')}`
+    } else {
+      nftId = `${prefix}-${i.toString().padStart(4, '0')}`
+    }
+    csvData.push(`"${nftId}","${uri}","${imgUrl}",""`)
+  }
+  return csvData.join('\n')
+}
+
 export function sleep (time: number) {
   return new Promise((resolve) => { setTimeout(resolve, time) })
 }

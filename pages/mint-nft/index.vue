@@ -39,8 +39,53 @@
         </div>
         <input type="file" @change="onISCNFileChange">
         <br>
-        <p>You can also create your ISCN using <a :href="`${appLikeCoURL}/new`" target="_blank">app.like.co</a></p>
-        <button :disabled="isLoading" style="margin-top: 16px" @click="onISCNFileInput">
+        <p>
+          You can also create your ISCN using
+          <a :href="`${appLikeCoURL}/new`" target="_blank">app.like.co</a>
+        </p>
+
+        <hr>
+
+        <h3>Please fill in the required information :</h3>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <div>
+            <label>NFT ID Prefix: </label>
+            <input v-model="nftIdPrefix" placeholder="English only ex.MoneyVerse">
+          </div>
+          <div>
+            <label>Number of NFT to mint: </label>
+            <input v-model="nftMintCount" placeholder="0-100">
+          </div>
+          <div>
+            <label>Image URL: </label>
+            <input v-model="imageUrl" placeholder="ipfs:// ... or ar://....">
+          </div>
+          <div>
+            <label>External URL (optional):</label>
+            <input v-model="externalUrl" placeholder="https://">
+          </div>
+          <div>
+            <label>URI (optional):</label>
+            <input v-model="uri" placeholder="https://">
+          </div>
+          <div>
+            <label>Max number of supply for this NFT Class (optional):</label>
+            <input
+              v-model="classMaxSupply"
+              :placeholder="`> ${nftMintCount}`"
+            >
+            <span
+              v-if="classMaxSupply && classMaxSupply < nftMintCount"
+              style="color: red"
+            >should more than number of NFT to mint</span>
+          </div>
+        </div>
+
+        <button
+          style="margin-top: 16px"
+          :disabled="isLoading || !(nftIdPrefix && nftMintCount && imageUrl)"
+          @click="onISCNFileInput"
+        >
           Create
         </button>
       </div>
@@ -137,7 +182,11 @@
         </div>
         <input type="file" @change="onMintNFTFileChange">
         <br>
-        <button :disabled="isLoading" style="margin-top: 16px" @click="onMintNFTStart">
+        <button
+          :disabled="isLoading"
+          style="margin-top: 16px"
+          @click="onMintNFTStart"
+        >
           Create
         </button>
       </div>
@@ -177,7 +226,7 @@ import { stringify } from 'csv-stringify/sync'
 
 import { useWalletStore } from '~/stores/wallet'
 import { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } from '~/constant'
-import { sleep } from '~/utils'
+import { downloadFile, generateCsvData, sleep } from '~/utils'
 
 const router = useRouter()
 const route = useRoute()
@@ -196,6 +245,10 @@ const iscnIdInput = ref(route.query.class_id || route.query.iscn_id || '')
 const iscnOwner = ref('')
 const iscnCreateData = ref<any>(null)
 const iscnData = ref<any>(null)
+const nftIdPrefix = ref('')
+const imageUrl = ref('')
+const externalUrl = ref('')
+const uri = ref('')
 
 const classData = ref<any>(null)
 const classMaxSupply = ref<number | undefined>(undefined)
@@ -274,6 +327,44 @@ async function onISCNFileInput () {
     iscnData.value = records[0].data
     iscnOwner.value = owner
     step.value = 2
+
+    const { contentMetadata } = iscnCreateData.value
+
+    const nftClassData = {
+      name: contentMetadata.name,
+      description: contentMetadata.description,
+      symbol: 'CNR',
+      uri: uri.value || '',
+      metadata: {
+        name: contentMetadata.name,
+        image: imageUrl.value,
+        external_url: externalUrl.value,
+        nft_meta_collection_id: `${nftIdPrefix.value}-nft-book`,
+        nft_meta_collection_name: contentMetadata.name,
+        nft_meta_collection_descrption: contentMetadata.description
+      }
+    }
+
+    const nftsDefaultData = {
+      uri: uri.value || '',
+      metadata: {
+        name: contentMetadata.name,
+        image: imageUrl.value,
+        external_url: externalUrl.value
+      }
+    }
+
+    const csvDataString = generateCsvData({
+      prefix: nftIdPrefix.value,
+      nftMintCount: nftMintCount.value,
+      imgUrl: imageUrl.value,
+      uri: uri.value
+    })
+    const csvDataArray = csvDataString.split('\n')
+
+    downloadFile({ data: nftClassData, fileName: 'nft_class.json', fileType: 'json' })
+    downloadFile({ data: nftsDefaultData, fileName: 'nfts_default.json', fileType: 'json' })
+    downloadFile({ data: csvDataArray, fileName: 'nft.csv', fileType: 'csv' })
   } catch (err) {
     console.error(err)
     error.value = (err as Error).toString()
@@ -440,7 +531,7 @@ function onMintNFTFileChange (event: Event) {
       if (typeof text !== 'string') { return }
       const data = parse(text, { columns: true })
       nftMintListData.value = data
-      if (data.length && data.length !== nftMintCount.value) { throw new Error('NFT data length and nft count not match') }
+      nftMintCount.value = data.length
     } catch (err) {
       console.error(err)
       error.value = (err as Error).toString()
@@ -454,3 +545,8 @@ function onDownloadCSV (e?: Event) {
   downloadBlob(nftCSVData.value, 'nft.csv', 'text/csv;charset=utf-8;')
 }
 </script>
+<style scoped>
+ input {
+  width: 250px
+}
+</style>
