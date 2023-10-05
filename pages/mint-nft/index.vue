@@ -335,9 +335,9 @@ async function onISCNFileInput () {
         name: contentMetadata.name,
         image: imageUrl.value,
         external_url: externalUrl.value,
-        nft_meta_collection_id: `${nftIdPrefix.value}-nft-book`,
-        nft_meta_collection_name: contentMetadata.name,
-        nft_meta_collection_descrption: contentMetadata.description
+        nft_meta_collection_id: 'nft_book',
+        nft_meta_collection_name: 'NFT Book',
+        nft_meta_collection_descrption: 'NFT Book by Liker Land'
       }
     }
 
