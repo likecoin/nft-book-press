@@ -605,7 +605,7 @@ function onMintNFTFileChange (event: Event) {
 
 function onDownloadCSV (e?: Event) {
   if (e) { e.preventDefault() }
-  downloadBlob(nftCSVData.value, 'nft.csv', 'text/csv;charset=utf-8;')
+  downloadBlob(nftCSVData.value, 'nft_result.csv', 'text/csv;charset=utf-8;')
 }
 
 function onDownloadClassJSON (e?: Event) {
@@ -620,7 +620,7 @@ function onDownloadDefaultClassJSON (e?: Event) {
 
 function onDownloadNftsCSV (e?: Event) {
   if (e) { e.preventDefault() }
-  downloadFile({ data: nftMintListData.value, fileName: 'nft.csv', fileType: 'csv' })
+  downloadFile({ data: nftMintListData.value, fileName: 'nfts.csv', fileType: 'csv' })
 }
 
 </script>

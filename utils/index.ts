@@ -33,7 +33,7 @@ export function downloadFile ({ data, fileName, fileType }:{data:any, fileName:s
     fileData = JSON.stringify(data, null, 2)
     mimeType = 'application/json'
   } else if (fileType === 'csv') {
-    fileData = data.join('\n')
+    fileData = convertArrayOfObjectsToCSV(data)
     mimeType = 'text/csv'
   } else {
     throw new Error('Unsupported file type')
@@ -73,4 +73,20 @@ export function generateCsvData ({
 
 export function sleep (time: number) {
   return new Promise((resolve) => { setTimeout(resolve, time) })
+}
+
+function convertArrayOfObjectsToCSV (data: Record<string, any>[]): string {
+  const csv: string[] = []
+  const headers: string = Array.from(
+    new Set(data.flatMap(obj => Object.keys(obj)))
+  ).join(',')
+
+  csv.push(headers)
+
+  data.forEach((obj: Record<string, any>) => {
+    const row: string = Object.keys(obj).map(key => obj[key]).join(',')
+    csv.push(row)
+  })
+
+  return csv.join('\n')
 }
