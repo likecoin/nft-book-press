@@ -31,7 +31,7 @@
       <component :is="hasMultiplePrices ? 'ul' : 'div'">
         <component :is="hasMultiplePrices ? 'li' : 'div'" v-for="p, index in prices" :key="p.index">
           <hr v-if="index > 0">
-          <p><label>Price(USD) of this {{ priceItemLabel }} (Minimal ${{ MINIMAL_PRICE }})</label></p>
+          <p><label>Price(USD) of this {{ priceItemLabel }} (Minimal ${{ MINIMAL_PRICE }} or free)</label></p>
           <input :value="p.price" type="number" step="0.01" :min="0" @input="e => updatePrice(e, 'price', index)">
           <p><label>Total number of NFT for sale of this {{ priceItemLabel }}</label></p>
           <input :value="p.stock" min="0" type="number" @input="e => updatePrice(e, 'stock', index)">
@@ -437,7 +437,7 @@ async function submitNewClass () {
 
     const p = mapPrices(prices.value)
     if (p.find(price => price.price !== 0 && price.price < MINIMAL_PRICE)) {
-      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE}`)
+      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or free`)
     }
     await checkStripeConnect()
 
@@ -485,7 +485,7 @@ async function submitEditedClass () {
       throw new Error('Please input price of edition')
     }
     if (price.price !== 0 && price.price < MINIMAL_PRICE) {
-      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE}`)
+      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or free`)
     }
 
     if (!price.stock && price.stock !== 0) {
