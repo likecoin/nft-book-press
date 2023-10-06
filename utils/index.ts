@@ -64,14 +64,8 @@ export function generateCsvData ({
 }) {
   const csvData = []
   csvData.push('"nftId","uri","image","metadata"')
-  const isEnglishPrefix = /[a-zA-Z]/.test(prefix)
   for (let i = 0; i <= nftMintCount - 1; i++) {
-    let nftId
-    if (isEnglishPrefix) {
-      nftId = `${prefix.toUpperCase()}-${i.toString().padStart(4, '0')}`
-    } else {
-      nftId = `${prefix}-${i.toString().padStart(4, '0')}`
-    }
+    const nftId = `${prefix}-${i.toString().padStart(4, '0')}`
     csvData.push(`"${nftId}","${uri}","${imgUrl}",""`)
   }
   return csvData.join('\n')

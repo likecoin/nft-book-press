@@ -11,7 +11,7 @@
       <div v-if="!iscnCreateData">
         <p><label>Enter ISCN ID or NFT Class ID:</label></p>
         <input v-model="iscnIdInput" placeholder="iscn://... or likenft....">
-        <button class="button" :disabled="isLoading" @click="onISCNIDInput">
+        <button class="button" :disabled="isLoading || !(iscnIdInput)" @click="onISCNIDInput">
           Submit
         </button>
       </div>
@@ -424,7 +424,7 @@ async function onClickMintByInputting () {
     imgUrl: imageUrl.value,
     uri: uri.value
   })
-  const csvDataArray = csvDataString.split('\n')
+  const csvDataArray = parse(csvDataString, { columns: true })
 
   classCreateData.value = nftClassData
   nftMintDefaultData.value = nftsDefaultData
