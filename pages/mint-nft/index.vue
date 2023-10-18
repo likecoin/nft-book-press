@@ -416,7 +416,7 @@ async function onClickMintByInputting () {
   const nftClassData = {
     name: contentMetadata.name,
     description: contentMetadata.description,
-    symbol: 'CNR',
+    symbol: 'BOOK',
     uri: uri.value || '',
     metadata: {
       name: contentMetadata.name,
