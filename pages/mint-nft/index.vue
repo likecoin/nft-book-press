@@ -79,9 +79,18 @@
           <h3>Mint NFT by uploading data files</h3>
 
           <label>Max number of supply for this NFT Class (optional):</label>
-          <input v-model="classMaxSupply" type="number">
+          <input
+            v-model="classMaxSupply"
+            type="number"
+            :min="nftMintCount"
+          >
           <label>Number of NFT to mint:</label>
-          <input v-model="nftMintCount" type="number">
+          <input
+            v-model="nftMintCount"
+            type="number"
+            :min="0"
+            :max="classMaxSupply"
+          >
 
           <p>
             <label>Upload NFT Class data json (
@@ -155,7 +164,13 @@
             </div>
             <div>
               <label>Number of NFT to mint: </label>
-              <input v-model="nftMintCount" placeholder="0-100">
+              <input
+                v-model="nftMintCount"
+                placeholder="0-100"
+                type="number"
+                :min="0"
+                :max="classMaxSupply"
+              >
             </div>
             <div>
               <label>Image URL: </label>
@@ -173,6 +188,8 @@
               <label>Max number of supply for this NFT Class (optional):</label>
               <input
                 v-model="classMaxSupply"
+                type="number"
+                :min="nftMintCount"
                 :placeholder="`> ${nftMintCount}`"
               >
               <span
