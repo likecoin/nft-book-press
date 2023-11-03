@@ -98,6 +98,7 @@
           <tr>
             <th>Buyer Email</th>
             <th>Status</th>
+            <th>Order Date</th>
             <th v-if="orderHasShipping">
               Shipping Status
             </th>
@@ -123,6 +124,7 @@
               Mark Complete
             </button>
           </td>
+          <td>{{ p.formattedDate }}</td>
           <td v-if="orderHasShipping">
             <NuxtLink
               v-if="p.shippingStatus === 'pending'"
@@ -421,6 +423,15 @@ onMounted(async () => {
       }
     }
     purchaseList.value = (ordersData.value as any).orders
+
+    purchaseList.value = purchaseList.value.map((purchase) => {
+      const timestamp = purchase.timestamp
+      const date = new Date(timestamp)
+      const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+      return { ...purchase, formattedDate }
+    })
+
+    purchaseList.value.sort((a, b) => b.timestamp - a.timestamp)
 
     const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${wallet.value}`,
       {
