@@ -5,7 +5,8 @@ export default defineNuxtConfig({
   css: ['@/assets/styles/global.css'],
   modules: [
     '@pinia/nuxt',
-    '@nuxtjs/eslint-module'
+    '@nuxtjs/eslint-module',
+    '@nuxt/ui'
   ],
   plugins: ['~/plugins/buffer.ts'],
   vite: {
