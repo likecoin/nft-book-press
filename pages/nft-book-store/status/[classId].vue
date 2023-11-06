@@ -319,7 +319,7 @@ const priceIndex = ref(0)
 const classListingInfo = ref<any>({})
 const prices = ref<any[]>([])
 const isUpdatingPricesOrder = ref(false)
-const purchaseList = ref<any[]>([])
+const ordersData = ref<any>([])
 const connectStatus = ref<any>({})
 const chainExplorerURL = CHAIN_EXPLORER_URL
 
@@ -369,6 +369,18 @@ const salesChannelMap = computed(() => {
   return map
 })
 
+const purchaseList = computed(() => {
+  if (ordersData.value?.orders) {
+    return ordersData.value.orders.map((purchase: any) => {
+      const timestamp = purchase.timestamp
+      const date = new Date(timestamp)
+      const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+      return { ...purchase, formattedDate }
+    }).sort((a: any, b: any) => b.timestamp - a.timestamp)
+  }
+  return []
+})
+
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
 })
@@ -409,7 +421,7 @@ onMounted(async () => {
     if (stripeConnectWallet.value !== ownerWallet.value) {
       stripeConnectWalletInput.value = stripeConnectWallet.value
     }
-    const { data: ordersData, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
+    const { data: orders, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
       {
         headers: {
           authorization: `Bearer ${token.value}`
@@ -422,16 +434,8 @@ onMounted(async () => {
         throw fetchOrdersError.value
       }
     }
-    purchaseList.value = (ordersData.value as any).orders
 
-    purchaseList.value = purchaseList.value.map((purchase) => {
-      const timestamp = purchase.timestamp
-      const date = new Date(timestamp)
-      const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
-      return { ...purchase, formattedDate }
-    })
-
-    purchaseList.value.sort((a, b) => b.timestamp - a.timestamp)
+    ordersData.value = orders.value
 
     const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${wallet.value}`,
       {
