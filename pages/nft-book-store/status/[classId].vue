@@ -319,7 +319,7 @@ const priceIndex = ref(0)
 const classListingInfo = ref<any>({})
 const prices = ref<any[]>([])
 const isUpdatingPricesOrder = ref(false)
-const ordersData = ref<any>([])
+const ordersData = ref<any>({})
 const connectStatus = ref<any>({})
 const chainExplorerURL = CHAIN_EXPLORER_URL
 
@@ -334,7 +334,7 @@ const stripeConnectWalletInput = ref('')
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
-const orderHasShipping = computed(() => purchaseList.value.find(p => !!p.shippingStatus))
+const orderHasShipping = computed(() => purchaseList.value.find((p: any) => !!p.shippingStatus))
 const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
 const userCanSendNFT = computed(() => userIsOwner.value || (wallet.value && moderatorWalletsGrants.value[wallet.value]))
 const purchaseLink = computed(() => {
@@ -354,7 +354,7 @@ const salesChannelMap = computed(() => {
       count: number,
       totalUSD: number
     };
-  } = purchaseList.value.reduce((acc, cur) => {
+  } = purchaseList.value.reduce((acc: any, cur: any) => {
     const from = cur.from || '(empty)'
     if (!acc[from]) {
       acc[from] = {
