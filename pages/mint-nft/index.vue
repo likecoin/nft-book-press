@@ -331,6 +331,12 @@ watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
 })
 
+watch(iscnData, (recordData) => {
+  if (recordData) {
+    imageUrl.value = recordData.contentMetadata?.thumbnailUrl || ''
+  }
+})
+
 async function onISCNIDInput () {
   try {
     isLoading.value = true
