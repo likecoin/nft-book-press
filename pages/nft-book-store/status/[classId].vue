@@ -103,8 +103,8 @@
                   <UButton
                     icon="i-heroicons-document-magnifying-glass"
                     :to="{
-                      name: 'nft-book-store-status-editingClassId-edit-editionIndex',
-                      params: { editingClassId: classId, editionIndex: index }
+                      name: 'nft-book-store-status-classId-edit-editionIndex',
+                      params: { classId, editionIndex: index }
                     }"
                     variant="soft"
                     color="gray"
@@ -491,6 +491,8 @@
         </QRCode>
       </UCard>
     </template>
+
+    <NuxtPage :transition="false" />
   </main>
 </template>
 
