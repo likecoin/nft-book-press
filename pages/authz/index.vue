@@ -1,6 +1,8 @@
 <template>
   <div class="space-y-4">
-    <h1 class="text-xl font-bold font-mono">Send NFT Authz Grants Management Page</h1>
+    <h1 class="text-xl font-bold font-mono">
+      Send NFT Authz Grants Management Page
+    </h1>
 
     <UAlert
       v-if="error"
@@ -24,7 +26,9 @@
     >
       <UCard :ui="{ body: { base: 'flex justify-center items-center' } }">
         <template #header>
-          <h2 class="font-bold font-mono">Connect your wallet</h2>
+          <h2 class="font-bold font-mono">
+            Connect your wallet
+          </h2>
         </template>
 
         <UButton
@@ -52,7 +56,9 @@
 
       <UCard>
         <template #header>
-          <h2 class="font-bold font-mono">Current Grants</h2>
+          <h2 class="font-bold font-mono">
+            Current Grants
+          </h2>
         </template>
 
         <UCard :ui="{ body: { padding: '' } }">
@@ -108,7 +114,9 @@
 
       <UCard>
         <template #header>
-          <h2 class="font-bold font-mono">Grant new send NFT Authz</h2>
+          <h2 class="font-bold font-mono">
+            Grant new send NFT Authz
+          </h2>
         </template>
 
         <UInput

@@ -1,6 +1,8 @@
 <template>
   <main :key="route.path">
-    <h1 class="text-xl font-bold font-mono mb-4">NFT Book Store Management Page</h1>
+    <h1 class="text-xl font-bold font-mono mb-4">
+      NFT Book Store Management Page
+    </h1>
 
     <UContainer
       v-if="!bookStoreApiStore.isAuthenticated"
@@ -8,7 +10,9 @@
     >
       <UCard :ui="{ body: { base: 'flex justify-center items-center' } }">
         <template #header>
-          <h2 class="font-bold font-mono">Verify your wallet address</h2>
+          <h2 class="font-bold font-mono">
+            Verify your wallet address
+          </h2>
         </template>
 
         <UButton

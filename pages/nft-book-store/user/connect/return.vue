@@ -3,7 +3,9 @@
     <!-- Loading -->
     <UCard v-if="isLoading">
       <template #header>
-        <h2 class="text-sm font-bold font-mono">Refreshing Stripe Connect Account Status</h2>
+        <h2 class="text-sm font-bold font-mono">
+          Refreshing Stripe Connect Account Status
+        </h2>
       </template>
 
       <UProgress animation="carousel">
@@ -16,7 +18,9 @@
     <!-- Success case -->
     <UCard v-else-if="isDone && !error">
       <template #header>
-        <h2 class="text-sm font-bold font-mono">Stripe Connect Account Status Refreshed</h2>
+        <h2 class="text-sm font-bold font-mono">
+          Stripe Connect Account Status Refreshed
+        </h2>
       </template>
 
       <UProgress :value="100">
@@ -35,7 +39,9 @@
       }"
     >
       <template #header>
-        <h2 class="text-sm font-bold font-mono">An error occurred when refreshing the Stripe Connect Account Status</h2>
+        <h2 class="text-sm font-bold font-mono">
+          An error occurred when refreshing the Stripe Connect Account Status
+        </h2>
       </template>
 
       <UProgress :value="100" color="red" />

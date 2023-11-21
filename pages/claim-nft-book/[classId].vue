@@ -1,6 +1,8 @@
 <template>
   <main class="space-y-4">
-    <h1 class="text-lg font-bold font-mono">Claim your NFT Book</h1>
+    <h1 class="text-lg font-bold font-mono">
+      Claim your NFT Book
+    </h1>
 
     <UAlert
       v-if="error"

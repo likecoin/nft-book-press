@@ -1,6 +1,8 @@
 <template>
   <main class="space-y-4">
-    <h1 class="text-lg font-bold font-mono">NFT Book Physical Good shipping status "{{ nftClassName || classId }}"</h1>
+    <h1 class="text-lg font-bold font-mono">
+      NFT Book Physical Good shipping status "{{ nftClassName || classId }}"
+    </h1>
 
     <UAlert
       v-if="error"
@@ -20,30 +22,86 @@
 
     <UCard v-if="bookStoreApiStore.isAuthenticated">
       <template #header>
-        <h3 class="font-bold font-mono">Order status</h3>
+        <h3 class="font-bold font-mono">
+          Order status
+        </h3>
       </template>
 
       <UCard :ui="{ body: { padding: '' } }">
         <table class="divide-y w-full">
-          <tr><th class="text-left px-4 py-3">Buyer Email</th><td class="text-left px-4 py-3">{{ orderInfo.email }}</td></tr>
-          <tr><th class="text-left px-4 py-3">Shipping Status</th><td class="text-left px-4 py-3">{{ orderInfo.shippingStatus }}</td></tr>
-          <tr><th class="text-left px-4 py-3">Shipping cost paid</th><td class="text-left px-4 py-3">{{ orderInfo.shippingCost }}</td></tr>
-          <tr><th class="text-left px-4 py-3">Buyer Wallet</th><td class="text-left px-4 py-3">{{ orderInfo.wallet }}</td></tr>
-          <tr><th class="text-left px-4 py-3">Price Name</th><td class="text-left px-4 py-3">{{ orderInfo.priceName }}</td></tr>
-          <tr><th class="text-left px-4 py-3">Price</th><td class="text-left px-4 py-3">{{ orderInfo.price }}</td></tr>
-          <tr><th class="text-left px-4 py-3">Buyer message</th><td class="text-left px-4 py-3">{{ orderInfo.message }}</td></tr>
-          <tr><th class="text-left px-4 py-3">Sales channel</th><td class="text-left px-4 py-3">{{ orderInfo.from }}</td></tr>
+          <tr>
+            <th class="text-left px-4 py-3">
+              Buyer Email
+            </th><td class="text-left px-4 py-3">
+              {{ orderInfo.email }}
+            </td>
+          </tr>
+          <tr>
+            <th class="text-left px-4 py-3">
+              Shipping Status
+            </th><td class="text-left px-4 py-3">
+              {{ orderInfo.shippingStatus }}
+            </td>
+          </tr>
+          <tr>
+            <th class="text-left px-4 py-3">
+              Shipping cost paid
+            </th><td class="text-left px-4 py-3">
+              {{ orderInfo.shippingCost }}
+            </td>
+          </tr>
+          <tr>
+            <th class="text-left px-4 py-3">
+              Buyer Wallet
+            </th><td class="text-left px-4 py-3">
+              {{ orderInfo.wallet }}
+            </td>
+          </tr>
+          <tr>
+            <th class="text-left px-4 py-3">
+              Price Name
+            </th><td class="text-left px-4 py-3">
+              {{ orderInfo.priceName }}
+            </td>
+          </tr>
+          <tr>
+            <th class="text-left px-4 py-3">
+              Price
+            </th><td class="text-left px-4 py-3">
+              {{ orderInfo.price }}
+            </td>
+          </tr>
+          <tr>
+            <th class="text-left px-4 py-3">
+              Buyer message
+            </th><td class="text-left px-4 py-3">
+              {{ orderInfo.message }}
+            </td>
+          </tr>
+          <tr>
+            <th class="text-left px-4 py-3">
+              Sales channel
+            </th><td class="text-left px-4 py-3">
+              {{ orderInfo.from }}
+            </td>
+          </tr>
         </table>
       </UCard>
 
       <UCard v-if="orderInfo.shippingDetails?.address">
         <template #header>
-          <h3 class="text-sm font-bold font-mono">Shipping Details</h3>
+          <h3 class="text-sm font-bold font-mono">
+            Shipping Details
+          </h3>
         </template>
         <table class="divide-y w-full">
           <tr v-for="[key, value] in Object.entries(orderInfo.shippingDetails?.address)" :key="key">
-            <td class="text-left px-4 py-3">{{ key }}</td>
-            <td class="text-left px-4 py-3">{{ value }}</td>
+            <td class="text-left px-4 py-3">
+              {{ key }}
+            </td>
+            <td class="text-left px-4 py-3">
+              {{ value }}
+            </td>
           </tr>
         </table>
       </UCard>

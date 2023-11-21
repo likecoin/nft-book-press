@@ -1,6 +1,8 @@
 <template>
   <div>
-    <h1 class="text-xl font-bold font-mono">Mint LikeCoin NFT/NFT Book</h1>
+    <h1 class="text-xl font-bold font-mono">
+      Mint LikeCoin NFT/NFT Book
+    </h1>
 
     <UAlert
       v-if="error"
@@ -17,7 +19,9 @@
 
     <UCard v-if="step === 1">
       <template #header>
-        <h2 class="font-bold font-mono">1. Select or Create ISCN</h2>
+        <h2 class="font-bold font-mono">
+          1. Select or Create ISCN
+        </h2>
       </template>
 
       <UCard v-if="!iscnCreateData">
@@ -49,7 +53,9 @@
               :padded="false"
               variant="link"
               target="_blank"
-            >(iscn.json)</UButton>
+            >
+              (iscn.json)
+            </UButton>
           </template>
           <UInput class="my-4" type="file" @change="onISCNFileChange" />
         </UFormGroup>
@@ -66,7 +72,9 @@
               :padded="false"
               variant="link"
               target="_blank"
-            >app.like.co</UButton>
+            >
+              app.like.co
+            </UButton>
           </template>
         </UAlert>
 
@@ -84,7 +92,9 @@
     </UCard>
     <UCard v-else-if="step > 1" class="mb-4">
       <template #header>
-        <h2 class="font-bold font-mono">ISCN Information</h2>
+        <h2 class="font-bold font-mono">
+          ISCN Information
+        </h2>
       </template>
 
       <UFormGroup label="ISCN ID">
@@ -120,7 +130,9 @@
 
     <UCard v-if="step === 2">
       <template #header>
-        <h2 class="font-bold font-mono">2. Create NFT Class</h2>
+        <h2 class="font-bold font-mono">
+          2. Create NFT Class
+        </h2>
       </template>
 
       <UTabs
@@ -133,7 +145,9 @@
         <template #upload>
           <UCard>
             <template #header>
-              <h3 class="font-bold">Mint NFT by uploading data files</h3>
+              <h3 class="font-bold">
+                Mint NFT by uploading data files
+              </h3>
             </template>
 
             <UFormGroup label="Max number of supply for this NFT Class (optional):">
@@ -198,7 +212,9 @@
               <UInput type="file" @change="onMintNFTFileChange" />
             </UFormGroup>
 
-            <UAlert v-if="nftMintListData?.length" class="mt-4">Number of NFT data in CSV: {{ nftMintListData?.length }}</UAlert>
+            <UAlert v-if="nftMintListData?.length" class="mt-4">
+              Number of NFT data in CSV: {{ nftMintListData?.length }}
+            </UAlert>
 
             <template #footer>
               <UButton
@@ -219,7 +235,9 @@
         <template #input>
           <UCard class="flex-1">
             <template #header>
-              <h3 class="font-bold">Mint NFT by filling required information</h3>
+              <h3 class="font-bold">
+                Mint NFT by filling required information
+              </h3>
             </template>
 
             <div class="flex flex-col gap-2">
@@ -302,7 +320,9 @@
         footer: { base: 'flex flex-wrap items-center justify-end gap-2' },
       }"
     >
-      <template #header>🎉 Success!</template>
+      <template #header>
+        🎉 Success!
+      </template>
 
       <UButton
         label="Download NFT result csv"

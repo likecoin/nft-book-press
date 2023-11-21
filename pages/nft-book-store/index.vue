@@ -48,7 +48,9 @@
             }"
           >
             <template #header>
-              <h2 class="font-bold font-mono">{{ item.label }}</h2>
+              <h2 class="font-bold font-mono">
+                {{ item.label }}
+              </h2>
               <UInput v-model="searchInput" icon="i-heroicons-magnifying-glass-20-solid" placeholder="Search..." />
             </template>
 

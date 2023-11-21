@@ -19,7 +19,9 @@
     <template v-if="bookStoreApiStore.isAuthenticated">
       <UCard :ui="{ body: { base: 'space-y-4' } }">
         <template #header>
-          <h2 class="font-bold font-mono">{{ pageTitle }}</h2>
+          <h2 class="font-bold font-mono">
+            {{ pageTitle }}
+          </h2>
         </template>
 
         <UFormGroup label="NFT Class ID">
@@ -46,7 +48,9 @@
 
       <UCard :ui="{ header: { base: 'flex justify-between items-center gap-2' } }">
         <template #header>
-          <h3 class="font-bold font-mono">Pricing and Availability</h3>
+          <h3 class="font-bold font-mono">
+            Pricing and Availability
+          </h3>
 
           <UButton
             v-if="!isEditMode"
@@ -85,7 +89,9 @@
             <UInput placeholder="產品中文名字" :value="p.nameZh" @input="e => updatePrice(e, 'nameZh', index)" />
           </UFormGroup>
 
-          <h5 class="font-bold font-mono">Product description of this {{ priceItemLabel }}</h5>
+          <h5 class="font-bold font-mono">
+            Product description of this {{ priceItemLabel }}
+          </h5>
           <md-editor
             v-model="p.descriptionEn"
             language="en-US"
@@ -113,7 +119,9 @@
             }"
           >
             <template #header>
-              <h3 class="font-bold font-mono">Physical Goods</h3>
+              <h3 class="font-bold font-mono">
+                Physical Goods
+              </h3>
 
               <UCheckbox
                 :value="hasShipping"
@@ -134,7 +142,9 @@
         }"
       >
         <template #header>
-          <h3 class="font-bold font-mono">Shipping Options and Prices</h3>
+          <h3 class="font-bold font-mono">
+            Shipping Options and Prices
+          </h3>
 
           <UButton
             label="Add Option"
@@ -218,7 +228,9 @@
           }"
         >
           <template #header>
-            <h4 class="text-sm font-bold font-mono">Share sales data to wallets</h4>
+            <h4 class="text-sm font-bold font-mono">
+              Share sales data to wallets
+            </h4>
             <div class="flex gap-2">
               <UInput
                 v-model="moderatorWalletInput"
@@ -277,7 +289,9 @@
           }"
         >
           <template #header>
-            <h4 class="text-sm font-bold font-mono">Email to receive sales notifications</h4>
+            <h4 class="text-sm font-bold font-mono">
+              Email to receive sales notifications
+            </h4>
 
             <div class="flex gap-2">
               <UInput

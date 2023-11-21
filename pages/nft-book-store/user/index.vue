@@ -19,7 +19,9 @@
       }"
     >
       <template #header>
-        <h1 class="text-center font-bold font-mono">Stripe Connect Status</h1>
+        <h1 class="text-center font-bold font-mono">
+          Stripe Connect Status
+        </h1>
 
         <UTooltip
           text="Refresh Status"

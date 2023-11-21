@@ -1,7 +1,9 @@
 <template>
   <UModal :model-value="true">
     <UCard :ui="{ header: { base: 'font-bold font-mono' } }">
-      <template #header>A unexpected issue happened</template>
+      <template #header>
+        A unexpected issue happened
+      </template>
 
       Please go back to Stripe Connect status page and try again.
 
