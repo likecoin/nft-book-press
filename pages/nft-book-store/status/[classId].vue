@@ -296,23 +296,37 @@
           }"
         >
           <template #header>
-            <h4 class="text-sm font-bold font-mono">
-              Share sales data to wallets
-            </h4>
-            <div class="flex gap-2">
-              <UInput
-                v-model="moderatorWalletInput"
-                class="font-mono"
-                placeholder="like1..."
-              />
+            <div class="flex flex-col gap-8">
+              <div class="flex gap-4">
+                <h4 class="text-sm font-bold font-mono">
+                  Force NFT claim before view
+                </h4>
+                <UCheckbox v-model="mustClaimToView" name="mustClaimToView" label="Must claim NFT to view" />
+              </div>
+              <div class="flex gap-4">
+                <h4 class="text-sm font-bold font-mono">
+                  Disable file download for PDF
+                </h4>
+                <UCheckbox v-model="hideDownload" name="hideDownload" label="Disable Download" />
+              </div>
+              <h4 class="text-sm font-bold font-mono">
+                Share sales data to wallets
+              </h4>
+              <div class="flex gap-2">
+                <UInput
+                  v-model="moderatorWalletInput"
+                  class="font-mono"
+                  placeholder="like1..."
+                />
 
-              <UButton
-                label="Add"
-                :variant="moderatorWalletInput ? 'outline' : 'solid'"
-                :color="moderatorWalletInput ? 'primary' : 'gray'"
-                :disabled="!moderatorWalletInput"
-                @click="addModeratorWallet"
-              />
+                <UButton
+                  label="Add"
+                  :variant="moderatorWalletInput ? 'outline' : 'solid'"
+                  :color="moderatorWalletInput ? 'primary' : 'gray'"
+                  :disabled="!moderatorWalletInput"
+                  @click="addModeratorWallet"
+                />
+              </div>
             </div>
           </template>
 
@@ -537,6 +551,8 @@ const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
 const stripeConnectWalletInput = ref('')
+const mustClaimToView = ref(false)
+const hideDownload = ref(false)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
@@ -810,7 +826,9 @@ onMounted(async () => {
     const {
       moderatorWallets: classModeratorWallets,
       notificationEmails: classNotificationEmails,
-      connectedWallets: classConnectedWallets
+      connectedWallets: classConnectedWallets,
+      mustClaimToView: classMustClaimToView,
+      hideDownload: classHideDownload
     } = classData.value as any
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
@@ -819,6 +837,8 @@ onMounted(async () => {
     if (stripeConnectWallet.value !== ownerWallet.value) {
       stripeConnectWalletInput.value = stripeConnectWallet.value
     }
+    mustClaimToView.value = classMustClaimToView
+    hideDownload.value = classHideDownload
     const { data: orders, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
       {
         headers: {
@@ -959,7 +979,9 @@ async function updateSettings () {
     await updateBookListingSetting(classId.value as string, {
       moderatorWallets,
       notificationEmails,
-      connectedWallets
+      connectedWallets,
+      hideDownload,
+      mustClaimToView
     })
   } catch (err) {
     const errorData = (err as any).data || err

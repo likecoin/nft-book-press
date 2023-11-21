@@ -228,23 +228,37 @@
           }"
         >
           <template #header>
-            <h4 class="text-sm font-bold font-mono">
-              Share sales data to wallets
-            </h4>
-            <div class="flex gap-2">
-              <UInput
-                v-model="moderatorWalletInput"
-                class="font-mono"
-                placeholder="like1..."
-              />
+            <div class="flex flex-col gap-8">
+              <div class="flex gap-4">
+                <h4 class="text-sm font-bold font-mono">
+                  Force NFT claim before view
+                </h4>
+                <UCheckbox v-model="mustClaimToView" name="mustClaimToView" label="Must claim NFT to view" />
+              </div>
+              <div class="flex gap-4">
+                <h4 class="text-sm font-bold font-mono">
+                  Disable file download for PDF
+                </h4>
+                <UCheckbox v-model="hideDownload" name="hideDownload" label="Disable Download" />
+              </div>
+              <h4 class="text-sm font-bold font-mono">
+                Share sales data to wallets
+              </h4>
+              <div class="flex gap-2">
+                <UInput
+                  v-model="moderatorWalletInput"
+                  class="font-mono"
+                  placeholder="like1..."
+                />
 
-              <UButton
-                label="Add"
-                :variant="moderatorWalletInput ? 'outline' : 'solid'"
-                :color="moderatorWalletInput ? 'primary' : 'gray'"
-                :disabled="!moderatorWalletInput"
-                @click="addModeratorWallet"
-              />
+                <UButton
+                  label="Add"
+                  :variant="moderatorWalletInput ? 'outline' : 'solid'"
+                  :color="moderatorWalletInput ? 'primary' : 'gray'"
+                  :disabled="!moderatorWalletInput"
+                  @click="addModeratorWallet"
+                />
+              </div>
             </div>
           </template>
 
@@ -387,6 +401,8 @@ const mdEditorPlaceholder = ref({
 const classIdInput = ref(classId || '')
 const nextPriceIndex = ref(1)
 const defaultPaymentCurrency = ref('USD')
+const mustClaimToView = ref(false)
+const hideDownload = ref(false)
 const prices = ref<any[]>([{
   price: MINIMAL_PRICE,
   stock: Number(route.query.count as string || 1),
@@ -516,13 +532,17 @@ onMounted(async () => {
         moderatorWallets: classModeratorWallets,
         notificationEmails: classNotificationEmails,
         connectedWallets: classConnectedWallets,
-        defaultPaymentCurrency: classDefaultPaymentCurrency
+        defaultPaymentCurrency: classDefaultPaymentCurrency,
+        mustClaimToView: classMustClaimToView,
+        hideDownload: classHideDownload
       } = data as any
       moderatorWallets.value = classModeratorWallets
       notificationEmails.value = classNotificationEmails
       isStripeConnectChecked.value = !!(classConnectedWallets && Object.keys(classConnectedWallets).length)
       stripeConnectWallet.value = classConnectedWallets && Object.keys(classConnectedWallets)[0]
       if (classDefaultPaymentCurrency) { defaultPaymentCurrency.value = classDefaultPaymentCurrency }
+      mustClaimToView.value = classMustClaimToView
+      hideDownload.value = classHideDownload
     }
 
     if (connectStatusData.error?.value && connectStatusData.error?.value?.statusCode !== 404) {
@@ -688,7 +708,9 @@ async function submitNewClass () {
       moderatorWallets,
       notificationEmails,
       prices: p,
-      shippingRates: s
+      shippingRates: s,
+      mustClaimToView,
+      hideDownload
     })
     router.push({ name: 'nft-book-store' })
   } catch (err) {
