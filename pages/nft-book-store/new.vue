@@ -221,6 +221,30 @@
           </h3>
         </template>
 
+        <div class="grid md:grid-cols-2 gap-4">
+          <UFormGroup
+            label="Force NFT claim before view"
+            :ui="{ label: { base: 'font-mono font-bold' } }"
+          >
+            <UCheckbox
+              v-model="mustClaimToView"
+              name="mustClaimToView"
+              label="Must claim NFT to view"
+            />
+          </UFormGroup>
+
+          <UFormGroup
+            label="Disable file download for PDF"
+            :ui="{ label: { base: 'font-mono font-bold' } }"
+          >
+            <UCheckbox
+              v-model="hideDownload"
+              name="hideDownload"
+              label="Disable Download"
+            />
+          </UFormGroup>
+        </div>
+
         <UCard
           :ui="{
             header: { base: 'flex justify-between items-center' },
@@ -228,37 +252,23 @@
           }"
         >
           <template #header>
-            <div class="flex flex-col gap-8">
-              <div class="flex gap-4">
-                <h4 class="text-sm font-bold font-mono">
-                  Force NFT claim before view
-                </h4>
-                <UCheckbox v-model="mustClaimToView" name="mustClaimToView" label="Must claim NFT to view" />
-              </div>
-              <div class="flex gap-4">
-                <h4 class="text-sm font-bold font-mono">
-                  Disable file download for PDF
-                </h4>
-                <UCheckbox v-model="hideDownload" name="hideDownload" label="Disable Download" />
-              </div>
-              <h4 class="text-sm font-bold font-mono">
-                Share sales data to wallets
-              </h4>
-              <div class="flex gap-2">
-                <UInput
-                  v-model="moderatorWalletInput"
-                  class="font-mono"
-                  placeholder="like1..."
-                />
+            <h4 class="text-sm font-bold font-mono">
+              Share sales data to wallets
+            </h4>
+            <div class="flex gap-2">
+              <UInput
+                v-model="moderatorWalletInput"
+                class="font-mono"
+                placeholder="like1..."
+              />
 
-                <UButton
-                  label="Add"
-                  :variant="moderatorWalletInput ? 'outline' : 'solid'"
-                  :color="moderatorWalletInput ? 'primary' : 'gray'"
-                  :disabled="!moderatorWalletInput"
-                  @click="addModeratorWallet"
-                />
-              </div>
+              <UButton
+                label="Add"
+                :variant="moderatorWalletInput ? 'outline' : 'solid'"
+                :color="moderatorWalletInput ? 'primary' : 'gray'"
+                :disabled="!moderatorWalletInput"
+                @click="addModeratorWallet"
+              />
             </div>
           </template>
 
