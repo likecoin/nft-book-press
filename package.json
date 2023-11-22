@@ -1,6 +1,8 @@
 {
-  "name": "nuxt-app",
-  "private": true,
+  "name": "nft-book-press",
+  "engines": {
+    "node": "18"
+  },
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
