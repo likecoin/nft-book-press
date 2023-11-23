@@ -234,7 +234,7 @@
           </UFormGroup>
 
           <UFormGroup
-            label="Disable file download for PDF"
+            label="Hide file download links"
             :ui="{ label: { base: 'font-mono font-bold' } }"
           >
             <UCheckbox
