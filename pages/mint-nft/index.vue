@@ -138,8 +138,8 @@
       <UTabs
         class="w-full"
         :items="[
-          { label: 'By uploading data files', slot: 'upload' },
           { label: 'By filling required information', slot: 'input' },
+          { label: 'By uploading data files', slot: 'upload' },
         ]"
       >
         <template #upload>
