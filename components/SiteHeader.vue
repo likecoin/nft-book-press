@@ -1,5 +1,14 @@
 <template>
-  <header class="shadow-md dark:shadow-none dark:border-b border-b-like-green-600">
+  <header
+    :class="[
+      'shadow-md',
+      'dark:shadow-none',
+      'dark:border-b',
+      'border-b-like-green-600',
+      'print:hidden',
+      { 'hidden': isHidden }
+    ]"
+  >
     <UContainer class="flex justify-between items-center gap-4 py-4">
       <h1 class="flex items-center">
         <UButton
@@ -61,7 +70,11 @@ import { IS_TESTNET } from '~/constant'
 
 import { useUIStore } from '~/stores/ui'
 
+const route = useRoute()
+
 const uiStore = useUIStore()
+
+const isHidden = computed(() => route.query.print === '1')
 
 const isSiteMenuOpen = computed({
   get () {

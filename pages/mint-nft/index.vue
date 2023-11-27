@@ -398,7 +398,7 @@ import { stringify } from 'csv-stringify/sync'
 
 import { useWalletStore } from '~/stores/wallet'
 import { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } from '~/constant'
-import { downloadFile, generateCsvData, sleep } from '~/utils'
+import { downloadFile, generateCSVData, sleep } from '~/utils'
 
 const router = useRouter()
 const route = useRoute()
@@ -536,6 +536,30 @@ function onISCNFileChange (event: Event) {
   reader.readAsText(file)
 }
 
+function generateNFTMintListCSVData ({
+  prefix,
+  nftMintCount,
+  imgUrl,
+  uri
+}: {
+  prefix: string;
+  nftMintCount: number;
+  imgUrl: string;
+  uri: string ;
+}) {
+  const csvRows = []
+  for (let i = 0; i < nftMintCount; i++) {
+    const nftId = `${prefix}-${i.toString().padStart(4, '0')}`
+    csvRows.push({
+      nftId,
+      uri,
+      image: imgUrl,
+      metadata: ''
+    })
+  }
+  return generateCSVData(csvRows)
+}
+
 async function onClickMintByInputting () {
   isLoading.value = true
   step.value = 3
@@ -563,7 +587,7 @@ async function onClickMintByInputting () {
       external_url: externalUrl.value
     }
   }
-  const csvDataString = generateCsvData({
+  const csvDataString = generateNFTMintListCSVData({
     prefix: nftIdPrefix.value,
     nftMintCount: nftMintCount.value,
     imgUrl: imageUrl.value,

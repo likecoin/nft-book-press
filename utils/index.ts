@@ -1,4 +1,4 @@
-import { LIKER_LAND_HOST } from '~/constant'
+import { LIKER_LAND_HOST, LIKE_CO_API } from '~/constant'
 
 export function addParamToUrl (url: string, params: { [key: string]: string }) {
   const urlObject = new URL(url)
@@ -53,22 +53,13 @@ export function downloadFile ({ data, fileName, fileType }:{data:any, fileName:s
   document.body.removeChild(fileLink)
 }
 
-export function generateCsvData ({
-  prefix,
-  nftMintCount,
-  imgUrl,
-  uri
-}: {
-  prefix: string;
-  nftMintCount: number;
-  imgUrl: string;
-  uri: string ;
-}) {
+export function generateCSVData (rows: any[]) {
   const csvData = []
-  csvData.push('"nftId","uri","image","metadata"')
-  for (let i = 0; i <= nftMintCount - 1; i++) {
-    const nftId = `${prefix}-${i.toString().padStart(4, '0')}`
-    csvData.push(`"${nftId}","${uri}","${imgUrl}",""`)
+  const headers = Object.keys(rows[0])
+  csvData.push(`"${headers.join('","')}"`)
+  for (const row of rows) {
+    const values = headers.map(header => row[header])
+    csvData.push(`"${values.join('","')}"`)
   }
   return csvData.join('\n')
 }
@@ -95,4 +86,21 @@ function convertArrayOfObjectsToCSV (data: Record<string, any>[]): string {
 
 export function getPortfolioURL (wallet: string) {
   return `https://${LIKER_LAND_HOST}/${wallet}`
+}
+
+export function getPurchaseLink ({
+  classId,
+  priceIndex = 0,
+  channel
+}:{
+  priceIndex?: number
+  channel?: string
+  classId?: string
+}) {
+  const payload: Record<string, string> = {
+    from: channel || '',
+    price_index: priceIndex.toString()
+  }
+  const queryString = `?${new URLSearchParams(payload).toString()}`
+  return `${LIKE_CO_API}/likernft/book/purchase/${classId}/new${queryString}`
 }
