@@ -114,6 +114,17 @@
             </template>
           </Draggable>
         </table>
+        <div class="flex justify-center py-4">
+          <UButton
+            icon="i-heroicons-plus-circle"
+            label="New Listing"
+            :to="{
+              name: 'nft-book-store-status-classId-edit-new',
+              params: { classId },
+              query: { priceIndex: prices.length}
+            }"
+          />
+        </div>
       </UCard>
 
       <UCard
