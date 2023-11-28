@@ -207,7 +207,11 @@ async function fetchNftId () {
     })
     if (nfts.length) {
       nftId.value = nfts[0].id
+    } else {
+      throw new Error(`${ownerWallet.value} does not hold any NFT of class ${classId.value}`)
     }
+  } catch (err) {
+    error.value = (err as Error).toString()
   } finally {
     isLoading.value = false
   }
