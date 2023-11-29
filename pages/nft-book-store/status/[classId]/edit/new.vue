@@ -227,7 +227,7 @@ const hasMultipleShippingRates = computed(() => shippingRates.value.length > 1)
 
 const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
 
-const toolbarOptions = ref<string[]>([
+const toolbarOptions = [
   'bold',
   'italic',
   'strikeThrough',
@@ -240,12 +240,12 @@ const toolbarOptions = ref<string[]>([
   'link',
   '=',
   'preview'
-])
+]
 
-const mdEditorPlaceholder = ref({
+const mdEditorPlaceholder = {
   en: 'Product description in English...',
   zh: '產品中文描述...'
-})
+}
 
 const pageTitle = computed(() => 'Add Edition')
 
@@ -270,18 +270,6 @@ onMounted(async () => {
       if (classResData?.ownerWallet !== wallet.value) {
         throw new Error('NOT_OWNER_OF_NFT_CLASS')
       }
-
-      // classData.value = classResData
-      // // const currentEdition = classData.value.prices.filter(e => e.index.toString() === editionIndex.value)[0]
-      // if (currentEdition) {
-      //   price.value = currentEdition.price || 0
-      //   stock.value = currentEdition.stock || 0
-      //   nameEn.value = currentEdition.name?.en || ''
-      //   nameZh.value = currentEdition.name?.zh || ''
-      //   descriptionEn.value = currentEdition.description?.en || ''
-      //   descriptionZh.value = currentEdition.description?.zh || ''
-      //   hasShipping.value = currentEdition.hasShipping || false
-      // }
     }
   } catch (error) {
     // eslint-disable-next-line no-console
