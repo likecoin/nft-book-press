@@ -22,7 +22,10 @@
 
     <UCard
       v-if="bookStoreApiStore.isAuthenticated"
-      :ui="{ body: { base: 'space-y-4' } }"
+      :ui="{
+        body: { base: 'space-y-4' },
+        footer: { base: 'flex justify-center gap-2' }
+      }"
     >
       <UCard :ui="{ body: { padding: '' } }">
         <table class="divide-y w-full">
@@ -82,34 +85,53 @@
         <UTextarea v-model="memo" placeholder="default memo" />
       </UFormGroup>
 
-      <UFormGroup label="Specify NFT ID">
-        <UInput v-model="nftId" class="font-mono" placeholder="leave empty to auto-fetch" />
-
-        <template #help>
+      <UFormGroup
+        label="Specify NFT ID"
+        :error="nftIdError"
+      >
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <UInput
+            ref="nftIdInputRef"
+            v-model="nftId"
+            class="font-mono flex-grow"
+            :readonly="!isEditingNFTId"
+            :disabled="!isEditingNFTId"
+            :loading="isVerifyingNFTId"
+            placeholder="Leave empty to auto-fetch NFT ID"
+            :trailing-icon="nftIdError ? 'i-heroicons-exclamation-triangle-20-solid' : undefined"
+          />
           <UButton
-            v-if="!nftId"
+            :label="isEditingNFTId || isVerifyingNFTId ? 'Confirm' : 'Edit'"
+            :disabled="isLoading || isVerifyingNFTId"
+            variant="outline"
+            :loading="isVerifyingNFTId"
+            color="gray"
+            @click="handleClickEditNFTId"
+          />
+          <UDivider class="text-sm text-gray-600 sm:w-min">OR</UDivider>
+          <UButton
             label="Auto-fetch NFT ID"
-            :disabled="isLoading"
+            :disabled="isLoading || isEditingNFTId"
+            :loading="isAutoFetchingNFTId"
             variant="outline"
             @click="fetchNftId"
           />
-        </template>
+        </div>
       </UFormGroup>
 
-      <div>
-        <img v-if="nftImage" :src="nftImage" height="128" style="display:block">
-        <div
-          v-else
-          style="display: table-cell; vertical-align: middle; height: 128px; width: 90px; border-radius: 8px; background-color: #f7f7f7; border: 1px solid #ececec; text-align: center;"
+      <PlaceholderCard class="h-[300px]">
+        <img
+          v-if="nftImage"
+          class="max-w-[180px] w-full h-full object-contain"
+          :src="nftImage"
         >
-          <span style="font-size: 12px; color: #4a4a4a">NFT Preview</span>
-        </div>
-      </div>
+      </PlaceholderCard>
 
       <template #footer>
         <UButton
           label="Sign and Send"
           :disabled="isSendButtonDisabled"
+          size="xl"
           @click="onSendNFTStart"
         />
       </template>
@@ -146,12 +168,19 @@ const classId = ref(route.params.classId as string)
 const paymentId = ref(route.query.payment_id as string)
 const ownerWallet = ref(route.query.owner_wallet as string || wallet.value)
 const memo = ref('')
+
 const nftId = ref('')
+const isVerifyingNFTId = ref(false)
+const isAutoFetchingNFTId = ref(false)
+const nftIdError = ref('')
+const isEditingNFTId = ref(false)
+const nftIdInputRef = ref<any>(undefined)
+
 const orderInfo = ref<any>({})
 const nftImage = ref('')
 
 const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
-const isSendButtonDisabled = computed(() => !nftId.value || isLoading.value)
+const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || isAutoFetchingNFTId.value || !!nftIdError.value)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 
@@ -159,16 +188,15 @@ watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
 })
 
-watch(nftId, async (newNftId) => {
-  if (newNftId) {
-    const { data, error: fetchError } = await useFetch(`${LCD_URL}/cosmos/nft/v1beta1/nfts/${classId.value}/${newNftId}`)
-    if (fetchError.value) {
-      nftImage.value = ''
-      error.value = fetchError.value.toString()
-      return
-    }
-    const image = (data.value as any)?.nft?.data?.metadata?.image || ''
-    nftImage.value = parseImageURLFromMetadata(image)
+watch(nftId, () => {
+  nftIdError.value = ''
+})
+
+watch(isEditingNFTId, async (isEditing) => {
+  if (isEditing) { return }
+
+  if (nftId.value) {
+    await fetchNFTMetadata()
   } else {
     nftImage.value = ''
   }
@@ -193,9 +221,42 @@ onMounted(async () => {
   lazyFetchClassMetadataById(classId.value as string)
 })
 
+function handleClickEditNFTId () {
+  isEditingNFTId.value = !isEditingNFTId.value
+  nftIdError.value = ''
+  nextTick(() => {
+    if (isEditingNFTId.value) {
+      nftIdInputRef.value?.$refs?.input?.focus()
+    }
+  })
+}
+
+async function fetchNFTMetadata () {
+  try {
+    isVerifyingNFTId.value = true
+    const { data, error: fetchError } = await useFetch(`${LCD_URL}/cosmos/nft/v1beta1/nfts/${classId.value}/${nftId.value}`)
+    if (fetchError.value) {
+      nftImage.value = ''
+      if (fetchError.value.data.code === 2) {
+        nftIdError.value = 'NFT not found'
+      } else {
+        nftIdError.value = fetchError.value.toString()
+      }
+      return
+    }
+    const image = (data.value as any)?.nft?.data?.metadata?.image || ''
+    nftImage.value = parseImageURLFromMetadata(image)
+  } catch (err) {
+    error.value = (err as Error).toString()
+  } finally {
+    isVerifyingNFTId.value = false
+  }
+}
+
 async function fetchNftId () {
   try {
-    isLoading.value = true
+    nftIdError.value = ''
+    isAutoFetchingNFTId.value = true
     if (!wallet.value || !signer.value) {
       await connect()
     }
@@ -207,13 +268,14 @@ async function fetchNftId () {
     })
     if (nfts.length) {
       nftId.value = nfts[0].id
+      await fetchNFTMetadata()
     } else {
       throw new Error(`${ownerWallet.value} does not hold any NFT of class ${classId.value}`)
     }
   } catch (err) {
     error.value = (err as Error).toString()
   } finally {
-    isLoading.value = false
+    isAutoFetchingNFTId.value = false
   }
 }
 
