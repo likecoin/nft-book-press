@@ -398,7 +398,7 @@ import { stringify } from 'csv-stringify/sync'
 
 import { useWalletStore } from '~/stores/wallet'
 import { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } from '~/constant'
-import { downloadFile, generateCSVData, sleep } from '~/utils'
+import { downloadFile, convertArrayOfObjectsToCSV, sleep } from '~/utils'
 
 const router = useRouter()
 const route = useRoute()
@@ -557,7 +557,7 @@ function generateNFTMintListCSVData ({
       metadata: ''
     })
   }
-  return generateCSVData(csvRows)
+  return convertArrayOfObjectsToCSV(csvRows)
 }
 
 async function onClickMintByInputting () {

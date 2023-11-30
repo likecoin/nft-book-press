@@ -17,6 +17,7 @@
     "@likecoin/iscn-js": "^0.6.8",
     "@nuxt/ui": "^2.10.0",
     "@pinia/nuxt": "^0.4.8",
+    "@solana/qr-code-styling": "^1.6.0",
     "bignumber.js": "^9.1.0",
     "buffer": "^6.0.3",
     "cosmjs-types": "^0.8.0",
@@ -26,7 +27,6 @@
     "jsonwebtoken": "^9.0.1",
     "md-editor-v3": "^4.2.2",
     "pinia": "^2.0.34",
-    "qr-code-styling": "^1.6.0-rc.1",
     "uuid": "^9.0.0",
     "vuedraggable": "^4.1.0"
   },

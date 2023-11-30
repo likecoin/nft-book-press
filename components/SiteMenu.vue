@@ -74,6 +74,11 @@ const items = [
     label: 'More Tools',
     links: [
       {
+        label: 'Batch Create QR Codes',
+        icon: 'i-heroicons-qr-code',
+        to: { name: 'batch-qrcode' }
+      },
+      {
         label: 'LikeCoin ISCN/NFT Tools',
         icon: 'i-heroicons-arrow-top-right-on-square',
         to: ISCN_TOOLS_URL,

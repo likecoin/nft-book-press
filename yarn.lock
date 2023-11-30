@@ -2198,6 +2198,13 @@
   resolved "https://registry.npmjs.org/@sinclair/typebox/-/typebox-0.25.24.tgz"
   integrity sha512-XJfwUVUKDHF5ugKwIcxEgc9k8b7HbznCp6eUfWgu710hMPNIO4aw4/zB5RogDQz8nd6gyCDpU9O/m6qYEWY6yQ==
 
+"@solana/qr-code-styling@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/@solana/qr-code-styling/-/qr-code-styling-1.6.0.tgz#8693bae79ace4b81135e032ee0b60f1ad739c3ef"
+  integrity sha512-KyBmyFKPxQPhUkP0jjnxV2ZeF1R1guTD8Hrd0YvHvMnhtrNEoEEdv4Jpp4W0GN4qCGG2KYOM5d3TgoLD+CNf9Q==
+  dependencies:
+    qrcode-generator "^1.4.3"
+
 "@tailwindcss/aspect-ratio@^0.4.2":
   version "0.4.2"
   resolved "https://registry.npmjs.org/@tailwindcss/aspect-ratio/-/aspect-ratio-0.4.2.tgz"
@@ -7534,13 +7541,6 @@ punycode@^2.1.0, punycode@^2.3.0:
   version "2.3.0"
   resolved "https://registry.npmjs.org/punycode/-/punycode-2.3.0.tgz"
   integrity sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==
-
-qr-code-styling@^1.6.0-rc.1:
-  version "1.6.0-rc.1"
-  resolved "https://registry.npmjs.org/qr-code-styling/-/qr-code-styling-1.6.0-rc.1.tgz"
-  integrity sha512-ModRIiW6oUnsP18QzrRYZSc/CFKFKIdj7pUs57AEVH20ajlglRpN3HukjHk0UbNMTlKGuaYl7Gt6/O5Gg2NU2Q==
-  dependencies:
-    qrcode-generator "^1.4.3"
 
 qrcode-generator@^1.4.3:
   version "1.4.4"

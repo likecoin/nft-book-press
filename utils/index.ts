@@ -53,31 +53,38 @@ export function downloadFile ({ data, fileName, fileType }:{data:any, fileName:s
   document.body.removeChild(fileLink)
 }
 
-export function generateCSVData (rows: any[]) {
-  const csvData = []
-  const headers = Object.keys(rows[0])
-  csvData.push(`"${headers.join('","')}"`)
-  for (const row of rows) {
-    const values = headers.map(header => row[header])
-    csvData.push(`"${values.join('","')}"`)
-  }
-  return csvData.join('\n')
-}
-
 export function sleep (time: number) {
   return new Promise((resolve) => { setTimeout(resolve, time) })
 }
 
-function convertArrayOfObjectsToCSV (data: Record<string, any>[]): string {
-  const csv: string[] = []
-  const headers: string = Array.from(
-    new Set(data.flatMap(obj => Object.keys(obj)))
-  ).join(',')
+export function convertArrayOfObjectsToCSV (data: Record<string, any>[]): string {
+  if (data.length === 0) {
+    return ''
+  }
 
-  csv.push(headers)
+  const headers: string[] = Array.from(
+    new Set(data.flatMap(obj => Object.keys(obj)))
+  )
+
+  const csv: string[] = []
+
+  csv.push(headers.join(','))
 
   data.forEach((obj: Record<string, any>) => {
-    const row: string = Object.keys(obj).map(key => obj[key]).join(',')
+    const row: string = headers.map((header) => {
+      // Convert null or undefined to an empty string
+      let value = obj[header] == null ? '' : obj[header].toString()
+
+      // Add double quotes if the value contains a comma, newline or double quote
+      if (value.includes(',') || value.includes('\n') || value.includes('"')) {
+        // Escape double quotes with another double quote
+        value = value.replace(/"/g, '""')
+        value = `"${value}"`
+      }
+
+      return value
+    }).join(',')
+
     csv.push(row)
   })
 

@@ -3,7 +3,7 @@ import {
   DotType,
   CornerSquareType,
   CornerDotType
-} from 'qr-code-styling'
+} from '@solana/qr-code-styling'
 
 import Logo from '~/assets/images/logo.png'
 

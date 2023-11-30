@@ -1,24 +1,46 @@
 <template>
   <main class="space-y-4">
-    <h2 class="text-lg font-bold font-mono print:hidden">
-      Print QR Code
-    </h2>
+    <h1 class="text-lg font-bold font-mono print:hidden">
+      Batch Create QR Codes
+    </h1>
+    <UFormGroup
+      label="Upload CSV file"
+      class="print:hidden"
+    >
+      <UInput type="file" accept="csv" @change="handleFileChange" />
+    </UFormGroup>
+    <UDivider class="print:hidden" label="OR" />
+    <UFormGroup
+      class="print:hidden"
+      label="Input CSV content"
+    >
+      <UTextarea
+        v-model="csvInput"
+        class="font-mono"
+        :placeholder="csvInputPlaceholder"
+      />
+    </UFormGroup>
     <nav class="flex justify-center items-center gap-2 print:hidden">
       <UButton
         label="Print"
+        size="lg"
+        :disabled="urlItems.length === 0"
         @click="handleClickPrint"
       />
     </nav>
-
-    <div class="flex flex-col items-center">
-      <ul class="grid grid-cols-3 gap-[0.5cm]">
+    <div class="flex flex-col items-center gap-[2cm] print:gap-0">
+      <ul
+        v-for="(items, page) in pagesForPrint"
+        :key="page"
+        class="w-[20cm] grid grid-cols-3 items-center gap-[0.25cm] py-[0.5cm] break-before-page"
+      >
         <li
-          v-for="item in fromChannelItems"
-          :key="item.channel"
+          v-for="item in items"
+          :key="item.key || item.url"
         >
           <figure ref="qrCodeRef" class="qrcode">
             <figcaption class="text-xs text-center font-mono">
-              {{ item.channel }}
+              {{ item.key }}
             </figcaption>
           </figure>
         </li>
@@ -28,61 +50,109 @@
 </template>
 
 <script setup lang="ts">
-import { getPurchaseLink } from '~/utils'
+import { parse as csvParse } from 'csv-parse/sync'
+
 import { getQRCodeOptions } from '~/utils/qrcode'
 
 import NFCIcon from '~/assets/images/nfc.png'
 
 definePageMeta({ layout: 'page' })
 
-const route = useRoute()
+const csvInput = ref('')
+const csvInputPlaceholder = `key,url
+example01,https://example01.com
+example02,https://example02.com`
 
-const qrCodeRef = ref(null)
-
-const classId = computed(() => route.params.classId as string)
-
-const priceIndex = computed(() => Number(route.query.price_index as string) || 0)
-
-const fromChannels = computed(() => {
-  const { from } = route.query
-  return (Array.isArray(from) ? from : from?.split(',').map(c => c.trim()).filter(c => !!c) || [])
+const qrCodeRef = ref<HTMLElement[] | undefined>(undefined)
+const urlItems = computed(() => {
+  try {
+    return csvParse(csvInput.value, {
+      columns: true,
+      skip_empty_lines: true
+    }) as { key: string, url: string }[]
+  } catch (error) {
+    return []
+  }
 })
 
-const fromChannelItems = computed(() => fromChannels.value?.map((fromChannel, index) => {
-  const channel = fromChannel as string
-  return {
-    index: index + 1,
-    channel,
-    link: getPurchaseLink({ classId: classId.value, priceIndex: priceIndex.value, channel })
-  }
-}) || [])
+const ITEMS_PER_PAGE = 12
 
-onMounted(async () => {
-  const { default: QRCodeStyling } = await import('qr-code-styling')
-  fromChannelItems.value.forEach((item, index) => {
+const pagesForPrint = computed(() => {
+  // split urlItems into chunks of 12 items
+  const chunks = []
+  for (let i = 0; i < urlItems.value.length; i += ITEMS_PER_PAGE) {
+    chunks.push(urlItems.value.slice(i, i + ITEMS_PER_PAGE))
+  }
+  return chunks
+})
+
+watch(csvInput, () => {
+  drawQRCodes()
+})
+
+onMounted(() => {
+  try {
+    const loadedInput = localStorage.getItem('nft_book_press_batch_qrcode')
+    if (loadedInput) {
+      csvInput.value = loadedInput
+      localStorage.removeItem('nft_book_press_batch_qrcode')
+    }
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+  }
+})
+
+async function drawQRCodes () {
+  const { default: QRCodeStyling } = await import('@solana/qr-code-styling')
+  urlItems.value.forEach((item, index: number) => {
     const qrcode = new QRCodeStyling(getQRCodeOptions({
       margin: 0,
-      data: item.link,
+      data: item.url,
       image: NFCIcon,
       fillColor: '#0a2439'
     }))
-    if (qrCodeRef.value) {
-      qrcode.append(qrCodeRef.value[index])
-    }
+    const element = qrCodeRef.value?.[index]
+    if (element) {
+      element.querySelector('svg')?.remove()
+      qrcode.append(element)
 
-    // HACK: Add viewBox attribute to fix the auto resize of SVG
-    const element = qrCodeRef.value?.[index] as unknown as HTMLElement
-    element.querySelector('svg')?.setAttribute('viewBox', '0 0 300 300')
+      // HACK: Add viewBox attribute to fix the auto resize of SVG
+      element.querySelector('svg')?.setAttribute('viewBox', '0 0 300 300')
+    }
   })
-})
+}
+
+function handleFileChange (event: Event) {
+  if (!event?.target) {
+    return
+  }
+
+  const files = (event.target as HTMLInputElement)?.files
+  if (!files) {
+    return
+  }
+
+  const [file] = files
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const text = e.target?.result
+    if (typeof text === 'string') {
+      csvInput.value = text
+    }
+  }
+  reader.readAsText(file)
+}
 
 function handleClickPrint () {
-  window.print()
+  if (csvInput.value) {
+    window.print()
+  }
 }
 </script>
 
 <style>
 figure.qrcode > svg {
-  @apply w-[6.2cm] h-[6.2cm] border;
+  @apply w-[6.2cm] h-[6.2cm] border p-[0.2cm];
 }
 </style>

@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import QRCodeStyling, { FileExtension } from 'qr-code-styling'
+import QRCodeStyling, { FileExtension } from '@solana/qr-code-styling'
 
 import { getQRCodeOptions } from '~/utils/qrcode'
 
@@ -69,7 +69,7 @@ watch(() => props.data, () => {
 })
 
 onMounted(async () => {
-  const { default: QRCodeStyling } = await import('qr-code-styling')
+  const { default: QRCodeStyling } = await import('@solana/qr-code-styling')
   qrCode.value = new QRCodeStyling(options.value)
   if (qrCodeRef.value) {
     qrCode.value.append(qrCodeRef.value)
@@ -77,7 +77,7 @@ onMounted(async () => {
 })
 
 async function download () {
-  const { default: QRCodeStyling } = await import('qr-code-styling')
+  const { default: QRCodeStyling } = await import('@solana/qr-code-styling')
   const tempInstance = new QRCodeStyling(options.value)
   tempInstance.download({ extension: extension.value as FileExtension, name: props.fileName })
 }

@@ -502,16 +502,7 @@
                 label="Print All QR Codes"
                 variant="outline"
                 color="primary"
-                :to="{
-                  name: 'batch-qrcode',
-                  query: {
-                    classId,
-                    price_index: priceIndex,
-                    from: fromChannelInput,
-                    print: '1',
-                  }
-                }"
-                target="_blank"
+                @click="printAllQRCodes"
               />
               <UButton
                 label="Download All Links"
@@ -618,13 +609,12 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import Draggable from 'vuedraggable'
-import { parse as csvParse } from 'csv-parse/sync'
 
 import { CHAIN_EXPLORER_URL, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useWalletStore } from '~/stores/wallet'
-import { getPortfolioURL, downloadFile, generateCSVData, getPurchaseLink } from '~/utils'
+import { getPortfolioURL, downloadFile, convertArrayOfObjectsToCSV, getPurchaseLink } from '~/utils'
 import { getNFTAuthzGrants, shortenWalletAddress } from '~/utils/cosmos'
 
 const store = useWalletStore()
@@ -1134,8 +1124,32 @@ async function copyPurchaseLink (text = '') {
 }
 
 function downloadAllPurchaseLinks () {
-  const csvDataString = generateCSVData(purchaseLinks.value)
-  const data = csvParse(csvDataString, { columns: true })
-  downloadFile({ data, fileName: 'purchase_links.csv', fileType: 'csv' })
+  downloadFile({
+    data: purchaseLinks.value,
+    fileName: `${classId.value}_purchase_links.csv`,
+    fileType: 'csv'
+  })
+}
+
+function printAllQRCodes () {
+  try {
+    localStorage.setItem(
+      'nft_book_press_batch_qrcode',
+      convertArrayOfObjectsToCSV(purchaseLinks.value.map(({ channel, ...link }) => ({ key: channel, ...link })))
+    )
+    window.open('/batch-qrcode?print=1', 'batch_qrcode', 'menubar=no,location=no,status=no')
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: 'Failed to print QR codes',
+      timeout: 0,
+      color: 'red',
+      ui: {
+        title: 'text-red-400 dark:text-red-400'
+      }
+    })
+  }
 }
 </script>
