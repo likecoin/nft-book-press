@@ -10,7 +10,7 @@
       <slot name="header" />
     </template>
 
-    <div class="space-y-4 p-4 print:hidden">
+    <div class="grid grid-cols-2 gap-4 p-4 print:hidden">
       <UFormGroup label="Pick an icon">
         <URadioGroup
           v-model="selectedIcon"
@@ -29,7 +29,11 @@
 
     <UDivider />
 
-    <div id="qr-code" ref="qrCodeRef" />
+    <div
+      id="qr-code"
+      ref="qrCodeRef"
+      class="flex justify-center items-center py-2"
+    />
 
     <template #footer>
       <template v-if="isDownloadMode">
