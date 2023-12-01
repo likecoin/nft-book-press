@@ -10,14 +10,19 @@
       <slot name="header" />
     </template>
 
-    <div class="p-4">
-      <UFormGroup
-        class="print:hidden"
-        label="Pick a QR code icon"
-      >
+    <div class="space-y-4 p-4 print:hidden">
+      <UFormGroup label="Pick an icon">
         <URadioGroup
           v-model="selectedIcon"
           :options="iconOptions"
+        />
+      </UFormGroup>
+
+      <UFormGroup label="Pick a color">
+        <UInput
+          v-model="selectedColor"
+          type="color"
+          :placeholder="DEFAULT_QR_CODE_COLOR"
         />
       </UFormGroup>
     </div>
@@ -60,7 +65,7 @@
 <script setup lang="ts">
 import QRCodeStyling, { FileExtension } from '@solana/qr-code-styling'
 
-import { getQRCodeOptions, getQRCodeIcon, iconOptions, DEFAULT_QR_CODE_ICON } from '~/utils/qrcode'
+import { getQRCodeOptions, getQRCodeIcon, iconOptions, DEFAULT_QR_CODE_ICON, DEFAULT_QR_CODE_COLOR } from '~/utils/qrcode'
 
 const props = defineProps({
   data: {
@@ -74,6 +79,10 @@ const props = defineProps({
   icon: {
     type: String,
     default: DEFAULT_QR_CODE_ICON
+  },
+  color: {
+    type: String,
+    default: DEFAULT_QR_CODE_COLOR
   },
   width: {
     type: Number,
@@ -93,21 +102,23 @@ const isDownloadMode = computed(() => props.mode === 'download')
 const isConfigMode = computed(() => props.mode === 'config')
 
 const selectedIcon = ref(props.icon)
+const selectedColor = ref(props.color)
 
 const downloadFileExtension = ref('svg')
 
-const emit = defineEmits(['save', 'update:icon'])
+const emit = defineEmits(['save', 'update:icon', 'update:color'])
 
 const options = computed(() => getQRCodeOptions({
   width: props.width,
   height: props.height,
   data: props.data,
+  fillColor: selectedColor.value,
   image: getQRCodeIcon(selectedIcon.value)
 }))
 const qrCode = ref<QRCodeStyling | null>(null)
 const qrCodeRef = ref(null)
 
-watch([selectedIcon, () => props.data], () => {
+watch([selectedIcon, selectedColor, () => props.data], () => {
   qrCode.value?.update(options.value)
 })
 
@@ -127,6 +138,7 @@ async function download () {
 
 function saveConfig () {
   emit('update:icon', selectedIcon.value)
-  emit('save', { icon: selectedIcon.value })
+  emit('update:color', selectedColor.value)
+  emit('save', { icon: selectedIcon.value, color: selectedColor.value })
 }
 </script>

@@ -34,6 +34,7 @@
     <UModal v-model="isEditingQRCodeConfig">
       <QRCodeGenerator
         v-model:icon="selectedQRCodeIcon"
+        v-model:color="selectedQRCodeColor"
         data="test"
         file-name="test"
         :width="500"
@@ -108,6 +109,7 @@ example01,https://example01.com
 example02,https://example02.com`
 
 const selectedQRCodeIcon = ref(DEFAULT_QR_CODE_ICON)
+const selectedQRCodeColor = ref(DEFAULT_QR_CODE_ICON)
 const isEditingQRCodeConfig = ref(false)
 
 const qrCodeRef = ref<HTMLElement[] | undefined>(undefined)

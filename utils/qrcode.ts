@@ -20,6 +20,7 @@ export const iconOptions = [
 ]
 
 export const DEFAULT_QR_CODE_ICON = 'likecoin'
+export const DEFAULT_QR_CODE_COLOR = '#28646e'
 
 const iconMap: Record<string, string> = {
   likecoin: LikeCoinIcon,
@@ -34,7 +35,7 @@ export function getQRCodeOptions ({
   data = '',
   width = 300,
   height = 300,
-  fillColor = '#28646e',
+  fillColor = DEFAULT_QR_CODE_COLOR,
   bgColor = '#ffffff',
   margin = 10,
   image = getQRCodeIcon()
