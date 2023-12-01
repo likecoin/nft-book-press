@@ -23,9 +23,22 @@
     <template v-if="bookStoreApiStore.isAuthenticated">
       <UCard :ui="{ body: { padding: '' } }">
         <template #header>
-          <h3 class="font-bold font-mono">
-            Editions
-          </h3>
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold font-mono">
+              Editions
+            </h3>
+            <div class="flex justify-center py-4">
+              <UButton
+                icon="i-heroicons-plus-circle"
+                label="New Listing"
+                :to="{
+                  name: 'nft-book-store-status-classId-edit-new',
+                  params: { classId },
+                  query: { priceIndex: prices.length }
+                }"
+              />
+            </div>
+          </div>
         </template>
 
         <table class="w-full divide-y text-sm">
@@ -114,17 +127,6 @@
             </template>
           </Draggable>
         </table>
-        <div class="flex justify-center py-4">
-          <UButton
-            icon="i-heroicons-plus-circle"
-            label="New Listing"
-            :to="{
-              name: 'nft-book-store-status-classId-edit-new',
-              params: { classId },
-              query: { priceIndex: prices.length}
-            }"
-          />
-        </div>
       </UCard>
 
       <UCard
