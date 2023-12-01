@@ -1,8 +1,9 @@
 <template>
-  <main class="space-y-4">
+  <main class="space-y-4 print:space-y-0">
     <h1 class="text-lg font-bold font-mono print:hidden">
       Batch Create QR Codes
     </h1>
+
     <UFormGroup
       label="Upload CSV file"
       class="print:hidden"
@@ -18,16 +19,27 @@
         v-model="csvInput"
         class="font-mono"
         :placeholder="csvInputPlaceholder"
+        :resize="true"
       />
     </UFormGroup>
+
     <nav class="flex justify-center items-center gap-2 print:hidden">
       <UButton
+        v-if="urlItems.length <= 0"
+        label="Generate"
+        size="lg"
+        :disabled="!csvInput"
+        @click="drawQRCodes"
+      />
+      <UButton
+        v-else
         label="Print"
         size="lg"
-        :disabled="urlItems.length === 0"
+        variant="outline"
         @click="handleClickPrint"
       />
     </nav>
+
     <div class="flex flex-col items-center gap-[2cm] print:gap-0">
       <ul
         v-for="(items, page) in pagesForPrint"
@@ -58,22 +70,15 @@ import NFCIcon from '~/assets/images/nfc.png'
 
 definePageMeta({ layout: 'page' })
 
+const toast = useToast()
+
 const csvInput = ref('')
 const csvInputPlaceholder = `key,url
 example01,https://example01.com
 example02,https://example02.com`
 
 const qrCodeRef = ref<HTMLElement[] | undefined>(undefined)
-const urlItems = computed(() => {
-  try {
-    return csvParse(csvInput.value, {
-      columns: true,
-      skip_empty_lines: true
-    }) as { key: string, url: string }[]
-  } catch (error) {
-    return []
-  }
-})
+const urlItems = ref<{ key: string, url: string }[]>([])
 
 const ITEMS_PER_PAGE = 12
 
@@ -87,7 +92,7 @@ const pagesForPrint = computed(() => {
 })
 
 watch(csvInput, () => {
-  drawQRCodes()
+  urlItems.value = []
 })
 
 onMounted(() => {
@@ -97,6 +102,11 @@ onMounted(() => {
       csvInput.value = loadedInput
       localStorage.removeItem('nft_book_press_batch_qrcode')
     }
+    nextTick(() => {
+      if (csvInput.value) {
+        drawQRCodes()
+      }
+    })
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)
@@ -104,6 +114,25 @@ onMounted(() => {
 })
 
 async function drawQRCodes () {
+  try {
+    urlItems.value = csvParse(csvInput.value, {
+      columns: true,
+      skip_empty_lines: true
+    }) as { key: string, url: string }[]
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: 'Failed to parse CSV input',
+      timeout: 0,
+      color: 'red',
+      ui: {
+        title: 'text-red-400 dark:text-red-400'
+      }
+    })
+  }
+
   const { default: QRCodeStyling } = await import('@solana/qr-code-styling')
   urlItems.value.forEach((item, index: number) => {
     const qrcode = new QRCodeStyling(getQRCodeOptions({
