@@ -96,15 +96,14 @@
             class="font-mono flex-grow"
             :readonly="!isEditingNFTId"
             :disabled="!isEditingNFTId"
-            :loading="isVerifyingNFTId"
             placeholder="Leave empty to auto-fetch NFT ID"
             :trailing-icon="nftIdError ? 'i-heroicons-exclamation-triangle-20-solid' : undefined"
           />
           <UButton
-            :label="isEditingNFTId || isVerifyingNFTId ? 'Confirm' : 'Edit'"
+            :label="isEditingNFTId || (isVerifyingNFTId && !isAutoFetchingNFTId) ? 'Confirm' : 'Edit'"
             :disabled="isLoading || isVerifyingNFTId"
             variant="outline"
-            :loading="isVerifyingNFTId"
+            :loading="isVerifyingNFTId && !isAutoFetchingNFTId"
             color="gray"
             @click="handleClickEditNFTId"
           />
