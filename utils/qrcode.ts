@@ -5,7 +5,30 @@ import {
   CornerDotType
 } from '@solana/qr-code-styling'
 
-import Logo from '~/assets/images/logo.png'
+import NFCIcon from '~/assets/images/nfc.png'
+import LikeCoinIcon from '~/assets/images/logo.png'
+
+export const iconOptions = [
+  {
+    value: 'likecoin',
+    label: 'LikeCoin'
+  },
+  {
+    value: 'nfc',
+    label: 'NFC'
+  }
+]
+
+export const DEFAULT_QR_CODE_ICON = 'likecoin'
+
+const iconMap: Record<string, string> = {
+  likecoin: LikeCoinIcon,
+  nfc: NFCIcon
+}
+
+export function getQRCodeIcon (value = DEFAULT_QR_CODE_ICON) {
+  return iconMap[value] || iconMap[DEFAULT_QR_CODE_ICON]
+}
 
 export function getQRCodeOptions ({
   data = '',
@@ -14,7 +37,7 @@ export function getQRCodeOptions ({
   fillColor = '#28646e',
   bgColor = '#ffffff',
   margin = 10,
-  image = Logo
+  image = getQRCodeIcon()
 }) {
   return {
     width,

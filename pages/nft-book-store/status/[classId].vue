@@ -582,7 +582,7 @@
       </UCard>
 
       <UModal v-model="isOpenQRCodeModal">
-        <QRCodeDownloader
+        <QRCodeGenerator
           v-if="selectedPurchaseLink"
           :data="selectedPurchaseLink.url"
           :file-name="getQRCodeFilename(selectedPurchaseLink.channel)"
@@ -600,7 +600,7 @@
               @click="isOpenQRCodeModal = false"
             />
           </template>
-        </QRCodeDownloader>
+        </QRCodeGenerator>
       </UModal>
     </template>
   </main>

@@ -23,6 +23,38 @@
       />
     </UFormGroup>
 
+    <div class="flex justify-center">
+      <UButton
+        label="QR Code Appearance"
+        variant="outline"
+        @click="isEditingQRCodeConfig = true"
+      />
+    </div>
+
+    <UModal v-model="isEditingQRCodeConfig">
+      <QRCodeGenerator
+        v-model:icon="selectedQRCodeIcon"
+        data="test"
+        file-name="test"
+        :width="500"
+        :height="500"
+        mode="config"
+        @save="isEditingQRCodeConfig = false"
+      >
+        <template #header>
+          <h3 class="font-bold font-mono">
+            QR Code Config
+          </h3>
+          <UButton
+            icon="i-heroicons-x-mark"
+            color="gray"
+            variant="ghost"
+            @click="isEditingQRCodeConfig = false"
+          />
+        </template>
+      </QRCodeGenerator>
+    </UModal>
+
     <nav class="flex justify-center items-center gap-2 print:hidden">
       <UButton
         v-if="urlItems.length <= 0"
@@ -64,9 +96,7 @@
 <script setup lang="ts">
 import { parse as csvParse } from 'csv-parse/sync'
 
-import { getQRCodeOptions } from '~/utils/qrcode'
-
-import NFCIcon from '~/assets/images/nfc.png'
+import { getQRCodeOptions, DEFAULT_QR_CODE_ICON } from '~/utils/qrcode'
 
 definePageMeta({ layout: 'page' })
 
@@ -76,6 +106,9 @@ const csvInput = ref('')
 const csvInputPlaceholder = `key,url
 example01,https://example01.com
 example02,https://example02.com`
+
+const selectedQRCodeIcon = ref(DEFAULT_QR_CODE_ICON)
+const isEditingQRCodeConfig = ref(false)
 
 const qrCodeRef = ref<HTMLElement[] | undefined>(undefined)
 const urlItems = ref<{ key: string, url: string }[]>([])
@@ -92,6 +125,10 @@ const pagesForPrint = computed(() => {
 })
 
 watch(csvInput, () => {
+  urlItems.value = []
+})
+
+watch(selectedQRCodeIcon, () => {
   urlItems.value = []
 })
 
@@ -138,7 +175,7 @@ async function drawQRCodes () {
     const qrcode = new QRCodeStyling(getQRCodeOptions({
       margin: 0,
       data: item.url,
-      image: NFCIcon,
+      image: getQRCodeIcon(selectedQRCodeIcon.value),
       fillColor: '#0a2439'
     }))
     const element = qrCodeRef.value?.[index]
