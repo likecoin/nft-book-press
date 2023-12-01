@@ -113,7 +113,7 @@
             :disabled="isLoading || isEditingNFTId"
             :loading="isAutoFetchingNFTId"
             variant="outline"
-            @click="fetchNftId"
+            @click="fetchNextNFTId"
           />
         </div>
       </UFormGroup>
@@ -218,6 +218,7 @@ onMounted(async () => {
     orderInfo.value = (data.value as any)
   }
   lazyFetchClassMetadataById(classId.value as string)
+  fetchNextNFTId()
 })
 
 function handleClickEditNFTId () {
@@ -252,7 +253,7 @@ async function fetchNFTMetadata () {
   }
 }
 
-async function fetchNftId () {
+async function fetchNextNFTId () {
   try {
     nftIdError.value = ''
     isAutoFetchingNFTId.value = true
@@ -293,7 +294,7 @@ async function onSendNFTStart () {
         throw new Error(`NFT classId: ${classId} nftId:${nftId} is not owned by sender!`)
       }
     } else {
-      await fetchNftId()
+      await fetchNextNFTId()
     }
     targetNftId = nftId.value
 
