@@ -35,8 +35,7 @@
       <QRCodeGenerator
         v-model:icon="selectedQRCodeIcon"
         v-model:color="selectedQRCodeColor"
-        data="test"
-        file-name="test"
+        data="https://example.com"
         :width="500"
         :height="500"
         mode="config"
@@ -178,7 +177,7 @@ async function drawQRCodes () {
       margin: 0,
       data: item.url,
       image: getQRCodeIcon(selectedQRCodeIcon.value),
-      fillColor: '#0a2439'
+      fillColor: selectedQRCodeColor.value
     }))
     const element = qrCodeRef.value?.[index]
     if (element) {
