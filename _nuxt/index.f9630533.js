@@ -1,1 +1,0 @@
-import{g as s,o,c,a as e,b as n,G as a}from"./entry.27469555.js";const _={class:"flex flex-col justify-center items-center py-44"},r={class:"space-y-4"},i=e("div",{class:"text-primary text-3xl font-bold font-mono"}," 🎉 Welcome! ",-1),f=s({__name:"index",setup(l){return(m,d)=>{const t=a;return o(),c("main",_,[e("div",r,[i,n(t,{"is-large":!0})])])}}});export{f as default};
