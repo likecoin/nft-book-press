@@ -3,7 +3,7 @@ import {
   DotType,
   CornerSquareType,
   CornerDotType
-} from '@solana/qr-code-styling'
+} from '@likecoin/qr-code-styling'
 
 import NFCIcon from '~/assets/images/nfc.png'
 import LikeCoinIcon from '~/assets/images/logo.png'

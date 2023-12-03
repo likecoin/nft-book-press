@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import QRCodeStyling, { FileExtension } from '@solana/qr-code-styling'
+import QRCodeStyling, { FileExtension } from '@likecoin/qr-code-styling'
 
 import { getQRCodeOptions, getQRCodeIcon, iconOptions, DEFAULT_QR_CODE_ICON, DEFAULT_QR_CODE_COLOR } from '~/utils/qrcode'
 
@@ -127,7 +127,7 @@ watch([selectedIcon, selectedColor, () => props.data], () => {
 })
 
 onMounted(async () => {
-  const { default: QRCodeStyling } = await import('@solana/qr-code-styling')
+  const { default: QRCodeStyling } = await import('@likecoin/qr-code-styling')
   qrCode.value = new QRCodeStyling(options.value)
   if (qrCodeRef.value) {
     qrCode.value.append(qrCodeRef.value)
@@ -135,7 +135,7 @@ onMounted(async () => {
 })
 
 async function download () {
-  const { default: QRCodeStyling } = await import('@solana/qr-code-styling')
+  const { default: QRCodeStyling } = await import('@likecoin/qr-code-styling')
   const tempInstance = new QRCodeStyling(options.value)
   tempInstance.download({ extension: downloadFileExtension.value as FileExtension, name: props.fileName })
 }

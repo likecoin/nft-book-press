@@ -171,7 +171,7 @@ async function drawQRCodes () {
     })
   }
 
-  const { default: QRCodeStyling } = await import('@solana/qr-code-styling')
+  const { default: QRCodeStyling } = await import('@likecoin/qr-code-styling')
   urlItems.value.forEach((item, index: number) => {
     const qrcode = new QRCodeStyling(getQRCodeOptions({
       margin: 0,

@@ -1556,6 +1556,13 @@
   dependencies:
     buffer "^6.0.3"
 
+"@likecoin/qr-code-styling@^1.6.4":
+  version "1.6.4"
+  resolved "https://registry.yarnpkg.com/@likecoin/qr-code-styling/-/qr-code-styling-1.6.4.tgz#7600a16c8d61114a8675adbb069529e43c29ae9c"
+  integrity sha512-N9bUkGLxGVijKcfppJUl0atDwnfMyN3mkOUXNT+d3u21RRV2pI1UnxJEt47eXR4OWDnplhUxSw7/cH92CtmEXQ==
+  dependencies:
+    qrcode-generator "^1.4.3"
+
 "@mapbox/node-pre-gyp@^1.0.5":
   version "1.0.10"
   resolved "https://registry.npmjs.org/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.10.tgz"
@@ -2197,13 +2204,6 @@
   version "0.25.24"
   resolved "https://registry.npmjs.org/@sinclair/typebox/-/typebox-0.25.24.tgz"
   integrity sha512-XJfwUVUKDHF5ugKwIcxEgc9k8b7HbznCp6eUfWgu710hMPNIO4aw4/zB5RogDQz8nd6gyCDpU9O/m6qYEWY6yQ==
-
-"@solana/qr-code-styling@^1.6.0":
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/@solana/qr-code-styling/-/qr-code-styling-1.6.0.tgz#8693bae79ace4b81135e032ee0b60f1ad739c3ef"
-  integrity sha512-KyBmyFKPxQPhUkP0jjnxV2ZeF1R1guTD8Hrd0YvHvMnhtrNEoEEdv4Jpp4W0GN4qCGG2KYOM5d3TgoLD+CNf9Q==
-  dependencies:
-    qrcode-generator "^1.4.3"
 
 "@tailwindcss/aspect-ratio@^0.4.2":
   version "0.4.2"
@@ -7544,7 +7544,7 @@ punycode@^2.1.0, punycode@^2.3.0:
 
 qrcode-generator@^1.4.3:
   version "1.4.4"
-  resolved "https://registry.npmjs.org/qrcode-generator/-/qrcode-generator-1.4.4.tgz"
+  resolved "https://registry.yarnpkg.com/qrcode-generator/-/qrcode-generator-1.4.4.tgz#63f771224854759329a99048806a53ed278740e7"
   integrity sha512-HM7yY8O2ilqhmULxGMpcHSF1EhJJ9yBj8gvDEuZ6M+KGJ0YY2hKpnXvRD+hZPLrDVck3ExIGhmPtSdcjC+guuw==
 
 qs@^6.11.0:
