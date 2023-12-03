@@ -497,20 +497,34 @@
               All Purchase Links
             </h4>
 
-            <div class="flex items-center gap-2">
+            <UDropdown
+              :items="[
+                [
+                  {
+                    label: 'Print All QR Codes',
+                    icon: 'i-heroicons-qr-code',
+                    click: printAllQRCodes,
+                  },
+                  {
+                    label: 'Download All Links',
+                    icon: 'i-heroicons-arrow-down-on-square-stack',
+                    click: downloadAllPurchaseLinks,
+                  },
+                  {
+                    label: 'Shorten All Links',
+                    icon: 'i-heroicons-sparkles',
+                    click: shortenAllLinks,
+                  },
+                ]
+              ]"
+              :popper="{ placement: 'top-end' }"
+            >
               <UButton
-                label="Print All QR Codes"
-                variant="outline"
-                color="primary"
-                @click="printAllQRCodes"
+                icon="i-heroicons-ellipsis-horizontal-20-solid"
+                color="gray"
+                variant="soft"
               />
-              <UButton
-                label="Download All Links"
-                variant="outline"
-                color="primary"
-                @click="downloadAllPurchaseLinks"
-              />
-            </div>
+            </UDropdown>
           </template>
 
           <UTable
@@ -626,6 +640,7 @@ const { updateBookListingSetting } = bookStoreApiStore
 const { lazyFetchClassMetadataById } = nftStore
 
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 
 const error = ref('')
@@ -1144,6 +1159,28 @@ function printAllQRCodes () {
     toast.add({
       icon: 'i-heroicons-exclamation-circle',
       title: 'Failed to print QR codes',
+      timeout: 0,
+      color: 'red',
+      ui: {
+        title: 'text-red-400 dark:text-red-400'
+      }
+    })
+  }
+}
+
+function shortenAllLinks () {
+  try {
+    localStorage.setItem(
+      'nft_book_press_batch_shorten_url',
+      convertArrayOfObjectsToCSV(purchaseLinks.value.map(({ channel, ...link }) => ({ key: channel, ...link })))
+    )
+    router.push({ name: 'batch-bitly', query: { print: 1 } })
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: 'Failed to shorten links',
       timeout: 0,
       color: 'red',
       ui: {

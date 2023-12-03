@@ -79,6 +79,11 @@ const items = [
         to: { name: 'batch-qrcode' }
       },
       {
+        label: 'Batch Create Bitly Links',
+        icon: 'i-heroicons-sparkles',
+        to: { name: 'batch-bitly' }
+      },
+      {
         label: 'LikeCoin ISCN/NFT Tools',
         icon: 'i-heroicons-arrow-top-right-on-square',
         to: ISCN_TOOLS_URL,
