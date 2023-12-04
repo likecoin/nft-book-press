@@ -82,9 +82,13 @@
           </template>
         </UAlert>
 
-        <UTextarea v-if="iscnCreateData" cols="100" rows="10" readonly>
-          {{ JSON.stringify(iscnCreateData, null, 2) }}
-        </UTextarea>
+        <UTextarea
+          v-if="iscnCreateData"
+          :value="JSON.stringify(iscnCreateData, null, 2) "
+          cols="100"
+          :rows="10"
+          readonly
+        />
 
         <UButton
           label="Create"
@@ -187,9 +191,14 @@
                 />)
               </template>
               <UInput type="file" @change="onClassFileChange" />
-              <UTextarea v-if="classCreateData" class="mt-2" cols="100" :rows="10" readonly>
-                {{ JSON.stringify(classCreateData, null, 2) }}
-              </UTextarea>
+              <UTextarea
+                v-if="classCreateData"
+                :value="JSON.stringify(classCreateData, null, 2)"
+                class="mt-2"
+                cols="100"
+                :rows="10"
+                readonly
+              />
             </UFormGroup>
 
             <UFormGroup>
@@ -203,9 +212,13 @@
                 />)
               </template>
               <UInput type="file" @change="onMintNFTDefaultFileChange" />
-              <UTextarea v-if="nftMintDefaultData" cols="100" :rows="10" readonly>
-                {{ JSON.stringify(nftMintDefaultData, null, 2) }}
-              </UTextarea>
+              <UTextarea
+                v-if="nftMintDefaultData"
+                :value="JSON.stringify(nftMintDefaultData, null, 2)"
+                cols="100"
+                :rows="10"
+                readonly
+              />
             </UFormGroup>
 
             <UFormGroup>
@@ -221,9 +234,10 @@
               <UInput type="file" @change="onMintNFTFileChange" />
             </UFormGroup>
 
-            <UAlert v-if="nftMintListData?.length">
-              Number of NFT data in CSV: {{ nftMintListData?.length }}
-            </UAlert>
+            <UAlert
+              v-if="nftMintListData?.length"
+              :title="`Number of NFT data in CSV: ${nftMintListData?.length}`"
+            />
 
             <template #footer>
               <UButton
