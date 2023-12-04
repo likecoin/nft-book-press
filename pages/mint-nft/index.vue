@@ -135,12 +135,12 @@
     </UCard>
 
     <UCard
-      v-if="step === 2"
+      v-if="step === 2 || step === 3"
       :ui="{ body: { base: 'space-y-4' } }"
     >
       <template #header>
         <h2 class="font-bold font-mono">
-          2. Create NFT Class
+          {{ step }}. {{ isCreatingClass ? 'Create NFT Class' : 'Mint NFT' }}
         </h2>
       </template>
 
@@ -159,7 +159,7 @@
               </h3>
             </template>
 
-            <UFormGroup label="Max number of supply for this NFT Class (optional):">
+            <UFormGroup v-if="isCreatingClass" label="Max number of supply for this NFT Class (optional):">
               <UInput
                 v-model="classMaxSupply"
                 type="number"
@@ -176,7 +176,7 @@
               />
             </UFormGroup>
 
-            <UFormGroup>
+            <UFormGroup v-if="isCreatingClass">
               <template #label>
                 Upload NFT Class data JSON file (<UButton
                   label="nft_class.json"
@@ -231,7 +231,7 @@
                 :disabled="
                   isLoading ||
                     !(
-                      classCreateData &&
+                      (!isCreatingClass || classCreateData) &&
                       nftMintDefaultData &&
                       nftMintListData
                     )"
@@ -278,7 +278,7 @@
               <UInput v-model="uri" placeholder="https://" />
             </UFormGroup>
 
-            <UFormGroup label="Max number of supply for this NFT Class (optional):">
+            <UFormGroup v-if="isCreatingClass" label="Max number of supply for this NFT Class (optional):">
               <template
                 v-if="classMaxSupply && classMaxSupply < nftMintCount"
                 #help
@@ -434,6 +434,7 @@ const nftCSVData = ref('')
 
 const iscnId = computed(() => iscnData.value?.['@id'])
 const classId = computed(() => classData.value?.id)
+const isCreatingClass = computed(() => !classId.value && step.value === 2)
 
 const shouldShowDownloadLink = ref(false)
 
@@ -478,7 +479,7 @@ async function onISCNIDInput () {
       const { records, owner } = resISCN.value as any
       iscnData.value = records[0].data
       iscnOwner.value = owner
-      step.value = 4
+      step.value = 3
     } else {
       throw new Error('Invalid ISCN ID or NFT Class ID')
     }
@@ -538,7 +539,6 @@ function onISCNFileChange (event: Event) {
 
 async function onClickMintByInputting () {
   isLoading.value = true
-  step.value = 3
   const { contentMetadata } = iscnData.value
 
   const nftClassData = {
@@ -577,29 +577,30 @@ async function onClickMintByInputting () {
   nftMintCount.value = csvDataArray.length
 
   try {
-    await onClassFileInput() // step=3
+    if (step.value === 2) {
+      await onClassFileInput() // step=3
+    }
     await onMintNFTStart() // step=4
+    shouldShowDownloadLink.value = true
   } catch (error) {
     console.error(error)
   } finally {
     isLoading.value = false
-    step.value = 4
-    shouldShowDownloadLink.value = true
   }
 }
 
 async function onClickMintByUploading () {
   isLoading.value = true
-  step.value = 3
   try {
-    await onClassFileInput() // step=3
+    if (step.value === 2) {
+      await onClassFileInput() // step=3
+    }
     await onMintNFTStart() // step=4
+    shouldShowDownloadLink.value = false
   } catch (error) {
     console.error(error)
   } finally {
     isLoading.value = false
-    step.value = 4
-    shouldShowDownloadLink.value = false
   }
 }
 
