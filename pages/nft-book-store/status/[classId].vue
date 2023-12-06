@@ -494,39 +494,141 @@
           <USelect v-model="priceIndex" :options="priceIndexOptions" />
         </UFormGroup>
 
-        <UFormGroup label="Sales channel for this link" hint="Optional">
-          <UInput v-model="fromChannel" placeholder="Channel ID" />
+        <UFormGroup label="Sales channel for the link(s)" hint="Optional">
+          <UInput v-model="fromChannelInput" placeholder="Channel ID(s), separated by commas (e.g. store01, store02)" />
         </UFormGroup>
 
-        <UButton
-          class="font-mono break-all"
-          :label="`${purchaseLink}`"
-          :to="purchaseLink"
-          variant="outline"
-          color="gray"
-          target="_blank"
-        />
-        <br>
-        <UButton
-          label="Copy Purchase Link"
-          variant="outline"
-          color="primary"
-          @click="copyPurchaseLink"
-        />
+        <UCard
+          v-if="purchaseLinks.length > 1"
+          :ui="{
+            header: { base: 'flex justify-between items-center' },
+            body: { padding: '' },
+          }"
+        >
+          <template #header>
+            <h4 class="text-sm font-bold font-mono">
+              All Purchase Links
+            </h4>
 
-        <QRCode
-          :data="purchaseLink"
-          :file-name="`${nftClassName || classId}-price_${priceIndex}-channel_${fromChannel || ''}`"
+            <UDropdown
+              :items="[
+                [
+                  {
+                    label: 'Print All QR Codes',
+                    icon: 'i-heroicons-qr-code',
+                    click: printAllQRCodes,
+                  },
+                  {
+                    label: 'Download All Links',
+                    icon: 'i-heroicons-arrow-down-on-square-stack',
+                    click: downloadAllPurchaseLinks,
+                  },
+                  {
+                    label: 'Shorten All Links',
+                    icon: 'i-heroicons-sparkles',
+                    click: shortenAllLinks,
+                  },
+                ]
+              ]"
+              :popper="{ placement: 'top-end' }"
+            >
+              <UButton
+                icon="i-heroicons-ellipsis-horizontal-20-solid"
+                color="gray"
+                variant="soft"
+              />
+            </UDropdown>
+          </template>
+
+          <UTable
+            :columns="[
+              { key: 'index', label: '#' },
+              { key: 'channel', label: 'Channel ID' },
+              { key: 'qrcode', label: 'QR Code' },
+              { key: 'link', label: 'Purchase Link' },
+            ]"
+            :rows="purchaseLinks"
+            :ui="{ thead: 'whitespace-nowrap' }"
+          >
+            <template #index-data="{ index }">
+              {{ index + 1 }}
+            </template>
+            <template #qrcode-data="{ row }">
+              <UButton
+                class="font-mono break-all"
+                icon="i-heroicons-arrow-down-tray"
+                variant="outline"
+                color="gray"
+                @click="selectedPurchaseLink = row"
+              />
+            </template>
+            <template #link-data="{ row }">
+              <div class="flex items-center gap-2">
+                <UButton
+                  label="Copy"
+                  variant="outline"
+                  color="primary"
+                  @click="copyPurchaseLink(purchaseLinks[0].url || '')"
+                />
+                <UButton
+                  class="font-mono break-all"
+                  :label="row.url"
+                  :to="row.url"
+                  variant="outline"
+                  color="gray"
+                  target="_blank"
+                />
+              </div>
+            </template>
+          </UTable>
+        </UCard>
+        <template v-else-if="purchaseLinks[0]">
+          <UButton
+            class="font-mono break-all"
+            :label="purchaseLinks[0].url"
+            :to="purchaseLinks[0].url"
+            variant="outline"
+            color="gray"
+            target="_blank"
+          />
+          <div class="flex gap-4">
+            <UButton
+              label="Copy Purchase Link"
+              variant="outline"
+              color="primary"
+              @click="copyPurchaseLink(purchaseLinks[0].url || '')"
+            />
+            <UButton
+              label="Get QR Code"
+              variant="outline"
+              color="primary"
+              @click="selectedPurchaseLink = purchaseLinks[0]"
+            />
+          </div>
+        </template>
+      </UCard>
+
+      <UModal v-model="isOpenQRCodeModal">
+        <QRCodeGenerator
+          v-if="selectedPurchaseLink"
+          :data="selectedPurchaseLink.url"
+          :file-name="getQRCodeFilename(selectedPurchaseLink.channel)"
           :width="500"
           :height="500"
         >
           <template #header>
             <h3 class="font-bold font-mono">
-              Purchase Link QR Code
+              Download QR Code
             </h3>
+            <UButton
+              icon="i-heroicons-x-mark"
+              color="gray"
+              variant="ghost"
+              @click="isOpenQRCodeModal = false"
+            />
           </template>
-        </QRCode>
-      </UCard>
+        </QRCodeGenerator>
+      </UModal>
     </template>
 
     <NuxtPage :transition="false" />
@@ -536,11 +638,12 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import Draggable from 'vuedraggable'
-import { CHAIN_EXPLORER_URL, IS_TESTNET, LIKE_CO_API } from '~/constant'
+
+import { CHAIN_EXPLORER_URL, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useWalletStore } from '~/stores/wallet'
-import { getPortfolioURL } from '~/utils'
+import { getPortfolioURL, downloadFile, convertArrayOfObjectsToCSV, getPurchaseLink } from '~/utils'
 import { getNFTAuthzGrants, shortenWalletAddress } from '~/utils/cosmos'
 
 const store = useWalletStore()
@@ -552,12 +655,13 @@ const { updateBookListingSetting } = bookStoreApiStore
 const { lazyFetchClassMetadataById } = nftStore
 
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 
 const error = ref('')
 const isLoading = ref(false)
-const classId = ref(route.params.classId)
-const fromChannel = ref<string | undefined>(undefined)
+const classId = ref<string>(route.params.classId as string)
+const fromChannelInput = ref('')
 const priceIndex = ref(0)
 const classListingInfo = ref<any>({})
 const prices = ref<any[]>([])
@@ -584,13 +688,27 @@ const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
 const orderHasShipping = computed(() => purchaseList.value.find((p: any) => !!p.shippingStatus))
 const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
 const userCanSendNFT = computed(() => userIsOwner.value || (wallet.value && moderatorWalletsGrants.value[wallet.value]))
-const purchaseLink = computed(() => {
-  const payload: Record<string, string> = {
-    from: fromChannel.value || '',
-    price_index: priceIndex.value.toString()
+const purchaseLinks = computed(() =>
+  fromChannelInput.value
+    .split(',')
+    .filter((c, index) => !!c || index === 0)
+    .map(c => c.trim())
+    .map(channel => ({
+      channel,
+      url: getPurchaseLink({ classId: classId.value, priceIndex: priceIndex.value, channel })
+    }))
+)
+const selectedPurchaseLink = ref<{
+  channel: string,
+  url: string,
+} | undefined>(undefined)
+const isOpenQRCodeModal = computed({
+  get: () => !!selectedPurchaseLink.value,
+  set: (value) => {
+    if (!value) {
+      selectedPurchaseLink.value = undefined
+    }
   }
-  const queryString = `?${new URLSearchParams(payload).toString()}`
-  return `https://api.${IS_TESTNET ? 'rinkeby.' : ''}like.co/likernft/book/purchase/${classId.value}/new${queryString}`
 })
 const salesChannelMap = computed(() => {
   if (!purchaseList.value.length) {
@@ -659,6 +777,14 @@ const orderTableColumns = computed(() => {
 
   return columns
 })
+
+function getQRCodeFilename (channel = '') {
+  const filenameParts = [`${nftClassName.value || classId.value}`, `price_${priceIndex.value}`]
+  if (channel) {
+    filenameParts.push(`channel_${channel}`)
+  }
+  return filenameParts.join('_')
+}
 
 function getOrdersTableActionItems (purchaseListItem: any) {
   const actionItems = []
@@ -1017,8 +1143,8 @@ async function updateSettings () {
   }
 }
 
-async function copyPurchaseLink () {
-  await navigator.clipboard.writeText(purchaseLink.value)
+async function copyPurchaseLink (text = '') {
+  await navigator.clipboard.writeText(text)
   toast.add({
     icon: 'i-heroicons-check-circle',
     title: 'Copied purchase link to clipboard',
@@ -1027,4 +1153,55 @@ async function copyPurchaseLink () {
   })
 }
 
+function downloadAllPurchaseLinks () {
+  downloadFile({
+    data: purchaseLinks.value,
+    fileName: `${classId.value}_purchase_links.csv`,
+    fileType: 'csv'
+  })
+}
+
+function printAllQRCodes () {
+  try {
+    localStorage.setItem(
+      'nft_book_press_batch_qrcode',
+      convertArrayOfObjectsToCSV(purchaseLinks.value.map(({ channel, ...link }) => ({ key: channel, ...link })))
+    )
+    window.open('/batch-qrcode?print=1', 'batch_qrcode', 'menubar=no,location=no,status=no')
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: 'Failed to print QR codes',
+      timeout: 0,
+      color: 'red',
+      ui: {
+        title: 'text-red-400 dark:text-red-400'
+      }
+    })
+  }
+}
+
+function shortenAllLinks () {
+  try {
+    localStorage.setItem(
+      'nft_book_press_batch_shorten_url',
+      convertArrayOfObjectsToCSV(purchaseLinks.value.map(({ channel, ...link }) => ({ key: channel, ...link })))
+    )
+    router.push({ name: 'batch-bitly', query: { print: 1 } })
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: 'Failed to shorten links',
+      timeout: 0,
+      color: 'red',
+      ui: {
+        title: 'text-red-400 dark:text-red-400'
+      }
+    })
+  }
+}
 </script>
