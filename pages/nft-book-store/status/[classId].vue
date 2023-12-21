@@ -663,7 +663,7 @@ const orderTableColumns = computed(() => {
 function getOrdersTableActionItems (purchaseListItem: any) {
   const actionItems = []
 
-  if (purchaseListItem.status === 'completed') {
+  if (purchaseListItem.status === 'completed' && purchaseListItem.txHash) {
     actionItems.push([{
       label: 'View Transaction',
       icon: 'i-heroicons-magnifying-glass',
