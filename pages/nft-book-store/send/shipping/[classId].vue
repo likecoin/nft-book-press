@@ -20,7 +20,10 @@
       </template>
     </UProgress>
 
-    <UCard v-if="bookStoreApiStore.isAuthenticated">
+    <UCard
+      v-if="bookStoreApiStore.isAuthenticated"
+      :ui="{ footer: { base: 'space-y-4' } }"
+    >
       <template #header>
         <h3 class="font-bold font-mono">
           Order status
@@ -53,7 +56,7 @@
           <tr>
             <th class="text-left px-4 py-3">
               Buyer Wallet
-            </th><td class="text-left px-4 py-3">
+            </th><td class="text-left px-4 py-3 font-mono text-sm">
               {{ orderInfo.wallet }}
             </td>
           </tr>
