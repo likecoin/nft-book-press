@@ -45,7 +45,7 @@
         </UFormGroup>
 
         <UFormGroup :label="`Total number of NFT for sale of this ${priceItemLabel}`">
-          <UInput v-model="stock" type="number" step="0.01" :min="0" />
+          <UInput v-model="stock" type="number" step="1" :min="0" />
         </UFormGroup>
 
         <UFormGroup

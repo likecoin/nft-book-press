@@ -78,7 +78,7 @@
           </UFormGroup>
 
           <UFormGroup :label="`Total number of NFT for sale of this ${priceItemLabel}`">
-            <UInput :value="p.stock" type="number" step="0.01" :min="0" @input="e => updatePrice(e, 'stock', index)" />
+            <UInput :value="p.stock" type="number" step="1" :min="0" @input="e => updatePrice(e, 'stock', index)" />
           </UFormGroup>
 
           <UFormGroup
