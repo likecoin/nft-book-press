@@ -276,10 +276,10 @@ onMounted(async () => {
       if (currentEdition) {
         price.value = currentEdition.price || 0
         stock.value = currentEdition.stock || 0
-        nameEn.value = currentEdition.name?.en || ''
-        nameZh.value = currentEdition.name?.zh || ''
-        descriptionEn.value = currentEdition.description?.en || ''
-        descriptionZh.value = currentEdition.description?.zh || ''
+        nameEn.value = currentEdition.name?.en || currentEdition.name || ''
+        nameZh.value = currentEdition.name?.zh || currentEdition.name || ''
+        descriptionEn.value = currentEdition.description?.en || currentEdition.description || ''
+        descriptionZh.value = currentEdition.description?.zh || currentEdition.description || ''
         hasShipping.value = currentEdition.hasShipping || false
       }
     }

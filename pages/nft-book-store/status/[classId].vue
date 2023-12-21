@@ -663,7 +663,7 @@ const orderTableColumns = computed(() => {
 function getOrdersTableActionItems (purchaseListItem: any) {
   const actionItems = []
 
-  if (purchaseListItem.status === 'completed') {
+  if (purchaseListItem.status === 'completed' && purchaseListItem.txHash) {
     actionItems.push([{
       label: 'View Transaction',
       icon: 'i-heroicons-magnifying-glass',
@@ -703,7 +703,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
     }])
   }
 
-  if (purchaseListItem.status === 'pendingNFT') {
+  if (['pendingNFT', 'paid'].includes(purchaseListItem.status)) {
     actionItems.push([{
       label: 'Mark Complete',
       icon: 'i-heroicons-check-circle',
@@ -960,6 +960,14 @@ async function hardSetStatusToCompleted (purchase: any) {
     return
   }
 
+  const orderData = ordersData.value?.orders?.find((p: any) => p.id === purchase.id)
+  if (!orderData) {
+    throw new Error('ORDER_NOT_FOUND')
+  }
+
+  const previousStatus = orderData.status
+  orderData.status = 'completed'
+
   const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/sent/${purchase.id}`,
     {
       method: 'POST',
@@ -968,10 +976,12 @@ async function hardSetStatusToCompleted (purchase: any) {
         authorization: `Bearer ${token.value}`
       }
     })
+
   if (fetchError.value) {
+    orderData.status = previousStatus
     throw fetchError.value
   }
-  purchase.status = 'completed'
+
   classListingInfo.value.pendingNFTCount -= 1
 }
 
