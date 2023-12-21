@@ -690,7 +690,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
   if (purchaseListItem.shippingStatus === 'pending') {
     actionItems.push([{
       label: 'Handle Shipping',
-      icon: 'i-heroicons-paper-airplane',
+      icon: 'i-heroicons-truck',
       to: {
         name: 'nft-book-store-send-shipping-classId',
         params: {
