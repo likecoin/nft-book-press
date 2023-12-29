@@ -278,8 +278,8 @@ onMounted(async () => {
         stock.value = currentEdition.stock || 0
         nameEn.value = currentEdition.name?.en || currentEdition.name || ''
         nameZh.value = currentEdition.name?.zh || currentEdition.name || ''
-        descriptionEn.value = currentEdition.description?.en || currentEdition.description || ''
-        descriptionZh.value = currentEdition.description?.zh || currentEdition.description || ''
+        descriptionEn.value = currentEdition.description?.en || currentEdition.description || ' '
+        descriptionZh.value = currentEdition.description?.zh || currentEdition.description || ' '
         hasShipping.value = currentEdition.hasShipping || false
       }
     }
