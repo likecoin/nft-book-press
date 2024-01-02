@@ -101,6 +101,10 @@ watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
 })
 
+onMounted(async () => {
+  await loadStripeConnectStatus()
+})
+
 async function loadStripeConnectStatus () {
   try {
     isLoading.value = true
