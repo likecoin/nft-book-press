@@ -52,7 +52,7 @@
           <UBadge v-else label="No" color="red" variant="outline" />
         </template>
         <template #completed-data="{ row }">
-          <UBadge v-if="row.completed" label="Yes" color="green" variant="outline" />
+          <UBadge v-if="row.completed" :label="connectStatus?.email || 'Yes'" color="green" variant="outline" />
           <UBadge v-else label="No" color="red" variant="outline" />
         </template>
       </UTable>
