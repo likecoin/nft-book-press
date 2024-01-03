@@ -481,9 +481,9 @@ watch(iscnData, (recordData) => {
 const validate = (state: any): FormError[] => {
   hasError.value = false
   const errors = []
-  const whitespaceRegex = /\s/
+  const whitespaceRegex = /^[a-zA-Z][a-zA-Z0-9/:-]{2,100}$/
 
-  if (whitespaceRegex.test(state.nftIdPrefix)) {
+  if (!whitespaceRegex.test(state.nftIdPrefix)) {
     hasError.value = true
     errors.push({ path: 'prefix', message: 'NFT ID cannot contain spaces' })
   }
