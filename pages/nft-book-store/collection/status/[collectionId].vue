@@ -397,6 +397,11 @@
           </h3>
         </template>
 
+        <div>
+          <UToggle v-model="useLikerLandPurchaseLink" />
+          Use {{ useLikerLandPurchaseLink ? 'Liker Land' : 'Stripe' }} Purchase Link
+        </div>
+
         <UFormGroup label="Sales channel for this link" hint="Optional">
           <UInput v-model="fromChannel" placeholder="Channel ID" />
         </UFormGroup>
@@ -479,6 +484,7 @@ const stripeConnectWallet = ref('')
 const stripeConnectWalletInput = ref('')
 const mustClaimToView = ref(false)
 const hideDownload = ref(false)
+const useLikerLandPurchaseLink = ref(true)
 
 const collectionName = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.name)
 const ownerWallet = computed(() => collectionListingInfo?.value?.ownerWallet)
@@ -490,7 +496,9 @@ const purchaseLink = computed(() => {
     from: fromChannel.value || ''
   }
   const queryString = `?${new URLSearchParams(payload).toString()}`
-  return `https://api.${IS_TESTNET ? 'rinkeby.' : ''}like.co/likernft/book/collection/purchase/${collectionId.value}/new${queryString}`
+  const likerLandLink = `https://${IS_TESTNET ? 'rinkeby.' : ''}liker.land/nft/collection/${collectionId.value}${queryString}`
+  const apiLink = `https://api.${IS_TESTNET ? 'rinkeby.' : ''}like.co/likernft/book/collection/purchase/${collectionId.value}/new${queryString}`
+  return useLikerLandPurchaseLink.value ? likerLandLink : apiLink
 })
 const salesChannelMap = computed(() => {
   if (!purchaseList.value.length) {

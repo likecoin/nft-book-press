@@ -500,6 +500,11 @@
           </h3>
         </template>
 
+        <div>
+          <UToggle v-model="useLikerLandPurchaseLink" />
+          Use {{ useLikerLandPurchaseLink ? 'Liker Land' : 'Stripe' }} Purchase Link
+        </div>
+
         <UFormGroup label="Price" :required="true">
           <USelect v-model="priceIndex" :options="priceIndexOptions" />
         </UFormGroup>
@@ -588,6 +593,7 @@ const stripeConnectWallet = ref('')
 const stripeConnectWalletInput = ref('')
 const mustClaimToView = ref(false)
 const hideDownload = ref(false)
+const useLikerLandPurchaseLink = ref(true)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
@@ -600,7 +606,9 @@ const purchaseLink = computed(() => {
     price_index: priceIndex.value.toString()
   }
   const queryString = `?${new URLSearchParams(payload).toString()}`
-  return `https://api.${IS_TESTNET ? 'rinkeby.' : ''}like.co/likernft/book/purchase/${classId.value}/new${queryString}`
+  const apiLink = `https://api.${IS_TESTNET ? 'rinkeby.' : ''}like.co/likernft/book/purchase/${classId.value}/new${queryString}`
+  const likerLandLink = `https://${IS_TESTNET ? 'rinkeby.' : ''}liker.land/nft/class/${classId.value}${queryString}`
+  return useLikerLandPurchaseLink.value ? likerLandLink : apiLink
 })
 const salesChannelMap = computed(() => {
   if (!purchaseList.value.length) {
