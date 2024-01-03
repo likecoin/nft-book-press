@@ -265,58 +265,58 @@
                 Mint NFT by filling required information
               </h3>
             </template>
+            <UForm :validate="validate" :state="state">
+              <UFormGroup label="NFT ID Prefix:" name="prefix">
+                <UInput v-model="state.nftIdPrefix" placeholder="English only ex.MoneyVerse" />
+              </UFormGroup>
 
-            <UFormGroup label="NFT ID Prefix:">
-              <UInput v-model="nftIdPrefix" placeholder="English only ex.MoneyVerse" />
-            </UFormGroup>
-
-            <UFormGroup label="Number of NFT to mint:">
-              <UInput
-                v-model="nftMintCount"
-                placeholder="0-100"
-                type="number"
-                :min="0"
-                :max="classMaxSupply"
-              />
-            </UFormGroup>
-
-            <UFormGroup label="Image URL:">
-              <UInput v-model="imageUrl" placeholder="ipfs:// ... or ar://...." />
-            </UFormGroup>
-
-            <UFormGroup label="External URL (optional):">
-              <UInput v-model="externalUrl" placeholder="https://" />
-            </UFormGroup>
-
-            <UFormGroup label="URI (optional):">
-              <UInput v-model="uri" placeholder="https://" />
-            </UFormGroup>
-
-            <UFormGroup v-if="isCreatingClass" label="Max number of supply for this NFT Class (optional):">
-              <template
-                v-if="classMaxSupply && classMaxSupply < nftMintCount"
-                #help
-              >
-                <UAlert
-                  class="mt-1"
-                  icon="i-heroicons-exclamation-triangle"
-                  title="Should be more than number of NFT to mint"
-                  color="red"
-                  variant="subtle"
+              <UFormGroup label="Number of NFT to mint:">
+                <UInput
+                  v-model="nftMintCount"
+                  placeholder="0-100"
+                  type="number"
+                  :min="0"
+                  :max="classMaxSupply"
                 />
-              </template>
-              <UInput
-                v-model="classMaxSupply"
-                type="number"
-                :min="nftMintCount"
-                :placeholder="`> ${nftMintCount}`"
-              />
-            </UFormGroup>
+              </UFormGroup>
 
+              <UFormGroup label="Image URL:">
+                <UInput v-model="imageUrl" placeholder="ipfs:// ... or ar://...." />
+              </UFormGroup>
+
+              <UFormGroup label="External URL (optional):">
+                <UInput v-model="externalUrl" placeholder="https://" />
+              </UFormGroup>
+
+              <UFormGroup label="URI (optional):">
+                <UInput v-model="uri" placeholder="https://" />
+              </UFormGroup>
+
+              <UFormGroup v-if="isCreatingClass" label="Max number of supply for this NFT Class (optional):">
+                <template
+                  v-if="classMaxSupply && classMaxSupply < nftMintCount"
+                  #help
+                >
+                  <UAlert
+                    class="mt-1"
+                    icon="i-heroicons-exclamation-triangle"
+                    title="Should be more than number of NFT to mint"
+                    color="red"
+                    variant="subtle"
+                  />
+                </template>
+                <UInput
+                  v-model="classMaxSupply"
+                  type="number"
+                  :min="nftMintCount"
+                  :placeholder="`> ${nftMintCount}`"
+                />
+              </UFormGroup>
+            </UForm>
             <template #footer>
               <UButton
                 label="Mint"
-                :disabled="isLoading || !(nftIdPrefix && nftMintCount && imageUrl)"
+                :disabled="isLoading || !(state.nftIdPrefix && nftMintCount && imageUrl) || hasError"
                 @click="onClickMintByInputting"
               />
             </template>
@@ -409,6 +409,7 @@ import { storeToRefs } from 'pinia'
 import { v4 as uuidv4 } from 'uuid'
 import { parse } from 'csv-parse/sync'
 import { stringify } from 'csv-stringify/sync'
+import type { FormError } from '#ui/types'
 
 import { useWalletStore } from '~/stores/wallet'
 import { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } from '~/constant'
@@ -431,7 +432,10 @@ const iscnIdInput = ref(route.query.class_id || route.query.iscn_id || '')
 const iscnOwner = ref('')
 const iscnCreateData = ref<any>(null)
 const iscnData = ref<any>(null)
-const nftIdPrefix = ref('BOOKSN')
+const state = reactive({
+  nftIdPrefix: 'BOOKSN'
+})
+const hasError = ref(false)
 const imageUrl = ref('')
 const externalUrl = ref('')
 const uri = ref('')
@@ -473,6 +477,18 @@ watch(iscnData, (recordData) => {
     imageUrl.value = recordData.contentMetadata?.thumbnailUrl || ''
   }
 })
+
+const validate = (state: any): FormError[] => {
+  hasError.value = false
+  const errors = []
+  const whitespaceRegex = /\s/
+
+  if (whitespaceRegex.test(state.nftIdPrefix)) {
+    hasError.value = true
+    errors.push({ path: 'prefix', message: 'NFT ID cannot contain spaces' })
+  }
+  return errors
+}
 
 async function onISCNIDInput () {
   try {
@@ -578,7 +594,7 @@ async function onClickMintByInputting () {
     }
   }
   const csvDataString = generateCsvData({
-    prefix: nftIdPrefix.value,
+    prefix: state.nftIdPrefix,
     nftMintCount: nftMintCount.value,
     imgUrl: imageUrl.value,
     uri: uri.value
