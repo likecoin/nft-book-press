@@ -55,6 +55,13 @@
         />
 
         <UFormGroup
+          v-if="deliverMethod === 'auto'"
+          :label="`Memo of this ${priceItemLabel}`"
+        >
+          <UInput v-model="autoMemo" placeholder="Thank you! 謝謝你的支持!" />
+        </UFormGroup>
+
+        <UFormGroup
           :label="`Product name of this ${priceItemLabel}`"
           :ui="{ container: 'space-y-2' }"
         >
@@ -223,6 +230,7 @@ const hasMultiplePrices = computed(() => classData?.value?.prices?.length > 1)
 const price = ref(MINIMAL_PRICE)
 const stock = ref(1)
 const deliverMethod = ref('auto')
+const autoMemo = ref('')
 const nameEn = ref('Standard Edition')
 const nameZh = ref('標準版')
 const descriptionEn = ref('')
@@ -349,6 +357,7 @@ async function handleSubmit () {
       price: Number(price.value),
       stock: Number(stock.value),
       isAutoDeliver: deliverMethod.value === 'auto',
+      autoMemo: autoMemo.value || '',
       hasShipping: hasShipping.value || false
     }
 

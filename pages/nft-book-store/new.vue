@@ -88,6 +88,13 @@
           />
 
           <UFormGroup
+            v-if="p.deliverMethod === 'auto'"
+            :label="`Memo of this ${priceItemLabel}`"
+          >
+            <UInput placeholder="Thank you! 謝謝你的支持!" :value="p.autoMemo" @input="e => updatePrice(e, 'autoMemo', index)" />
+          </UFormGroup>
+
+          <UFormGroup
             :label="`Product name of this ${priceItemLabel}`"
             :ui="{ container: 'space-y-2' }"
           >
@@ -423,6 +430,7 @@ const hideDownload = ref(false)
 const prices = ref<any[]>([{
   price: MINIMAL_PRICE,
   deliverMethod: 'auto',
+  autoMemo: '',
   stock: Number(route.query.count as string || 1),
   nameEn: 'Standard Edition',
   nameZh: '標準版',
@@ -599,6 +607,7 @@ function addMorePrice () {
     index: uuidv4(),
     price: MINIMAL_PRICE,
     deliverMethod: 'auto',
+    autoMemo: '',
     stock: 1,
     nameEn: `Tier ${nextPriceIndex.value}`,
     nameZh: `級別 ${nextPriceIndex.value}`,
@@ -665,6 +674,7 @@ function mapPrices (prices:any) {
       price: Number(p.price),
       stock: Number(p.stock),
       isAutoDeliver: p.deliverMethod === 'auto',
+      autoMemo: p.autoMemo || '',
       hasShipping: p.hasShipping || false
     }))
 }
