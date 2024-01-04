@@ -81,12 +81,11 @@
             <UInput :value="p.stock" type="number" step="1" :min="0" @input="e => updatePrice(e, 'stock', index)" />
           </UFormGroup>
 
-          <UFormGroup
-            :label="`Deliver Method of this ${priceItemLabel}`"
-          >
-            <URadio v-model="p.deliverMethod" :label="`Automatic deliver NFT of this ${priceItemLabel}`" name="auto" value="auto" :disabled="isEditMode" />
-            <URadio v-model="p.deliverMethod" :label="`Sign memo and manually deliver each NFT of this ${priceItemLabel}`" name="manual" value="manual" :disabled="isEditMode" />
-          </UFormGroup>
+          <URadioGroup
+            v-model="p.deliverMethod"
+            :legend="`Deliver method of this ${priceItemLabel}`"
+            :options="deliverMethodOptions"
+          />
 
           <UFormGroup
             :label="`Product name of this ${priceItemLabel}`"
@@ -388,7 +387,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { LCD_URL, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
-import { getPortfolioURL } from '~/utils'
+import { getPortfolioURL, deliverMethodOptions } from '~/utils'
 import { getNFTAuthzGrants, sendNFTsToAPIWallet } from '~/utils/cosmos'
 
 const walletStore = useWalletStore()

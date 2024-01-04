@@ -48,12 +48,11 @@
           <UInput v-model="stock" type="number" step="1" :min="0" />
         </UFormGroup>
 
-        <UFormGroup
-          :label="`Deliver Method of this ${priceItemLabel}`"
-        >
-          <URadio v-model="deliverMethod" :label="`Automatic deliver NFT of this ${priceItemLabel}`" name="auto" value="auto" disabled />
-          <URadio v-model="deliverMethod" :label="`Sign memo and manually deliver each NFT of this ${priceItemLabel}`" name="manual" value="manual" disabled />
-        </UFormGroup>
+        <URadioGroup
+          v-model="deliverMethod"
+          :legend="`Deliver method of this ${priceItemLabel}`"
+          :options="deliverMethodOptions"
+        />
 
         <UFormGroup
           :label="`Product name of this ${priceItemLabel}`"
@@ -198,6 +197,7 @@ import { LIKE_CO_API } from '~/constant'
 
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
+import { deliverMethodOptions } from '~/utils'
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
