@@ -36,11 +36,13 @@
               <UInput
                 :value="s.nameEn"
                 placeholder="Shipping option name"
+                :disabled="isViewMode"
                 @input="(e) => updateShippingRate(e, 'nameEn', index)"
               />
               <UInput
                 placeholder="運送選項名稱"
                 :value="s.nameZh"
+                :disabled="isViewMode"
                 @input="(e) => updateShippingRate(e, 'nameZh', index)"
               />
             </UFormGroup>
@@ -51,11 +53,12 @@
                 type="number"
                 step="0.01"
                 :min="0"
+                :disabled="isViewMode"
                 @input="(e) => updateShippingRate(e, 'price', index)"
               />
             </UFormGroup>
 
-            <template v-if="hasMultipleShippingRates" #footer>
+            <template v-if="hasMultipleShippingRates && isEditMode" #footer>
               <UButton
                 label="Delete"
                 variant="outline"
@@ -65,24 +68,44 @@
             </template>
           </UCard>
         </component>
-        <UButton
-          label="Add Option"
-          variant="outline"
-          @click="addMoreShippingRate"
-        />
+        <div class="flex justify-center">
+          <UButton
+            v-if="isEditMode"
+            label="Add Options"
+            variant="outline"
+            icon="i-heroicons-plus-20-solid"
+            @click="addMoreShippingRate"
+          />
+        </div>
       </component>
       <div v-else class="flex justify-center items-center py-[36px]">
         No items
         <UButton
-          label="Add Option"
+          v-if="isEditMode"
+          label="Add Options"
           variant="outline"
+          icon="i-heroicons-plus-20-solid"
           @click="addMoreShippingRate"
         />
       </div>
 
-      <template v-if="isEditMode" #footer>
+      <template #footer>
         <div class="flex justify-end items-center">
-          <UButton label="Save" @click="closeModal" />
+          <UButton v-if="isEditMode" label="Save" @click="closeModal" />
+          <div v-if="isViewMode" class="flex justify-end items-center gap-[8px]">
+            <span class="text-gray-300 text-sm text-right underline">
+              You can manage the shipping options by going to the management page
+            </span>
+            <UButton
+              label="Set Shipping Options"
+              variant="outline"
+              @click="addMoreShippingRate"
+            >
+              <template #trailing>
+                <UIcon name="i-heroicons-arrow-right-20-solid" />
+              </template>
+            </UButton>
+          </div>
         </div>
       </template>
     </UCard>
@@ -101,7 +124,7 @@ const props = defineProps({
   },
   mode: {
     type: String as PropType<ModeType>,
-    default: ''
+    default: 'edit'
   },
   shippingInfo: {
     type: Array,
@@ -110,6 +133,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue'])
 const isEditMode = computed(() => !!(props.mode === 'edit'))
+const isViewMode = computed(() => !!(props.mode === 'view'))
 const modalTitle = computed(() =>
   isEditMode.value ? 'Editing Shipping Options' : 'Shipping Options Info'
 )
