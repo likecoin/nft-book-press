@@ -556,7 +556,7 @@
         </QRCode>
       </UCard>
     </template>
-    <ShippingRateModal
+    <ShippingRatesInfoModal
       v-if="isSippingModalOpened"
       v-model="isSippingModalOpened"
       mode="edit"
