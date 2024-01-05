@@ -50,6 +50,7 @@
 
         <URadioGroup
           v-model="deliverMethod"
+          disabled
           :legend="`Deliver method of this ${priceItemLabel}`"
           :options="deliverMethodOptions"
         />
