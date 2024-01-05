@@ -233,26 +233,6 @@ export async function signMintNFT (
   return res
 }
 
-export async function signSendNFT (
-  targetAddress: string,
-  classId: string,
-  nftId: string,
-  signer: OfflineSigner,
-  address: string,
-  memo?: string
-) {
-  const signingClient = await getSigningClient()
-  await signingClient.connectWithSigner(RPC_URL, signer)
-  const res = await signingClient.sendNFTs(
-    address,
-    targetAddress,
-    classId,
-    [nftId],
-    { memo }
-  ) as DeliverTxResponse
-  return res
-}
-
 export async function signSendNFTs (
   targetAddress: string,
   classIds: string[],
