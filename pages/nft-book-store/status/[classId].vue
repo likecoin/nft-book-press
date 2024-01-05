@@ -144,9 +144,16 @@
         :ui="{ body: { padding: '' } }"
       >
         <template #header>
-          <h3 class="font-bold font-mono">
-            Shipping Options
-          </h3>
+          <div class="flex flex-row justify-between items-center">
+            <h3 class="font-bold font-mono">
+              Shipping Options
+            </h3>
+            <UButton
+              icon="i-heroicons-pencil-square"
+              label="Edit"
+              @click="handleOpenShippingModal"
+            />
+          </div>
         </template>
 
         <UTable
@@ -157,8 +164,14 @@
           ]"
           :rows="shippingRatesTableRows"
         >
+          <template #name-data="{ row }">
+            <div class="flex flex-col gap-[8px] items-start">
+              <span class="text-center">en: {{ row.name.en }}</span>
+              <span class="text-center">zh: {{ row.name.zh }}</span>
+            </div>
+          </template>
           <template #price-data="{ row }">
-            <span class="text-right">{{ row.price }}</span>
+            <span class="text-center">{{ row.price }}</span>
           </template>
         </UTable>
       </UCard>
@@ -543,7 +556,12 @@
         </QRCode>
       </UCard>
     </template>
-
+    <ShippingRateModal
+      v-if="isSippingModalOpened"
+      v-model="isSippingModalOpened"
+      mode="edit"
+      :shipping-info="classListingInfo.shippingRates"
+    />
     <NuxtPage :transition="false" />
   </main>
 </template>
@@ -579,6 +597,7 @@ const prices = ref<any[]>([])
 const isUpdatingPricesOrder = ref(false)
 const ordersData = ref<any>({})
 const connectStatus = ref<any>({})
+const isSippingModalOpened = ref<Boolean>(false)
 
 // Search
 const searchInput = ref('')
@@ -1069,6 +1088,10 @@ async function copyPurchaseLink () {
     timeout: 2000,
     color: 'green'
   })
+}
+
+function handleOpenShippingModal () {
+  isSippingModalOpened.value = true
 }
 
 </script>
