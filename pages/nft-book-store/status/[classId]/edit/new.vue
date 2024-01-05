@@ -198,10 +198,12 @@ import { LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { deliverMethodOptions } from '~/utils'
+import { sendNFTsToAPIWallet } from '~/utils/cosmos'
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
-const { wallet } = storeToRefs(walletStore)
+const { connect } = walletStore
+const { wallet, signer } = storeToRefs(walletStore)
 const { token } = storeToRefs(bookStoreApiStore)
 
 const router = useRouter()
@@ -370,6 +372,21 @@ async function handleSubmit () {
     }
 
     isLoading.value = true
+
+    if (editedPrice.isAutoDeliver && editedPrice.stock > 0) {
+      if (!wallet.value || !signer.value) {
+        await connect()
+      }
+      if (!wallet.value || !signer.value) {
+        throw new Error('Unable to connect to wallet')
+      }
+      await sendNFTsToAPIWallet(
+        classId.value as string,
+        editedPrice.stock,
+        signer.value,
+        wallet.value
+      )
+    }
 
     await bookStoreApiStore.addEditionPrice(classId.value as string, priceIndex.value, {
       price: editedPrice
