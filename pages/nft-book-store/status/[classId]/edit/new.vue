@@ -49,6 +49,13 @@
         </UFormGroup>
 
         <UFormGroup
+          :label="`Deliver Method of this ${priceItemLabel}`"
+        >
+          <URadio v-model="deliverMethod" :label="`Automatic deliver NFT of this ${priceItemLabel}`" name="auto" value="auto" />
+          <URadio v-model="deliverMethod" :label="`Sign memo and manually deliver each NFT of this ${priceItemLabel}`" name="manual" value="manual" />
+        </UFormGroup>
+
+        <UFormGroup
           :label="`Product name of this ${priceItemLabel}`"
           :ui="{ container: 'space-y-2' }"
         >
@@ -213,6 +220,7 @@ const hasMultiplePrices = computed(() => classData?.value?.prices?.length > 1)
 
 const price = ref(MINIMAL_PRICE)
 const stock = ref(1)
+const deliverMethod = ref('auto')
 const nameEn = ref('Standard Edition')
 const nameZh = ref('標準版')
 const descriptionEn = ref('')
@@ -338,6 +346,7 @@ async function handleSubmit () {
       priceInDecimal: Math.round(Number(price.value) * 100),
       price: Number(price.value),
       stock: Number(stock.value),
+      isAutoDeliver: deliverMethod.value === 'auto',
       hasShipping: hasShipping.value || false
     }
 

@@ -82,6 +82,13 @@
           </UFormGroup>
 
           <UFormGroup
+            :label="`Deliver Method of this ${priceItemLabel}`"
+          >
+            <URadio v-model="p.deliverMethod" :label="`Automatic deliver NFT of this ${priceItemLabel}`" name="auto" value="auto" :disabled="isEditMode" />
+            <URadio v-model="p.deliverMethod" :label="`Sign memo and manually deliver each NFT of this ${priceItemLabel}`" name="manual" value="manual" :disabled="isEditMode" />
+          </UFormGroup>
+
+          <UFormGroup
             :label="`Product name of this ${priceItemLabel}`"
             :ui="{ container: 'space-y-2' }"
           >
@@ -378,15 +385,16 @@ import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
 import { v4 as uuidv4 } from 'uuid'
-import { LCD_URL, LIKE_CO_API } from '~/constant'
+import { LIKER_NFT_TARGET_ADDRESS, LCD_URL, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { getPortfolioURL } from '~/utils'
-import { getNFTAuthzGrants } from '~/utils/cosmos'
+import { getNFTs, signSendNFTs, getNFTAuthzGrants } from '~/utils/cosmos'
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
-const { wallet } = storeToRefs(walletStore)
+const { connect } = walletStore
+const { wallet, signer } = storeToRefs(walletStore)
 const { token } = storeToRefs(bookStoreApiStore)
 const { newBookListing, updateEditionPrice } = bookStoreApiStore
 
@@ -415,6 +423,7 @@ const mustClaimToView = ref(false)
 const hideDownload = ref(false)
 const prices = ref<any[]>([{
   price: MINIMAL_PRICE,
+  deliverMethod: 'auto',
   stock: Number(route.query.count as string || 1),
   nameEn: 'Standard Edition',
   nameZh: '標準版',
@@ -455,7 +464,7 @@ const toolbarOptions = ref<string[]>([
   'preview'
 ])
 
-const isEditMode = computed(() => route.params.editingClassId && editionIndex.value)
+const isEditMode = computed(() => Boolean(route.params.editingClassId && editionIndex.value))
 const pageTitle = computed(() => isEditMode.value ? 'Edit Current Edition' : 'New NFT Book Listing')
 const submitButtonText = computed(() => isEditMode.value ? 'Save Changes' : 'Submit')
 const editionInfo = ref<any>({})
@@ -590,6 +599,7 @@ function addMorePrice () {
   prices.value.push({
     index: uuidv4(),
     price: MINIMAL_PRICE,
+    deliverMethod: 'auto',
     stock: 1,
     nameEn: `Tier ${nextPriceIndex.value}`,
     nameZh: `級別 ${nextPriceIndex.value}`,
@@ -655,6 +665,7 @@ function mapPrices (prices:any) {
       priceInDecimal: Math.round(Number(p.price) * 100),
       price: Number(p.price),
       stock: Number(p.stock),
+      isAutoDeliver: p.deliverMethod === 'auto',
       hasShipping: p.hasShipping || false
     }))
 }
@@ -711,6 +722,38 @@ async function submitNewClass () {
           price: Number(rate.price)
         }))
       : undefined
+
+    const autoDeliverCount = p
+      .filter(price => price.isAutoDeliver)
+      .reduce((acc, price) => acc + price.stock, 0)
+
+    if (autoDeliverCount > 0) {
+      if (!wallet.value || !signer.value) {
+        await connect()
+      }
+      if (!wallet.value || !signer.value) { return }
+
+      const { nfts } = await getNFTs({
+        classId: classIdInput.value as string,
+        owner: wallet.value,
+        needCount: autoDeliverCount
+      })
+      const nftIds = nfts.map(nft => nft.id).slice(0, autoDeliverCount)
+      const classIds = nftIds.map(_ => classIdInput.value as string)
+
+      const res = await signSendNFTs(
+        LIKER_NFT_TARGET_ADDRESS,
+        classIds,
+        nftIds,
+        signer.value,
+        wallet.value,
+        'Send auto delivered NFT to API wallet'
+      )
+
+      if (!res.transactionHash || res.code !== 0) {
+        throw new Error('Failed to sign and send NFTs')
+      }
+    }
 
     await newBookListing(classIdInput.value as string, {
       defaultPaymentCurrency,

@@ -49,6 +49,13 @@
         </UFormGroup>
 
         <UFormGroup
+          :label="`Deliver Method of this ${priceItemLabel}`"
+        >
+          <URadio v-model="deliverMethod" :label="`Automatic deliver NFT of this ${priceItemLabel}`" name="auto" value="auto" disabled />
+          <URadio v-model="deliverMethod" :label="`Sign memo and manually deliver each NFT of this ${priceItemLabel}`" name="manual" value="manual" disabled />
+        </UFormGroup>
+
+        <UFormGroup
           :label="`Product name of this ${priceItemLabel}`"
           :ui="{ container: 'space-y-2' }"
         >
@@ -213,6 +220,7 @@ const hasMultiplePrices = computed(() => classData?.value?.prices?.length > 1)
 
 const price = ref(MINIMAL_PRICE)
 const stock = ref(1)
+const deliverMethod = ref('auto')
 const nameEn = ref('Standard Edition')
 const nameZh = ref('標準版')
 const descriptionEn = ref('')
@@ -276,6 +284,7 @@ onMounted(async () => {
       if (currentEdition) {
         price.value = currentEdition.price || 0
         stock.value = currentEdition.stock || 0
+        deliverMethod.value = currentEdition.isAutoDeliver ? 'auto' : 'manual'
         nameEn.value = currentEdition.name?.en || currentEdition.name || ''
         nameZh.value = currentEdition.name?.zh || currentEdition.name || ''
         const legacyDescription = typeof currentEdition.description === 'string' ? currentEdition.description : undefined
@@ -351,6 +360,7 @@ async function handleSubmit () {
       priceInDecimal: Math.round(Number(price.value) * 100),
       price: Number(price.value),
       stock: Number(stock.value),
+      isAutoDeliver: deliverMethod.value === 'auto',
       hasShipping: hasShipping.value || false
     }
 
