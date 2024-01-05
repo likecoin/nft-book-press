@@ -357,7 +357,7 @@ async function handleSubmit () {
       price: Number(price.value),
       stock: Number(stock.value),
       isAutoDeliver: deliverMethod.value === 'auto',
-      autoMemo: autoMemo.value || '',
+      autoMemo: deliverMethod.value === 'auto' ? (autoMemo.value || '') : '',
       hasShipping: hasShipping.value || false
     }
 

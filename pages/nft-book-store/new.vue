@@ -674,7 +674,7 @@ function mapPrices (prices:any) {
       price: Number(p.price),
       stock: Number(p.stock),
       isAutoDeliver: p.deliverMethod === 'auto',
-      autoMemo: p.autoMemo || '',
+      autoMemo: p.deliverMethod === 'auto' ? (p.autoMemo || '') : '',
       hasShipping: p.hasShipping || false
     }))
 }
