@@ -1537,13 +1537,13 @@
     "@lezer/highlight" "^1.0.0"
     "@lezer/lr" "^1.0.0"
 
-"@likecoin/iscn-js@^0.6.8":
-  version "0.6.8"
-  resolved "https://registry.npmjs.org/@likecoin/iscn-js/-/iscn-js-0.6.8.tgz"
-  integrity sha512-+vBBr9rNUFyM3Wej8LiQ4LT1XJG00DtrfJLtXG5loPffQVk+X4uDomo1U/DBh1HDCGQNeKQmtnR0nvwVleUvew==
+"@likecoin/iscn-js@^0.6.10":
+  version "0.6.10"
+  resolved "https://registry.yarnpkg.com/@likecoin/iscn-js/-/iscn-js-0.6.10.tgz#213d444f77a42d174a9fc58b95c1afed798071b7"
+  integrity sha512-53Aup9AzNOlDBVF8C/U4pD8CZ/flbFM/5HXfPpMyOFz5aa4gvjguyiPq97rtVoprmT2P6OX/HZ/YoHFqcYKnfQ==
   dependencies:
     "@likecoin/iscn-message-types" "0.0.7"
-    axios "^0.27.2"
+    axios "^1.6.0"
     bech32 "^2.0.0"
     bignumber.js "^9.0.1"
     buffer "^6.0.3"
@@ -3022,6 +3022,15 @@ axios@^0.27.2:
   dependencies:
     follow-redirects "^1.14.9"
     form-data "^4.0.0"
+
+axios@^1.6.0:
+  version "1.6.4"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.4.tgz#184ee1f63d412caffcf30d2c50982253c3ee86e0"
+  integrity sha512-heJnIs6N4aa1eSthhN9M5ioILu8Wi8vmQW9iHQ9NUvfkJb0lEEDUiIdQNAuBtfUt3FxReaKdpQA5DbmMOqzF/A==
+  dependencies:
+    follow-redirects "^1.15.4"
+    form-data "^4.0.0"
+    proxy-from-env "^1.1.0"
 
 b4a@^1.6.4:
   version "1.6.4"
@@ -4840,6 +4849,11 @@ follow-redirects@^1.14.0, follow-redirects@^1.14.9:
   version "1.15.2"
   resolved "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.15.2.tgz"
   integrity sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==
+
+follow-redirects@^1.15.4:
+  version "1.15.4"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.15.4.tgz#cdc7d308bf6493126b17ea2191ea0ccf3e535adf"
+  integrity sha512-Cr4D/5wlrb0z9dgERpUL3LrmPKVDsETIJhaCMeDfuFYcqa5bldGV6wBsAN6X/vxlXQtFBMrXdXxdL8CbDTGniw==
 
 for-each@^0.3.3:
   version "0.3.3"
@@ -7507,6 +7521,11 @@ protocols@^2.0.0, protocols@^2.0.1:
   version "2.0.1"
   resolved "https://registry.npmjs.org/protocols/-/protocols-2.0.1.tgz"
   integrity sha512-/XJ368cyBJ7fzLMwLKv1e4vLxOju2MNAIokcr7meSaNcVbWz/CPcW22cP04mwxOErdA5mwjA8Q6w/cdAQxVn7Q==
+
+proxy-from-env@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/proxy-from-env/-/proxy-from-env-1.1.0.tgz#e102f16ca355424865755d2c9e8ea4f24d58c3e2"
+  integrity sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==
 
 prr@~1.0.1:
   version "1.0.1"
