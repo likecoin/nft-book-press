@@ -37,13 +37,13 @@
                 :value="s.nameEn"
                 placeholder="Shipping option name"
                 :disabled="isViewMode"
-                @input="(e) => updateShippingRate(e, 'nameEn', index)"
+                @input="(e) => handleInputShippingRates(e, 'nameEn', index)"
               />
               <UInput
                 placeholder="運送選項名稱"
                 :value="s.nameZh"
                 :disabled="isViewMode"
-                @input="(e) => updateShippingRate(e, 'nameZh', index)"
+                @input="(e) => handleInputShippingRates(e, 'nameZh', index)"
               />
             </UFormGroup>
 
@@ -54,7 +54,7 @@
                 step="0.01"
                 :min="0"
                 :disabled="isViewMode"
-                @input="(e) => updateShippingRate(e, 'price', index)"
+                @input="(e) => handleInputShippingRates(e, 'price', index)"
               />
             </UFormGroup>
 
@@ -91,7 +91,7 @@
 
       <template #footer>
         <div class="flex justify-end items-center">
-          <UButton v-if="isEditMode" label="Save" @click="closeModal" />
+          <UButton v-if="isEditMode" label="Save" @click="handleOnSave" />
           <div v-if="isViewMode" class="flex justify-end items-center gap-[8px]">
             <span class="text-gray-300 text-sm text-right underline">
               You can manage the shipping options by going to the management page
@@ -131,7 +131,7 @@ const props = defineProps({
     default: () => []
   }
 })
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'on-update-shipping-rates'])
 const isEditMode = computed(() => !!(props.mode === 'edit'))
 const isViewMode = computed(() => !!(props.mode === 'view'))
 const modalTitle = computed(() =>
@@ -152,7 +152,7 @@ function closeModal () {
   emit('update:modelValue', false)
 }
 
-function updateShippingRate (e: InputEvent, key: string, index: number) {
+function handleInputShippingRates (e: InputEvent, key: string, index: number) {
   shippingRates.value[index][key] = (e.target as HTMLInputElement)?.value
 }
 
@@ -176,5 +176,10 @@ function addMoreShippingRate () {
 
 function deleteShippingRate (index: number) {
   shippingRates.value.splice(index, 1)
+}
+
+function handleOnSave () {
+  emit('on-update-shipping-rates', shippingRates.value.map((option:any) => ({ name: { en: option.nameEn, zh: option.nameZh }, priceInDecimal: Math.round(Number(option.price) * 100) })))
+  closeModal()
 }
 </script>

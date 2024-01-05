@@ -561,6 +561,7 @@
       v-model="isSippingModalOpened"
       mode="edit"
       :shipping-info="classListingInfo.shippingRates"
+      @on-update-shipping-rates="updateShippingRates"
     />
     <NuxtPage :transition="false" />
   </main>
@@ -1074,6 +1075,28 @@ async function updateSettings () {
   } catch (err) {
     const errorData = (err as any).data || err
     console.error(errorData)
+    error.value = errorData
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function updateShippingRates (value: any) {
+  try {
+    await updateBookListingSetting(classId.value as string, {
+      shippingRates: value
+    })
+    const { data: classData } = await useFetch(
+      `${LIKE_CO_API}/likernft/book/store/${classId.value}`,
+      {
+        headers: {
+          authorization: `Bearer ${token.value}`
+        }
+      }
+    )
+    classListingInfo.value = classData.value
+  } catch (err) {
+    const errorData = (err as any).data || err
     error.value = errorData
   } finally {
     isLoading.value = false
