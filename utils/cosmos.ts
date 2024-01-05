@@ -9,7 +9,7 @@ import { parseAuthzGrant } from '@likecoin/iscn-js/dist/messages/parsing'
 import { GenericAuthorization } from 'cosmjs-types/cosmos/authz/v1beta1/authz'
 import { formatMsgSend } from '@likecoin/iscn-js/dist/messages/likenft'
 import { addParamToUrl } from '.'
-import { RPC_URL, LIKER_NFT_FEE_WALLET } from '~/constant'
+import { RPC_URL, LIKER_NFT_FEE_WALLET, LIKER_NFT_TARGET_ADDRESS } from '~/constant'
 import network from '~/constant/network'
 
 const DEFAULT_GAS_AMOUNT = 200000
@@ -321,4 +321,42 @@ export async function signRevokeNFTSendAuthz (
 export function shortenWalletAddress (address: string) {
   if (!address) { return '-' }
   return `${address.slice(0, 10)}...${address.slice(-6)}`
+}
+
+export async function sendNFTsToAPIWallet (
+  classId: string,
+  nftCount: number,
+  signer: OfflineSigner,
+  ownerAddress: string
+) {
+  if (nftCount <= 0) { return }
+
+  if (!ownerAddress) {
+    throw new Error('Missing owner address')
+  }
+
+  if (!signer) {
+    throw new Error('Missing signer')
+  }
+
+  const { nfts } = await getNFTs({
+    classId,
+    owner: ownerAddress,
+    needCount: nftCount
+  })
+  const nftIds = nfts.map(nft => nft.id).slice(0, nftCount)
+  const classIds = nftIds.map(_ => classId)
+
+  const res = await signSendNFTs(
+    LIKER_NFT_TARGET_ADDRESS,
+    classIds,
+    nftIds,
+    signer,
+    ownerAddress,
+    'Send auto delivering NFT Book to API wallet'
+  )
+
+  if (!res.transactionHash || res.code !== 0) {
+    throw new Error('Failed to sign and send NFTs')
+  }
 }

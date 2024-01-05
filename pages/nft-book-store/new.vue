@@ -385,11 +385,11 @@ import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
 import { v4 as uuidv4 } from 'uuid'
-import { LIKER_NFT_TARGET_ADDRESS, LCD_URL, LIKE_CO_API } from '~/constant'
+import { LCD_URL, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { getPortfolioURL } from '~/utils'
-import { getNFTs, signSendNFTs, getNFTAuthzGrants } from '~/utils/cosmos'
+import { getNFTAuthzGrants, sendNFTsToAPIWallet } from '~/utils/cosmos'
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
@@ -731,28 +731,15 @@ async function submitNewClass () {
       if (!wallet.value || !signer.value) {
         await connect()
       }
-      if (!wallet.value || !signer.value) { return }
-
-      const { nfts } = await getNFTs({
-        classId: classIdInput.value as string,
-        owner: wallet.value,
-        needCount: autoDeliverCount
-      })
-      const nftIds = nfts.map(nft => nft.id).slice(0, autoDeliverCount)
-      const classIds = nftIds.map(_ => classIdInput.value as string)
-
-      const res = await signSendNFTs(
-        LIKER_NFT_TARGET_ADDRESS,
-        classIds,
-        nftIds,
-        signer.value,
-        wallet.value,
-        'Send auto delivered NFT to API wallet'
-      )
-
-      if (!res.transactionHash || res.code !== 0) {
-        throw new Error('Failed to sign and send NFTs')
+      if (!wallet.value || !signer.value) {
+        throw new Error('Unable to connect to wallet')
       }
+      await sendNFTsToAPIWallet(
+        classIdInput.value as string,
+        autoDeliverCount,
+        signer.value,
+        wallet.value
+      )
     }
 
     await newBookListing(classIdInput.value as string, {
