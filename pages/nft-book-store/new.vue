@@ -42,9 +42,16 @@
           <UInput
             :value="`${totalStock}`"
             :readonly="true"
+            disabled
           />
         </UFormGroup>
       </UCard>
+
+      <ShippingRates
+        mode="edit"
+        :shipping-info="shippingRates"
+        @on-update-shipping-rates="updateShippingRate"
+      />
 
       <UCard :ui="{ header: { base: 'flex justify-between items-center gap-2' } }">
         <template #header>
@@ -111,62 +118,13 @@
 
           <UButton v-if="hasMultiplePrices" label="Delete" color="red" @click="deletePrice(index)" />
 
-          <UCard
-            :ui="{
-              divide: isStripeConnectChecked ? undefined : '',
-              header: { base: 'flex flex-wrap justify-between items-center gap-2' },
-              body: { padding: isStripeConnectChecked ? undefined : '', base: 'grid lg:grid-cols-2 gap-4' }
-            }"
-          >
-            <template #header>
-              <h3 class="font-bold font-mono">
-                Physical Goods
-              </h3>
-
-              <UCheckbox
-                :value="hasShipping"
-                label="Includes physical good that requires shipping"
-                @input="e => updatePrice(e, 'hasShipping', index)"
-              />
-            </template>
-          </UCard>
+          <ShippingRates
+            v-model="p.hasShipping"
+            mode="view"
+            :shipping-info="shippingRates"
+          />
         </component>
       </component>
-
-      <UCard
-        v-if="hasShipping"
-        :ui="{
-          divide: isStripeConnectChecked ? undefined : '',
-          header: { base: 'flex flex-wrap justify-between items-center gap-2' },
-          body: { padding: isStripeConnectChecked ? undefined : '', base: 'grid lg:grid-cols-2 gap-4' }
-        }"
-      >
-        <template #header>
-          <h3 class="font-bold font-mono">
-            Shipping Options and Prices
-          </h3>
-
-          <UButton
-            label="Add Option"
-            variant="outline"
-            @click="addMoreShippingRate"
-          />
-        </template>
-
-        <component :is="hasMultipleShippingRates ? 'ul' : 'div'">
-          <component :is="hasMultipleShippingRates ? 'li' : 'div'" v-for="s, index in shippingRates" :key="s.index" class="space-y-2 px-5 py-4">
-            <UDivider v-if="index > 0" />
-            <UFormGroup label="Price(USD) of this shipping option">
-              <UInput :value="s.price" type="number" step="0.01" :min="0" @input="e => updateShippingRate(e, 'price', index)" />
-            </UFormGroup>
-
-            <UFormGroup label="Name of this shipping option" :ui="{ container: 'space-y-2' }">
-              <UInput placeholder="Shipping option name" :value="s.nameEn" @input="e => updateShippingRate(e, 'nameEn', index)" />
-              <UInput placeholder="運送選項名稱" :value="s.nameZh" @input="e => updateShippingRate(e, 'nameZh', index)" />
-            </UFormGroup>
-          </component>
-        </component>
-      </UCard>
 
       <UCard
         :ui="{
@@ -419,16 +377,11 @@ const prices = ref<any[]>([{
   nameEn: 'Standard Edition',
   nameZh: '標準版',
   descriptionEn: '',
-  descriptionZh: ''
+  descriptionZh: '',
+  hasShipping: false
 }])
-const shippingRates = ref<any[]>([{
-  price: 10.0,
-  nameEn: 'Standard Shipping',
-  nameZh: '標準寄送'
-}])
+const shippingRates = ref<any[]>([])
 const hasMultiplePrices = computed(() => prices.value.length > 1)
-const hasShipping = computed(() => prices.value.find(p => p.hasShipping))
-const hasMultipleShippingRates = computed(() => shippingRates.value.length > 1)
 const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
 const moderatorWallets = ref<string[]>([])
 const moderatorWalletsGrants = ref<any>({})
@@ -594,7 +547,8 @@ function addMorePrice () {
     nameEn: `Tier ${nextPriceIndex.value}`,
     nameZh: `級別 ${nextPriceIndex.value}`,
     descriptionEn: '',
-    descriptionZh: ''
+    descriptionZh: '',
+    hasShipping: false
   })
 }
 
@@ -602,17 +556,8 @@ function deletePrice (index: number) {
   prices.value.splice(index, 1)
 }
 
-function updateShippingRate (e: InputEvent, key: string, index: number) {
-  shippingRates.value[index][key] = (e.target as HTMLInputElement)?.value
-}
-
-function addMoreShippingRate () {
-  shippingRates.value.push({
-    index: uuidv4(),
-    price: 20,
-    nameEn: 'International Shipping',
-    nameZh: '國際寄送'
-  })
+function updateShippingRate (options: any) {
+  shippingRates.value = options
 }
 
 function addModeratorWallet () {
@@ -646,7 +591,7 @@ function sanitizeHtml (html: string) {
 
 function mapPrices (prices:any) {
   return prices
-    .map(p => ({
+    .map((p: any) => ({
       name: { en: p.nameEn, zh: p.nameZh },
       description: {
         en: escapeHtml(p.descriptionEn),
@@ -693,7 +638,7 @@ async function submitNewClass () {
     }
 
     const p = mapPrices(prices.value)
-    if (p.find(price => price.price !== 0 && price.price < MINIMAL_PRICE)) {
+    if (p.find((price: any) => price.price !== 0 && price.price < MINIMAL_PRICE)) {
       throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or free`)
     }
     await checkStripeConnect()
@@ -703,12 +648,12 @@ async function submitNewClass () {
           [stripeConnectWallet.value]: 100
         }
       : null
-    const s = hasShipping.value
+    const s = shippingRates.value.length
       ? shippingRates.value
         .map(rate => ({
-          name: { en: rate.nameEn, zh: rate.nameZh },
-          priceInDecimal: Math.round(Number(rate.price) * 100),
-          price: Number(rate.price)
+          name: { en: rate.name.en, zh: rate.name.zh },
+          priceInDecimal: rate.priceInDecimal,
+          price: rate.priceInDecimal / 100
         }))
       : undefined
 

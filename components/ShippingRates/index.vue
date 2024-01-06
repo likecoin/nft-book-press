@@ -6,6 +6,7 @@
           Shipping Options
         </h3>
         <UButton
+          v-if="!shouldHideViewButtonOnViewMode"
           :icon="buttonConfig.icon"
           :label="buttonConfig.text"
           :loading="isLoading"
@@ -69,6 +70,10 @@
 
 <script setup lang="ts">
 type ModeType = 'edit' | 'view';
+const NEW_LISTING_PAGES = {
+  BOOK: 'nft-book-store-new',
+  COLLECTION: 'nft-book-store-collection-new'
+}
 const props = defineProps({
   isLoading: {
     type: Boolean,
@@ -86,15 +91,22 @@ const props = defineProps({
     type: Boolean
   }
 })
+const route = useRoute()
+const routerName = route.name
 const emit = defineEmits(['update:modelValue', 'on-update-shipping-rates'])
 const isSippingModalOpened = ref<Boolean>(false)
 
 const hasShipping = ref(props.modelValue)
+watch(() => props.modelValue, (newValue) => {
+  hasShipping.value = newValue
+})
 watch(hasShipping, (hasShipping) => {
   emit('update:modelValue', hasShipping)
 })
 const isEditMode = computed(() => !!(props.mode === 'edit'))
 const isViewMode = computed(() => !!(props.mode === 'view'))
+const isNewListingPage = computed(() => Object.values(NEW_LISTING_PAGES).includes(routerName as string))
+const shouldHideViewButtonOnViewMode = computed(() => Boolean(isViewMode.value && isNewListingPage.value))
 const buttonConfig = computed(() => {
   if (isEditMode.value && props.shippingInfo.length) {
     return {
