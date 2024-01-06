@@ -139,42 +139,12 @@
         </table>
       </UCard>
 
-      <UCard
-        v-if="classListingInfo.shippingRates"
-        :ui="{ body: { padding: '' } }"
-      >
-        <template #header>
-          <div class="flex flex-row justify-between items-center">
-            <h3 class="font-bold font-mono">
-              Shipping Options
-            </h3>
-            <UButton
-              icon="i-heroicons-pencil-square"
-              label="Edit"
-              @click="handleOpenShippingModal"
-            />
-          </div>
-        </template>
-
-        <UTable
-          :columns="[
-            { key: 'index', },
-            { key: 'name', label: 'Name' },
-            { key: 'price', label: 'Price (USD)' },
-          ]"
-          :rows="shippingRatesTableRows"
-        >
-          <template #name-data="{ row }">
-            <div class="flex flex-col gap-[8px] items-start">
-              <span class="text-center">en: {{ row.name.en }}</span>
-              <span class="text-center">zh: {{ row.name.zh }}</span>
-            </div>
-          </template>
-          <template #price-data="{ row }">
-            <span class="text-center">{{ row.price }}</span>
-          </template>
-        </UTable>
-      </UCard>
+      <ShippingRates
+        mode="edit"
+        :is-loading="isUpdatingShippingRates"
+        :shipping-info="classListingInfo.shippingRates"
+        @on-update-shipping-rates="updateShippingRates"
+      />
 
       <UCard :ui="{ body: { padding: '' } }">
         <template #header>
@@ -556,13 +526,6 @@
         </QRCode>
       </UCard>
     </template>
-    <ShippingRatesInfoModal
-      v-if="isSippingModalOpened"
-      v-model="isSippingModalOpened"
-      mode="edit"
-      :shipping-info="classListingInfo.shippingRates"
-      @on-update-shipping-rates="updateShippingRates"
-    />
     <NuxtPage :transition="false" />
   </main>
 </template>
@@ -598,7 +561,7 @@ const prices = ref<any[]>([])
 const isUpdatingPricesOrder = ref(false)
 const ordersData = ref<any>({})
 const connectStatus = ref<any>({})
-const isSippingModalOpened = ref<Boolean>(false)
+const isUpdatingShippingRates = ref(false)
 
 // Search
 const searchInput = ref('')
@@ -664,17 +627,6 @@ const purchaseList = computed(() => {
     }).sort((a: any, b: any) => b.timestamp - a.timestamp)
   }
   return []
-})
-
-const shippingRatesTableRows = computed(() => {
-  if (!classListingInfo.value.shippingRates) {
-    return []
-  }
-  return classListingInfo.value.shippingRates.map((r: any, index: number) => ({
-    index: index + 1,
-    name: r.name,
-    price: r.priceInDecimal / 100
-  }))
 })
 
 const orderTableColumns = computed(() => {
@@ -1082,6 +1034,7 @@ async function updateSettings () {
 }
 
 async function updateShippingRates (value: any) {
+  isUpdatingShippingRates.value = true
   try {
     await updateBookListingSetting(classId.value as string, {
       shippingRates: value
@@ -1099,7 +1052,7 @@ async function updateShippingRates (value: any) {
     const errorData = (err as any).data || err
     error.value = errorData
   } finally {
-    isLoading.value = false
+    isUpdatingShippingRates.value = false
   }
 }
 
@@ -1111,10 +1064,6 @@ async function copyPurchaseLink () {
     timeout: 2000,
     color: 'green'
   })
-}
-
-function handleOpenShippingModal () {
-  isSippingModalOpened.value = true
 }
 
 </script>
