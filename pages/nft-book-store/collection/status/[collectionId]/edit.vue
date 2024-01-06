@@ -84,22 +84,11 @@
           :sanitize="sanitizeHtml"
         />
 
-        <UCard
-          :ui="{
-            divide: '',
-            header: { base: 'flex flex-wrap justify-between items-center gap-2' },
-            body: { padding: '' },
-            footer: { base: 'grid lg:grid-cols-2 gap-4' },
-          }"
-        >
-          <template #header>
-            <h3 class="font-bold font-mono">
-              Physical Goods
-            </h3>
-
-            <UCheckbox v-model="hasShipping" label="Includes physical good that requires shipping" />
-          </template>
-        </UCard>
+        <ShippingRates
+          v-model="hasShipping"
+          mode="view"
+          :shipping-info="shippingRates"
+        />
 
         <template #footer>
           <UButton label="Save Changes" :loading="isLoading" size="lg" :disabled="isLoading" @click="handleSubmit" />
@@ -138,6 +127,7 @@ const descriptionEn = ref('')
 const descriptionZh = ref('')
 const image = ref('')
 const hasShipping = ref(false)
+const shippingRates = ref<any[]>([])
 
 const toolbarOptions = ref<string[]>([
   'bold',
@@ -186,6 +176,7 @@ onMounted(async () => {
     descriptionEn.value = collectionListingInfo.value.description?.en || ' '
     descriptionZh.value = collectionListingInfo.value.description?.zh || ' '
     hasShipping.value = collectionListingInfo.value.hasShipping || false
+    shippingRates.value = collectionListingInfo.value.shippingRates || []
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)

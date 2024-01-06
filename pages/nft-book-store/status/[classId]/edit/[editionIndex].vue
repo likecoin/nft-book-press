@@ -176,7 +176,7 @@ onMounted(async () => {
 
     const classResData = classRes?.data?.value
     if (classResData) {
-      shippingRates.value = classResData?.shippingRates
+      shippingRates.value = classResData?.shippingRates || []
       if (classResData?.ownerWallet !== wallet.value) {
         throw new Error('NOT_OWNER_OF_NFT_CLASS')
       }

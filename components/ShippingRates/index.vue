@@ -1,4 +1,3 @@
-
 <template>
   <UCard :ui="{ body: { padding: '' } }">
     <template #header>

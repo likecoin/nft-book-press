@@ -22,7 +22,12 @@
 
     <template v-if="bookStoreApiStore.isAuthenticated">
       <UCard :ui="{ body: { padding: '' } }">
-        <UFormGroup label="Books in Collection">
+        <template #header>
+          <h3 class="font-bold font-mono">
+            Books in Collection
+          </h3>
+        </template>
+        <UFormGroup>
           <UTable
             :columns="[{ key: 'classId', label: 'Class ID' }, { key: 'name', label: 'Book Name'}]"
             :rows="collectionListingInfo?.classIds?.map((classId, index) => ({ index, classId, name: getClassMetadataById(classId)?.name }))"
@@ -60,29 +65,12 @@
         </table>
       </UCard>
 
-      <UCard
-        v-if="collectionListingInfo.shippingRates"
-        :ui="{ body: { padding: '' } }"
-      >
-        <template #header>
-          <h3 class="font-bold font-mono">
-            Shipping Options
-          </h3>
-        </template>
-
-        <UTable
-          :columns="[
-            { key: 'index', },
-            { key: 'name', label: 'Name' },
-            { key: 'price', label: 'Price (USD)' },
-          ]"
-          :rows="shippingRatesTableRows"
-        >
-          <template #price-data="{ row }">
-            <span class="text-right">{{ row.price }}</span>
-          </template>
-        </UTable>
-      </UCard>
+      <ShippingRates
+        mode="edit"
+        :is-loading="isUpdatingShippingRates"
+        :shipping-info="collectionListingInfo.shippingRates"
+        @on-update-shipping-rates="updateShippingRates"
+      />
 
       <UCard :ui="{ body: { padding: '' } }">
         <template #header>
@@ -470,6 +458,7 @@ const fromChannel = ref<string | undefined>(undefined)
 const collectionListingInfo = ref<any>({})
 const ordersData = ref<any>({})
 const connectStatus = ref<any>({})
+const isUpdatingShippingRates = ref(false)
 
 // Search
 const searchInput = ref('')
@@ -534,17 +523,6 @@ const purchaseList = computed(() => {
     }).sort((a: any, b: any) => b.timestamp - a.timestamp)
   }
   return []
-})
-
-const shippingRatesTableRows = computed(() => {
-  if (!collectionListingInfo.value.shippingRates) {
-    return []
-  }
-  return collectionListingInfo.value.shippingRates.map((r: any, index: number) => ({
-    index: index + 1,
-    name: r.name,
-    price: r.priceInDecimal / 100
-  }))
 })
 
 const orderTableColumns = computed(() => {
@@ -880,6 +858,21 @@ async function updateSettings () {
     error.value = errorData
   } finally {
     isLoading.value = false
+  }
+}
+
+async function updateShippingRates (value: any) {
+  isUpdatingShippingRates.value = true
+  try {
+    await updateNFTBookCollectionById(collectionId.value as string, {
+      shippingRates: value
+    })
+    collectionListingInfo.value = (await collectionStore.fetchCollectionById(collectionId.value as string)).value
+  } catch (err) {
+    const errorData = (err as any).data || err
+    error.value = errorData
+  } finally {
+    isUpdatingShippingRates.value = false
   }
 }
 
