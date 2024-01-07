@@ -2,9 +2,12 @@
   <UCard :ui="{ body: { padding: '' } }">
     <template #header>
       <div class="flex flex-row justify-between items-center">
-        <h3 class="font-bold font-mono">
-          Shipping Options
-        </h3>
+        <div class="flex justify-start items-center gap-[8px]">
+          <h3 class="font-bold font-mono">
+            Shipping Options
+          </h3>
+          <slot name="header" />
+        </div>
         <UButton
           v-if="!shouldHideViewButtonOnViewMode"
           :icon="buttonConfig.icon"

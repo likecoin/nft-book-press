@@ -108,61 +108,19 @@
             <UInput v-model="price.stock" type="number" step="0.01" :min="0" />
           </UFormGroup>
 
-          <UCard
-            :ui="{
-              divide: isStripeConnectChecked ? undefined : '',
-              header: { base: 'flex flex-wrap justify-between items-center gap-2' },
-              body: { padding: isStripeConnectChecked ? undefined : '', base: 'grid lg:grid-cols-2 gap-4' }
-            }"
+          <ShippingRates
+            mode="edit"
+            :shipping-info="shippingRates"
+            @on-update-shipping-rates="updateShippingRate"
           >
             <template #header>
-              <h3 class="font-bold font-mono">
-                Physical Goods
-              </h3>
-
-              <UCheckbox
-                v-model="price.hasShipping"
-                label="Includes physical good that requires shipping"
-              />
+              <span class="text-[14px] text-gray-500">
+                (Includes physical good that requires shipping)
+              </span>
             </template>
-          </UCard>
+          </ShippingRates>
         </div>
       </div>
-
-      <UCard
-        v-if="hasShipping"
-        :ui="{
-          divide: isStripeConnectChecked ? undefined : '',
-          header: { base: 'flex flex-wrap justify-between items-center gap-2' },
-          body: { padding: isStripeConnectChecked ? undefined : '', base: 'grid lg:grid-cols-2 gap-4' }
-        }"
-      >
-        <template #header>
-          <h3 class="font-bold font-mono">
-            Shipping Options and Prices
-          </h3>
-
-          <UButton
-            label="Add Option"
-            variant="outline"
-            @click="addMoreShippingRate"
-          />
-        </template>
-
-        <component :is="hasMultipleShippingRates ? 'ul' : 'div'">
-          <component :is="hasMultipleShippingRates ? 'li' : 'div'" v-for="s, index in shippingRates" :key="s.index" class="space-y-2 px-5 py-4">
-            <UDivider v-if="index > 0" />
-            <UFormGroup label="Price(USD) of this shipping option">
-              <UInput :value="s.price" type="number" step="0.01" :min="0" @input="e => updateShippingRate(e, 'price', index)" />
-            </UFormGroup>
-
-            <UFormGroup label="Name of this shipping option" :ui="{ container: 'space-y-2' }">
-              <UInput placeholder="Shipping option name" :value="s.nameEn" @input="e => updateShippingRate(e, 'nameEn', index)" />
-              <UInput placeholder="運送選項名稱" :value="s.nameZh" @input="e => updateShippingRate(e, 'nameZh', index)" />
-            </UFormGroup>
-          </component>
-        </component>
-      </UCard>
 
       <UCard
         :ui="{
@@ -349,7 +307,6 @@ import { MdEditor, ToolbarNames, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
-import { v4 as uuidv4 } from 'uuid'
 import { LCD_URL, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
@@ -395,13 +352,7 @@ const price = ref({
   stock: Number(route.query.count as string || 1),
   hasShipping: false
 })
-const shippingRates = ref<any[]>([{
-  price: 10.0,
-  nameEn: 'Standard Shipping',
-  nameZh: '標準寄送'
-}])
-const hasShipping = computed(() => price.value.hasShipping)
-const hasMultipleShippingRates = computed(() => shippingRates.value.length > 1)
+const shippingRates = ref<any[]>([])
 const moderatorWallets = ref<string[]>([])
 const moderatorWalletsGrants = ref<any>({})
 const notificationEmails = ref<string[]>([])
@@ -508,17 +459,8 @@ function addMoreClassId () {
   classIdInput.value = ''
 }
 
-function updateShippingRate (e: InputEvent, key: string, index: number) {
-  shippingRates.value[index][key] = (e.target as HTMLInputElement)?.value
-}
-
-function addMoreShippingRate () {
-  shippingRates.value.push({
-    index: uuidv4(),
-    price: 20,
-    nameEn: 'International Shipping',
-    nameZh: '國際寄送'
-  })
+function updateShippingRate (options: any) {
+  shippingRates.value = options
 }
 
 function addModeratorWallet () {
@@ -542,7 +484,7 @@ function formatPrice (price: any) {
   return {
     priceInDecimal: Math.round(Number(price.price) * 100),
     stock: Number(price.stock),
-    hasShipping: price.hasShipping || false
+    hasShipping: Boolean(price.hasShipping || shippingRates.value.length || false)
   }
 }
 
@@ -606,7 +548,7 @@ async function submitNewCollection () {
           [stripeConnectWallet.value]: 100
         }
       : null
-    const s = hasShipping.value
+    const s = shippingRates.value.length
       ? shippingRates.value
         .map(rate => ({
           name: { en: rate.nameEn, zh: rate.nameZh },

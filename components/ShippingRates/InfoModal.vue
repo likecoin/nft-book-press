@@ -78,8 +78,10 @@
           />
         </div>
       </component>
-      <div v-else class="flex justify-center items-center py-[36px]">
-        No items
+      <div v-else class="flex justify-center items-center w-full gap-[8px] py-[36px]">
+        <span>
+          No items
+        </span>
         <UButton
           v-if="isEditMode"
           label="Add Options"
