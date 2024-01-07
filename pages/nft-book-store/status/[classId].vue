@@ -40,7 +40,7 @@
             <div class="flex justify-center py-4">
               <UButton
                 icon="i-heroicons-plus-circle"
-                label="New Listing"
+                label="New Edition"
                 :to="{
                   name: 'nft-book-store-status-classId-edit-new',
                   params: { classId },
