@@ -102,8 +102,6 @@ import { MdEditor, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
-import { v4 as uuidv4 } from 'uuid'
-
 import { LIKE_CO_API } from '~/constant'
 
 import { useBookStoreApiStore } from '~/stores/book-store-api'
