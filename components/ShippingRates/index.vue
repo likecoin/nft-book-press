@@ -95,6 +95,7 @@ const props = defineProps({
   }
 })
 const route = useRoute()
+const router = useRouter()
 const routerName = route.name
 const emit = defineEmits(['update:modelValue', 'on-update-shipping-rates'])
 const isSippingModalOpened = ref<Boolean>(false)
@@ -133,7 +134,7 @@ const buttonConfig = computed(() => {
     return {
       icon: 'i-heroicons-pencil-square-20-solid',
       text: 'Set Shipping Options',
-      action: handleOpenShippingModal
+      action: goBack
     }
   }
 })
@@ -147,6 +148,10 @@ const shippingRatesTableRows = computed(() => {
     price: r.priceInDecimal / 100
   }))
 })
+
+function goBack () {
+  router.go(-1) // go back to status page
+}
 
 function handleOpenShippingModal () {
   isSippingModalOpened.value = true

@@ -101,7 +101,7 @@
             <UButton
               label="Set Shipping Options"
               variant="outline"
-              @click="addMoreShippingRate"
+              @click="goBack"
             >
               <template #trailing>
                 <UIcon name="i-heroicons-arrow-right-20-solid" />
@@ -134,6 +134,7 @@ const props = defineProps({
   }
 })
 const emit = defineEmits(['update:modelValue', 'on-update-shipping-rates'])
+const router = useRouter()
 const isEditMode = computed(() => !!(props.mode === 'edit'))
 const isViewMode = computed(() => !!(props.mode === 'view'))
 const modalTitle = computed(() =>
@@ -152,6 +153,10 @@ const hasMultipleShippingRates = computed(() => shippingRates.value.length > 1)
 
 function closeModal () {
   emit('update:modelValue', false)
+}
+
+function goBack () {
+  router.go(-1) // go back to status page
 }
 
 function handleInputShippingRates (e: InputEvent, key: string, index: number) {
