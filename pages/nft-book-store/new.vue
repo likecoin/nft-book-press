@@ -116,13 +116,13 @@
             :sanitize="sanitizeHtml"
           />
 
-          <UButton v-if="hasMultiplePrices" label="Delete" color="red" @click="deletePrice(index)" />
-
           <ShippingRates
             v-model="p.hasShipping"
             mode="view"
             :shipping-info="shippingRates"
           />
+
+          <UButton v-if="hasMultiplePrices" label="Delete" color="red" @click="deletePrice(index)" />
         </component>
       </component>
 
