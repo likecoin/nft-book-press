@@ -59,7 +59,7 @@
           v-if="isAutoDeliver"
           :label="`Memo of this ${priceItemLabel}`"
         >
-          <UInput placeholder="Thank you! 謝謝你的支持!" :value="autoMemo" />
+          <UInput v-model="autoMemo" placeholder="Thank you! 謝謝你的支持!" />
         </UFormGroup>
 
         <UFormGroup
