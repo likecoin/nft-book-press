@@ -329,7 +329,7 @@ export async function sendNFTsToAPIWallet (
   signer: OfflineSigner,
   ownerAddress: string
 ) {
-  if (nftCount <= 0) { return }
+  if (nftCount <= 0) { return '' }
 
   if (!ownerAddress) {
     throw new Error('Missing owner address')
@@ -347,7 +347,7 @@ export async function sendNFTsToAPIWallet (
   const nftIds = nfts.map(nft => nft.id).slice(0, nftCount)
   const classIds = nftIds.map(_ => classId)
 
-  const res = await signSendNFTs(
+  const { transactionHash, code } = await signSendNFTs(
     LIKER_NFT_TARGET_ADDRESS,
     classIds,
     nftIds,
@@ -356,7 +356,8 @@ export async function sendNFTsToAPIWallet (
     'Send auto delivering NFT Book to API wallet'
   )
 
-  if (!res.transactionHash || res.code !== 0) {
+  if (!transactionHash || code !== 0) {
     throw new Error('Failed to sign and send NFTs')
   }
+  return transactionHash
 }

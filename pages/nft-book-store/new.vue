@@ -736,6 +736,7 @@ async function submitNewClass () {
       .filter(price => price.isAutoDeliver)
       .reduce((acc, price) => acc + price.stock, 0)
 
+    let sendNFTsToAPIWalletTxHash = ''
     if (autoDeliverCount > 0) {
       if (!wallet.value || !signer.value) {
         await connect()
@@ -743,7 +744,7 @@ async function submitNewClass () {
       if (!wallet.value || !signer.value) {
         throw new Error('Unable to connect to wallet')
       }
-      await sendNFTsToAPIWallet(
+      sendNFTsToAPIWalletTxHash = await sendNFTsToAPIWallet(
         classIdInput.value as string,
         autoDeliverCount,
         signer.value,
@@ -759,7 +760,8 @@ async function submitNewClass () {
       prices: p,
       shippingRates: s,
       mustClaimToView,
-      hideDownload
+      hideDownload,
+      sendNFTsToAPIWalletTxHash
     })
     router.push({ name: 'nft-book-store' })
   } catch (err) {
