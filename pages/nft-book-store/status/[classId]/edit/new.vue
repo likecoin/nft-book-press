@@ -382,7 +382,7 @@ async function handleSubmit () {
 
     isLoading.value = true
 
-    let sendNFTsToAPIWalletTxHash = ''
+    let autoDeliverNFTsTxHash = ''
     if (editedPrice.isAutoDeliver && editedPrice.stock > 0) {
       if (!wallet.value || !signer.value) {
         await connect()
@@ -390,7 +390,7 @@ async function handleSubmit () {
       if (!wallet.value || !signer.value) {
         throw new Error('Unable to connect to wallet')
       }
-      sendNFTsToAPIWalletTxHash = await sendNFTsToAPIWallet(
+      autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
         classId.value as string,
         editedPrice.stock,
         signer.value,
@@ -400,7 +400,7 @@ async function handleSubmit () {
 
     await bookStoreApiStore.addEditionPrice(classId.value as string, priceIndex.value, {
       price: editedPrice,
-      sendNFTsToAPIWalletTxHash
+      autoDeliverNFTsTxHash
     })
 
     router.push({
