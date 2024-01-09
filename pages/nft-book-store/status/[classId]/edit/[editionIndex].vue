@@ -45,7 +45,7 @@
         </UFormGroup>
 
         <UFormGroup :label="`Total number of NFT for sale of this ${priceItemLabel}`">
-          <UInput v-model="stock" type="number" step="1" :min="0" />
+          <UInput v-model="stock" type="number" step="1" :min="0" :disabled="isAutoDeliver" />
         </UFormGroup>
 
         <URadioGroup
@@ -56,7 +56,7 @@
         />
 
         <UFormGroup
-          v-if="deliverMethod === 'auto'"
+          v-if="isAutoDeliver"
           :label="`Memo of this ${priceItemLabel}`"
         >
           <UInput placeholder="Thank you! 謝謝你的支持!" :value="autoMemo" />
@@ -243,6 +243,7 @@ const shippingRates = ref<any[]>([{
 const hasMultipleShippingRates = computed(() => shippingRates.value.length > 1)
 
 const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
+const isAutoDeliver = computed(() => deliverMethod.value === 'auto')
 
 const toolbarOptions = ref<string[]>([
   'bold',
@@ -370,7 +371,7 @@ async function handleSubmit () {
       priceInDecimal: Math.round(Number(price.value) * 100),
       price: Number(price.value),
       stock: Number(stock.value),
-      isAutoDeliver: deliverMethod.value === 'auto',
+      isAutoDeliver: isAutoDeliver.value,
       autoMemo: autoMemo.value || '',
       hasShipping: hasShipping.value || false
     }
