@@ -45,7 +45,21 @@
         </UFormGroup>
 
         <UFormGroup :label="`Total number of NFT for sale of this ${priceItemLabel}`">
-          <UInput v-model="stock" type="number" step="0.01" :min="0" />
+          <UInput v-model="stock" type="number" step="1" :min="0" :disabled="isAutoDeliver" />
+        </UFormGroup>
+
+        <URadioGroup
+          v-model="deliverMethod"
+          disabled
+          :legend="`Deliver method of this ${priceItemLabel}`"
+          :options="deliverMethodOptions"
+        />
+
+        <UFormGroup
+          v-if="isAutoDeliver"
+          :label="`Memo of this ${priceItemLabel}`"
+        >
+          <UInput v-model="autoMemo" placeholder="Thank you! 謝謝你的支持!" />
         </UFormGroup>
 
         <UFormGroup
@@ -191,6 +205,7 @@ import { LIKE_CO_API } from '~/constant'
 
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
+import { deliverMethodOptions } from '~/utils'
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
@@ -213,6 +228,8 @@ const hasMultiplePrices = computed(() => classData?.value?.prices?.length > 1)
 
 const price = ref(MINIMAL_PRICE)
 const stock = ref(1)
+const deliverMethod = ref('auto')
+const autoMemo = ref('')
 const nameEn = ref('Standard Edition')
 const nameZh = ref('標準版')
 const descriptionEn = ref('')
@@ -226,6 +243,7 @@ const shippingRates = ref<any[]>([{
 const hasMultipleShippingRates = computed(() => shippingRates.value.length > 1)
 
 const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
+const isAutoDeliver = computed(() => deliverMethod.value === 'auto')
 
 const toolbarOptions = ref<string[]>([
   'bold',
@@ -276,6 +294,8 @@ onMounted(async () => {
       if (currentEdition) {
         price.value = currentEdition.price || 0
         stock.value = currentEdition.stock || 0
+        deliverMethod.value = currentEdition.isAutoDeliver ? 'auto' : 'manual'
+        autoMemo.value = currentEdition.autoMemo || ''
         nameEn.value = currentEdition.name?.en || currentEdition.name || ''
         nameZh.value = currentEdition.name?.zh || currentEdition.name || ''
         const legacyDescription = typeof currentEdition.description === 'string' ? currentEdition.description : undefined
@@ -351,6 +371,8 @@ async function handleSubmit () {
       priceInDecimal: Math.round(Number(price.value) * 100),
       price: Number(price.value),
       stock: Number(stock.value),
+      isAutoDeliver: isAutoDeliver.value,
+      autoMemo: autoMemo.value || '',
       hasShipping: hasShipping.value || false
     }
 

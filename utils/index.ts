@@ -97,3 +97,14 @@ function convertArrayOfObjectsToCSV (data: Record<string, any>[]): string {
 export function getPortfolioURL (wallet: string) {
   return `https://${LIKER_LAND_HOST}/${wallet}`
 }
+
+export const deliverMethodOptions = [
+  {
+    value: 'auto',
+    label: 'Automatic deliver NFT'
+  },
+  {
+    value: 'manual',
+    label: 'Sign memo and manually deliver each NFT'
+  }
+]
