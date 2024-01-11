@@ -38,7 +38,7 @@
       </template>
     </UTable>
 
-    <div v-if="isViewMode" class="px-[24px] py-[12px]">
+    <div v-else class="px-[24px] py-[12px]">
       <UFormGroup
         label="Physical Goods"
         :ui="{ label: { base: 'font-mono font-bold' } }"

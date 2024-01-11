@@ -94,7 +94,7 @@
       <template #footer>
         <div class="flex justify-end items-center">
           <UButton v-if="isEditMode" label="Save" @click="handleOnSave" />
-          <div v-if="isViewMode" class="flex justify-end items-center gap-[8px]">
+          <div v-else class="flex justify-end items-center gap-[8px]">
             <span class="text-gray-300 text-sm text-right underline">
               You can manage the shipping options by going to the management page
             </span>
