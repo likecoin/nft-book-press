@@ -111,6 +111,7 @@
           <ShippingRates
             :read-only="false"
             :shipping-info="shippingRates"
+            :is-new-listing-page="true"
             @on-update-shipping-rates="updateShippingRate"
           >
             <template #header>

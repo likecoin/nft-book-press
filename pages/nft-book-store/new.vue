@@ -49,6 +49,7 @@
 
       <ShippingRates
         :read-only="false"
+        :is-new-listing-page="true"
         :shipping-info="shippingRates"
         @on-update-shipping-rates="updateShippingRate"
       />
@@ -119,6 +120,7 @@
           <ShippingRates
             v-model="p.hasShipping"
             :read-only="true"
+            :is-new-listing-page="true"
             :shipping-info="shippingRates"
           />
 

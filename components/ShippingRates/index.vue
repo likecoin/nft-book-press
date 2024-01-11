@@ -72,10 +72,6 @@
 </template>
 
 <script setup lang="ts">
-const NEW_LISTING_PAGES = {
-  BOOK: 'nft-book-store-new',
-  COLLECTION: 'nft-book-store-collection-new'
-}
 const props = defineProps({
   isLoading: {
     type: Boolean,
@@ -91,11 +87,13 @@ const props = defineProps({
   },
   modelValue: {
     type: Boolean
+  },
+  isNewListingPage: {
+    type: Boolean,
+    default: false
   }
 })
-const route = useRoute()
 const router = useRouter()
-const routerName = route.name
 const emit = defineEmits(['update:modelValue', 'on-update-shipping-rates'])
 const isShippingModalOpened = ref<Boolean>(false)
 
@@ -108,8 +106,7 @@ watch(hasShipping, (hasShipping) => {
 })
 const isEditMode = computed(() => !(props.readOnly))
 const isViewMode = computed(() => (props.readOnly))
-const isNewListingPage = computed(() => Object.values(NEW_LISTING_PAGES).includes(routerName as string))
-const shouldHideViewButtonOnViewMode = computed(() => Boolean(isViewMode.value && isNewListingPage.value))
+const shouldHideViewButtonOnViewMode = computed(() => Boolean(isViewMode.value && props.isNewListingPage))
 const buttonConfig = computed(() => {
   if (isEditMode.value && props.shippingInfo.length) {
     return {
