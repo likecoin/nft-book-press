@@ -108,29 +108,33 @@ const isEditMode = computed(() => !(props.readOnly))
 const isViewMode = computed(() => (props.readOnly))
 const shouldHideViewButtonOnViewMode = computed(() => Boolean(isViewMode.value && props.isNewListingPage))
 const buttonConfig = computed(() => {
-  if (isEditMode.value && props.shippingInfo.length) {
-    return {
-      icon: 'i-heroicons-pencil-square',
-      text: 'Edit',
-      action: handleOpenShippingModal
+  if (isEditMode.value) {
+    if (props.shippingInfo.length) {
+      return {
+        icon: 'i-heroicons-pencil-square',
+        text: 'Edit',
+        action: handleOpenShippingModal
+      }
+    } else {
+      return {
+        icon: 'i-heroicons-plus-20-solid',
+        text: 'Add',
+        action: handleOpenShippingModal
+      }
     }
-  } else if (isEditMode.value && !props.shippingInfo.length) {
-    return {
-      icon: 'i-heroicons-plus-20-solid',
-      text: 'Add',
-      action: handleOpenShippingModal
-    }
-  } else if (isViewMode.value && props.shippingInfo.length) {
-    return {
-      icon: 'i-heroicons-eye-20-solid',
-      text: 'View Current Shipping Options',
-      action: handleOpenShippingModal
-    }
-  } else if (isViewMode.value && !props.shippingInfo.length) {
-    return {
-      icon: 'i-heroicons-pencil-square-20-solid',
-      text: 'Set Shipping Options',
-      action: goBack
+  } else if (isViewMode.value) {
+    if (props.shippingInfo.length) {
+      return {
+        icon: 'i-heroicons-eye-20-solid',
+        text: 'View Current Shipping Options',
+        action: handleOpenShippingModal
+      }
+    } else {
+      return {
+        icon: 'i-heroicons-pencil-square-20-solid',
+        text: 'Set Shipping Options',
+        action: goBack
+      }
     }
   }
 })
