@@ -48,7 +48,7 @@
       </UCard>
 
       <ShippingRates
-        mode="edit"
+        :read-only="false"
         :shipping-info="shippingRates"
         @on-update-shipping-rates="updateShippingRate"
       />
@@ -118,7 +118,7 @@
 
           <ShippingRates
             v-model="p.hasShipping"
-            mode="view"
+            :read-only="true"
             :shipping-info="shippingRates"
           />
 

@@ -78,7 +78,7 @@
 
         <ShippingRates
           v-model="hasShipping"
-          mode="view"
+          :read-only="true"
           :shipping-info="shippingRates"
         />
 

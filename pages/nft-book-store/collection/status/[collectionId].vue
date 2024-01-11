@@ -66,7 +66,7 @@
       </UCard>
 
       <ShippingRates
-        mode="edit"
+        :read-only="false"
         :is-loading="isUpdatingShippingRates"
         :shipping-info="collectionListingInfo.shippingRates"
         @on-update-shipping-rates="updateShippingRates"

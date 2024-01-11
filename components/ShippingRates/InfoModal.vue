@@ -119,14 +119,13 @@ import { v4 as uuidv4 } from 'uuid'
 
 definePageMeta({ layout: 'page' })
 
-type ModeType = 'edit' | 'view';
 const props = defineProps({
   modelValue: {
     type: Boolean
   },
-  mode: {
-    type: String as PropType<ModeType>,
-    default: 'edit'
+  readOnly: {
+    type: Boolean,
+    default: false
   },
   shippingInfo: {
     type: Array,
@@ -135,8 +134,8 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue', 'on-update-shipping-rates'])
 const router = useRouter()
-const isEditMode = computed(() => !!(props.mode === 'edit'))
-const isViewMode = computed(() => !!(props.mode === 'view'))
+const isEditMode = computed(() => !props.readOnly)
+const isViewMode = computed(() => props.readOnly)
 const modalTitle = computed(() =>
   isEditMode.value ? 'Editing Shipping Options' : 'Shipping Options Info'
 )

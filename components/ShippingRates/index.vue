@@ -63,7 +63,7 @@
     <ShippingRatesInfoModal
       v-if="isSippingModalOpened"
       v-model="isSippingModalOpened"
-      :mode="mode"
+      :read-only="readOnly"
       :shipping-info="shippingInfo"
       @on-update-shipping-rates="
         (value) => emit('on-update-shipping-rates', value)"
@@ -72,7 +72,6 @@
 </template>
 
 <script setup lang="ts">
-type ModeType = 'edit' | 'view';
 const NEW_LISTING_PAGES = {
   BOOK: 'nft-book-store-new',
   COLLECTION: 'nft-book-store-collection-new'
@@ -82,9 +81,9 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  mode: {
-    type: String as PropType<ModeType>,
-    default: 'edit'
+  readOnly: {
+    type: Boolean,
+    default: false
   },
   shippingInfo: {
     type: Array,
@@ -107,8 +106,8 @@ watch(() => props.modelValue, (newValue) => {
 watch(hasShipping, (hasShipping) => {
   emit('update:modelValue', hasShipping)
 })
-const isEditMode = computed(() => !!(props.mode === 'edit'))
-const isViewMode = computed(() => !!(props.mode === 'view'))
+const isEditMode = computed(() => !(props.readOnly))
+const isViewMode = computed(() => (props.readOnly))
 const isNewListingPage = computed(() => Object.values(NEW_LISTING_PAGES).includes(routerName as string))
 const shouldHideViewButtonOnViewMode = computed(() => Boolean(isViewMode.value && isNewListingPage.value))
 const buttonConfig = computed(() => {

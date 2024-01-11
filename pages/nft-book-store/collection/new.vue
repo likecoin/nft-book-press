@@ -109,7 +109,7 @@
           </UFormGroup>
 
           <ShippingRates
-            mode="edit"
+            :read-only="false"
             :shipping-info="shippingRates"
             @on-update-shipping-rates="updateShippingRate"
           >
