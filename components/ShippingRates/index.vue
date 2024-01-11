@@ -61,8 +61,8 @@
       </UFormGroup>
     </div>
     <ShippingRatesInfoModal
-      v-if="isSippingModalOpened"
-      v-model="isSippingModalOpened"
+      v-if="isShippingModalOpened"
+      v-model="isShippingModalOpened"
       :read-only="readOnly"
       :shipping-info="shippingInfo"
       @on-update-shipping-rates="
@@ -97,7 +97,7 @@ const route = useRoute()
 const router = useRouter()
 const routerName = route.name
 const emit = defineEmits(['update:modelValue', 'on-update-shipping-rates'])
-const isSippingModalOpened = ref<Boolean>(false)
+const isShippingModalOpened = ref<Boolean>(false)
 
 const hasShipping = ref(props.modelValue)
 watch(() => props.modelValue, (newValue) => {
@@ -153,6 +153,6 @@ function goBack () {
 }
 
 function handleOpenShippingModal () {
-  isSippingModalOpened.value = true
+  isShippingModalOpened.value = true
 }
 </script>
