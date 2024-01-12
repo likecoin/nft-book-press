@@ -868,6 +868,9 @@ async function updateSettings () {
         }
       : null
     await updateNFTBookCollectionById(collectionId.value as string, {
+      classIds: collectionListingInfo?.value.classIds,
+      name: collectionListingInfo?.value.name,
+      description: collectionListingInfo?.value.description,
       moderatorWallets,
       notificationEmails,
       connectedWallets,
