@@ -91,7 +91,7 @@
             v-if="p.deliveryMethod === 'auto'"
             :label="`Memo of this ${priceItemLabel}`"
           >
-            <UInput placeholder="Thank you! 謝謝你的支持!" :value="p.autoMemo" @input="e => updatePrice(e, 'autoMemo', index)" />
+            <UInput :value="p.autoMemo" @input="e => updatePrice(e, 'autoMemo', index)" />
           </UFormGroup>
 
           <UFormGroup
@@ -430,7 +430,7 @@ const hideDownload = ref(false)
 const prices = ref<any[]>([{
   price: MINIMAL_PRICE,
   deliveryMethod: 'auto',
-  autoMemo: '',
+  autoMemo: 'Thanks for purchasing this NFT ebook.',
   stock: Number(route.query.count as string || 1),
   nameEn: 'Standard Edition',
   nameZh: '標準版',

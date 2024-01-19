@@ -58,7 +58,7 @@
           v-if="deliveryMethod === 'auto'"
           :label="`Memo of this ${priceItemLabel}`"
         >
-          <UInput v-model="autoMemo" placeholder="Thank you! 謝謝你的支持!" />
+          <UInput v-model="autoMemo" />
         </UFormGroup>
 
         <UFormGroup
@@ -230,7 +230,7 @@ const hasMultiplePrices = computed(() => classData?.value?.prices?.length > 1)
 const price = ref(MINIMAL_PRICE)
 const stock = ref(1)
 const deliveryMethod = ref('auto')
-const autoMemo = ref('')
+const autoMemo = ref('Thanks for purchasing this NFT ebook.')
 const nameEn = ref('Standard Edition')
 const nameZh = ref('標準版')
 const descriptionEn = ref('')
