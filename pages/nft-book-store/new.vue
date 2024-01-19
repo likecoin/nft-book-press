@@ -732,6 +732,11 @@ async function submitNewClass () {
         }))
       : undefined
 
+    if (p.some(price => price.isAutoDeliver)) {
+      const ok = confirm('NFT Book Press - Reminder\nOnce you choose automatic delivery, you can\'t switch it back to manual delivery.  Are you sure?')
+      if (!ok) { return }
+    }
+
     const autoDeliverCount = p
       .filter(price => price.isAutoDeliver)
       .reduce((acc, price) => acc + price.stock, 0)

@@ -380,6 +380,11 @@ async function handleSubmit () {
       throw new Error('Please input product name')
     }
 
+    if (editedPrice.isAutoDeliver) {
+      const ok = confirm('NFT Book Press - Reminder\nOnce you choose automatic delivery, you can\'t switch it back to manual delivery.  Are you sure?')
+      if (!ok) { return }
+    }
+
     isLoading.value = true
 
     let autoDeliverNFTsTxHash
