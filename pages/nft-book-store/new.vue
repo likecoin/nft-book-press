@@ -736,7 +736,7 @@ async function submitNewClass () {
       .filter(price => price.isAutoDeliver)
       .reduce((acc, price) => acc + price.stock, 0)
 
-    let autoDeliverNFTsTxHash = ''
+    let autoDeliverNFTsTxHash
     if (autoDeliverCount > 0) {
       if (!wallet.value || !signer.value) {
         await connect()

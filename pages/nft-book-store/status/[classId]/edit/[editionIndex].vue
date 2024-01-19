@@ -423,7 +423,7 @@ async function handleSubmit () {
         : editedPrice.stock
     }
 
-    let autoDeliverNFTsTxHash = ''
+    let autoDeliverNFTsTxHash
     if (newAutoDeliverNFTsCount > 0) {
       if (!wallet.value || !signer.value) {
         await connect()

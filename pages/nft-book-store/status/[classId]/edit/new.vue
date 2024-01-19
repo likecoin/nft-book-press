@@ -382,7 +382,7 @@ async function handleSubmit () {
 
     isLoading.value = true
 
-    let autoDeliverNFTsTxHash = ''
+    let autoDeliverNFTsTxHash
     if (editedPrice.isAutoDeliver && editedPrice.stock > 0) {
       if (!wallet.value || !signer.value) {
         await connect()
