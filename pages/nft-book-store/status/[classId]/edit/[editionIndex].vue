@@ -281,7 +281,12 @@ config({
 
 watch(isAutoDeliver, (newValue) => {
   if (newValue) {
-    alert('Note that delivery method cannot be changed back to manual delivery once it is set to auto delivery.')
+    const ok = confirm('NFT Book Press - Reminder\nOnce you choose automatic delivery, you can\'t switch it back to manual delivery.  Are you sure?')
+    if (!ok) {
+      nextTick(() => {
+        deliverMethod.value = 'manual'
+      })
+    }
   }
 })
 
