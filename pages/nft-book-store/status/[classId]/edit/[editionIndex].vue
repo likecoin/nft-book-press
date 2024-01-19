@@ -286,6 +286,8 @@ watch(isAutoDeliver, (newValue) => {
       nextTick(() => {
         deliveryMethod.value = 'manual'
       })
+    } else if (!autoMemo.value) {
+      autoMemo.value = 'Thanks for purchasing this NFT ebook.'
     }
   }
 })
