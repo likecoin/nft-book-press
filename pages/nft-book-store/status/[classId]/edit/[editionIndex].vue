@@ -49,9 +49,9 @@
         </UFormGroup>
 
         <URadioGroup
-          v-model="deliverMethod"
+          v-model="deliveryMethod"
           :disabled="oldIsAutoDeliver"
-          :legend="`Deliver method of this ${priceItemLabel}`"
+          :legend="`Delivery method of this ${priceItemLabel}`"
           :options="deliverMethodOptions"
         />
 
@@ -230,7 +230,7 @@ const hasMultiplePrices = computed(() => classData?.value?.prices?.length > 1)
 
 const price = ref(MINIMAL_PRICE)
 const stock = ref(1)
-const deliverMethod = ref('auto')
+const deliveryMethod = ref('auto')
 const autoMemo = ref('')
 const nameEn = ref('Standard Edition')
 const nameZh = ref('標準版')
@@ -248,7 +248,7 @@ const oldStock = ref(0)
 const oldIsAutoDeliver = ref(false)
 
 const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
-const isAutoDeliver = computed(() => deliverMethod.value === 'auto')
+const isAutoDeliver = computed(() => deliveryMethod.value === 'auto')
 const minStock = computed(() => oldIsAutoDeliver.value ? oldStock.value : 0)
 
 const toolbarOptions = ref<string[]>([
@@ -284,7 +284,7 @@ watch(isAutoDeliver, (newValue) => {
     const ok = confirm('NFT Book Press - Reminder\nOnce you choose automatic delivery, you can\'t switch it back to manual delivery.  Are you sure?')
     if (!ok) {
       nextTick(() => {
-        deliverMethod.value = 'manual'
+        deliveryMethod.value = 'manual'
       })
     }
   }
@@ -311,7 +311,7 @@ onMounted(async () => {
       if (currentEdition) {
         price.value = currentEdition.price || 0
         stock.value = currentEdition.stock || 0
-        deliverMethod.value = currentEdition.isAutoDeliver ? 'auto' : 'manual'
+        deliveryMethod.value = currentEdition.isAutoDeliver ? 'auto' : 'manual'
         autoMemo.value = currentEdition.autoMemo || ''
         nameEn.value = currentEdition.name?.en || currentEdition.name || ''
         nameZh.value = currentEdition.name?.zh || currentEdition.name || ''
@@ -412,7 +412,7 @@ async function handleSubmit () {
     }
 
     if (oldIsAutoDeliver.value && !editedPrice.isAutoDeliver) {
-      throw new Error('Cannot change auto deliver to manual deliver')
+      throw new Error('Cannot change automatic delivery to manual delivery')
     }
 
     if (!editedPrice.name.en || !editedPrice.name.zh) {
