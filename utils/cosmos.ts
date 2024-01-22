@@ -347,6 +347,10 @@ export async function sendNFTsToAPIWallet (
   const nftIds = nfts.map(nft => nft.id).slice(0, nftCount)
   const classIds = nftIds.map(_ => classId)
 
+  if (nftIds.length !== nftCount) {
+    throw new Error('Not enough NFTs')
+  }
+
   const { transactionHash, code } = await signSendNFTs(
     LIKER_NFT_TARGET_ADDRESS,
     classIds,
