@@ -17,7 +17,7 @@ export const LIKER_NFT_FEE_WALLET = IS_TESTNET
 
 export const LIKER_NFT_TARGET_ADDRESS = IS_TESTNET
   ? 'like1yney2cqn5qdrlc50yr5l53898ufdhxafqz9gxp'
-  : 'like10ywsmztkxjl55xarxnhlxwc83z9v2hkxtsajwl'
+  : 'like17m4vwrnhjmd20uu7tst7nv0kap6ee7js69jfrs'
 
 export const LIKE_CO_API = `https://api.${IS_TESTNET ? 'rinkeby.' : ''}like.co`
 export const APP_LIKE_CO_URL = `https://app.${IS_TESTNET ? 'rinkeby.' : ''}like.co`
