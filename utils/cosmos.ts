@@ -353,7 +353,7 @@ export async function sendNFTsToAPIWallet (
     nftIds,
     signer,
     ownerAddress,
-    'Send automatic delivery NFT Book to Liker Land'
+    'Commission Liker Land to help issue this NFT ebook'
   )
 
   if (!transactionHash || code !== 0) {
