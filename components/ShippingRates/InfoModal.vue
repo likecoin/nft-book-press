@@ -94,14 +94,11 @@
       <template #footer>
         <div class="flex justify-end items-center">
           <UButton v-if="isEditMode" label="Save" @click="handleOnSave" />
-          <div v-else class="flex justify-end items-center gap-[8px]">
-            <span class="text-gray-300 text-sm text-right underline">
-              You can manage the shipping options by going to the management page
-            </span>
+          <div v-else class="flex justify-end items-center">
             <UButton
               label="Set Shipping Options"
               variant="outline"
-              @click="goBack"
+              @click="updateShippingRates"
             >
               <template #trailing>
                 <UIcon name="i-heroicons-arrow-right-20-solid" />
@@ -133,9 +130,8 @@ const props = defineProps({
   }
 })
 const emit = defineEmits(['update:modelValue', 'on-update-shipping-rates'])
-const router = useRouter()
-const isEditMode = computed(() => !props.readOnly)
-const isViewMode = computed(() => props.readOnly)
+const isEditMode = computed(() => !isReadOnlyMode.value)
+const isViewMode = computed(() => isReadOnlyMode.value)
 const modalTitle = computed(() =>
   isEditMode.value ? 'Editing Shipping Options' : 'Shipping Options Info'
 )
@@ -149,13 +145,14 @@ const shippingRates = ref<any[]>(
     : []
 )
 const hasMultipleShippingRates = computed(() => shippingRates.value.length > 1)
+const isReadOnlyMode = ref(props.readOnly)
 
 function closeModal () {
   emit('update:modelValue', false)
 }
 
-function goBack () {
-  router.go(-1) // go back to status page
+function updateShippingRates () {
+  isReadOnlyMode.value = false
 }
 
 function handleInputShippingRates (e: InputEvent, key: string, index: number) {

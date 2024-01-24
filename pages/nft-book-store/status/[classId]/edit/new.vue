@@ -93,6 +93,8 @@
           v-model="hasShipping"
           :read-only="true"
           :shipping-info="shippingRates"
+          :is-loading="isUpdatingShippingRates"
+          @on-update-shipping-rates="updateShippingRates"
         />
 
         <template #footer>
@@ -127,6 +129,7 @@ const bookStoreApiStore = useBookStoreApiStore()
 const { connect } = walletStore
 const { wallet, signer } = storeToRefs(walletStore)
 const { token } = storeToRefs(bookStoreApiStore)
+const { updateBookListingSetting } = bookStoreApiStore
 
 const router = useRouter()
 const route = useRoute()
@@ -152,6 +155,7 @@ const descriptionEn = ref('')
 const descriptionZh = ref('')
 const hasShipping = ref(false)
 const shippingRates = ref<any[]>([])
+const isUpdatingShippingRates = ref(false)
 
 const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
 
@@ -234,6 +238,29 @@ function handleClickBack () {
     name: 'nft-book-store-status-classId',
     params: { classId: classId.value }
   })
+}
+
+async function updateShippingRates (value: any) {
+  isUpdatingShippingRates.value = true
+  try {
+    await updateBookListingSetting(classId.value as string, {
+      shippingRates: value
+    })
+    const { data: classData } = await useFetch(
+      `${LIKE_CO_API}/likernft/book/store/${classId.value}`,
+      {
+        headers: {
+          authorization: `Bearer ${token.value}`
+        }
+      }
+    )
+    shippingRates.value = classData.value?.shippingRates || []
+  } catch (err) {
+    const errorData = (err as any).data || err
+    error.value = errorData
+  } finally {
+    isUpdatingShippingRates.value = false
+  }
 }
 
 async function handleSubmit () {

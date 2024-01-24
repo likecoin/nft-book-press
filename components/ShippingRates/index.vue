@@ -63,7 +63,7 @@
     <ShippingRatesInfoModal
       v-if="isShippingModalOpened"
       v-model="isShippingModalOpened"
-      :read-only="readOnly"
+      :read-only="isModalReadOnly"
       :shipping-info="shippingInfo"
       @on-update-shipping-rates="
         (value) => emit('on-update-shipping-rates', value)"
@@ -93,11 +93,11 @@ const props = defineProps({
     default: false
   }
 })
-const router = useRouter()
 const emit = defineEmits(['update:modelValue', 'on-update-shipping-rates'])
 const isShippingModalOpened = ref<Boolean>(false)
 
 const hasShipping = ref(props.modelValue)
+const isModalReadOnly = ref(props.readOnly)
 watch(() => props.modelValue, (newValue) => {
   hasShipping.value = newValue
 })
@@ -131,9 +131,9 @@ const buttonConfig = computed(() => {
       }
     } else {
       return {
-        icon: 'i-heroicons-pencil-square-20-solid',
-        text: 'Set Shipping Options',
-        action: goBack
+        icon: 'i-heroicons-plus-20-solid',
+        text: 'Add Shipping Options',
+        action: handleOpenEditModal
       }
     }
   }
@@ -149,11 +149,12 @@ const shippingRatesTableRows = computed(() => {
   }))
 })
 
-function goBack () {
-  router.go(-1) // go back to status page
+function handleOpenShippingModal () {
+  isShippingModalOpened.value = true
 }
 
-function handleOpenShippingModal () {
+function handleOpenEditModal () {
+  isModalReadOnly.value = false
   isShippingModalOpened.value = true
 }
 </script>
