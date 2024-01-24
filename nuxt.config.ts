@@ -6,8 +6,12 @@ export default defineNuxtConfig({
   modules: [
     '@pinia/nuxt',
     '@nuxtjs/eslint-module',
-    '@nuxt/ui'
+    '@nuxt/ui',
+    'nuxt-gtag'
   ],
+  gtag: {
+    id: 'G-815EFDL3PS'
+  },
   plugins: ['~/plugins/buffer.ts'],
   vite: {
     plugins: [
@@ -17,5 +21,8 @@ export default defineNuxtConfig({
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
     layoutTransition: { name: 'page', mode: 'out-in' }
+  },
+  colorMode: {
+    preference: 'light'
   }
 })

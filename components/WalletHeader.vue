@@ -40,6 +40,16 @@ const { connect, disconnect } = store
 
 const portfolioURL = computed(() => getPortfolioURL(wallet.value))
 
+onMounted(async () => {
+  try {
+    const payload = window.localStorage.getItem('likecoin_nft_book_press_token')
+    if (payload) {
+      const { wallet: storedWallet } = JSON.parse(payload)
+      if (storedWallet) { await connect() }
+    }
+  } catch {}
+})
+
 function onClickDisconnect () {
   disconnect()
   window.localStorage.removeItem('likecoin_nft_book_press_token')

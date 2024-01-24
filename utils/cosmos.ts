@@ -9,7 +9,7 @@ import { parseAuthzGrant } from '@likecoin/iscn-js/dist/messages/parsing'
 import { GenericAuthorization } from 'cosmjs-types/cosmos/authz/v1beta1/authz'
 import { formatMsgSend } from '@likecoin/iscn-js/dist/messages/likenft'
 import { addParamToUrl } from '.'
-import { RPC_URL, LIKER_NFT_FEE_WALLET } from '~/constant'
+import { RPC_URL, LIKER_NFT_FEE_WALLET, LIKER_NFT_TARGET_ADDRESS } from '~/constant'
 import network from '~/constant/network'
 
 const DEFAULT_GAS_AMOUNT = 200000
@@ -91,7 +91,7 @@ export async function getNFTAuthzGrants (granter: string, grantee: string) {
   return grants[0]
 }
 
-export async function getNFTs ({ classId = '', owner = '', needCount }) {
+export async function getNFTs ({ classId = '', owner = '', needCount = 0 }) {
   const needPages = Math.ceil(needCount / 100)
   const c = (await getSigningClient()).getISCNQueryClient()
   const client = await c.getQueryClient()
@@ -106,7 +106,7 @@ export async function getNFTs ({ classId = '', owner = '', needCount }) {
     );
     (next = res.pagination?.nextKey)
     nfts.push(...res.nfts)
-    if (pageCounts > needPages) { break }
+    if (needPages && pageCounts > needPages) { break }
     pageCounts += 1
   } while (next && next.length)
   return { nfts }
@@ -233,26 +233,6 @@ export async function signMintNFT (
   return res
 }
 
-export async function signSendNFT (
-  targetAddress: string,
-  classId: string,
-  nftId: string,
-  signer: OfflineSigner,
-  address: string,
-  memo?: string
-) {
-  const signingClient = await getSigningClient()
-  await signingClient.connectWithSigner(RPC_URL, signer)
-  const res = await signingClient.sendNFTs(
-    address,
-    targetAddress,
-    classId,
-    [nftId],
-    { memo }
-  ) as DeliverTxResponse
-  return res
-}
-
 export async function signSendNFTs (
   targetAddress: string,
   classIds: string[],
@@ -341,4 +321,47 @@ export async function signRevokeNFTSendAuthz (
 export function shortenWalletAddress (address: string) {
   if (!address) { return '-' }
   return `${address.slice(0, 10)}...${address.slice(-6)}`
+}
+
+export async function sendNFTsToAPIWallet (
+  classId: string,
+  nftCount: number,
+  signer: OfflineSigner,
+  ownerAddress: string
+) {
+  if (nftCount <= 0) { return '' }
+
+  if (!ownerAddress) {
+    throw new Error('Missing owner address')
+  }
+
+  if (!signer) {
+    throw new Error('Missing signer')
+  }
+
+  const { nfts } = await getNFTs({
+    classId,
+    owner: ownerAddress,
+    needCount: nftCount
+  })
+  const nftIds = nfts.map(nft => nft.id).slice(0, nftCount)
+  const classIds = nftIds.map(_ => classId)
+
+  if (nftIds.length !== nftCount) {
+    throw new Error('Not enough NFTs')
+  }
+
+  const { transactionHash, code } = await signSendNFTs(
+    LIKER_NFT_TARGET_ADDRESS,
+    classIds,
+    nftIds,
+    signer,
+    ownerAddress,
+    'Commission Liker Land to help issue this NFT ebook'
+  )
+
+  if (!transactionHash || code !== 0) {
+    throw new Error('Failed to sign and send NFTs')
+  }
+  return transactionHash
 }

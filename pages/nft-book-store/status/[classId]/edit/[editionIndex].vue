@@ -45,15 +45,29 @@
         </UFormGroup>
 
         <UFormGroup :label="`Total number of NFT for sale of this ${priceItemLabel}`">
-          <UInput v-model="stock" type="number" step="0.01" :min="0" />
+          <UInput v-model="stock" type="number" step="1" :min="minStock" />
+        </UFormGroup>
+
+        <URadioGroup
+          v-model="deliveryMethod"
+          :disabled="oldIsAutoDeliver"
+          :legend="`Delivery method of this ${priceItemLabel}`"
+          :options="deliverMethodOptions"
+        />
+
+        <UFormGroup
+          v-if="isAutoDeliver"
+          :label="`Memo of this ${priceItemLabel}`"
+        >
+          <UInput v-model="autoMemo" />
         </UFormGroup>
 
         <UFormGroup
           :label="`Product name of this ${priceItemLabel}`"
           :ui="{ container: 'space-y-2' }"
         >
-          <UInput placeholder="Product name in English" :value="nameEn" />
-          <UInput placeholder="產品中文名字" :value="nameZh" />
+          <UInput v-model="nameEn" placeholder="Product name in English" />
+          <UInput v-model="nameZh" placeholder="產品中文名字" />
         </UFormGroup>
 
         <h5 class="!mt-8 font-bold font-mono">
@@ -105,10 +119,13 @@ import { LIKE_CO_API } from '~/constant'
 
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
+import { deliverMethodOptions } from '~/utils'
+import { sendNFTsToAPIWallet } from '~/utils/cosmos'
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
-const { wallet } = storeToRefs(walletStore)
+const { connect } = walletStore
+const { wallet, signer } = storeToRefs(walletStore)
 const { token } = storeToRefs(bookStoreApiStore)
 
 const router = useRouter()
@@ -127,6 +144,8 @@ const hasMultiplePrices = computed(() => classData?.value?.prices?.length > 1)
 
 const price = ref(MINIMAL_PRICE)
 const stock = ref(1)
+const deliveryMethod = ref('auto')
+const autoMemo = ref('Thanks for purchasing this NFT ebook.')
 const nameEn = ref('Standard Edition')
 const nameZh = ref('標準版')
 const descriptionEn = ref('')
@@ -134,7 +153,12 @@ const descriptionZh = ref('')
 const hasShipping = ref(false)
 const shippingRates = ref<any[]>([])
 
+const oldStock = ref(0)
+const oldIsAutoDeliver = ref(false)
+
 const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
+const isAutoDeliver = computed(() => deliveryMethod.value === 'auto')
+const minStock = computed(() => oldIsAutoDeliver.value ? oldStock.value : 0)
 
 const toolbarOptions = ref<string[]>([
   'bold',
@@ -164,6 +188,19 @@ config({
   }
 })
 
+watch(isAutoDeliver, (newValue) => {
+  if (newValue) {
+    const ok = confirm('NFT Book Press - Reminder\nOnce you choose automatic delivery, you can\'t switch it back to manual delivery.  Are you sure?')
+    if (!ok) {
+      nextTick(() => {
+        deliveryMethod.value = 'manual'
+      })
+    } else if (!autoMemo.value) {
+      autoMemo.value = 'Thanks for purchasing this NFT ebook.'
+    }
+  }
+})
+
 onMounted(async () => {
   try {
     isLoading.value = true
@@ -186,12 +223,17 @@ onMounted(async () => {
       if (currentEdition) {
         price.value = currentEdition.price || 0
         stock.value = currentEdition.stock || 0
+        deliveryMethod.value = currentEdition.isAutoDeliver ? 'auto' : 'manual'
+        autoMemo.value = currentEdition.autoMemo || ''
         nameEn.value = currentEdition.name?.en || currentEdition.name || ''
         nameZh.value = currentEdition.name?.zh || currentEdition.name || ''
         const legacyDescription = typeof currentEdition.description === 'string' ? currentEdition.description : undefined
         descriptionEn.value = currentEdition.description?.en || legacyDescription || ' '
         descriptionZh.value = currentEdition.description?.zh || legacyDescription || ' '
         hasShipping.value = !!(currentEdition.hasShipping) || false
+
+        oldStock.value = currentEdition.stock
+        oldIsAutoDeliver.value = currentEdition.isAutoDeliver
       }
     }
   } catch (error) {
@@ -244,6 +286,8 @@ async function handleSubmit () {
       priceInDecimal: Math.round(Number(price.value) * 100),
       price: Number(price.value),
       stock: Number(stock.value),
+      isAutoDeliver: isAutoDeliver.value,
+      autoMemo: autoMemo.value || '',
       hasShipping: hasShipping.value || false
     }
 
@@ -258,8 +302,12 @@ async function handleSubmit () {
       throw new Error('Please input stock of edition')
     }
 
-    if (editedPrice.stock < 0) {
-      throw new Error('Stock cannot be negative')
+    if (editedPrice.stock < minStock.value) {
+      throw new Error(`Stock cannot be less than ${minStock.value}`)
+    }
+
+    if (oldIsAutoDeliver.value && !editedPrice.isAutoDeliver) {
+      throw new Error('Cannot change automatic delivery to manual delivery')
     }
 
     if (!editedPrice.name.en || !editedPrice.name.zh) {
@@ -268,8 +316,32 @@ async function handleSubmit () {
 
     isLoading.value = true
 
+    let newAutoDeliverNFTsCount = 0
+    if (editedPrice.isAutoDeliver) {
+      newAutoDeliverNFTsCount = oldIsAutoDeliver.value
+        ? editedPrice.stock - oldStock.value
+        : editedPrice.stock
+    }
+
+    let autoDeliverNFTsTxHash
+    if (newAutoDeliverNFTsCount > 0) {
+      if (!wallet.value || !signer.value) {
+        await connect()
+      }
+      if (!wallet.value || !signer.value) {
+        throw new Error('Unable to connect to wallet')
+      }
+      autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
+        classId.value as string,
+        newAutoDeliverNFTsCount,
+        signer.value,
+        wallet.value
+      )
+    }
+
     await bookStoreApiStore.updateEditionPrice(classId.value as string, editionIndex.value, {
-      price: editedPrice
+      price: editedPrice,
+      autoDeliverNFTsTxHash
     })
 
     router.push({

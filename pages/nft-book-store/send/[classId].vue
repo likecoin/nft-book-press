@@ -146,7 +146,7 @@ import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { parseImageURLFromMetadata } from '~/utils'
-import { signExecNFTSendAuthz, signSendNFT } from '~/utils/cosmos'
+import { signExecNFTSendAuthz, signSendNFTs } from '~/utils/cosmos'
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
@@ -304,10 +304,10 @@ async function onSendNFTStart () {
 
     let res: DeliverTxResponse | undefined
     if (userIsOwner.value) {
-      res = await signSendNFT(
+      res = await signSendNFTs(
         orderInfo.value.wallet,
-        classId.value,
-        targetNftId,
+        [classId.value],
+        [targetNftId],
         signer.value,
         wallet.value,
         memo.value

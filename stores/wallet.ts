@@ -67,7 +67,8 @@ export const useWalletStore = defineStore('wallet', () => {
       publicKey: signature.pub_key.value,
       message: stringify(signed),
       wallet: wallet.value,
-      signMethod: 'memo'
+      signMethod: 'memo',
+      expiresIn: '1d'
     }
   }
 

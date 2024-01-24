@@ -86,7 +86,20 @@
           </UFormGroup>
 
           <UFormGroup :label="`Total number of NFT for sale of this ${priceItemLabel}`">
-            <UInput :value="p.stock" type="number" step="0.01" :min="0" @input="e => updatePrice(e, 'stock', index)" />
+            <UInput :value="p.stock" type="number" step="1" :min="0" @input="e => updatePrice(e, 'stock', index)" />
+          </UFormGroup>
+
+          <URadioGroup
+            v-model="p.deliveryMethod"
+            :legend="`Delivery method of this ${priceItemLabel}`"
+            :options="deliverMethodOptions"
+          />
+
+          <UFormGroup
+            v-if="p.deliveryMethod === 'auto'"
+            :label="`Memo of this ${priceItemLabel}`"
+          >
+            <UInput :value="p.autoMemo" @input="e => updatePrice(e, 'autoMemo', index)" />
           </UFormGroup>
 
           <UFormGroup
@@ -341,12 +354,13 @@ import { v4 as uuidv4 } from 'uuid'
 import { LCD_URL, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
-import { getPortfolioURL } from '~/utils'
-import { getNFTAuthzGrants } from '~/utils/cosmos'
+import { getPortfolioURL, deliverMethodOptions } from '~/utils'
+import { getNFTAuthzGrants, sendNFTsToAPIWallet } from '~/utils/cosmos'
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
-const { wallet } = storeToRefs(walletStore)
+const { connect } = walletStore
+const { wallet, signer } = storeToRefs(walletStore)
 const { token } = storeToRefs(bookStoreApiStore)
 const { newBookListing, updateEditionPrice } = bookStoreApiStore
 
@@ -375,6 +389,8 @@ const mustClaimToView = ref(false)
 const hideDownload = ref(false)
 const prices = ref<any[]>([{
   price: MINIMAL_PRICE,
+  deliveryMethod: 'auto',
+  autoMemo: 'Thanks for purchasing this NFT ebook.',
   stock: Number(route.query.count as string || 1),
   nameEn: 'Standard Edition',
   nameZh: '標準版',
@@ -410,7 +426,7 @@ const toolbarOptions = ref<string[]>([
   'preview'
 ])
 
-const isEditMode = computed(() => route.params.editingClassId && editionIndex.value)
+const isEditMode = computed(() => Boolean(route.params.editingClassId && editionIndex.value))
 const pageTitle = computed(() => isEditMode.value ? 'Edit Current Edition' : 'New NFT Book Listing')
 const submitButtonText = computed(() => isEditMode.value ? 'Save Changes' : 'Submit')
 const editionInfo = ref<any>({})
@@ -545,6 +561,8 @@ function addMorePrice () {
   prices.value.push({
     index: uuidv4(),
     price: MINIMAL_PRICE,
+    deliveryMethod: 'auto',
+    autoMemo: '',
     stock: 1,
     nameEn: `Tier ${nextPriceIndex.value}`,
     nameZh: `級別 ${nextPriceIndex.value}`,
@@ -602,6 +620,8 @@ function mapPrices (prices:any) {
       priceInDecimal: Math.round(Number(p.price) * 100),
       price: Number(p.price),
       stock: Number(p.stock),
+      isAutoDeliver: p.deliveryMethod === 'auto',
+      autoMemo: p.deliveryMethod === 'auto' ? (p.autoMemo || '') : '',
       hasShipping: p.hasShipping || false
     }))
 }
@@ -659,6 +679,31 @@ async function submitNewClass () {
         }))
       : undefined
 
+    if (p.some(price => price.isAutoDeliver)) {
+      const ok = confirm('NFT Book Press - Reminder\nOnce you choose automatic delivery, you can\'t switch it back to manual delivery.  Are you sure?')
+      if (!ok) { return }
+    }
+
+    const autoDeliverCount = p
+      .filter(price => price.isAutoDeliver)
+      .reduce((acc, price) => acc + price.stock, 0)
+
+    let autoDeliverNFTsTxHash
+    if (autoDeliverCount > 0) {
+      if (!wallet.value || !signer.value) {
+        await connect()
+      }
+      if (!wallet.value || !signer.value) {
+        throw new Error('Unable to connect to wallet')
+      }
+      autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
+        classIdInput.value as string,
+        autoDeliverCount,
+        signer.value,
+        wallet.value
+      )
+    }
+
     await newBookListing(classIdInput.value as string, {
       defaultPaymentCurrency,
       connectedWallets,
@@ -667,7 +712,8 @@ async function submitNewClass () {
       prices: p,
       shippingRates: s,
       mustClaimToView,
-      hideDownload
+      hideDownload,
+      autoDeliverNFTsTxHash
     })
     router.push({ name: 'nft-book-store' })
   } catch (err) {
