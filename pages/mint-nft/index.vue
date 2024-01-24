@@ -598,6 +598,9 @@ async function onClickMintByInputting () {
     const { nfts } = await getNFTs({ classId: classId.value as string })
     existingNftCount.value = nfts.length
   }
+  if (typeof nftMintCount.value !== 'number') {
+    nftMintCount.value = Number(nftMintCount.value)
+  }
   const csvDataString = generateCsvData({
     prefix: state.nftIdPrefix,
     nftMintCount: nftMintCount.value,
