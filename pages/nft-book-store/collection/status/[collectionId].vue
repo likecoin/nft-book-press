@@ -464,6 +464,10 @@
           <UInput v-model="fromChannel" placeholder="Channel ID" />
         </UFormGroup>
 
+        <UFormGroup v-if="Object.keys(coupons).length" label="Active coupon" hint="Optional">
+          <USelect v-model="activeCoupon" :options="[''].concat(Object.keys(coupons))" />
+        </UFormGroup>
+
         <UButton
           class="font-mono break-all"
           :label="`${purchaseLink}`"
@@ -525,6 +529,7 @@ const error = ref('')
 const isLoading = ref(false)
 const collectionId = ref(route.params.collectionId)
 const fromChannel = ref<string | undefined>(undefined)
+const activeCoupon = ref('')
 const collectionListingInfo = ref<any>({})
 const ordersData = ref<any>({})
 const connectStatus = ref<any>({})
@@ -559,6 +564,7 @@ const purchaseLink = computed(() => {
   const payload: Record<string, string> = {
     from: fromChannel.value || ''
   }
+  if (activeCoupon.value) { payload.coupon = activeCoupon.value }
   const queryString = `?${new URLSearchParams(payload).toString()}`
   const likerLandLink = `https://${IS_TESTNET ? 'rinkeby.' : ''}liker.land/nft/collection/${collectionId.value}${queryString}`
   const apiLink = `https://api.${IS_TESTNET ? 'rinkeby.' : ''}like.co/likernft/book/collection/purchase/${collectionId.value}/new${queryString}`
