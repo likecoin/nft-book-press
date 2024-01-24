@@ -305,6 +305,64 @@
         </template>
       </UCard>
 
+      <UCard
+        :ui="{
+          header: { base: 'flex justify-between items-center' },
+          body: { padding: '' }
+        }"
+      >
+        <template #header>
+          <h4 class="text-sm font-bold font-mono">
+            Coupon codes
+          </h4>
+        </template>
+
+        <UTable
+          :columns="[
+            { key: 'id', label: 'code', sortable: true },
+            { key: 'discount', label: 'discount multiplier' },
+            { key: 'expireTs', label: 'expireTs' },
+          ]"
+          :rows="couponsTableRows"
+        />
+        <h5>New Coupon</h5>
+        <UFormGroup
+          label="New coupon code"
+          :ui="{ label: { base: 'font-mono font-bold' } }"
+        >
+          <UInput
+            v-model="newCoupon.id"
+            placeholder="coupon_code"
+          />
+        </UFormGroup>
+        <UFormGroup
+          label="Coupon discount multiplier, 0.01x - 1x"
+          :ui="{ label: { base: 'font-mono font-bold' } }"
+        >
+          <UInput
+            v-model="newCoupon.discount"
+            type="number"
+            min="0.01"
+            max="1"
+          />
+        </UFormGroup>
+        <UFormGroup
+          label="Coupon expire date"
+          :ui="{ label: { base: 'font-mono font-bold' } }"
+        >
+          <UInput
+            v-model="newCoupon.expireTs"
+            type="date"
+          />
+        </UFormGroup>
+
+        <UButton
+          label="Add"
+          :disabled="!(newCoupon.id && newCoupon.discount)"
+          @click="addCouponCode"
+        />
+      </UCard>
+
       <UCard :ui="{ body: { base: 'space-y-8' } }">
         <template #header>
           <h3 class="font-bold font-mono">
@@ -585,6 +643,12 @@ const searchInput = ref('')
 
 const moderatorWallets = ref<string[]>([])
 const moderatorWalletsGrants = ref<any>({})
+const coupons = ref<any>({})
+const newCoupon = ref<any>({
+  id: '',
+  discount: 1.0,
+  expireTs: ''
+})
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
@@ -644,6 +708,17 @@ const purchaseList = computed(() => {
     }).sort((a: any, b: any) => b.timestamp - a.timestamp)
   }
   return []
+})
+
+const couponsTableRows = computed(() => {
+  if (!coupons.value) {
+    return []
+  }
+  return Object.entries(coupons.value).map(([id, value]) => ({
+    id,
+    expireTs: (value as any).expireTs ? new Date((value as any).expireTs) : '',
+    discount: (value as any).discount
+  }))
 })
 
 const shippingRatesTableRows = computed(() => {
@@ -887,7 +962,8 @@ onMounted(async () => {
       notificationEmails: classNotificationEmails,
       connectedWallets: classConnectedWallets,
       mustClaimToView: classMustClaimToView,
-      hideDownload: classHideDownload
+      hideDownload: classHideDownload,
+      coupons: classCoupons
     } = classData.value as any
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
@@ -898,6 +974,7 @@ onMounted(async () => {
     }
     mustClaimToView.value = classMustClaimToView
     hideDownload.value = classHideDownload
+    coupons.value = classCoupons || {}
     const { data: orders, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
       {
         headers: {
@@ -1003,6 +1080,20 @@ async function hardSetStatusToCompleted (purchase: any) {
   classListingInfo.value.pendingNFTCount -= 1
 }
 
+function addCouponCode () {
+  coupons.value[newCoupon.value.id] = {
+    discount: newCoupon.value.discount,
+    expireTs: newCoupon.value.expireTs ? new Date(newCoupon.value.expireTs).getTime() : null,
+    email: newCoupon.value.email
+  }
+  newCoupon.value = {
+    id: '',
+    discount: 1.0,
+    expireTs: ''
+  }
+  updateSettings()
+}
+
 function addModeratorWallet () {
   if (!moderatorWalletInput.value) { return }
   moderatorWallets.value.push(moderatorWalletInput.value)
@@ -1050,7 +1141,8 @@ async function updateSettings () {
       notificationEmails,
       connectedWallets,
       hideDownload,
-      mustClaimToView
+      mustClaimToView,
+      coupons
     })
   } catch (err) {
     const errorData = (err as any).data || err
