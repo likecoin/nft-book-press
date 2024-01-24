@@ -449,6 +449,7 @@ const nftMintDefaultData = ref<any>(null)
 const nftMintCount = ref(100)
 const nftData = ref<any>(null)
 const nftCSVData = ref('')
+const existingNftCount = ref(0)
 
 const iscnId = computed(() => iscnData.value?.['@id'])
 const classId = computed(() => classData.value?.id)
@@ -593,9 +594,14 @@ async function onClickMintByInputting () {
       external_url: externalUrl.value
     }
   }
+  if (!isCreatingClass.value) {
+    const { nfts } = await getNFTs({ classId: classId.value as string })
+    existingNftCount.value = nfts.length
+  }
   const csvDataString = generateCsvData({
     prefix: state.nftIdPrefix,
     nftMintCount: nftMintCount.value,
+    nftExisitngCount: existingNftCount.value,
     imgUrl: imageUrl.value,
     uri: uri.value
   })

@@ -56,18 +56,20 @@ export function downloadFile ({ data, fileName, fileType }:{data:any, fileName:s
 
 export function generateCsvData ({
   prefix,
+  nftExisitngCount = 0,
   nftMintCount,
   imgUrl,
   uri
 }: {
   prefix: string;
   nftMintCount: number;
+  nftExisitngCount?: number;
   imgUrl: string;
   uri: string ;
 }) {
   const csvData = []
   csvData.push('"nftId","uri","image","metadata"')
-  for (let i = 0; i <= nftMintCount - 1; i++) {
+  for (let i = nftExisitngCount; i <= nftExisitngCount + nftMintCount - 1; i++) {
     const nftId = `${prefix}-${i.toString().padStart(4, '0')}`
     csvData.push(`"${nftId}","${uri}","${imgUrl}",""`)
   }

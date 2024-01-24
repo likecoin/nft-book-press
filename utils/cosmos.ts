@@ -91,7 +91,7 @@ export async function getNFTAuthzGrants (granter: string, grantee: string) {
   return grants[0]
 }
 
-export async function getNFTs ({ classId = '', owner = '', needCount }) {
+export async function getNFTs ({ classId = '', owner = '', needCount = 0 }) {
   const needPages = Math.ceil(needCount / 100)
   const c = (await getSigningClient()).getISCNQueryClient()
   const client = await c.getQueryClient()
@@ -106,7 +106,7 @@ export async function getNFTs ({ classId = '', owner = '', needCount }) {
     );
     (next = res.pagination?.nextKey)
     nfts.push(...res.nfts)
-    if (pageCounts > needPages) { break }
+    if (needPages && pageCounts > needPages) { break }
     pageCounts += 1
   } while (next && next.length)
   return { nfts }
