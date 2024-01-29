@@ -26,45 +26,80 @@
         <UButton icon="i-heroicons-plus-circle" label="New Collection" :to="{ name: 'nft-book-store-collection-new' }" />
       </template>
 
-      <UCard
-        :ui="{
-          header: { base: 'flex justify-between items-center gap-4' },
-          body: {
-            base: 'divide-y divide-gray-200 dark:divide-gray-700',
-            padding: '',
-          },
-        }"
+      <UTabs
+        v-model="selectedTabItemIndex"
+        class="w-full"
+        :items="tabItems"
       >
-        <template #header>
-          <h2 class="font-bold font-mono">
-            Current book collections
-          </h2>
-        </template>
+        <template #item="{ item }">
+          <UCard
+            :key="item.key"
+            :ui="{
+              header: { base: 'flex justify-between items-center gap-4' },
+              body: {
+                base: 'divide-y divide-gray-200 dark:divide-gray-700',
+                padding: '',
+              },
+            }"
+          >
+            <template #header>
+              <h2 class="font-bold font-mono">
+                {{ item.label }}
+              </h2>
+            </template>
 
-        <!-- Table -->
-        <UTable
-          :columns="tableColumns"
-          :rows="tableRows"
-          @select="selectTableRow"
-        />
-      </UCard>
+            <!-- Table -->
+            <UTable
+              :columns="tableColumns"
+              :rows="tableRows"
+              @select="selectTableRow"
+            />
+          </UCard>
+        </template>
+      </UTabs>
     </UCard>
   </main>
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'
 
+const route = useRoute()
 const router = useRouter()
 const nftStore = useNftStore()
+const bookStoreApiStore = useBookStoreApiStore()
 const collectionStore = useCollectionStore()
-const { listNFTBookCollections } = collectionStore
+const { listNFTBookCollections, listModeratedNFTBookCollections } = collectionStore
 const { getClassMetadataById, lazyFetchClassMetadataById } = nftStore
+const { token } = storeToRefs(bookStoreApiStore)
 
 const error = ref('')
 const isLoading = ref(false)
 const collectionList = ref<any[]>([])
+const moderatedCollectionList = ref<any[]>([])
+
+// Tabs
+const tabItems = [
+  { label: 'Current Collection Listing', key: 'current' },
+  { label: 'Viewable Collection Listing', key: 'viewable' }
+]
+
+const selectedTabItemIndex = computed({
+  get () {
+    const index = tabItems.findIndex(item => item.key === route.query.tab)
+    if (index === -1) {
+      return 0
+    }
+
+    return index
+  },
+  set (value) {
+    router.replace({ query: { tab: tabItems[value].key } })
+  }
+})
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
@@ -99,14 +134,22 @@ const tableColumns = [
 ]
 
 onMounted(async () => {
-  const data = await listNFTBookCollections()
-  collectionList.value = (data.value as any)?.list
+  const promises = [listNFTBookCollections()]
+  if (token.value) {
+    promises.push(listModeratedNFTBookCollections())
+  }
+  const [collectionData, moderatedData] = await Promise.all(promises)
+  collectionList.value = (collectionData?.value as any)?.list
   collectionList.value.forEach((b :any) => {
+    b.classIds.forEach((classId: string) => lazyFetchClassMetadataById(classId))
+  })
+  moderatedCollectionList.value = (moderatedData?.value as any)?.list || []
+  moderatedCollectionList.value.forEach((b :any) => {
     b.classIds.forEach((classId: string) => lazyFetchClassMetadataById(classId))
   })
 })
 
-const tableRows = computed(() => collectionList.value.map(b => ({
+const tableRows = computed(() => (tabItems[selectedTabItemIndex.value].key === 'viewable' ? moderatedCollectionList : collectionList).value.map(b => ({
   collectionId: b.id,
   name: b.name?.en,
   priceInUSD: b.typePayload?.priceInDecimal / 100,
