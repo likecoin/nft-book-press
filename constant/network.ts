@@ -62,7 +62,8 @@ const testnetConfig = {
     {
       coinDenom: 'EKIL',
       coinMinimalDenom: 'nanoekil',
-      coinDecimals: 9
+      coinDecimals: 9,
+      coinGeckoId: undefined
     }
   ],
   feeCurrencies: [
@@ -70,6 +71,7 @@ const testnetConfig = {
       coinDenom: 'EKIL',
       coinMinimalDenom: 'nanoekil',
       coinDecimals: 9,
+      coinGeckoId: undefined,
       gasPriceStep: {
         low: 1,
         average: 10,
@@ -80,7 +82,8 @@ const testnetConfig = {
   stakeCurrency: {
     coinDenom: 'EKIL',
     coinMinimalDenom: 'nanoekil',
-    coinDecimals: 9
+    coinDecimals: 9,
+    coinGeckoId: undefined
   }
 }
 
