@@ -2,7 +2,10 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  css: ['@/assets/styles/global.css'],
+  css: [
+    '@/assets/styles/global.css',
+    '@likecoin/wallet-connector/dist/style.css'
+  ],
   modules: [
     '@pinia/nuxt',
     '@nuxtjs/eslint-module',

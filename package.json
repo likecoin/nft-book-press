@@ -15,6 +15,7 @@
     "@cosmjs/proto-signing": "^0.30.1",
     "@cosmjs/stargate": "^0.30.1",
     "@likecoin/iscn-js": "^0.6.10",
+    "@likecoin/wallet-connector": "^0.26.0",
     "@nuxt/ui": "^2.10.0",
     "@pinia/nuxt": "^0.4.8",
     "bignumber.js": "^9.1.0",
@@ -27,6 +28,8 @@
     "md-editor-v3": "^4.2.2",
     "pinia": "^2.0.34",
     "qr-code-styling": "^1.6.0-rc.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "uuid": "^9.0.0",
     "vuedraggable": "^4.1.0"
   },
