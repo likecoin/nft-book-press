@@ -1,7 +1,7 @@
 <template>
-  <main class="space-y-4">
-    <div class="flex justify-between gap-4 flex-wrap">
-      <h1 class="text-lg font-bold font-mono">
+  <main class="space-y-10 pb-10">
+    <div class="flex justify-between gap-4">
+      <h1 class="text-lg font-bold font-mono flex-wrap">
         NFT Book Status "{{ nftClassName || classId }}"
       </h1>
 
@@ -52,7 +52,7 @@
             <h3 class="font-bold font-mono">
               Editions
             </h3>
-            <div class="flex justify-center py-4">
+            <div class="flex justify-center">
               <UButton
                 icon="i-heroicons-plus-circle"
                 label="New Listing"
@@ -327,56 +327,30 @@
         }"
       >
         <template #header>
-          <h4 class="text-sm font-bold font-mono">
-            Coupon codes
-          </h4>
+          <h3 class="font-bold font-mono">
+            Coupon Codes
+          </h3>
+          <UButton
+            label="Add New"
+            icon="i-heroicons-plus-circle"
+            variant="outline"
+            color="primary"
+            @click="isShowNewCouponModal = true"
+          />
         </template>
 
         <UTable
+          v-if="couponsTableRows.length"
           :columns="[
-            { key: 'id', label: 'code', sortable: true },
-            { key: 'discount', label: 'discount multiplier' },
-            { key: 'expireTs', label: 'expireTs' },
+            { key: 'id', label: 'Code', sortable: true },
+            { key: 'discount', label: 'Discount Multiplier' },
+            { key: 'expireTs', label: 'Expiry Date' },
           ]"
           :rows="couponsTableRows"
         />
-        <h5>New Coupon</h5>
-        <UFormGroup
-          label="New coupon code"
-          :ui="{ label: { base: 'font-mono font-bold' } }"
-        >
-          <UInput
-            v-model="newCoupon.id"
-            placeholder="coupon_code"
-          />
-        </UFormGroup>
-        <UFormGroup
-          label="Coupon discount multiplier, 0.01x - 1x"
-          :ui="{ label: { base: 'font-mono font-bold' } }"
-        >
-          <UInput
-            v-model="newCoupon.discount"
-            type="number"
-            min="0.01"
-            max="1"
-          />
-        </UFormGroup>
-        <UFormGroup
-          label="Coupon expire date"
-          :ui="{ label: { base: 'font-mono font-bold' } }"
-        >
-          <UInput
-            v-model="newCoupon.expireTs"
-            type="date"
-          />
-        </UFormGroup>
-
-        <UButton
-          label="Add"
-          :disabled="!(newCoupon.id && newCoupon.discount)"
-          @click="addCouponCode"
-        />
       </UCard>
+
+      <NewCouponModal v-model="isShowNewCouponModal" @add="addCouponCode" />
 
       <UCard :ui="{ body: { base: 'space-y-8' } }">
         <template #header>
@@ -664,11 +638,6 @@ const searchInput = ref('')
 const moderatorWallets = ref<string[]>([])
 const moderatorWalletsGrants = ref<any>({})
 const coupons = ref<any>({})
-const newCoupon = ref<any>({
-  id: '',
-  discount: 1.0,
-  expireTs: ''
-})
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
@@ -678,6 +647,7 @@ const stripeConnectWalletInput = ref('')
 const mustClaimToView = ref(false)
 const hideDownload = ref(false)
 const useLikerLandPurchaseLink = ref(true)
+const isShowNewCouponModal = ref(false)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
@@ -1103,16 +1073,10 @@ async function hardSetStatusToCompleted (purchase: any) {
   classListingInfo.value.pendingNFTCount -= 1
 }
 
-function addCouponCode () {
-  coupons.value[newCoupon.value.id] = {
-    discount: newCoupon.value.discount,
-    expireTs: newCoupon.value.expireTs ? new Date(newCoupon.value.expireTs).getTime() : null,
-    email: newCoupon.value.email
-  }
-  newCoupon.value = {
-    id: '',
-    discount: 1.0,
-    expireTs: ''
+function addCouponCode (coupon: any) {
+  coupons.value[coupon.id] = {
+    discount: coupon.discount,
+    expireTs: coupon.expireTs
   }
   updateSettings()
 }
