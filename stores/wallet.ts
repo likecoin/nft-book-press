@@ -11,6 +11,7 @@ import type {
   LikeCoinWalletConnectorConnectionResult
 } from '@likecoin/wallet-connector'
 
+import { IS_TESTNET } from '@/constant'
 import network from '@/constant/network'
 
 declare global {
@@ -51,6 +52,7 @@ export const useWalletStore = defineStore('wallet', () => {
       bech32PrefixConsAddr: network.bech32Config.bech32PrefixConsAddr,
       bech32PrefixConsPub: network.bech32Config.bech32PrefixConsPub,
       availableMethods: [
+        LikeCoinWalletConnectorMethodType.Web3Auth,
         LikeCoinWalletConnectorMethodType.Keplr,
         [LikeCoinWalletConnectorMethodType.KeplrMobile, { tier: 1, isRecommended: true }],
         LikeCoinWalletConnectorMethodType.Cosmostation,
@@ -69,7 +71,9 @@ export const useWalletStore = defineStore('wallet', () => {
       cosmostationDirectSignEnabled: true,
       connectWalletTitle: 'Login',
       connectWalletMobileWarning: 'Mobile Warning',
-      language: 'en'
+      language: 'en',
+      web3AuthNetwork: IS_TESTNET ? 'sapphire_devnet' : 'mainnet',
+      web3AuthClientId: IS_TESTNET ? 'BFxTDr8kscB0wmO6L3M_EVuwKLFO8J1TLRDIZqP3_t3Q64S6vWf8t_ihMDWDr3ZYvUmuNo7uBuBVVD_WBMxQocQ' : ''
     })
     const session = connector.value.restoreSession()
     let connection: LikeCoinWalletConnectorConnectionResult | null = null
