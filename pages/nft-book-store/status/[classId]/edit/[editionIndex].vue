@@ -237,6 +237,7 @@ const nameZh = ref('標準版')
 const descriptionEn = ref('')
 const descriptionZh = ref('')
 const hasShipping = ref(false)
+const isPhysicalOnly = ref(false)
 const shippingRates = ref<any[]>([{
   price: 10.0,
   nameEn: 'Standard Shipping',
@@ -321,6 +322,7 @@ onMounted(async () => {
         descriptionEn.value = currentEdition.description?.en || legacyDescription || ' '
         descriptionZh.value = currentEdition.description?.zh || legacyDescription || ' '
         hasShipping.value = currentEdition.hasShipping || false
+        isPhysicalOnly.value = currentEdition.isPhysicalOnly || false
 
         oldStock.value = currentEdition.stock
         oldIsAutoDeliver.value = currentEdition.isAutoDeliver
@@ -395,7 +397,8 @@ async function handleSubmit () {
       stock: Number(stock.value),
       isAutoDeliver: isAutoDeliver.value,
       autoMemo: autoMemo.value || '',
-      hasShipping: hasShipping.value || false
+      hasShipping: hasShipping.value || false,
+      isPhysicalOnly: isPhysicalOnly.value || false
     }
 
     if (!editedPrice || editedPrice.price === undefined) {
