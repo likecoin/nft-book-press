@@ -107,75 +107,6 @@
               label="Includes physical good that requires shipping"
             />
           </template>
-
-          <UCard
-            v-if="hasShipping"
-            :ui="{
-              header: { base: 'flex flex-wrap justify-between items-center gap-2' },
-              rounded: 'rounded-t-none',
-            }"
-          >
-            <template #header>
-              <h4 class="text-sm font-bold font-mono">
-                Shipping Options and Prices
-              </h4>
-
-              <UButton
-                label="Add Option"
-                variant="outline"
-                @click="addMoreShippingRate"
-              />
-            </template>
-
-            <component :is="hasMultipleShippingRates ? 'ul' : 'div'" class="space-y-4">
-              <component :is="hasMultipleShippingRates ? 'li' : 'div'" v-for="s, index in shippingRates" :key="s.index">
-                <UCard
-                  :ui="{
-                    body: { base: 'space-y-4' },
-                    footer: { base: 'flex justify-end items-center' },
-                  }"
-                >
-                  <UFormGroup
-                    label="Name of this shipping option"
-                    :ui="{ container: 'space-y-2' }"
-                  >
-                    <UInput
-                      :value="s.nameEn"
-                      placeholder="Shipping option name"
-                      @input="e => updateShippingRate(e, 'nameEn', index)"
-                    />
-                    <UInput
-                      placeholder="運送選項名稱"
-                      :value="s.nameZh"
-                      @input="e => updateShippingRate(e, 'nameZh', index)"
-                    />
-                  </UFormGroup>
-
-                  <UFormGroup label="Price(USD) of this shipping option">
-                    <UInput
-                      :value="s.price"
-                      type="number"
-                      step="0.01"
-                      :min="0"
-                      @input="e => updateShippingRate(e, 'price', index)"
-                    />
-                  </UFormGroup>
-
-                  <template
-                    v-if="hasMultipleShippingRates"
-                    #footer
-                  >
-                    <UButton
-                      label="Delete"
-                      variant="outline"
-                      color="red"
-                      @click="deleteShippingRate(index)"
-                    />
-                  </template>
-                </UCard>
-              </component>
-            </component>
-          </UCard>
         </UCard>
 
         <template #footer>
@@ -197,8 +128,6 @@ import { storeToRefs } from 'pinia'
 import { MdEditor, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
-
-import { v4 as uuidv4 } from 'uuid'
 
 import { LIKE_CO_API } from '~/constant'
 
@@ -236,13 +165,6 @@ const nameZh = ref('標準版')
 const descriptionEn = ref('')
 const descriptionZh = ref('')
 const hasShipping = ref(false)
-const shippingRates = ref<any[]>([{
-  price: 10.0,
-  nameEn: 'Standard Shipping',
-  nameZh: '標準寄送'
-}])
-const hasMultipleShippingRates = computed(() => shippingRates.value.length > 1)
-
 const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
 
 const toolbarOptions = [
@@ -305,23 +227,6 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
-
-function updateShippingRate (e: InputEvent, key: string, index: number) {
-  shippingRates.value[index][key] = (e.target as HTMLInputElement)?.value
-}
-
-function addMoreShippingRate () {
-  shippingRates.value.push({
-    index: uuidv4(),
-    price: 20,
-    nameEn: 'International Shipping',
-    nameZh: '國際寄送'
-  })
-}
-
-function deleteShippingRate (index: number) {
-  shippingRates.value.splice(index, 1)
-}
 
 function escapeHtml (text = '') {
   return text
