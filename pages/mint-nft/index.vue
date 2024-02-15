@@ -61,7 +61,7 @@
               (iscn.json)
             </UButton>
           </template>
-          <UInput class="my-4" type="file" @change="onISCNFileChange" />
+          <UInput class="my-4" type="file" accept="application/json" @change="onISCNFileChange" />
         </UFormGroup>
         <UAlert
           title=""
@@ -190,7 +190,7 @@
                   target="_blank"
                 />)
               </template>
-              <UInput type="file" @change="onClassFileChange" />
+              <UInput type="file" accept="application/json" @change="onClassFileChange" />
               <UTextarea
                 v-if="classCreateData"
                 :value="JSON.stringify(classCreateData, null, 2)"
@@ -211,7 +211,7 @@
                   target="_blank"
                 />)
               </template>
-              <UInput type="file" @change="onMintNFTDefaultFileChange" />
+              <UInput type="file" accept="application/json" @change="onMintNFTDefaultFileChange" />
               <UTextarea
                 v-if="nftMintDefaultData"
                 :value="JSON.stringify(nftMintDefaultData, null, 2)"
@@ -231,7 +231,7 @@
                   target="_blank"
                 />)
               </template>
-              <UInput type="file" @change="onMintNFTFileChange" />
+              <UInput type="file" accept=".csv" @change="onMintNFTFileChange" />
             </UFormGroup>
 
             <UAlert
@@ -597,6 +597,9 @@ async function onClickMintByInputting () {
   if (!isCreatingClass.value) {
     const { nfts } = await getNFTs({ classId: classId.value as string })
     existingNftCount.value = nfts.length
+  }
+  if (typeof nftMintCount.value !== 'number') {
+    nftMintCount.value = Number(nftMintCount.value)
   }
   const csvDataString = generateCsvData({
     prefix: state.nftIdPrefix,

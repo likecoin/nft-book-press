@@ -1,17 +1,32 @@
 <template>
-  <main class="space-y-4">
+  <main class="space-y-10 pb-10">
     <div class="flex justify-between gap-4">
-      <h1 class="text-lg font-bold font-mono">
+      <h1 class="text-lg font-bold font-mono flex-wrap">
         NFT Book Status "{{ nftClassName || classId }}"
       </h1>
 
-      <UButton
-        label="View in liker.land"
-        icon="i-heroicons-arrow-top-right-on-square"
-        variant="outline"
-        :to="`${LIKER_LAND_URL}/nft/class/${classId}`"
-        target="_blank"
-      />
+      <div class="flex justify-center items-center gap-2 flex-wrap">
+        <UButton
+          class="font-mono break-all"
+          label="Gift Books"
+          icon="i-heroicons-gift"
+          :to="{
+            name: 'nft-book-store-gift-classId',
+            params: { classId }
+          }"
+          color="pink"
+          variant="outline"
+          target="_blank"
+        />
+
+        <UButton
+          label="View in liker.land"
+          icon="i-heroicons-arrow-top-right-on-square"
+          variant="outline"
+          :to="`${LIKER_LAND_URL}/nft/class/${classId}`"
+          target="_blank"
+        />
+      </div>
     </div>
 
     <UAlert
@@ -37,7 +52,7 @@
             <h3 class="font-bold font-mono">
               Editions
             </h3>
-            <div class="flex justify-center py-4">
+            <div class="flex justify-center">
               <UButton
                 icon="i-heroicons-plus-circle"
                 label="New Edition"
@@ -288,6 +303,38 @@
         </template>
       </UCard>
 
+      <UCard
+        :ui="{
+          header: { base: 'flex justify-between items-center' },
+          body: { padding: '' }
+        }"
+      >
+        <template #header>
+          <h3 class="font-bold font-mono">
+            Coupon Codes
+          </h3>
+          <UButton
+            label="Add New"
+            icon="i-heroicons-plus-circle"
+            variant="outline"
+            color="primary"
+            @click="isShowNewCouponModal = true"
+          />
+        </template>
+
+        <UTable
+          v-if="couponsTableRows.length"
+          :columns="[
+            { key: 'id', label: 'Code', sortable: true },
+            { key: 'discount', label: 'Discount Multiplier' },
+            { key: 'expireTs', label: 'Expiry Date' },
+          ]"
+          :rows="couponsTableRows"
+        />
+      </UCard>
+
+      <NewCouponModal v-model="isShowNewCouponModal" @add="addCouponCode" />
+
       <UCard :ui="{ body: { base: 'space-y-8' } }">
         <template #header>
           <h3 class="font-bold font-mono">
@@ -496,6 +543,10 @@
           <UInput v-model="fromChannel" placeholder="Channel ID" />
         </UFormGroup>
 
+        <UFormGroup v-if="Object.keys(coupons).length" label="Active coupon" hint="Optional">
+          <USelect v-model="activeCoupon" :options="[''].concat(Object.keys(coupons))" />
+        </UFormGroup>
+
         <UButton
           class="font-mono break-all"
           :label="`${purchaseLink}`"
@@ -556,6 +607,7 @@ const isLoading = ref(false)
 const classId = ref(route.params.classId)
 const fromChannel = ref<string | undefined>(undefined)
 const priceIndex = ref(0)
+const activeCoupon = ref('')
 const classListingInfo = ref<any>({})
 const prices = ref<any[]>([])
 const isUpdatingPricesOrder = ref(false)
@@ -568,6 +620,7 @@ const searchInput = ref('')
 
 const moderatorWallets = ref<string[]>([])
 const moderatorWalletsGrants = ref<any>({})
+const coupons = ref<any>({})
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
@@ -577,6 +630,7 @@ const stripeConnectWalletInput = ref('')
 const mustClaimToView = ref(false)
 const hideDownload = ref(false)
 const useLikerLandPurchaseLink = ref(true)
+const isShowNewCouponModal = ref(false)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
@@ -588,6 +642,7 @@ const purchaseLink = computed(() => {
     from: fromChannel.value || '',
     price_index: priceIndex.value.toString()
   }
+  if (activeCoupon.value) { payload.coupon = activeCoupon.value }
   const queryString = `?${new URLSearchParams(payload).toString()}`
   const apiLink = `https://api.${IS_TESTNET ? 'rinkeby.' : ''}like.co/likernft/book/purchase/${classId.value}/new${queryString}`
   const likerLandLink = `https://${IS_TESTNET ? 'rinkeby.' : ''}liker.land/nft/class/${classId.value}${queryString}`
@@ -629,6 +684,16 @@ const purchaseList = computed(() => {
   return []
 })
 
+const couponsTableRows = computed(() => {
+  if (!coupons.value) {
+    return []
+  }
+  return Object.entries(coupons.value).map(([id, value]) => ({
+    id,
+    expireTs: (value as any).expireTs ? new Date((value as any).expireTs) : '',
+    discount: (value as any).discount
+  }))
+})
 const orderTableColumns = computed(() => {
   const columns = [
     { key: 'actions', label: 'Actions', sortable: false },
@@ -642,6 +707,7 @@ const orderTableColumns = computed(() => {
     { key: 'from', label: 'Sales Channel', sortable: true },
     { key: 'price', label: 'Price', sortable: true },
     { key: 'priceName', label: 'Price Name', sortable: false },
+    { key: 'coupon', label: 'Coupon Applied', sortable: false },
     { key: 'email', label: 'Buyer Email', sortable: true },
     { key: 'wallet', label: 'Buyer Wallet', sortable: true },
     { key: 'message', label: 'Buyer Message', sortable: false }
@@ -751,6 +817,7 @@ const ordersTableRows = computed(() => purchaseList.value?.map((p: any, index: n
   shortenWallet: shortenWalletAddress(p.wallet),
   priceName: p.priceName,
   price: p.price || 0,
+  coupon: p.coupon || '',
   message: p.message || '',
   from: p.from || '',
   actions: getOrdersTableActionItems(p)
@@ -859,7 +926,8 @@ onMounted(async () => {
       notificationEmails: classNotificationEmails,
       connectedWallets: classConnectedWallets,
       mustClaimToView: classMustClaimToView,
-      hideDownload: classHideDownload
+      hideDownload: classHideDownload,
+      coupons: classCoupons
     } = classData.value as any
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
@@ -870,6 +938,7 @@ onMounted(async () => {
     }
     mustClaimToView.value = classMustClaimToView
     hideDownload.value = classHideDownload
+    coupons.value = classCoupons || {}
     const { data: orders, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
       {
         headers: {
@@ -975,6 +1044,14 @@ async function hardSetStatusToCompleted (purchase: any) {
   classListingInfo.value.pendingNFTCount -= 1
 }
 
+function addCouponCode (coupon: any) {
+  coupons.value[coupon.id] = {
+    discount: coupon.discount,
+    expireTs: coupon.expireTs
+  }
+  updateSettings()
+}
+
 function addModeratorWallet () {
   if (!moderatorWalletInput.value) { return }
   moderatorWallets.value.push(moderatorWalletInput.value)
@@ -1022,7 +1099,8 @@ async function updateSettings () {
       notificationEmails,
       connectedWallets,
       hideDownload,
-      mustClaimToView
+      mustClaimToView,
+      coupons
     })
   } catch (err) {
     const errorData = (err as any).data || err

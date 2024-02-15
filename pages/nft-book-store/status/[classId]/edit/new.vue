@@ -279,7 +279,8 @@ async function handleSubmit () {
       stock: Number(stock.value),
       isAutoDeliver: deliveryMethod.value === 'auto',
       autoMemo: deliveryMethod.value === 'auto' ? (autoMemo.value || '') : '',
-      hasShipping: hasShipping.value || false
+      hasShipping: hasShipping.value || false,
+      isPhysicalOnly: false
     }
 
     if (!editedPrice || editedPrice.price === undefined) {

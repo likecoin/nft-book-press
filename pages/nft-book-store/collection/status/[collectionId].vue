@@ -1,5 +1,5 @@
 <template>
-  <main class="space-y-4">
+  <main class="space-y-10 pb-10">
     <h1 class="text-lg font-bold font-mono">
       NFT Book Collection Status "{{ collectionName }}"
     </h1>
@@ -214,6 +214,42 @@
         </template>
       </UCard>
 
+      <UCard
+        :ui="{
+          header: { base: 'flex justify-between items-center' },
+          body: { padding: '' }
+        }"
+      >
+        <template #header>
+          <h3 class="font-bold font-mono">
+            Coupon Codes
+          </h3>
+          <UButton
+            label="Add New"
+            icon="i-heroicons-plus-circle"
+            variant="outline"
+            color="primary"
+            @click="isShowNewCouponModal = true"
+          />
+        </template>
+
+        <UTable
+          v-if="couponsTableRows.length"
+          :columns="[
+            { key: 'id', label: 'Code', sortable: true },
+            { key: 'discount', label: 'Discount Multiplier' },
+            { key: 'expireTs', label: 'Expiry Date' },
+          ]"
+          :rows="couponsTableRows"
+        >
+          <template #id-data="{ row }">
+            <span class="font-mono">{{ row.id }}</span>
+          </template>
+        </UTable>
+      </UCard>
+
+      <NewCouponModal v-model="isShowNewCouponModal" @add="addCouponCode" />
+
       <UCard :ui="{ body: { base: 'space-y-8' } }">
         <template #header>
           <h3 class="font-bold font-mono">
@@ -394,6 +430,10 @@
           <UInput v-model="fromChannel" placeholder="Channel ID" />
         </UFormGroup>
 
+        <UFormGroup v-if="Object.keys(coupons).length" label="Active coupon" hint="Optional">
+          <USelect v-model="activeCoupon" :options="[''].concat(Object.keys(coupons))" />
+        </UFormGroup>
+
         <UButton
           class="font-mono break-all"
           :label="`${purchaseLink}`"
@@ -455,6 +495,7 @@ const error = ref('')
 const isLoading = ref(false)
 const collectionId = ref(route.params.collectionId)
 const fromChannel = ref<string | undefined>(undefined)
+const activeCoupon = ref('')
 const collectionListingInfo = ref<any>({})
 const ordersData = ref<any>({})
 const connectStatus = ref<any>({})
@@ -465,6 +506,7 @@ const searchInput = ref('')
 
 const moderatorWallets = ref<string[]>([])
 const moderatorWalletsGrants = ref<any>({})
+const coupons = ref<any>({})
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
@@ -474,6 +516,7 @@ const stripeConnectWalletInput = ref('')
 const mustClaimToView = ref(false)
 const hideDownload = ref(false)
 const useLikerLandPurchaseLink = ref(true)
+const isShowNewCouponModal = ref(false)
 
 const collectionName = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.name)
 const ownerWallet = computed(() => collectionListingInfo?.value?.ownerWallet)
@@ -484,6 +527,7 @@ const purchaseLink = computed(() => {
   const payload: Record<string, string> = {
     from: fromChannel.value || ''
   }
+  if (activeCoupon.value) { payload.coupon = activeCoupon.value }
   const queryString = `?${new URLSearchParams(payload).toString()}`
   const likerLandLink = `https://${IS_TESTNET ? 'rinkeby.' : ''}liker.land/nft/collection/${collectionId.value}${queryString}`
   const apiLink = `https://api.${IS_TESTNET ? 'rinkeby.' : ''}like.co/likernft/book/collection/purchase/${collectionId.value}/new${queryString}`
@@ -525,6 +569,17 @@ const purchaseList = computed(() => {
   return []
 })
 
+const couponsTableRows = computed(() => {
+  if (!coupons.value) {
+    return []
+  }
+  return Object.entries(coupons.value).map(([id, value]) => ({
+    id,
+    expireTs: (value as any).expireTs ? new Date((value as any).expireTs) : '',
+    discount: (value as any).discount
+  }))
+})
+
 const orderTableColumns = computed(() => {
   const columns = [
     { key: 'actions', label: 'Actions', sortable: false },
@@ -537,6 +592,7 @@ const orderTableColumns = computed(() => {
   columns.push(
     { key: 'from', label: 'Sales Channel', sortable: true },
     { key: 'price', label: 'Price', sortable: true },
+    { key: 'coupon', label: 'Coupon Applied', sortable: false },
     { key: 'email', label: 'Buyer Email', sortable: true },
     { key: 'wallet', label: 'Buyer Wallet', sortable: true },
     { key: 'message', label: 'Buyer Message', sortable: false }
@@ -630,6 +686,7 @@ const ordersTableRows = computed(() => purchaseList.value?.map((p: any, index: n
   shortenWallet: shortenWalletAddress(p.wallet),
   priceName: p.priceName,
   price: p.price || 0,
+  coupon: p.coupon || '',
   message: p.message || '',
   from: p.from || '',
   actions: getOrdersTableActionItems(p)
@@ -729,7 +786,8 @@ onMounted(async () => {
     const {
       moderatorWallets: classModeratorWallets,
       notificationEmails: classNotificationEmails,
-      connectedWallets: classConnectedWallets
+      connectedWallets: classConnectedWallets,
+      coupons: classCoupons
     } = collectionListingInfo.value as any
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
@@ -738,6 +796,7 @@ onMounted(async () => {
     if (stripeConnectWallet.value !== ownerWallet.value) {
       stripeConnectWalletInput.value = stripeConnectWallet.value
     }
+    coupons.value = classCoupons || {}
     const { data: orders, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/orders`,
       {
         headers: {
@@ -803,6 +862,14 @@ async function hardSetStatusToCompleted (purchase: any) {
   collectionListingInfo.value.pendingNFTCount -= 1
 }
 
+function addCouponCode (coupon: any) {
+  coupons.value[coupon.id] = {
+    discount: coupon.discount,
+    expireTs: coupon.expireTs
+  }
+  updateSettings()
+}
+
 function addModeratorWallet () {
   if (!moderatorWalletInput.value) { return }
   moderatorWallets.value.push(moderatorWalletInput.value)
@@ -850,7 +917,8 @@ async function updateSettings () {
       notificationEmails,
       connectedWallets,
       hideDownload,
-      mustClaimToView
+      mustClaimToView,
+      coupons
     })
   } catch (err) {
     const errorData = (err as any).data || err

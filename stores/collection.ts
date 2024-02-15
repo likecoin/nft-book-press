@@ -39,6 +39,24 @@ export const useCollectionStore = defineStore('collection', () => {
     return data
   }
 
+  async function listModeratedNFTBookCollections () {
+    const { error, data } = await useFetch(`${LIKE_CO_API}/likernft/book/collection/store/list/moderated`, {
+      query: {
+        wallet: sessionWallet.value,
+        type: 'book'
+      },
+      headers: token.value
+        ? {
+            authorization: `Bearer ${token.value}`
+          }
+        : undefined
+    })
+    if (error.value) {
+      throw error.value
+    }
+    return data
+  }
+
   async function getNFTBookCollectionById (collectionId: string) {
     const { error, data } = await useFetch(`${LIKE_CO_API}/likernft/collection/${collectionId}`, {
       headers: token.value
@@ -100,6 +118,7 @@ export const useCollectionStore = defineStore('collection', () => {
     fetchCollectionById,
     lazyFetchCollectionById,
     listNFTBookCollections,
+    listModeratedNFTBookCollections,
     getNFTBookCollectionById,
     newNFTBookCollection,
     updateNFTBookCollectionById,
