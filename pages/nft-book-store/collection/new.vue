@@ -120,6 +120,17 @@
               </span>
             </template>
           </ShippingRates>
+
+          <UFormGroup
+            label="Allow custom price"
+            :ui="{ label: { base: 'font-mono font-bold' } }"
+          >
+            <UCheckbox
+              v-model="price.isAllowCustomPrice"
+              name="isAllowCustomPrice"
+              label="Allow user to pay more than defined price"
+            />
+          </UFormGroup>
         </div>
       </div>
 
@@ -351,7 +362,8 @@ const defaultPaymentCurrency = ref('USD')
 const price = ref({
   price: MINIMAL_PRICE,
   stock: Number(route.query.count as string || 1),
-  hasShipping: false
+  hasShipping: false,
+  isAllowCustomPrice: false
 })
 const shippingRates = ref<any[]>([])
 const moderatorWallets = ref<string[]>([])
@@ -485,7 +497,8 @@ function formatPrice (price: any) {
   return {
     priceInDecimal: Math.round(Number(price.price) * 100),
     stock: Number(price.stock),
-    hasShipping: Boolean(price.hasShipping || shippingRates.value.length || false)
+    hasShipping: Boolean(price.hasShipping || shippingRates.value.length || false),
+    isAllowCustomPrice: Boolean(price.isAllowCustomPrice || false)
   }
 }
 

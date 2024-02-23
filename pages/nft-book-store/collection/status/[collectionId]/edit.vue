@@ -90,6 +90,17 @@
           :shipping-info="shippingRates"
         />
 
+        <UFormGroup
+          label="Allow custom price"
+          :ui="{ label: { base: 'font-mono font-bold' } }"
+        >
+          <UCheckbox
+            v-model="isAllowCustomPrice"
+            name="isAllowCustomPrice"
+            label="Allow user to pay more than defined price"
+          />
+        </UFormGroup>
+
         <template #footer>
           <UButton label="Save Changes" :loading="isLoading" size="lg" :disabled="isLoading" @click="handleSubmit" />
         </template>
@@ -127,6 +138,7 @@ const descriptionEn = ref('')
 const descriptionZh = ref('')
 const image = ref('')
 const hasShipping = ref(false)
+const isAllowCustomPrice = ref(false)
 const shippingRates = ref<any[]>([])
 
 const toolbarOptions = ref<string[]>([
@@ -177,6 +189,7 @@ onMounted(async () => {
     descriptionZh.value = collectionListingInfo.value.description?.zh || ' '
     hasShipping.value = collectionListingInfo.value.hasShipping || false
     shippingRates.value = collectionListingInfo.value.shippingRates || []
+    isAllowCustomPrice.value = collectionListingInfo.value.isAllowCustomPrice || false
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)
@@ -229,7 +242,8 @@ async function handleSubmit () {
       priceInDecimal: Math.round(Number(price.value) * 100),
       price: Number(price.value),
       stock: Number(stock.value),
-      hasShipping: hasShipping.value || false
+      hasShipping: hasShipping.value || false,
+      isAllowCustomPrice: isAllowCustomPrice.value || false
     }
 
     if (!editedPrice || editedPrice.price === undefined) {

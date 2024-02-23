@@ -98,6 +98,28 @@
           @on-update-shipping-rates="updateShippingRates"
         />
 
+        <UFormGroup
+          label="Is Physical only good"
+          :ui="{ label: { base: 'font-mono font-bold' } }"
+        >
+          <UCheckbox
+            v-model="isPhysicalOnly"
+            name="isPhysicalOnly"
+            label="This edition does not contain digital file/NFT"
+          />
+        </UFormGroup>
+
+        <UFormGroup
+          label="Allow custom price"
+          :ui="{ label: { base: 'font-mono font-bold' } }"
+        >
+          <UCheckbox
+            v-model="isAllowCustomPrice"
+            name="isAllowCustomPrice"
+            label="Allow user to pay more than defined price"
+          />
+        </UFormGroup>
+
         <template #footer>
           <UButton
             label="Save Changes"
@@ -155,6 +177,7 @@ const descriptionEn = ref('')
 const descriptionZh = ref('')
 const hasShipping = ref(false)
 const isPhysicalOnly = ref(false)
+const isAllowCustomPrice = ref(false)
 const shippingRates = ref<any[]>([])
 const isUpdatingShippingRates = ref(false)
 const oldStock = ref(0)
@@ -236,6 +259,7 @@ onMounted(async () => {
         descriptionZh.value = currentEdition.description?.zh || legacyDescription || ' '
         hasShipping.value = !!(currentEdition.hasShipping) || false
         isPhysicalOnly.value = currentEdition.isPhysicalOnly || false
+        isAllowCustomPrice.value = currentEdition.isAllowCustomPrice || false
 
         oldStock.value = currentEdition.stock
         oldIsAutoDeliver.value = currentEdition.isAutoDeliver
@@ -317,7 +341,8 @@ async function handleSubmit () {
       isAutoDeliver: isAutoDeliver.value,
       autoMemo: autoMemo.value || '',
       hasShipping: hasShipping.value || false,
-      isPhysicalOnly: isPhysicalOnly.value || false
+      isPhysicalOnly: isPhysicalOnly.value || false,
+      isAllowCustomPrice: isAllowCustomPrice.value || false
     }
 
     if (!editedPrice || editedPrice.price === undefined) {

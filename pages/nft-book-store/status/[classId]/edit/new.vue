@@ -97,6 +97,28 @@
           @on-update-shipping-rates="updateShippingRates"
         />
 
+        <UFormGroup
+          label="Is Physical only good"
+          :ui="{ label: { base: 'font-mono font-bold' } }"
+        >
+          <UCheckbox
+            v-model="isPhysicalOnly"
+            name="isPhysicalOnly"
+            label="This edition does not contain digital file/NFT"
+          />
+        </UFormGroup>
+
+        <UFormGroup
+          label="Allow custom price"
+          :ui="{ label: { base: 'font-mono font-bold' } }"
+        >
+          <UCheckbox
+            v-model="isAllowCustomPrice"
+            name="isAllowCustomPrice"
+            label="Allow user to pay more than defined price"
+          />
+        </UFormGroup>
+
         <template #footer>
           <UButton
             label="Add Edition"
@@ -155,6 +177,8 @@ const descriptionEn = ref('')
 const descriptionZh = ref('')
 const hasShipping = ref(false)
 const shippingRates = ref<any[]>([])
+const isPhysicalOnly = ref(false)
+const isAllowCustomPrice = ref(false)
 const isUpdatingShippingRates = ref(false)
 
 const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
@@ -280,7 +304,8 @@ async function handleSubmit () {
       isAutoDeliver: deliveryMethod.value === 'auto',
       autoMemo: deliveryMethod.value === 'auto' ? (autoMemo.value || '') : '',
       hasShipping: hasShipping.value || false,
-      isPhysicalOnly: false
+      isPhysicalOnly: isPhysicalOnly.value || false,
+      isAllowCustomPrice: isAllowCustomPrice.value || false
     }
 
     if (!editedPrice || editedPrice.price === undefined) {
