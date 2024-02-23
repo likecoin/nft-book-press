@@ -385,7 +385,7 @@ const mdEditorPlaceholder = ref({
 const classIdInput = ref(classId || '')
 const nextPriceIndex = ref(1)
 const defaultPaymentCurrency = ref('USD')
-const mustClaimToView = ref(false)
+const mustClaimToView = ref(true)
 const hideDownload = ref(false)
 const prices = ref<any[]>([{
   price: MINIMAL_PRICE,
