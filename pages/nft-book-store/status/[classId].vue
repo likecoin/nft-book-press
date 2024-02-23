@@ -338,7 +338,7 @@
       <UCard :ui="{ body: { base: 'space-y-8' } }">
         <template #header>
           <h3 class="font-bold font-mono">
-            Other Settings
+            DRM Options
           </h3>
         </template>
 
@@ -355,7 +355,7 @@
           </UFormGroup>
 
           <UFormGroup
-            label="Hide file download links"
+            label="Disable File Download "
             :ui="{ label: { base: 'font-mono font-bold' } }"
           >
             <UCheckbox
@@ -365,7 +365,14 @@
             />
           </UFormGroup>
         </div>
+      </UCard>
 
+      <UCard :ui="{ body: { base: 'space-y-8' } }">
+        <template #header>
+          <h3 class="font-bold font-mono">
+            Other Settings
+          </h3>
+        </template>
         <UCard
           :ui="{
             header: { base: 'flex justify-between items-center' },
