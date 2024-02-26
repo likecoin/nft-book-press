@@ -91,6 +91,17 @@
         />
 
         <UFormGroup
+          label="Is Physical only good"
+          :ui="{ label: { base: 'font-mono font-bold' } }"
+        >
+          <UCheckbox
+            v-model="isPhysicalOnly"
+            name="isPhysicalOnly"
+            label="This collection does not contain any digital file/NFT"
+          />
+        </UFormGroup>
+
+        <UFormGroup
           label="Allow custom price"
           :ui="{ label: { base: 'font-mono font-bold' } }"
         >
@@ -139,6 +150,7 @@ const descriptionZh = ref('')
 const image = ref('')
 const hasShipping = ref(false)
 const isAllowCustomPrice = ref(false)
+const isPhysicalOnly = ref(false)
 const shippingRates = ref<any[]>([])
 
 const toolbarOptions = ref<string[]>([
@@ -189,6 +201,7 @@ onMounted(async () => {
     descriptionZh.value = collectionListingInfo.value.description?.zh || ' '
     hasShipping.value = collectionListingInfo.value.hasShipping || false
     shippingRates.value = collectionListingInfo.value.shippingRates || []
+    isPhysicalOnly.value = collectionListingInfo.value.isPhysicalOnly || false
     isAllowCustomPrice.value = collectionListingInfo.value.isAllowCustomPrice || false
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -243,6 +256,7 @@ async function handleSubmit () {
       price: Number(price.value),
       stock: Number(stock.value),
       hasShipping: hasShipping.value || false,
+      isPhysicalOnly: isPhysicalOnly.value || false,
       isAllowCustomPrice: isAllowCustomPrice.value || false
     }
 

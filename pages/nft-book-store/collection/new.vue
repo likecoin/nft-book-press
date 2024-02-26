@@ -122,6 +122,17 @@
           </ShippingRates>
 
           <UFormGroup
+            label="Is Physical only good"
+            :ui="{ label: { base: 'font-mono font-bold' } }"
+          >
+            <UCheckbox
+              v-model="price.isPhysicalOnly"
+              name="isPhysicalOnly"
+              label="This edition does not contain digital file/NFT"
+            />
+          </UFormGroup>
+
+          <UFormGroup
             label="Allow custom price"
             :ui="{ label: { base: 'font-mono font-bold' } }"
           >
@@ -363,6 +374,7 @@ const price = ref({
   price: MINIMAL_PRICE,
   stock: Number(route.query.count as string || 1),
   hasShipping: false,
+  isPhysicalOnly: false,
   isAllowCustomPrice: false
 })
 const shippingRates = ref<any[]>([])
@@ -498,6 +510,7 @@ function formatPrice (price: any) {
     priceInDecimal: Math.round(Number(price.price) * 100),
     stock: Number(price.stock),
     hasShipping: Boolean(price.hasShipping || shippingRates.value.length || false),
+    isPhysicalOnly: Boolean(price.isPhysicalOnly || false),
     isAllowCustomPrice: Boolean(price.isAllowCustomPrice || false)
   }
 }
