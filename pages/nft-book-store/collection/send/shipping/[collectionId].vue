@@ -88,6 +88,14 @@
           </h3>
         </template>
         <table class="divide-y w-full">
+          <tr v-if="orderInfo.shippingDetails?.name">
+            <td class="text-left px-4 py-3">
+              Name
+            </td>
+            <td class="text-left px-4 py-3">
+              {{ orderInfo.shippingDetails.name }}
+            </td>
+          </tr>
           <tr v-for="[key, value] in Object.entries(orderInfo.shippingDetails?.address)" :key="key">
             <td class="text-left px-4 py-3">
               {{ key }}
