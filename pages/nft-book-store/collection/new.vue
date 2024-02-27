@@ -108,7 +108,7 @@
             <UInput v-model="price.stock" type="number" step="0.01" :min="0" />
           </UFormGroup>
 
-          <ShippingRates
+          <ShippingRatesRateTable
             :read-only="false"
             :shipping-info="shippingRates"
             :is-new-listing-page="true"
@@ -119,7 +119,7 @@
                 (Includes physical good that requires shipping)
               </span>
             </template>
-          </ShippingRates>
+          </ShippingRatesRateTable>
 
           <UFormGroup
             label="Allow custom price"

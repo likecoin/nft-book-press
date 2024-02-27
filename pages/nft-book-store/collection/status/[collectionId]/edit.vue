@@ -84,7 +84,7 @@
           :sanitize="sanitizeHtml"
         />
 
-        <ShippingRates
+        <ShippingRatesRateTable
           v-model="hasShipping"
           :read-only="true"
           :shipping-info="shippingRates"

@@ -107,7 +107,9 @@
             color="gray"
             @click="handleClickEditNFTId"
           />
-          <UDivider class="text-sm text-gray-600 sm:w-min">OR</UDivider>
+          <UDivider class="text-sm text-gray-600 sm:w-min">
+            OR
+          </UDivider>
           <UButton
             label="Auto-fetch NFT ID"
             :disabled="isLoading || isEditingNFTId"

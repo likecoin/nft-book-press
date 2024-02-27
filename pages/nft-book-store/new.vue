@@ -47,7 +47,7 @@
         </UFormGroup>
       </UCard>
 
-      <ShippingRates
+      <ShippingRatesRateTable
         :read-only="false"
         :is-new-listing-page="true"
         :shipping-info="shippingRates"
@@ -130,7 +130,7 @@
             :sanitize="sanitizeHtml"
           />
 
-          <ShippingRates
+          <ShippingRatesRateTable
             v-model="p.hasShipping"
             :read-only="true"
             :is-new-listing-page="true"

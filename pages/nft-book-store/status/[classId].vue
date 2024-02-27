@@ -154,7 +154,7 @@
         </table>
       </UCard>
 
-      <ShippingRates
+      <ShippingRatesRateTable
         :read-only="false"
         :is-loading="isUpdatingShippingRates"
         :shipping-info="classListingInfo.shippingRates"
