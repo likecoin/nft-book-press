@@ -595,7 +595,7 @@ import { CHAIN_EXPLORER_URL, IS_TESTNET, LIKE_CO_API, LIKER_LAND_URL } from '~/c
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useWalletStore } from '~/stores/wallet'
-import { getPortfolioURL } from '~/utils'
+import { getPortfolioURL, formatShippingAddress } from '~/utils'
 import { getNFTAuthzGrants, shortenWalletAddress } from '~/utils/cosmos'
 
 const store = useWalletStore()
@@ -719,6 +719,11 @@ const orderTableColumns = computed(() => {
     { key: 'wallet', label: 'Buyer Wallet', sortable: true },
     { key: 'message', label: 'Buyer Message', sortable: false }
   )
+  if (orderHasShipping.value) {
+    columns.push({ key: 'shippingName', label: 'Shipping Name', sortable: true })
+    columns.push({ key: 'shippingAddress', label: 'Shipping Address', sortable: true })
+    columns.push({ key: 'shippingCountry', label: 'Shipping Country', sortable: true })
+  }
 
   return columns
 })
@@ -819,6 +824,9 @@ const ordersTableRows = computed(() => purchaseList.value?.map((p: any, index: n
   statusLabelColor: getStatusLabelColor(p),
   orderDate: p.formattedDate,
   shippingStatus: p.shippingStatus || '',
+  shippingCountry: p.shippingDetails?.address?.country || '',
+  shippingAddress: formatShippingAddress(p.shippingDetails) || '',
+  shippingName: p.shippingDetails?.name || '',
   wallet: p.wallet || '',
   walletLink: getPortfolioURL(p.wallet),
   shortenWallet: shortenWalletAddress(p.wallet),

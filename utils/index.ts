@@ -110,3 +110,26 @@ export const deliverMethodOptions = [
     label: 'Sign memo and manually deliver each NFT'
   }
 ]
+
+export const formatShippingAddress = function (shippingDetails: any) {
+  if (!shippingDetails?.address) {
+    return ''
+  }
+  const {
+    line1 = '',
+    line2 = '',
+    city = '',
+    state = '',
+    postal_code: code = '',
+    country = ''
+  } = shippingDetails.address
+  const parts = [
+    line1,
+    line2,
+    city,
+    state,
+    code,
+    country
+  ]
+  return parts.filter(p => !!p).join(', ')
+}
