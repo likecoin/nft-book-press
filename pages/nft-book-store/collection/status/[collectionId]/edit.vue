@@ -48,8 +48,8 @@
         </UFormGroup>
 
         <UFormGroup :label="`Product name of this collection`" :ui="{ container: 'space-y-2' }">
-          <UInput placeholder="Product name in English" :value="nameEn" />
-          <UInput placeholder="產品中文名字" :value="nameZh" />
+          <UInput v-model="nameEn" placeholder="Product name in English" />
+          <UInput v-model="nameZh" placeholder="產品中文名字" />
         </UFormGroup>
 
         <UFormGroup
