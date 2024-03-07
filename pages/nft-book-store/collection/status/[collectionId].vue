@@ -24,57 +24,6 @@
       <UCard :ui="{ body: { padding: '' } }">
         <template #header>
           <h3 class="font-bold font-mono">
-            Books in Collection
-          </h3>
-        </template>
-        <UFormGroup>
-          <UTable
-            :columns="[{ key: 'classId', label: 'Class ID' }, { key: 'name', label: 'Book Name'}]"
-            :rows="collectionListingInfo?.classIds?.map((classId, index) => ({ index, classId, name: getClassMetadataById(classId)?.name }))"
-          />
-        </UFormGroup>
-        <table class="w-full divide-y text-sm">
-          <thead class="border-b-2">
-            <tr class="text-left">
-              <th class="px-3 py-4 text-right">
-                Price (USD)
-              </th>
-              <th class="px-3 py-4 text-right">
-                Edit
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="px-3 py-4 text-right">
-                {{ collectionListingInfo.priceInDecimal / 100 }}
-              </td>
-              <td class="text-center">
-                <UButton
-                  icon="i-heroicons-document-magnifying-glass"
-                  :to="{
-                    name: 'nft-book-store-collection-status-collectionId-edit',
-                    params: { collectionId }
-                  }"
-                  variant="soft"
-                  color="gray"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </UCard>
-
-      <ShippingRatesRateTable
-        :read-only="false"
-        :is-loading="isUpdatingShippingRates"
-        :shipping-info="collectionListingInfo.shippingRates"
-        @on-update-shipping-rates="updateShippingRates"
-      />
-
-      <UCard :ui="{ body: { padding: '' } }">
-        <template #header>
-          <h3 class="font-bold font-mono">
             Status
           </h3>
         </template>
@@ -166,6 +115,57 @@
           </template>
         </UTable>
       </UCard>
+
+      <UCard :ui="{ body: { padding: '' } }">
+        <template #header>
+          <h3 class="font-bold font-mono">
+            Books in Collection
+          </h3>
+        </template>
+        <UFormGroup>
+          <UTable
+            :columns="[{ key: 'classId', label: 'Class ID' }, { key: 'name', label: 'Book Name'}]"
+            :rows="collectionListingInfo?.classIds?.map((classId, index) => ({ index, classId, name: getClassMetadataById(classId)?.name }))"
+          />
+        </UFormGroup>
+        <table class="w-full divide-y text-sm">
+          <thead class="border-b-2">
+            <tr class="text-left">
+              <th class="px-3 py-4 text-right">
+                Price (USD)
+              </th>
+              <th class="px-3 py-4 text-right">
+                Edit
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="px-3 py-4 text-right">
+                {{ collectionListingInfo.priceInDecimal / 100 }}
+              </td>
+              <td class="text-center">
+                <UButton
+                  icon="i-heroicons-document-magnifying-glass"
+                  :to="{
+                    name: 'nft-book-store-collection-status-collectionId-edit',
+                    params: { collectionId }
+                  }"
+                  variant="soft"
+                  color="gray"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </UCard>
+
+      <ShippingRatesRateTable
+        :read-only="false"
+        :is-loading="isUpdatingShippingRates"
+        :shipping-info="collectionListingInfo.shippingRates"
+        @on-update-shipping-rates="updateShippingRates"
+      />
 
       <UCard
         v-if="userIsOwner"

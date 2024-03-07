@@ -48,6 +48,101 @@
     <template v-if="bookStoreApiStore.isAuthenticated">
       <UCard :ui="{ body: { padding: '' } }">
         <template #header>
+          <h3 class="font-bold font-mono">
+            Status
+          </h3>
+        </template>
+
+        <UTable
+          :columns="[
+            { key: 'pendingAction', label: 'Pending Action' },
+            { key: 'sold', label: 'Sold' },
+            { key: 'stock', label: 'Stock' },
+          ]"
+          :rows="[
+            {
+              pendingAction: classListingInfo.pendingNFTCount || 0,
+              sold: classListingInfo.sold || 0,
+              stock: classListingInfo.stock || 0
+            },
+          ]"
+        >
+          <template #pendingAction-data="{ row }">
+            <UBadge
+              v-if="row.pendingAction"
+              :label="`${row.pendingAction}`"
+              color="red"
+              :ui="{ rounded: 'rounded-full' }"
+            />
+            <template v-else>
+              {{ row.pendingAction }}
+            </template>
+          </template>
+        </UTable>
+      </UCard>
+
+      <UCard
+        :ui="{
+          header: { base: 'flex justify-between items-center gap-4' },
+          body: { padding: '' },
+        }"
+      >
+        <template #header>
+          <h3 class="font-bold font-mono">
+            Orders
+          </h3>
+
+          <UInput v-model="searchInput" icon="i-heroicons-magnifying-glass-20-solid" placeholder="Search..." />
+        </template>
+
+        <UTable
+          :columns="orderTableColumns"
+          :rows="ordersTableRows"
+        >
+          <template #email-data="{ row }">
+            <UButton
+              :label="row.email"
+              :to="`mailto:${row.email}`"
+              variant="link"
+              :padded="false"
+            />
+          </template>
+          <template #wallet-data="{ row }">
+            <UTooltip :text="row.wallet">
+              <UButton
+                class="font-mono"
+                :label="row.shortenWallet"
+                :to="row.walletLink"
+                variant="link"
+                :padded="false"
+                size="xs"
+                target="_blank"
+              />
+            </UTooltip>
+          </template>
+          <template #status-data="{ row }">
+            <UBadge
+              :color="row.statusLabelColor"
+              :label="row.statusLabel"
+              variant="outline"
+              :ui="{ rounded: 'rounded-full' }"
+            />
+          </template>
+          <template #actions-data="{ row }">
+            <UDropdown :items="row.actions">
+              <UButton
+                :class="{ hidden: !row.actions.length }"
+                icon="i-heroicons-ellipsis-horizontal-20-solid"
+                color="gray"
+                variant="ghost"
+              />
+            </UDropdown>
+          </template>
+        </UTable>
+      </UCard>
+
+      <UCard :ui="{ body: { padding: '' } }">
+        <template #header>
           <div class="flex justify-between items-center">
             <h3 class="font-bold font-mono">
               Editions
@@ -160,101 +255,6 @@
         :shipping-info="classListingInfo.shippingRates"
         @on-update-shipping-rates="updateShippingRates"
       />
-
-      <UCard :ui="{ body: { padding: '' } }">
-        <template #header>
-          <h3 class="font-bold font-mono">
-            Status
-          </h3>
-        </template>
-
-        <UTable
-          :columns="[
-            { key: 'pendingAction', label: 'Pending Action' },
-            { key: 'sold', label: 'Sold' },
-            { key: 'stock', label: 'Stock' },
-          ]"
-          :rows="[
-            {
-              pendingAction: classListingInfo.pendingNFTCount || 0,
-              sold: classListingInfo.sold || 0,
-              stock: classListingInfo.stock || 0
-            },
-          ]"
-        >
-          <template #pendingAction-data="{ row }">
-            <UBadge
-              v-if="row.pendingAction"
-              :label="`${row.pendingAction}`"
-              color="red"
-              :ui="{ rounded: 'rounded-full' }"
-            />
-            <template v-else>
-              {{ row.pendingAction }}
-            </template>
-          </template>
-        </UTable>
-      </UCard>
-
-      <UCard
-        :ui="{
-          header: { base: 'flex justify-between items-center gap-4' },
-          body: { padding: '' },
-        }"
-      >
-        <template #header>
-          <h3 class="font-bold font-mono">
-            Orders
-          </h3>
-
-          <UInput v-model="searchInput" icon="i-heroicons-magnifying-glass-20-solid" placeholder="Search..." />
-        </template>
-
-        <UTable
-          :columns="orderTableColumns"
-          :rows="ordersTableRows"
-        >
-          <template #email-data="{ row }">
-            <UButton
-              :label="row.email"
-              :to="`mailto:${row.email}`"
-              variant="link"
-              :padded="false"
-            />
-          </template>
-          <template #wallet-data="{ row }">
-            <UTooltip :text="row.wallet">
-              <UButton
-                class="font-mono"
-                :label="row.shortenWallet"
-                :to="row.walletLink"
-                variant="link"
-                :padded="false"
-                size="xs"
-                target="_blank"
-              />
-            </UTooltip>
-          </template>
-          <template #status-data="{ row }">
-            <UBadge
-              :color="row.statusLabelColor"
-              :label="row.statusLabel"
-              variant="outline"
-              :ui="{ rounded: 'rounded-full' }"
-            />
-          </template>
-          <template #actions-data="{ row }">
-            <UDropdown :items="row.actions">
-              <UButton
-                :class="{ hidden: !row.actions.length }"
-                icon="i-heroicons-ellipsis-horizontal-20-solid"
-                color="gray"
-                variant="ghost"
-              />
-            </UDropdown>
-          </template>
-        </UTable>
-      </UCard>
 
       <UCard
         v-if="userIsOwner"
