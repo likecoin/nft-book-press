@@ -755,7 +755,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
     }])
   }
 
-  if (purchaseListItem.shippingStatus === 'pending') {
+  if (purchaseListItem.shippingStatus) {
     actionItems.push([{
       label: 'Handle Shipping',
       icon: 'i-heroicons-truck',
