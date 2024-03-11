@@ -40,7 +40,7 @@
           />
         </UFormGroup>
 
-        <UFormGroup :label="`Price(USD) of this ${priceItemLabel} (Minimal ${MINIMAL_PRICE} or free)`">
+        <UFormGroup :label="`Price(USD) of this ${priceItemLabel} (Minimal ${MINIMAL_PRICE} or 0 (free))`">
           <UInput v-model="price" type="number" step="0.01" :min="MINIMAL_PRICE" />
         </UFormGroup>
 
@@ -139,7 +139,7 @@ import { storeToRefs } from 'pinia'
 import { MdEditor, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
-import { LIKE_CO_API } from '~/constant'
+import { DEFAULT_PRICE, LIKE_CO_API, MINIMAL_PRICE } from '~/constant'
 
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
@@ -160,14 +160,12 @@ const toast = useToast()
 const classId = ref(route.params.classId)
 const editionIndex = ref(route.params.editionIndex as string)
 
-const MINIMAL_PRICE = 0.9
-
 const isLoading = ref(false)
 
 const classData = ref<any>({})
 const hasMultiplePrices = computed(() => classData?.value?.prices?.length > 1)
 
-const price = ref(MINIMAL_PRICE)
+const price = ref(DEFAULT_PRICE)
 const stock = ref(1)
 const deliveryMethod = ref('auto')
 const autoMemo = ref('Thanks for purchasing this NFT ebook.')
@@ -238,7 +236,7 @@ onMounted(async () => {
       }
     })
 
-    const classResData = classRes?.data?.value
+    const classResData: any = classRes?.data?.value
     if (classResData) {
       shippingRates.value = classResData?.shippingRates || []
       if (classResData?.ownerWallet !== wallet.value) {
@@ -349,7 +347,7 @@ async function handleSubmit () {
       throw new Error('Please input price of edition')
     }
     if (editedPrice.price !== 0 && editedPrice.price < MINIMAL_PRICE) {
-      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or free`)
+      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or 0 (free)`)
     }
 
     if (!editedPrice.stock && editedPrice.stock !== 0) {

@@ -32,3 +32,6 @@ export const CHAIN_EXPLORER_URL = IS_TESTNET ? 'https://node.testnet.like.co/cos
 export const NFT_MARKETPLACE_URL = IS_TESTNET ? 'https://likecoin-nft-marketplace-testnet.netlify.app' : 'https://likecoin.github.io/likecoin-nft-marketplace'
 
 export const ISCN_TOOLS_URL = IS_TESTNET ? 'https://likecoin-iscn-nft-tools-testnet.netlify.app' : 'https://likecoin.github.io/iscn-nft-tools'
+
+export const MINIMAL_PRICE = 0.99
+export const DEFAULT_PRICE = 4.99

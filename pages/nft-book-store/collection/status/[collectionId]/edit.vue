@@ -39,7 +39,7 @@
           />
         </UFormGroup>
 
-        <UFormGroup :label="`Price(USD) of this collection (Minimal ${MINIMAL_PRICE} or free)`">
+        <UFormGroup :label="`Price(USD) of this collection (Minimal ${MINIMAL_PRICE} or 0 (free))`">
           <UInput v-model="price" type="number" step="0.01" :min="MINIMAL_PRICE" />
         </UFormGroup>
 
@@ -125,6 +125,7 @@ import { MdEditor, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
+import { DEFAULT_PRICE, MINIMAL_PRICE } from 'constant'
 import { useCollectionStore } from '~/stores/collection'
 
 const collectionStore = useCollectionStore()
@@ -136,12 +137,10 @@ const toast = useToast()
 
 const collectionId = ref(route.params.collectionId)
 
-const MINIMAL_PRICE = 0.9
-
 const isLoading = ref(false)
 
 const classIds = ref<string[]>([])
-const price = ref(MINIMAL_PRICE)
+const price = ref(DEFAULT_PRICE)
 const stock = ref(1)
 const nameEn = ref('Standard Edition')
 const nameZh = ref('標準版')
@@ -264,7 +263,7 @@ async function handleSubmit () {
       throw new Error('Please input price of edition')
     }
     if (editedPrice.price !== 0 && editedPrice.price < MINIMAL_PRICE) {
-      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or free`)
+      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or 0 (free)`)
     }
 
     if (!editedPrice.stock && editedPrice.stock !== 0) {

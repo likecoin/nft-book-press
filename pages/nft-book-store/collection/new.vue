@@ -100,7 +100,7 @@
 
       <div>
         <div class="space-y-4">
-          <UFormGroup :label="`Price(USD) of this book collection (Minimal ${MINIMAL_PRICE} or free)`">
+          <UFormGroup :label="`Price(USD) of this book collection (Minimal ${MINIMAL_PRICE} or 0 (free))`">
             <UInput v-model="price.price" type="number" step="0.01" :min="0" />
           </UFormGroup>
 
@@ -330,7 +330,7 @@ import { MdEditor, ToolbarNames, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
-import { LCD_URL, LIKE_CO_API } from '~/constant'
+import { DEFAULT_PRICE, MINIMAL_PRICE, LCD_URL, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
@@ -349,8 +349,6 @@ const { getClassMetadataById, lazyFetchClassMetadataById } = nftStore
 
 const router = useRouter()
 const route = useRoute()
-
-const MINIMAL_PRICE = 0.9
 
 const error = ref('')
 const isLoading = ref(false)
@@ -371,7 +369,7 @@ const classIdInput = ref('')
 const classIds = ref<string[]>([])
 const defaultPaymentCurrency = ref('USD')
 const price = ref({
-  price: MINIMAL_PRICE,
+  price: DEFAULT_PRICE,
   stock: Number(route.query.count as string || 1),
   hasShipping: false,
   isPhysicalOnly: false,
@@ -566,7 +564,7 @@ async function submitNewCollection () {
     }))
 
     if (price.value.price !== 0 && price.value.price < MINIMAL_PRICE) {
-      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or free`)
+      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or 0 (free)`)
     }
     await checkStripeConnect()
 

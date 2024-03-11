@@ -81,7 +81,7 @@
         <component :is="hasMultiplePrices ? 'li' : 'div'" v-for="p, index in prices" :key="p.index" class="space-y-4">
           <UDivider v-if="index > 0" />
 
-          <UFormGroup :label="`Price(USD) of this ${priceItemLabel} (Minimal ${MINIMAL_PRICE} or free)`">
+          <UFormGroup :label="`Price(USD) of this ${priceItemLabel} (Minimal ${MINIMAL_PRICE} or 0 (free))`">
             <UInput :value="p.price" type="number" step="0.01" :min="0" @input="e => updatePrice(e, 'price', index)" />
           </UFormGroup>
 
@@ -380,7 +380,7 @@ import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
 import { v4 as uuidv4 } from 'uuid'
-import { LCD_URL, LIKE_CO_API } from '~/constant'
+import { DEFAULT_PRICE, MINIMAL_PRICE, LCD_URL, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { getPortfolioURL, deliverMethodOptions } from '~/utils'
@@ -400,8 +400,6 @@ const route = useRoute()
 const classId = ref(route.params.editingClassId || route.query.class_id as string)
 const editionIndex = ref(route.params.editionIndex as string)
 
-const MINIMAL_PRICE = 0.9
-
 const error = ref('')
 const isLoading = ref(false)
 const connectStatus = ref<any>({})
@@ -417,7 +415,7 @@ const defaultPaymentCurrency = ref('USD')
 const mustClaimToView = ref(true)
 const hideDownload = ref(false)
 const prices = ref<any[]>([{
-  price: MINIMAL_PRICE,
+  price: DEFAULT_PRICE,
   deliveryMethod: 'auto',
   autoMemo: 'Thanks for purchasing this NFT ebook.',
   stock: Number(route.query.count as string || 1),
@@ -591,7 +589,7 @@ function addMorePrice () {
   nextPriceIndex.value += 1
   prices.value.push({
     index: uuidv4(),
-    price: MINIMAL_PRICE,
+    price: DEFAULT_PRICE,
     deliveryMethod: 'auto',
     autoMemo: '',
     stock: 1,
@@ -696,7 +694,7 @@ async function submitNewClass () {
 
     const p = mapPrices(prices.value)
     if (p.find((price: any) => price.price !== 0 && price.price < MINIMAL_PRICE)) {
-      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or free`)
+      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or 0 (free)`)
     }
     await checkStripeConnect()
 
@@ -772,7 +770,7 @@ async function submitEditedClass () {
       throw new Error('Please input price of edition')
     }
     if (price.price !== 0 && price.price < MINIMAL_PRICE) {
-      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or free`)
+      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or 0 (free)`)
     }
 
     if (!price.stock && price.stock !== 0) {
