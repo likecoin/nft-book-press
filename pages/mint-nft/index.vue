@@ -428,7 +428,7 @@ const step = ref(1)
 const error = ref('')
 const isLoading = ref(false)
 
-const iscnIdInput = ref(route.query.class_id as string || route.query.iscn_id as string || '')
+const iscnIdInput = ref('')
 const iscnOwner = ref('')
 const iscnCreateData = ref<any>(null)
 const iscnData = ref<any>(null)
@@ -477,6 +477,11 @@ watch(iscnData, (recordData) => {
   if (recordData) {
     imageUrl.value = recordData.contentMetadata?.thumbnailUrl || ''
   }
+})
+
+onMounted(() => {
+  // HACK: mitigate disable state stuck issue when iscnIdInput is inited as qs in data
+  iscnIdInput.value = route.query.class_id as string || route.query.iscn_id as string || ''
 })
 
 const validate = (state: any): FormError[] => {
