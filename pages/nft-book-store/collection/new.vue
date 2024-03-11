@@ -100,7 +100,7 @@
 
       <div>
         <div class="space-y-4">
-          <UFormGroup :label="`Price(USD) of this book collection (Minimal ${MINIMAL_PRICE} or 0 (free))`">
+          <UFormGroup :label="`Price(USD) of this book collection (Minimal ${MINIMAL_PRICE} or $0 (free))`">
             <UInput v-model="price.price" type="number" step="0.01" :min="0" />
           </UFormGroup>
 
@@ -564,7 +564,7 @@ async function submitNewCollection () {
     }))
 
     if (price.value.price !== 0 && price.value.price < MINIMAL_PRICE) {
-      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or 0 (free)`)
+      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or $0 (free)`)
     }
     await checkStripeConnect()
 

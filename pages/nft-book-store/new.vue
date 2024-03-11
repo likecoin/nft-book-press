@@ -81,7 +81,7 @@
         <component :is="hasMultiplePrices ? 'li' : 'div'" v-for="p, index in prices" :key="p.index" class="space-y-4">
           <UDivider v-if="index > 0" />
 
-          <UFormGroup :label="`Price(USD) of this ${priceItemLabel} (Minimal ${MINIMAL_PRICE} or 0 (free))`">
+          <UFormGroup :label="`Price(USD) of this ${priceItemLabel} (Minimal ${MINIMAL_PRICE} or $0 (free))`">
             <UInput :value="p.price" type="number" step="0.01" :min="0" @input="e => updatePrice(e, 'price', index)" />
           </UFormGroup>
 
@@ -694,7 +694,7 @@ async function submitNewClass () {
 
     const p = mapPrices(prices.value)
     if (p.find((price: any) => price.price !== 0 && price.price < MINIMAL_PRICE)) {
-      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or 0 (free)`)
+      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or $0 (free)`)
     }
     await checkStripeConnect()
 
@@ -770,7 +770,7 @@ async function submitEditedClass () {
       throw new Error('Please input price of edition')
     }
     if (price.price !== 0 && price.price < MINIMAL_PRICE) {
-      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or 0 (free)`)
+      throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or $0 (free)`)
     }
 
     if (!price.stock && price.stock !== 0) {
