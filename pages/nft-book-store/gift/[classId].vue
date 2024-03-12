@@ -32,7 +32,7 @@
       }"
     >
       <UFormGroup label="Default Recipient Name" :required="true">
-        <UTextarea v-model="defaultFromName" placeholder="Fellow Reader" />
+        <UTextarea v-model="defaultToName" placeholder="Fellow Reader" />
       </UFormGroup>
 
       <UFormGroup label="Default Gift Message" :required="true">
@@ -40,7 +40,7 @@
       </UFormGroup>
 
       <UFormGroup label="Gift Giver’s Name" :required="true">
-        <UTextarea v-model="defaultToName" placeholder="Your name" />
+        <UTextarea v-model="defaultFromName" placeholder="Your name" />
       </UFormGroup>
 
       <UFormGroup>
