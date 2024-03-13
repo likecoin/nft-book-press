@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-4">
+  <div class="space-y-4 mb-[40px]">
     <UAlert
       v-if="error"
       icon="i-heroicons-exclamation-triangle"
@@ -46,13 +46,6 @@
           />
         </UFormGroup>
       </UCard>
-
-      <ShippingRatesRateTable
-        :read-only="false"
-        :is-new-listing-page="true"
-        :shipping-info="shippingRates"
-        @on-update-shipping-rates="updateShippingRate"
-      />
 
       <UCard :ui="{ header: { base: 'flex justify-between items-center gap-2' } }">
         <template #header>
@@ -212,102 +205,9 @@
       <UCard :ui="{ body: { base: 'space-y-8' } }">
         <template #header>
           <h3 class="font-bold font-mono">
-            DRM Options
-          </h3>
-        </template>
-
-        <div class="grid md:grid-cols-2 gap-4">
-          <UFormGroup
-            label="Force NFT claim before view"
-            :ui="{ label: { base: 'font-mono font-bold' } }"
-          >
-            <UCheckbox
-              v-model="mustClaimToView"
-              name="mustClaimToView"
-              label="Must claim NFT to view"
-            />
-          </UFormGroup>
-
-          <UFormGroup
-            label="Disable File Download"
-            :ui="{ label: { base: 'font-mono font-bold' } }"
-          >
-            <UCheckbox
-              v-model="hideDownload"
-              name="hideDownload"
-              label="Disable Download"
-            />
-          </UFormGroup>
-        </div>
-      </UCard>
-
-      <UCard :ui="{ body: { base: 'space-y-8' } }">
-        <template #header>
-          <h3 class="font-bold font-mono">
             Other Settings
           </h3>
         </template>
-        <UCard
-          :ui="{
-            header: { base: 'flex justify-between items-center' },
-            body: { padding: '', base: 'space-y-8' }
-          }"
-        >
-          <template #header>
-            <h4 class="text-sm font-bold font-mono">
-              Share sales data to wallets
-            </h4>
-            <div class="flex gap-2">
-              <UInput
-                v-model="moderatorWalletInput"
-                class="font-mono"
-                placeholder="like1..."
-              />
-
-              <UButton
-                label="Add"
-                :variant="moderatorWalletInput ? 'outline' : 'solid'"
-                :color="moderatorWalletInput ? 'primary' : 'gray'"
-                :disabled="!moderatorWalletInput"
-                @click="addModeratorWallet"
-              />
-            </div>
-          </template>
-
-          <UTable
-            :columns="moderatorWalletsTableColumns"
-            :rows="moderatorWalletsTableRows"
-          >
-            <template #wallet-data="{ row }">
-              <UButton
-                class="font-mono"
-                :label="row.wallet"
-                :to="row.walletLink"
-                variant="link"
-                :padded="false"
-              />
-            </template>
-            <template #authz-data="{ row }">
-              <UButton
-                :label="row.grantLabel"
-                :to="row.grantRoute"
-                :variant="row.isGranted ? 'outline' : 'solid'"
-                color="green"
-              />
-            </template>
-            <template #remove-data="{ row }">
-              <div class="flex justify-end items-center">
-                <UButton
-                  icon="i-heroicons-x-mark"
-                  variant="soft"
-                  color="red"
-                  @click="() => moderatorWallets.splice(row.index, 1)"
-                />
-              </div>
-            </template>
-          </UTable>
-        </UCard>
-
         <UCard
           :ui="{
             header: { base: 'flex justify-between items-center' },
@@ -360,6 +260,133 @@
             </template>
           </UTable>
         </UCard>
+      </UCard>
+
+      <UCard
+        :ui="{
+          header: { base: 'flex justify-between items-center' },
+          body: { padding: '12px' },
+        }"
+      >
+        <div class="flex justify-between items-center w-full">
+          <h3 class="font-bold font-mono">
+            Advance Settings
+          </h3>
+          <UButton
+            color="gray"
+            variant="ghost"
+            :icon="shouldShowAdvanceSettings ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+            @click="
+              () => {
+                shouldShowAdvanceSettings = !shouldShowAdvanceSettings;
+              }"
+          />
+        </div>
+        <template v-if="shouldShowAdvanceSettings">
+          <div class="mt-[24px] flex flex-col gap-[12px]">
+            <!-- Shipping Rates -->
+            <ShippingRatesRateTable
+              :read-only="false"
+              :is-new-listing-page="true"
+              :shipping-info="shippingRates"
+              @on-update-shipping-rates="updateShippingRate"
+            />
+
+            <!-- Share sales data -->
+            <UCard
+              :ui="{
+                header: { base: 'flex justify-between items-center' },
+                body: { padding: '', base: 'space-y-8' }
+              }"
+            >
+              <template #header>
+                <h4 class="text-sm font-bold font-mono">
+                  Share sales data to wallets
+                </h4>
+                <div class="flex gap-2">
+                  <UInput
+                    v-model="moderatorWalletInput"
+                    class="font-mono"
+                    placeholder="like1..."
+                  />
+
+                  <UButton
+                    label="Add"
+                    :variant="moderatorWalletInput ? 'outline' : 'solid'"
+                    :color="moderatorWalletInput ? 'primary' : 'gray'"
+                    :disabled="!moderatorWalletInput"
+                    @click="addModeratorWallet"
+                  />
+                </div>
+              </template>
+              <UTable
+                :columns="moderatorWalletsTableColumns"
+                :rows="moderatorWalletsTableRows"
+              >
+                <template #wallet-data="{ row }">
+                  <UButton
+                    class="font-mono"
+                    :label="row.wallet"
+                    :to="row.walletLink"
+                    variant="link"
+                    :padded="false"
+                  />
+                </template>
+                <template #authz-data="{ row }">
+                  <UButton
+                    :label="row.grantLabel"
+                    :to="row.grantRoute"
+                    :variant="row.isGranted ? 'outline' : 'solid'"
+                    color="green"
+                  />
+                </template>
+                <template #remove-data="{ row }">
+                  <div class="flex justify-end items-center">
+                    <UButton
+                      icon="i-heroicons-x-mark"
+
+                      variant="soft"
+                      color="red"
+                      @click="() => moderatorWallets.splice(row.index, 1)"
+                    />
+                  </div>
+                </template>
+              </UTable>
+            </UCard>
+
+            <UCard :ui="{ body: { base: 'space-y-8' } }">
+              <template #header>
+                <h3 class="font-bold font-mono">
+                  DRM Options
+                </h3>
+              </template>
+
+              <div class="grid md:grid-cols-2 gap-4">
+                <UFormGroup
+                  label="Force NFT claim before view"
+                  :ui="{ label: { base: 'font-mono font-bold' } }"
+                >
+                  <UCheckbox
+                    v-model="mustClaimToView"
+                    name="mustClaimToView"
+                    label="Must claim NFT to view"
+                  />
+                </UFormGroup>
+
+                <UFormGroup
+                  label="Disable File Download"
+                  :ui="{ label: { base: 'font-mono font-bold' } }"
+                >
+                  <UCheckbox
+                    v-model="hideDownload"
+                    name="hideDownload"
+                    label="Disable Download"
+                  />
+                </UFormGroup>
+              </div>
+            </UCard>
+          </div>
+        </template>
       </UCard>
 
       <UButton
@@ -430,7 +457,7 @@ const prices = ref<any[]>([{
 const shippingRates = ref<any[]>([])
 const hasMultiplePrices = computed(() => prices.value.length > 1)
 const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
-const moderatorWallets = ref<string[]>([])
+const moderatorWallets = ref<string[]>(['like1rclg677y2jqt8x4ylj0kjlqjjmnn6w63uflpgr'])
 const moderatorWalletsGrants = ref<any>({})
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
@@ -460,6 +487,7 @@ const pageTitle = computed(() => isEditMode.value ? 'Edit Current Edition' : 'Ne
 const submitButtonText = computed(() => isEditMode.value ? 'Save Changes' : 'Submit')
 const editionInfo = ref<any>({})
 const classOwnerWallet = ref<any>({})
+const shouldShowAdvanceSettings = ref<boolean>(false)
 
 const moderatorWalletsTableColumns = computed(() => [
   { key: 'wallet', label: 'Wallet', sortable: true },
