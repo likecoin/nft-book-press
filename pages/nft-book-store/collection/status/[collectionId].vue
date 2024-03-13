@@ -74,10 +74,18 @@
           :columns="orderTableColumns"
           :rows="ordersTableRows"
         >
-          <template #email-data="{ row }">
+          <template #buyerEmail-data="{ row }">
             <UButton
-              :label="row.email"
-              :to="`mailto:${row.email}`"
+              :label="row.buyerEmail"
+              :to="`mailto:${row.buyerEmail}`"
+              variant="link"
+              :padded="false"
+            />
+          </template>
+          <template #readerEmail-data="{ row }">
+            <UButton
+              :label="row.readerEmail"
+              :to="`mailto:${row.readerEmail}`"
               variant="link"
               :padded="false"
             />
@@ -593,9 +601,10 @@ const orderTableColumns = computed(() => {
     { key: 'from', label: 'Sales Channel', sortable: true },
     { key: 'price', label: 'Price', sortable: true },
     { key: 'coupon', label: 'Coupon Applied', sortable: false },
-    { key: 'email', label: 'Buyer Email', sortable: true },
-    { key: 'wallet', label: 'Buyer Wallet', sortable: true },
-    { key: 'message', label: 'Buyer Message', sortable: false }
+    { key: 'buyerEmail', label: 'Buyer Email', sortable: true },
+    { key: 'readerEmail', label: 'Reader Email', sortable: true },
+    { key: 'wallet', label: 'Reader Wallet', sortable: true },
+    { key: 'message', label: 'Reader Message', sortable: false }
   )
   if (orderHasShipping.value) {
     columns.push({ key: 'shippingName', label: 'Shipping Name', sortable: true })
@@ -680,7 +689,8 @@ function getStatusLabelColor (purchaseListItem: any) {
 
 const ordersTableRows = computed(() => purchaseList.value?.map((p: any, index: number) => ({
   index,
-  email: p.email,
+  buyerEmail: p.email,
+  readerEmail: p.giftInfo?.toEmail || p.email,
   status: p.status,
   statusLabel: getStatusLabel(p),
   statusLabelColor: getStatusLabelColor(p),
@@ -702,7 +712,8 @@ const ordersTableRows = computed(() => purchaseList.value?.map((p: any, index: n
   if (!searchInput.value) { return true }
   const normalizedSearchInput = searchInput.value.toLowerCase()
   return (
-    p.email.toLowerCase().includes(normalizedSearchInput) ||
+    p.buyerEmail.toLowerCase().includes(normalizedSearchInput) ||
+    p.readerEmail.toLowerCase().includes(normalizedSearchInput) ||
     p.wallet?.toLowerCase().includes(normalizedSearchInput) ||
     p.priceName?.toLowerCase().includes(normalizedSearchInput) ||
     p.statusLabel?.toLowerCase().includes(normalizedSearchInput) ||

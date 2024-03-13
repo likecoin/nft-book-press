@@ -38,6 +38,13 @@
           </tr>
           <tr>
             <th class="text-left px-4 py-3">
+              Reader Email
+            </th><td class="px-4 py-3">
+              {{ orderInfo.giftInfo?.toEmail || orderInfo.email }}
+            </td>
+          </tr>
+          <tr>
+            <th class="text-left px-4 py-3">
               Status
             </th><td class="px-4 py-3">
               {{ orderInfo.status }}
