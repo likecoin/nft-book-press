@@ -140,69 +140,81 @@
               />
             </UFormGroup>
 
-            <UDivider :label="`Product info of this ${priceItemLabel}`" />
-
-            <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
-              <template #label>
-                Product Name
-                <ToolTips :image-style="{ width: '250px' }">
-                  <template #image>
-                    <img
-                      src="~/assets/images/hint/editionInfo-en.png"
-                      class="object-cover"
-                      alt=""
-                    >
-                  </template>
-                  <UIcon name="i-heroicons-question-mark-circle" />
-                </ToolTips>
+            <UCard
+              :ui="{
+                body: {
+                  base: 'flex flex-col gap-[20px]',
+                },
+                base: 'overflow-visible'
+              }"
+            >
+              <template #header>
+                <h3 class="font-bold font-mono">
+                  Product Information
+                </h3>
               </template>
-              <UInput
-                placeholder="Product name in English"
-                :value="p.nameEn"
-                @input="(e) => updatePrice(e, 'nameEn', index)"
-              />
-              <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional)</span>
-              <md-editor
-                v-model="p.descriptionEn"
-                language="en-US"
-                :editor-id="`en-${index}`"
-                :placeholder="mdEditorPlaceholder.en"
-                :toolbars="toolbarOptions"
-                :sanitize="sanitizeHtml"
-                :style="{ height: '200px', width: '100%', marginTop: '0px' }"
-              />
-            </UFormGroup>
-            <UFormGroup :ui="{ container: 'space-y-2' }">
-              <template #label>
-                產品標題
-                <ToolTips :image-style="{ width: '250px' }">
-                  <template #image>
-                    <img
-                      src="~/assets/images/hint/editionInfo-zh.png"
-                      class="object-cover"
-                      alt=""
-                    >
-                  </template>
-                  <UIcon name="i-heroicons-question-mark-circle" />
-                </ToolTips>
-              </template>
-              <UInput
-                placeholder="產品中文名字"
-                :value="p.nameZh"
-                @input="(e) => updatePrice(e, 'nameZh', index)"
-              />
-              <span class="block text-[14px] text-[#374151] mt-[8px]">描述 (選填)</span>
-              <md-editor
-                v-model="p.descriptionZh"
-                language="en-US"
-                :editor-id="`zh-${index}`"
-                :placeholder="mdEditorPlaceholder.zh"
-                :toolbars="toolbarOptions"
-                :sanitize="sanitizeHtml"
-                :style="{ height: '200px', width: '100%', marginTop: '0px' }"
-              />
-            </UFormGroup>
-            <UDivider />
+              <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
+                <template #label>
+                  Product Name
+                  <ToolTips :image-style="{ width: '250px' }">
+                    <template #image>
+                      <img
+                        src="~/assets/images/hint/editionInfo-en.png"
+                        class="object-cover"
+                        alt=""
+                      >
+                    </template>
+                    <UIcon name="i-heroicons-question-mark-circle" />
+                  </ToolTips>
+                </template>
+                <UInput
+                  placeholder="Product name in English"
+                  :value="p.nameEn"
+                  @input="(e) => updatePrice(e, 'nameEn', index)"
+                />
+                <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional)</span>
+                <md-editor
+                  v-model="p.descriptionEn"
+                  language="en-US"
+                  :editor-id="`en-${index}`"
+                  :placeholder="mdEditorPlaceholder.en"
+                  :toolbars="toolbarOptions"
+                  :sanitize="sanitizeHtml"
+                  :style="{ height: '200px', width: '100%', marginTop: '0px' }"
+                />
+              </UFormGroup>
+              <UDivider />
+              <UFormGroup :ui="{ container: 'space-y-2 my-[20px]' }">
+                <template #label>
+                  產品名稱
+                  <ToolTips :image-style="{ width: '250px' }">
+                    <template #image>
+                      <img
+                        src="~/assets/images/hint/editionInfo-zh.png"
+                        class="object-cover"
+                        alt=""
+                      >
+                    </template>
+                    <UIcon name="i-heroicons-question-mark-circle" />
+                  </ToolTips>
+                </template>
+                <UInput
+                  placeholder="產品中文名字"
+                  :value="p.nameZh"
+                  @input="(e) => updatePrice(e, 'nameZh', index)"
+                />
+                <span class="block text-[14px] text-[#374151] mt-[8px]">描述 (選填)</span>
+                <md-editor
+                  v-model="p.descriptionZh"
+                  language="en-US"
+                  :editor-id="`zh-${index}`"
+                  :placeholder="mdEditorPlaceholder.zh"
+                  :toolbars="toolbarOptions"
+                  :sanitize="sanitizeHtml"
+                  :style="{ height: '200px', width: '100%', marginTop: '0px' }"
+                />
+              </UFormGroup>
+            </UCard>
 
             <ShippingRatesRateTable
               v-model="p.hasShipping"
@@ -568,7 +580,7 @@ const connectStatus = ref<any>({})
 
 const mdEditorPlaceholder = ref({
   en: 'e.g.: This edition includes EPUB and PDF ebook files.',
-  zh: 'e.g.: 此版本包含 EPUB 及 PDF 電子書檔'
+  zh: '例：此版本包含 EPUB 及 PDF 電子書檔'
 })
 
 const classIdInput = ref(classId || '')
