@@ -70,89 +70,91 @@
         </UFormGroup>
       </UCard>
 
-      <component :is="hasMultiplePrices ? 'ul' : 'div'">
-        <component :is="hasMultiplePrices ? 'li' : 'div'" v-for="p, index in prices" :key="p.index" class="space-y-4">
-          <UDivider v-if="index > 0" />
+      <component :is="hasMultiplePrices ? 'ul' : 'div'" class="flex flex-col gap-[12px]">
+        <component :is="hasMultiplePrices ? 'li' : 'div'" v-for="p, index in prices" :key="p.index">
+          <UCard :ui="{ body: { base: 'space-y-5 border-[4px] relative' } }">
+            <div class=" absolute top-0 left-0 px-[12px] py-[4px] bg-gray-200">
+              {{ index+1 }}
+            </div>
+            <UFormGroup :label="`Price(USD) of this ${priceItemLabel} (Minimal ${MINIMAL_PRICE} or $0 (free))`">
+              <UInput :value="p.price" type="number" step="0.01" :min="0" @input="e => updatePrice(e, 'price', index)" />
+            </UFormGroup>
 
-          <UFormGroup :label="`Price(USD) of this ${priceItemLabel} (Minimal ${MINIMAL_PRICE} or $0 (free))`">
-            <UInput :value="p.price" type="number" step="0.01" :min="0" @input="e => updatePrice(e, 'price', index)" />
-          </UFormGroup>
+            <UFormGroup :label="`Total number of NFT for sale of this ${priceItemLabel}`">
+              <UInput :value="p.stock" type="number" step="1" :min="0" @input="e => updatePrice(e, 'stock', index)" />
+            </UFormGroup>
 
-          <UFormGroup :label="`Total number of NFT for sale of this ${priceItemLabel}`">
-            <UInput :value="p.stock" type="number" step="1" :min="0" @input="e => updatePrice(e, 'stock', index)" />
-          </UFormGroup>
-
-          <URadioGroup
-            v-model="p.deliveryMethod"
-            :legend="`Delivery method of this ${priceItemLabel}`"
-            :options="deliverMethodOptions"
-          />
-
-          <UFormGroup
-            v-if="p.deliveryMethod === 'auto'"
-            :label="`Memo of this ${priceItemLabel}`"
-          >
-            <UInput :value="p.autoMemo" @input="e => updatePrice(e, 'autoMemo', index)" />
-          </UFormGroup>
-
-          <UFormGroup
-            :label="`Product name of this ${priceItemLabel}`"
-            :ui="{ container: 'space-y-2' }"
-          >
-            <UInput placeholder="Product name in English" :value="p.nameEn" @input="e => updatePrice(e, 'nameEn', index)" />
-            <UInput placeholder="產品中文名字" :value="p.nameZh" @input="e => updatePrice(e, 'nameZh', index)" />
-          </UFormGroup>
-
-          <h5 class="font-bold font-mono">
-            Product description of this {{ priceItemLabel }}
-          </h5>
-          <md-editor
-            v-model="p.descriptionEn"
-            language="en-US"
-            :editor-id="`en-${index}`"
-            :placeholder="mdEditorPlaceholder.en"
-            :toolbars="toolbarOptions"
-            :sanitize="sanitizeHtml"
-          />
-          <md-editor
-            v-model="p.descriptionZh"
-            language="en-US"
-            :editor-id="`zh-${index}`"
-            :placeholder="mdEditorPlaceholder.zh"
-            :toolbars="toolbarOptions"
-            :sanitize="sanitizeHtml"
-          />
-
-          <ShippingRatesRateTable
-            v-model="p.hasShipping"
-            :read-only="true"
-            :is-new-listing-page="true"
-            :shipping-info="shippingRates"
-          />
-
-          <UFormGroup
-            label="Is Physical only good"
-            :ui="{ label: { base: 'font-mono font-bold' } }"
-          >
-            <UCheckbox
-              v-model="p.isPhysicalOnly"
-              name="isPhysicalOnly"
-              label="This edition does not contain digital file/NFT"
+            <URadioGroup
+              v-model="p.deliveryMethod"
+              :legend="`Delivery method of this ${priceItemLabel}`"
+              :options="deliverMethodOptions"
             />
-          </UFormGroup>
 
-          <UFormGroup
-            label="Allow custom price"
-            :ui="{ label: { base: 'font-mono font-bold' } }"
-          >
-            <UCheckbox
-              v-model="p.isAllowCustomPrice"
-              name="isAllowCustomPrice"
-              label="Allow user to pay more than defined price"
+            <UFormGroup
+              v-if="p.deliveryMethod === 'auto'"
+              :label="`Memo of this ${priceItemLabel}`"
+            >
+              <UInput :value="p.autoMemo" @input="e => updatePrice(e, 'autoMemo', index)" />
+            </UFormGroup>
+
+            <UFormGroup
+              :label="`Product name of this ${priceItemLabel}`"
+              :ui="{ container: 'space-y-2' }"
+            >
+              <UInput placeholder="Product name in English" :value="p.nameEn" @input="e => updatePrice(e, 'nameEn', index)" />
+              <UInput placeholder="產品中文名字" :value="p.nameZh" @input="e => updatePrice(e, 'nameZh', index)" />
+            </UFormGroup>
+
+            <h5 class="font-bold font-mono">
+              Product description of this {{ priceItemLabel }}
+            </h5>
+            <md-editor
+              v-model="p.descriptionEn"
+              language="en-US"
+              :editor-id="`en-${index}`"
+              :placeholder="mdEditorPlaceholder.en"
+              :toolbars="toolbarOptions"
+              :sanitize="sanitizeHtml"
             />
-          </UFormGroup>
+            <md-editor
+              v-model="p.descriptionZh"
+              language="en-US"
+              :editor-id="`zh-${index}`"
+              :placeholder="mdEditorPlaceholder.zh"
+              :toolbars="toolbarOptions"
+              :sanitize="sanitizeHtml"
+            />
 
-          <UButton v-if="hasMultiplePrices" label="Delete" color="red" @click="deletePrice(index)" />
+            <ShippingRatesRateTable
+              v-model="p.hasShipping"
+              :read-only="true"
+              :is-new-listing-page="true"
+              :shipping-info="shippingRates"
+            />
+
+            <UFormGroup
+              label="Is Physical only good"
+              :ui="{ label: { base: 'font-mono font-bold' } }"
+            >
+              <UCheckbox
+                v-model="p.isPhysicalOnly"
+                name="isPhysicalOnly"
+                label="This edition does not contain digital file/NFT"
+              />
+            </UFormGroup>
+
+            <UFormGroup
+              label="Allow custom price"
+              :ui="{ label: { base: 'font-mono font-bold' } }"
+            >
+              <UCheckbox
+                v-model="p.isAllowCustomPrice"
+                name="isAllowCustomPrice"
+                label="Allow user to pay more than defined price"
+              />
+            </UFormGroup>
+            <UButton v-if="hasMultiplePrices" label="Delete" color="red" @click="deletePrice(index)" />
+          </UCard>
         </component>
       </component>
 
