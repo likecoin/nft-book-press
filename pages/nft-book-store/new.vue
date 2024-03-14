@@ -54,8 +54,8 @@
         </template>
 
         <UFormGroup
-          label="Default display currency when user checkout"
-          help="note that prices setting are always in USD"
+          label="Default Display Currency at Checkout"
+          help="Note that price setting is always in USD "
         >
           <URadio
             v-model="defaultPaymentCurrency"
@@ -91,7 +91,7 @@
               {{ index + 1 }}
             </div>
             <UFormGroup
-              :label="`Price(USD) of this ${priceItemLabel} (Minimal ${MINIMAL_PRICE} or $0 (free))`"
+              :label="`Unit Price in USD (Minimum ${MINIMAL_PRICE}, or 0 for free)`"
             >
               <UInput
                 :value="p.price"
@@ -103,7 +103,7 @@
             </UFormGroup>
 
             <UFormGroup
-              :label="`Total number of NFT for sale of this ${priceItemLabel}`"
+              :label="`Total number of NFT ${hasMultiplePrices ? 'edition' : 'ebook'} for sale`"
             >
               <UInput
                 :value="p.stock"
