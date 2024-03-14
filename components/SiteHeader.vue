@@ -20,7 +20,7 @@
 
       <div class="flex items-center gap-2">
         <WalletHeader class="max-lg:hidden" />
-        <ColorModeButton class="max-lg:hidden" />
+        <!-- <ColorModeButton class="max-lg:hidden" /> -->
         <UButton
           class="lg:hidden"
           icon="i-heroicons-bars-3"
@@ -47,9 +47,9 @@
 
           <SiteMenu @click-link="uiStore.toggleSiteMenuOpen" />
 
-          <template #footer>
+          <!-- <template #footer>
             <ColorModeButton />
-          </template>
+          </template> -->
         </UCard>
       </USlideover>
     </nav>

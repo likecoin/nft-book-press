@@ -6,3 +6,11 @@
     </UContainer>
   </UContainer>
 </template>
+
+<script setup>
+const colorMode = useColorMode()
+if (colorMode.value !== 'light') {
+  colorMode.preference = 'light'
+}
+
+</script>
