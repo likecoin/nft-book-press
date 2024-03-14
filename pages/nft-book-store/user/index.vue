@@ -20,6 +20,47 @@
     >
       <template #header>
         <h1 class="text-center font-bold font-mono">
+          Book Affiliation Program
+        </h1>
+      </template>
+      <div v-if="likerIdInfo?.user">
+        <h2>
+          Your affiliation channel ID
+        </h2>
+        <code class="text-center font-bold font-mono">
+          @{{ likerIdInfo?.user }}
+        </code>
+        <p v-if="!connectStatus.isReady">
+          Please setup your stripe account below to participate in the book affiliation program.
+        </p>
+        <p v-else>
+          Append <code class="font-bold font-mono">?from=@{{ likerIdInfo?.user }}</code> in any book store page to earn commission from book sales.
+        </p>
+      </div>
+      <p v-else>
+        You have not setup your channel ID yet.
+      </p>
+      <template #footer>
+        <UButton
+          v-if="!likerIdInfo?.user"
+          label="Setup your ID"
+          size="lg"
+          rel="noopener"
+          target="_blank"
+          :to="`${LIKE_CO_HOST}/in`"
+        />
+      </template>
+    </UCard>
+    <UCard
+      v-if="bookStoreApiStore.isAuthenticated"
+      :ui="{
+        header: { base: 'flex justify-between items-center' },
+        body: { padding: '' },
+        footer: { base: 'text-center' },
+      }"
+    >
+      <template #header>
+        <h1 class="text-center font-bold font-mono">
           Stripe Connect Status
         </h1>
 
@@ -86,7 +127,7 @@
 import { storeToRefs } from 'pinia'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
-import { LIKE_CO_API } from '~/constant'
+import { LIKE_CO_API, LIKE_CO_HOST } from '~/constant'
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
@@ -96,14 +137,32 @@ const { token } = storeToRefs(bookStoreApiStore)
 const error = ref('')
 const isLoading = ref(false)
 const connectStatus = ref<any>({})
+const likerIdInfo = ref<any>({})
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
 })
 
 onMounted(async () => {
+  await loadLikerId()
   await loadStripeConnectStatus()
 })
+
+async function loadLikerId () {
+  try {
+    isLoading.value = true
+    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/users/addr/${wallet.value}/min`)
+    if (fetchError.value && fetchError.value?.statusCode !== 404) {
+      throw new Error(fetchError.value.toString())
+    }
+    likerIdInfo.value = (data.value as any) || {}
+  } catch (e) {
+    console.error(e)
+    error.value = (e as Error).toString()
+  } finally {
+    isLoading.value = false
+  }
+}
 
 async function loadStripeConnectStatus () {
   try {
