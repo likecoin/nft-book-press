@@ -65,7 +65,7 @@
 
       <component :is="hasMultiplePrices ? 'ul' : 'div'" class="flex flex-col gap-[12px]">
         <component :is="hasMultiplePrices ? 'li' : 'div'" v-for="p, index in prices" :key="p.index">
-          <UCard :ui="{ body: { base: 'space-y-5 border-[4px] relative' } }">
+          <UCard :ui="{ body: { base: 'space-y-5 border-[4px] relative' }, base: 'overflow-visible' }">
             <div class=" absolute top-0 left-0 px-[12px] py-[4px] bg-gray-200">
               {{ index+1 }}
             </div>
@@ -85,8 +85,20 @@
 
             <UFormGroup
               v-if="p.deliveryMethod === 'auto'"
-              :label="`Memo of this ${priceItemLabel}`"
             >
+              <template #label>
+                {{ `Memo of this ${priceItemLabel}` }}
+                <ToolTips>
+                  <template #image>
+                    <img
+                      src="~/assets/images/hint/memo.png"
+                      class="object-cover"
+                      alt=""
+                    >
+                  </template>
+                  <UIcon name="i-heroicons-question-mark-circle" />
+                </ToolTips>
+              </template>
               <UInput :value="p.autoMemo" @input="e => updatePrice(e, 'autoMemo', index)" />
             </UFormGroup>
 
@@ -96,6 +108,19 @@
               label="Product Name"
               :ui="{ container: 'space-y-2' }"
             >
+              <template #label>
+                Product Name
+                <ToolTips :image-style="{ width: '250px' }">
+                  <template #image>
+                    <img
+                      src="~/assets/images/hint/editionInfo-en.png"
+                      class="object-cover"
+                      alt=""
+                    >
+                  </template>
+                  <UIcon name="i-heroicons-question-mark-circle" />
+                </ToolTips>
+              </template>
               <UInput placeholder="Product name in English" :value="p.nameEn" @input="e => updatePrice(e, 'nameEn', index)" />
               <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional)</span>
               <md-editor
@@ -109,9 +134,21 @@
               />
             </UFormGroup>
             <UFormGroup
-              label="產品標題"
               :ui="{ container: 'space-y-2' }"
             >
+              <template #label>
+                產品標題
+                <ToolTips :image-style="{ width: '250px' }">
+                  <template #image>
+                    <img
+                      src="~/assets/images/hint/editionInfo-zh.png"
+                      class="object-cover"
+                      alt=""
+                    >
+                  </template>
+                  <UIcon name="i-heroicons-question-mark-circle" />
+                </ToolTips>
+              </template>
               <UInput placeholder="產品中文名字" :value="p.nameZh" @input="e => updatePrice(e, 'nameZh', index)" />
               <span class="block text-[14px] text-[#374151] mt-[8px]">描述 (選填)</span>
               <md-editor
@@ -145,9 +182,21 @@
               </UFormGroup>
 
               <UFormGroup
-                label="Allow custom price"
                 :ui="{ label: { base: 'font-mono font-bold' } }"
               >
+                <template #label>
+                  Allow custom price
+                  <ToolTips :image-style="{ width: '300px' }">
+                    <template #image>
+                      <img
+                        src="~/assets/images/hint/tipping.png"
+                        class="object-cover"
+                        alt=""
+                      >
+                    </template>
+                    <UIcon name="i-heroicons-question-mark-circle" />
+                  </ToolTips>
+                </template>
                 <UCheckbox
                   v-model="p.isAllowCustomPrice"
                   name="isAllowCustomPrice"
@@ -461,7 +510,7 @@ const hideDownload = ref(false)
 const prices = ref<any[]>([{
   price: DEFAULT_PRICE,
   deliveryMethod: 'auto',
-  autoMemo: 'Thanks for purchasing this NFT ebook.',
+  autoMemo: 'Thank you for your support. It means a lot to me.',
   stock: Number(route.query.count as string || 1),
   nameEn: 'Standard Edition',
   nameZh: '標準版',
