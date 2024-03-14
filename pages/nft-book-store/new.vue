@@ -52,13 +52,6 @@
           <h3 class="font-bold font-mono">
             Pricing and Availability
           </h3>
-
-          <UButton
-            v-if="!isEditMode"
-            icon="i-heroicons-plus-circle"
-            label="Add Edition"
-            @click="addMorePrice"
-          />
         </template>
 
         <UFormGroup
@@ -97,33 +90,41 @@
               <UInput :value="p.autoMemo" @input="e => updatePrice(e, 'autoMemo', index)" />
             </UFormGroup>
 
+            <UDivider :label="`Product info of this ${priceItemLabel}`" />
+
             <UFormGroup
-              :label="`Product name of this ${priceItemLabel}`"
+              label="Product Name"
               :ui="{ container: 'space-y-2' }"
             >
               <UInput placeholder="Product name in English" :value="p.nameEn" @input="e => updatePrice(e, 'nameEn', index)" />
-              <UInput placeholder="產品中文名字" :value="p.nameZh" @input="e => updatePrice(e, 'nameZh', index)" />
+              <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional)</span>
+              <md-editor
+                v-model="p.descriptionEn"
+                language="en-US"
+                :editor-id="`en-${index}`"
+                :placeholder="mdEditorPlaceholder.en"
+                :toolbars="toolbarOptions"
+                :sanitize="sanitizeHtml"
+                :style="{ height: '200px',width:'100%',marginTop:'0px' }"
+              />
             </UFormGroup>
-
-            <h5 class="font-bold font-mono">
-              Product description of this {{ priceItemLabel }}
-            </h5>
-            <md-editor
-              v-model="p.descriptionEn"
-              language="en-US"
-              :editor-id="`en-${index}`"
-              :placeholder="mdEditorPlaceholder.en"
-              :toolbars="toolbarOptions"
-              :sanitize="sanitizeHtml"
-            />
-            <md-editor
-              v-model="p.descriptionZh"
-              language="en-US"
-              :editor-id="`zh-${index}`"
-              :placeholder="mdEditorPlaceholder.zh"
-              :toolbars="toolbarOptions"
-              :sanitize="sanitizeHtml"
-            />
+            <UFormGroup
+              label="產品標題"
+              :ui="{ container: 'space-y-2' }"
+            >
+              <UInput placeholder="產品中文名字" :value="p.nameZh" @input="e => updatePrice(e, 'nameZh', index)" />
+              <span class="block text-[14px] text-[#374151] mt-[8px]">描述 (選填)</span>
+              <md-editor
+                v-model="p.descriptionZh"
+                language="en-US"
+                :editor-id="`zh-${index}`"
+                :placeholder="mdEditorPlaceholder.zh"
+                :toolbars="toolbarOptions"
+                :sanitize="sanitizeHtml"
+                :style="{ height: '200px',width:'100%',marginTop:'0px' }"
+              />
+            </UFormGroup>
+            <UDivider />
 
             <ShippingRatesRateTable
               v-model="p.hasShipping"
@@ -131,32 +132,45 @@
               :is-new-listing-page="true"
               :shipping-info="shippingRates"
             />
+            <div class="flex justify-start items-center gap-[32px]">
+              <UFormGroup
+                label="Is Physical only good"
+                :ui="{ label: { base: 'font-mono font-bold' } }"
+              >
+                <UCheckbox
+                  v-model="p.isPhysicalOnly"
+                  name="isPhysicalOnly"
+                  label="This edition does not contain digital file/NFT"
+                />
+              </UFormGroup>
 
-            <UFormGroup
-              label="Is Physical only good"
-              :ui="{ label: { base: 'font-mono font-bold' } }"
-            >
-              <UCheckbox
-                v-model="p.isPhysicalOnly"
-                name="isPhysicalOnly"
-                label="This edition does not contain digital file/NFT"
-              />
-            </UFormGroup>
-
-            <UFormGroup
-              label="Allow custom price"
-              :ui="{ label: { base: 'font-mono font-bold' } }"
-            >
-              <UCheckbox
-                v-model="p.isAllowCustomPrice"
-                name="isAllowCustomPrice"
-                label="Allow user to pay more than defined price"
-              />
-            </UFormGroup>
-            <UButton v-if="hasMultiplePrices" label="Delete" color="red" @click="deletePrice(index)" />
+              <UFormGroup
+                label="Allow custom price"
+                :ui="{ label: { base: 'font-mono font-bold' } }"
+              >
+                <UCheckbox
+                  v-model="p.isAllowCustomPrice"
+                  name="isAllowCustomPrice"
+                  label="Allow user to pay more than defined price"
+                />
+              </UFormGroup>
+            </div>
+            <div class="flex justify-center items-center">
+              <UButton v-if="hasMultiplePrices" label="Delete" color="red" @click="deletePrice(index)" />
+            </div>
           </UCard>
         </component>
       </component>
+      <div class="flex justify-center items-center">
+        <UButton
+          v-if="!isEditMode"
+          :ui="{ rounded: 'rounded-full' }"
+          color="gray"
+          icon="i-heroicons-plus-solid"
+          label="Add Edition"
+          @click="addMorePrice"
+        />
+      </div>
 
       <UCard
         :ui="{
@@ -356,6 +370,7 @@
               </UTable>
             </UCard>
 
+            <!-- DRM -->
             <UCard :ui="{ body: { base: 'space-y-8' } }">
               <template #header>
                 <h3 class="font-bold font-mono">
@@ -434,8 +449,8 @@ const isLoading = ref(false)
 const connectStatus = ref<any>({})
 
 const mdEditorPlaceholder = ref({
-  en: 'Product description in English...',
-  zh: '產品中文描述...'
+  en: 'e.g.: This edition includes EPUB and PDF ebook files.',
+  zh: 'e.g.: 此版本包含 EPUB 及 PDF 電子書檔'
 })
 
 const classIdInput = ref(classId || '')
