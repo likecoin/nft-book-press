@@ -56,58 +56,100 @@
           <UCard
             :ui="{
               body: { base: 'space-y-5 border-[4px] relative' },
-              base: 'overflow-visible',
+              base: 'overflow-visible border-[2px]',
             }"
           >
-            <UFormGroup
-              :label="`Unit Price in USD (Minimum ${MINIMAL_PRICE}, or 0 for free)`"
+            <UCard
+              :ui="{
+                body: {
+                  base: 'flex flex-col gap-[20px]',
+                },
+                base: 'overflow-visible'
+              }"
             >
-              <UInput
-                :value="p.price"
-                type="number"
-                step="0.01"
-                :min="0"
-                @input="(e) => updatePrice(e, 'price', index)"
-              />
-            </UFormGroup>
-
-            <UFormGroup
-              :label="`Total number of NFT ${hasMultiplePrices ? 'edition' : 'ebook'} for sale`"
-            >
-              <UInput
-                :value="p.stock"
-                type="number"
-                step="1"
-                :min="0"
-                @input="(e) => updatePrice(e, 'stock', index)"
-              />
-            </UFormGroup>
-
-            <URadioGroup
-              v-model="p.deliveryMethod"
-              :legend="`Delivery method of this ${priceItemLabel}`"
-              :options="deliverMethodOptions"
-            />
-
-            <UFormGroup v-if="p.deliveryMethod === 'auto'">
-              <template #label>
-                {{ `Memo of this ${priceItemLabel}` }}
-                <ToolTips>
-                  <template #image>
-                    <img
-                      src="~/assets/images/hint/memo.png"
-                      class="object-cover"
-                      alt=""
-                    >
-                  </template>
-                  <UIcon name="i-heroicons-question-mark-circle" />
-                </ToolTips>
+              <template #header>
+                <h3 class="font-bold font-mono">
+                  Pricing and Availability
+                </h3>
               </template>
-              <UInput
-                :value="p.autoMemo"
-                @input="(e) => updatePrice(e, 'autoMemo', index)"
+              <UFormGroup
+                :label="`Unit Price in USD (Minimum ${MINIMAL_PRICE}, or 0 for free)`"
+              >
+                <UInput
+                  :value="p.price"
+                  type="number"
+                  step="0.01"
+                  :min="0"
+                  @input="(e) => updatePrice(e, 'price', index)"
+                />
+              </UFormGroup>
+              <UFormGroup
+                :label="`Total number of NFT ${hasMultiplePrices ? 'edition' : 'ebook'} for sale`"
+              >
+                <UInput
+                  :value="p.stock"
+                  type="number"
+                  step="1"
+                  :min="0"
+                  @input="(e) => updatePrice(e, 'stock', index)"
+                />
+              </UFormGroup>
+              <URadioGroup
+                v-model="p.deliveryMethod"
+                :legend="`Delivery method of this ${priceItemLabel}`"
+                :options="deliverMethodOptions"
               />
-            </UFormGroup>
+              <UFormGroup v-if="p.deliveryMethod === 'auto'">
+                <template #label>
+                  {{ `Memo of this ${priceItemLabel}` }}
+                  <ToolTips>
+                    <template #image>
+                      <img
+                        src="~/assets/images/hint/memo.png"
+                        class="object-cover"
+                        alt=""
+                      >
+                    </template>
+                    <UIcon name="i-heroicons-question-mark-circle" />
+                  </ToolTips>
+                </template>
+                <UInput
+                  :value="p.autoMemo"
+                  @input="(e) => updatePrice(e, 'autoMemo', index)"
+                />
+              </UFormGroup>
+              <UFormGroup
+                v-else
+                label="Is Physical only good"
+              >
+                <UCheckbox
+                  v-model="p.isPhysicalOnly"
+                  name="isPhysicalOnly"
+                  label="This edition does not contain digital file/NFT"
+                />
+              </UFormGroup>
+
+              <UFormGroup>
+                <template #label>
+                  Allow custom price
+                  <ToolTips :image-style="{ width: '300px' }">
+                    <template #image>
+                      <img
+                        src="~/assets/images/hint/tipping.png"
+                        class="object-cover"
+                        alt=""
+                      >
+                    </template>
+                    <UIcon name="i-heroicons-question-mark-circle" />
+                  </ToolTips>
+                </template>
+                <UCheckbox
+                  v-model="p.isAllowCustomPrice"
+                  name="isAllowCustomPrice"
+                  label="Allow user to pay more than defined price"
+                />
+              </UFormGroup>
+            </UCard>
 
             <UCard
               :ui="{
@@ -152,7 +194,6 @@
                   :style="{ height: '200px', width: '100%', marginTop: '0px' }"
                 />
               </UFormGroup>
-              <UDivider />
               <UFormGroup :ui="{ container: 'space-y-2 my-[20px]' }">
                 <template #label>
                   產品名稱
@@ -191,39 +232,6 @@
               :is-new-listing-page="true"
               :shipping-info="shippingRates"
             />
-            <div class="flex justify-start items-center gap-[32px]">
-              <UFormGroup
-                label="Is Physical only good"
-                :ui="{ label: { base: 'font-mono font-bold' } }"
-              >
-                <UCheckbox
-                  v-model="p.isPhysicalOnly"
-                  name="isPhysicalOnly"
-                  label="This edition does not contain digital file/NFT"
-                />
-              </UFormGroup>
-
-              <UFormGroup :ui="{ label: { base: 'font-mono font-bold' } }">
-                <template #label>
-                  Allow custom price
-                  <ToolTips :image-style="{ width: '300px' }">
-                    <template #image>
-                      <img
-                        src="~/assets/images/hint/tipping.png"
-                        class="object-cover"
-                        alt=""
-                      >
-                    </template>
-                    <UIcon name="i-heroicons-question-mark-circle" />
-                  </ToolTips>
-                </template>
-                <UCheckbox
-                  v-model="p.isAllowCustomPrice"
-                  name="isAllowCustomPrice"
-                  label="Allow user to pay more than defined price"
-                />
-              </UFormGroup>
-            </div>
             <div class="flex justify-center items-center">
               <UButton
                 v-if="hasMultiplePrices"
@@ -398,13 +406,13 @@
         </div>
         <template v-if="shouldShowAdvanceSettings">
           <div class="mt-[24px] flex flex-col gap-[12px]">
-            <!-- Pricing and Availability -->
+            <!-- Default Currency -->
             <UCard
               :ui="{ header: { base: 'flex justify-between items-center gap-2' } }"
             >
               <template #header>
                 <h3 class="font-bold font-mono">
-                  Pricing and Availability
+                  Default Currency
                 </h3>
               </template>
 
