@@ -277,7 +277,7 @@
       >
         <template #header>
           <h3 class="font-bold font-mono">
-            Connect to your own Stripe Account
+            Stripe Connect Settings
           </h3>
           <UToggle
             v-model="isStripeConnectChecked"
