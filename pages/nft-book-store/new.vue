@@ -44,34 +44,6 @@
         </UFormGroup>
       </UCard>
 
-      <UCard
-        :ui="{ header: { base: 'flex justify-between items-center gap-2' } }"
-      >
-        <template #header>
-          <h3 class="font-bold font-mono">
-            Pricing and Availability
-          </h3>
-        </template>
-
-        <UFormGroup
-          label="Default Display Currency at Checkout"
-          help="Note that price setting is always in USD "
-        >
-          <URadio
-            v-model="defaultPaymentCurrency"
-            label="USD"
-            name="USD"
-            value="USD"
-          />
-          <URadio
-            v-model="defaultPaymentCurrency"
-            label="HKD"
-            name="HKD"
-            value="HKD"
-          />
-        </UFormGroup>
-      </UCard>
-
       <component
         :is="hasMultiplePrices ? 'ul' : 'div'"
         class="flex flex-col gap-[12px]"
@@ -87,9 +59,6 @@
               base: 'overflow-visible',
             }"
           >
-            <div class="absolute top-0 left-0 px-[12px] py-[4px] bg-gray-200">
-              {{ index + 1 }}
-            </div>
             <UFormGroup
               :label="`Unit Price in USD (Minimum ${MINIMAL_PRICE}, or 0 for free)`"
             >
@@ -429,6 +398,35 @@
         </div>
         <template v-if="shouldShowAdvanceSettings">
           <div class="mt-[24px] flex flex-col gap-[12px]">
+            <!-- Pricing and Availability -->
+            <UCard
+              :ui="{ header: { base: 'flex justify-between items-center gap-2' } }"
+            >
+              <template #header>
+                <h3 class="font-bold font-mono">
+                  Pricing and Availability
+                </h3>
+              </template>
+
+              <UFormGroup
+                label="Default Display Currency at Checkout"
+                help="Note that price setting is always in USD "
+              >
+                <URadio
+                  v-model="defaultPaymentCurrency"
+                  label="USD"
+                  name="USD"
+                  value="USD"
+                />
+                <URadio
+                  v-model="defaultPaymentCurrency"
+                  label="HKD"
+                  name="HKD"
+                  value="HKD"
+                />
+              </UFormGroup>
+            </UCard>
+
             <!-- Shipping Rates -->
             <ShippingRatesRateTable
               :read-only="false"
