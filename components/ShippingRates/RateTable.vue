@@ -55,7 +55,7 @@
             icon="i-heroicons-face-frown-solid"
             color="yellow"
             variant="solid"
-            title="Please set the shipping options first to enable this feature."
+            title="Please enable this feature in the advanced settings."
           />
         </div>
       </UFormGroup>
