@@ -955,6 +955,13 @@ async function updateShippingRates (value: any) {
       shippingRates: value
     })
     collectionListingInfo.value = (await collectionStore.fetchCollectionById(collectionId.value as string)).value
+    const typePayload = collectionListingInfo.value.typePayload
+    if (typePayload) {
+      collectionListingInfo.value = {
+        ...collectionListingInfo.value,
+        ...typePayload
+      }
+    }
   } catch (err) {
     const errorData = (err as any).data || err
     error.value = errorData
