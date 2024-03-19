@@ -563,7 +563,7 @@ async function submitNewCollection () {
       }
     }))
 
-    if (price.value.price !== 0 && price.value.price < MINIMAL_PRICE) {
+    if (Number(price.value.price) !== 0 && price.value.price < MINIMAL_PRICE) {
       throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or $0 (free)`)
     }
     await checkStripeConnect()
