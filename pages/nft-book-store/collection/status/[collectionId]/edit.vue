@@ -256,7 +256,8 @@ async function handleSubmit () {
       stock: Number(stock.value),
       hasShipping: hasShipping.value || false,
       isPhysicalOnly: isPhysicalOnly.value || false,
-      isAllowCustomPrice: isAllowCustomPrice.value || false
+      isAllowCustomPrice: isAllowCustomPrice.value || false,
+      shippingRates: shippingRates.value || []
     }
 
     if (!editedPrice || editedPrice.price === undefined) {
