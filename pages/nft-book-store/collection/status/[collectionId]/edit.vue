@@ -88,6 +88,7 @@
           v-model="hasShipping"
           :read-only="true"
           :shipping-info="shippingRates"
+          @on-update-shipping-rates="value => shippingRates = value"
         />
 
         <UFormGroup
