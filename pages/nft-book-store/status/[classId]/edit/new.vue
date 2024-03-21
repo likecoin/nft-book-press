@@ -91,7 +91,7 @@
 
         <ShippingRatesRateTable
           v-model="hasShipping"
-          :is-class-view="false"
+          :is-show-physical-goods-checkbox="true"
           :shipping-info="shippingRates"
           :is-loading="isUpdatingShippingRates"
           @update-shipping-rates="updateShippingRates"

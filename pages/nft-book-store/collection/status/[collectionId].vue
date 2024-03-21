@@ -169,7 +169,7 @@
       </UCard>
 
       <ShippingRatesRateTable
-        :is-class-view="true"
+        :is-show-physical-goods-checkbox="false"
         :is-loading="isUpdatingShippingRates"
         :shipping-info="collectionListingInfo.shippingRates"
         @update-shipping-rates="updateShippingRates"

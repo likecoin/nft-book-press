@@ -109,9 +109,9 @@
           </UFormGroup>
 
           <ShippingRatesRateTable
-            :is-class-view="true"
+            :is-show-physical-goods-checkbox="false"
             :shipping-info="shippingRates"
-            :is-new-listing-page="true"
+            :is-show-setting-modal-button="true"
             @update-shipping-rates="updateShippingRate"
           >
             <template #header>

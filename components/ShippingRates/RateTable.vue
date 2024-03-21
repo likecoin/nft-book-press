@@ -78,7 +78,7 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  isClassView: {
+  isShowPhysicalGoodsCheckbox: {
     type: Boolean,
     default: false
   },
@@ -89,7 +89,7 @@ const props = defineProps({
   modelValue: {
     type: Boolean
   },
-  isNewListingPage: {
+  isShowSettingModalButton: {
     type: Boolean,
     default: false
   }
@@ -98,6 +98,7 @@ const emit = defineEmits(['update:modelValue', 'update-shipping-rates'])
 const isShippingModalOpened = ref<Boolean>(false)
 
 const hasShipping = ref(props.modelValue)
+const isModalReadOnly = ref(props.isShowPhysicalGoodsCheckbox)
 
 watch(() => props.modelValue, (newValue) => {
   hasShipping.value = newValue
@@ -105,10 +106,9 @@ watch(() => props.modelValue, (newValue) => {
 watch(hasShipping, (hasShipping) => {
   emit('update:modelValue', hasShipping)
 })
-const isModalReadOnly = computed(() => (!props.isClassView))
-const isEditMode = computed(() => (props.isClassView))
-const isViewMode = computed(() => !(props.isClassView))
-const shouldHideViewButtonOnViewMode = computed(() => Boolean(isViewMode.value && props.isNewListingPage))
+const isEditMode = computed(() => !(props.isShowPhysicalGoodsCheckbox))
+const isViewMode = computed(() => (props.isShowPhysicalGoodsCheckbox))
+const shouldHideViewButtonOnViewMode = computed(() => Boolean(isViewMode.value && props.isShowSettingModalButton))
 const buttonConfig = computed(() => {
   if (isEditMode.value) {
     if (props.shippingInfo.length) {
