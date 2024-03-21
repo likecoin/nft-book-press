@@ -168,26 +168,64 @@
           </template>
         </UTable>
       </UCard>
+
+      <UCard
+        :ui="{
+          header: { base: 'flex justify-between items-center' },
+          body: { padding: '' },
+          footer: { base: 'text-center' },
+        }"
+      >
+        <template #header>
+          <h1 class="text-center font-bold font-mono">
+            User Setting
+          </h1>
+        </template>
+
+        <UFormGroup label="Email for Affiliation Related Notification">
+          <UInput
+            v-model="notificationEmail"
+            placeholder="exmaple@example.com"
+            :ui="{ base: 'font-mono' }"
+          />
+        </UFormGroup>
+
+        <template #footer>
+          <UButton
+            label="Update"
+            color="gray"
+            @click="updateUserProfile"
+          />
+        </template>
+      </UCard>
     </template>
   </main>
 </template>
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { useUserStore } from '~/stores/user'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { LIKER_LAND_URL, LIKE_CO_API, LIKE_CO_HOST } from '~/constant'
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
+const userStore = useUserStore()
 const { wallet } = storeToRefs(walletStore)
 const { token } = storeToRefs(bookStoreApiStore)
+const { bookUser } = storeToRefs(userStore)
 
 const error = ref('')
 const isLoading = ref(false)
 const connectStatus = ref<any>({})
 const likerIdInfo = ref<any>({})
 const commissionHistory = ref<any>([])
+const notificationEmail = ref('')
+
+watch(bookUser, (user) => {
+  notificationEmail.value = user?.notificationEmail || ''
+})
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
@@ -197,7 +235,8 @@ onMounted(async () => {
   await Promise.all([
     loadCommissionHistory(),
     loadLikerId(),
-    loadStripeConnectStatus()
+    loadStripeConnectStatus(),
+    userStore.lazyFetchBookUserProfile()
   ])
 })
 
@@ -324,6 +363,12 @@ async function onSetupStripe () {
   } finally {
     isLoading.value = false
   }
+}
+
+async function updateUserProfile () {
+  await userStore.updateBookUserProfile({
+    notificationEmail: notificationEmail.value
+  })
 }
 
 </script>
