@@ -88,7 +88,8 @@
           v-model="hasShipping"
           :read-only="true"
           :shipping-info="shippingRates"
-          @on-update-shipping-rates="value => shippingRates = value"
+          :is-loading="isUpdatingShippingRates"
+          @on-update-shipping-rates="updateShippingRates"
         />
 
         <UFormGroup
@@ -152,6 +153,7 @@ const hasShipping = ref(false)
 const isAllowCustomPrice = ref(false)
 const isPhysicalOnly = ref(false)
 const shippingRates = ref<any[]>([])
+const isUpdatingShippingRates = ref(false)
 
 const toolbarOptions = ref<string[]>([
   'bold',
@@ -239,6 +241,23 @@ function handleClickBack () {
   })
 }
 
+async function updateShippingRates (value: any) {
+  isUpdatingShippingRates.value = true
+  try {
+    await collectionStore.updateNFTBookCollectionById(collectionId.value as string, {
+      shippingRates: value
+    })
+
+    const updatedCollectionData = (await collectionStore.fetchCollectionById(collectionId.value as string)).value
+    shippingRates.value = updatedCollectionData?.typePayload?.shippingRates
+  } catch (err) {
+    const errorData = (err as any).data || err
+    console.error(errorData)
+  } finally {
+    isUpdatingShippingRates.value = false
+  }
+}
+
 async function handleSubmit () {
   try {
     const editedPrice = {
@@ -257,8 +276,7 @@ async function handleSubmit () {
       stock: Number(stock.value),
       hasShipping: hasShipping.value || false,
       isPhysicalOnly: isPhysicalOnly.value || false,
-      isAllowCustomPrice: isAllowCustomPrice.value || false,
-      shippingRates: shippingRates.value || []
+      isAllowCustomPrice: isAllowCustomPrice.value || false
     }
 
     if (!editedPrice || editedPrice.price === undefined) {
