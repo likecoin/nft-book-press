@@ -65,8 +65,8 @@
       v-model="isShippingModalOpened"
       :read-only="isModalReadOnly"
       :shipping-info="shippingInfo"
-      @on-update-shipping-rates="
-        (value) => emit('on-update-shipping-rates', value)"
+      @update-shipping-rates="
+        (value) => emit('update-shipping-rates', value)"
     />
   </UCard>
 </template>
@@ -94,7 +94,7 @@ const props = defineProps({
     default: false
   }
 })
-const emit = defineEmits(['update:modelValue', 'on-update-shipping-rates'])
+const emit = defineEmits(['update:modelValue', 'update-shipping-rates'])
 const isShippingModalOpened = ref<Boolean>(false)
 
 const hasShipping = ref(props.modelValue)

@@ -89,7 +89,7 @@
           :is-class-view="false"
           :shipping-info="shippingRates"
           :is-loading="isUpdatingShippingRates"
-          @on-update-shipping-rates="updateShippingRates"
+          @update-shipping-rates="updateShippingRates"
         />
 
         <UFormGroup

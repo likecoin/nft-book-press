@@ -440,7 +440,7 @@
               :is-class-view="true"
               :is-new-listing-page="true"
               :shipping-info="shippingRates"
-              @on-update-shipping-rates="updateShippingRate"
+              @update-shipping-rates="updateShippingRate"
             />
 
             <!-- Share sales data -->

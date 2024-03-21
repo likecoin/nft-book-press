@@ -129,7 +129,7 @@ const props = defineProps({
     default: () => []
   }
 })
-const emit = defineEmits(['update:modelValue', 'on-update-shipping-rates'])
+const emit = defineEmits(['update:modelValue', 'update-shipping-rates'])
 const isEditMode = computed(() => !isReadOnlyMode.value)
 const isViewMode = computed(() => isReadOnlyMode.value)
 const modalTitle = computed(() =>
@@ -182,7 +182,7 @@ function deleteShippingRate (index: number) {
 }
 
 function handleOnSave () {
-  emit('on-update-shipping-rates', shippingRates.value.map((option:any) => ({ name: { en: option.nameEn, zh: option.nameZh }, priceInDecimal: Math.round(Number(option.price) * 100) })))
+  emit('update-shipping-rates', shippingRates.value.map((option:any) => ({ name: { en: option.nameEn, zh: option.nameZh }, priceInDecimal: Math.round(Number(option.price) * 100) })))
   closeModal()
 }
 </script>

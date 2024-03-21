@@ -261,7 +261,7 @@
         :is-class-view="true"
         :is-loading="isUpdatingShippingRates"
         :shipping-info="classListingInfo.shippingRates"
-        @on-update-shipping-rates="updateShippingRates"
+        @update-shipping-rates="updateShippingRates"
       />
 
       <UCard

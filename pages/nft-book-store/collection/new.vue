@@ -112,7 +112,7 @@
             :is-class-view="true"
             :shipping-info="shippingRates"
             :is-new-listing-page="true"
-            @on-update-shipping-rates="updateShippingRate"
+            @update-shipping-rates="updateShippingRate"
           >
             <template #header>
               <span class="text-[14px] text-gray-500">
