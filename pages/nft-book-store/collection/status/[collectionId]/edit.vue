@@ -86,7 +86,7 @@
 
         <ShippingRatesRateTable
           v-model="hasShipping"
-          :read-only="true"
+          :is-class-view="false"
           :shipping-info="shippingRates"
           :is-loading="isUpdatingShippingRates"
           @on-update-shipping-rates="updateShippingRates"

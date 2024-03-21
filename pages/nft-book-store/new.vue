@@ -228,7 +228,7 @@
 
             <ShippingRatesRateTable
               v-model="p.hasShipping"
-              :read-only="true"
+              :is-class-view="false"
               :is-new-listing-page="true"
               :shipping-info="shippingRates"
             />
@@ -437,7 +437,7 @@
 
             <!-- Shipping Rates -->
             <ShippingRatesRateTable
-              :read-only="false"
+              :is-class-view="true"
               :is-new-listing-page="true"
               :shipping-info="shippingRates"
               @on-update-shipping-rates="updateShippingRate"

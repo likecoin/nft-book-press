@@ -78,7 +78,7 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  readOnly: {
+  isClassView: {
     type: Boolean,
     default: false
   },
@@ -98,15 +98,15 @@ const emit = defineEmits(['update:modelValue', 'on-update-shipping-rates'])
 const isShippingModalOpened = ref<Boolean>(false)
 
 const hasShipping = ref(props.modelValue)
-const isModalReadOnly = ref(props.readOnly)
+const isModalReadOnly = ref(!props.isClassView)
 watch(() => props.modelValue, (newValue) => {
   hasShipping.value = newValue
 })
 watch(hasShipping, (hasShipping) => {
   emit('update:modelValue', hasShipping)
 })
-const isEditMode = computed(() => !(props.readOnly))
-const isViewMode = computed(() => (props.readOnly))
+const isEditMode = computed(() => (props.isClassView))
+const isViewMode = computed(() => !(props.isClassView))
 const shouldHideViewButtonOnViewMode = computed(() => Boolean(isViewMode.value && props.isNewListingPage))
 const buttonConfig = computed(() => {
   if (isEditMode.value) {

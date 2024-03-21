@@ -109,7 +109,7 @@
           </UFormGroup>
 
           <ShippingRatesRateTable
-            :read-only="false"
+            :is-class-view="true"
             :shipping-info="shippingRates"
             :is-new-listing-page="true"
             @on-update-shipping-rates="updateShippingRate"
