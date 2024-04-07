@@ -607,6 +607,7 @@ const orderTableColumns = computed(() => {
     { key: 'message', label: 'Reader Message', sortable: false }
   )
   if (orderHasShipping.value) {
+    columns.push({ key: 'buyerPhone', label: 'Buyer Phone', sortable: true })
     columns.push({ key: 'shippingName', label: 'Shipping Name', sortable: true })
     columns.push({ key: 'shippingAddress', label: 'Shipping Address', sortable: true })
     columns.push({ key: 'shippingCountry', label: 'Shipping Country', sortable: true })
@@ -690,6 +691,7 @@ function getStatusLabelColor (purchaseListItem: any) {
 const ordersTableRows = computed(() => purchaseList.value?.map((p: any, index: number) => ({
   index,
   buyerEmail: p.email,
+  buyerPhone: p.phone || '',
   readerEmail: p.giftInfo?.toEmail || p.email,
   status: p.status,
   statusLabel: getStatusLabel(p),
@@ -713,6 +715,7 @@ const ordersTableRows = computed(() => purchaseList.value?.map((p: any, index: n
   const normalizedSearchInput = searchInput.value.toLowerCase()
   return (
     p.buyerEmail.toLowerCase().includes(normalizedSearchInput) ||
+    p.buyerPhone.toLowerCase().includes(normalizedSearchInput) ||
     p.readerEmail.toLowerCase().includes(normalizedSearchInput) ||
     p.wallet?.toLowerCase().includes(normalizedSearchInput) ||
     p.priceName?.toLowerCase().includes(normalizedSearchInput) ||
