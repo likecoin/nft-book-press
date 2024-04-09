@@ -316,67 +316,60 @@
         </template>
       </UCard>
 
-      <UCard :ui="{ body: { base: 'space-y-8' } }">
+      <UCard
+        :ui="{
+          header: { base: 'flex justify-between items-center' },
+          body: { padding: '' },
+        }"
+      >
         <template #header>
-          <h3 class="font-bold font-mono">
-            Other Settings
-          </h3>
+          <h4 class="text-sm font-bold font-mono">
+            Email to receive sales notifications
+          </h4>
+
+          <div class="flex gap-2">
+            <UInput
+              v-model="notificationEmailInput"
+              placeholder="abc@example.com"
+            />
+
+            <UButton
+              label="Add"
+              :variant="notificationEmailInput ? 'outline' : 'solid'"
+              :color="notificationEmailInput ? 'primary' : 'gray'"
+              :disabled="!notificationEmailInput"
+              @click="addNotificationEmail"
+            />
+          </div>
         </template>
-        <UCard
-          :ui="{
-            header: { base: 'flex justify-between items-center' },
-            body: { padding: '' },
-          }"
+
+        <UTable
+          :columns="[
+            { key: 'email', label: 'Email', sortable: true },
+            { key: 'action' },
+          ]"
+          :rows="notificationEmailsTableRows"
         >
-          <template #header>
-            <h4 class="text-sm font-bold font-mono">
-              Email to receive sales notifications
-            </h4>
+          <template #email-data="{ row }">
+            <UButton
+              :label="row.email"
+              :to="`mailto:${row.email}`"
+              variant="link"
+              :padded="false"
+            />
+          </template>
 
-            <div class="flex gap-2">
-              <UInput
-                v-model="notificationEmailInput"
-                placeholder="abc@example.com"
-              />
-
+          <template #action-data="{ row }">
+            <div class="flex justify-end items-center">
               <UButton
-                label="Add"
-                :variant="notificationEmailInput ? 'outline' : 'solid'"
-                :color="notificationEmailInput ? 'primary' : 'gray'"
-                :disabled="!notificationEmailInput"
-                @click="addNotificationEmail"
+                icon="i-heroicons-x-mark"
+                variant="soft"
+                color="red"
+                @click="() => notificationEmails.splice(row.index, 1)"
               />
             </div>
           </template>
-
-          <UTable
-            :columns="[
-              { key: 'email', label: 'Email', sortable: true },
-              { key: 'action' },
-            ]"
-            :rows="notificationEmailsTableRows"
-          >
-            <template #email-data="{ row }">
-              <UButton
-                :label="row.email"
-                :to="`mailto:${row.email}`"
-                variant="link"
-                :padded="false"
-              />
-            </template>
-
-            <template #action-data="{ row }">
-              <div class="flex justify-end items-center">
-                <UButton
-                  icon="i-heroicons-x-mark"
-                  variant="soft"
-                  color="red"
-                  @click="() => notificationEmails.splice(row.index, 1)"
-                />
-              </div>
-            </template>
-          </UTable>
-        </UCard>
+        </UTable>
       </UCard>
 
       <UCard

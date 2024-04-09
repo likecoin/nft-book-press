@@ -257,13 +257,6 @@
         </table>
       </UCard>
 
-      <ShippingRatesRateTable
-        :is-show-physical-goods-checkbox="false"
-        :is-loading="isUpdatingShippingRates"
-        :shipping-info="classListingInfo.shippingRates"
-        @update-shipping-rates="updateShippingRates"
-      />
-
       <UCard
         v-if="userIsOwner"
         :ui="{
@@ -318,192 +311,50 @@
         }"
       >
         <template #header>
-          <h3 class="font-bold font-mono">
-            Coupon Codes
-          </h3>
-          <UButton
-            label="Add New"
-            icon="i-heroicons-plus-circle"
-            variant="outline"
-            color="primary"
-            @click="isShowNewCouponModal = true"
-          />
+          <h4 class="text-sm font-bold font-mono">
+            Email to receive sales notifications
+          </h4>
+
+          <div class="flex gap-2">
+            <UInput
+              v-model="notificationEmailInput"
+              placeholder="abc@example.com"
+            />
+
+            <UButton
+              label="Add"
+              :variant="notificationEmailInput ? 'outline' : 'solid'"
+              :color="notificationEmailInput ? 'primary' : 'gray'"
+              :disabled="!notificationEmailInput"
+              @click="addNotificationEmail"
+            />
+          </div>
         </template>
 
         <UTable
-          v-if="couponsTableRows.length"
-          :columns="[
-            { key: 'id', label: 'Code', sortable: true },
-            { key: 'discount', label: 'Discount Multiplier' },
-            { key: 'expireTs', label: 'Expiry Date' },
-          ]"
-          :rows="couponsTableRows"
-        />
-      </UCard>
-
-      <NewCouponModal v-model="isShowNewCouponModal" @add="addCouponCode" />
-
-      <UCard :ui="{ body: { base: 'space-y-8' } }">
-        <template #header>
-          <h3 class="font-bold font-mono">
-            DRM Options
-          </h3>
-        </template>
-
-        <div class="grid md:grid-cols-2 gap-4">
-          <UFormGroup
-            label="Force NFT claim before view"
-            :ui="{ label: { base: 'font-mono font-bold' } }"
-          >
-            <UCheckbox
-              v-model="mustClaimToView"
-              name="mustClaimToView"
-              label="Must claim NFT to view"
-            />
-          </UFormGroup>
-
-          <UFormGroup
-            label="Disable File Download "
-            :ui="{ label: { base: 'font-mono font-bold' } }"
-          >
-            <UCheckbox
-              v-model="hideDownload"
-              name="hideDownload"
-              label="Disable Download"
-            />
-          </UFormGroup>
-        </div>
-      </UCard>
-
-      <UCard :ui="{ body: { base: 'space-y-8' } }">
-        <template #header>
-          <h3 class="font-bold font-mono">
-            Other Settings
-          </h3>
-        </template>
-        <UCard
-          :ui="{
-            header: { base: 'flex justify-between items-center' },
-            body: { padding: '', base: 'space-y-8' }
-          }"
+          :columns="[{ key: 'email', label: 'Email', sortable: true }, { key: 'action' }]"
+          :rows="notificationEmailsTableRows"
         >
-          <template #header>
-            <h4 class="text-sm font-bold font-mono">
-              Share sales data to wallets
-            </h4>
-            <div class="flex gap-2">
-              <UInput
-                v-model="moderatorWalletInput"
-                class="font-mono"
-                placeholder="like1..."
-              />
+          <template #email-data="{ row }">
+            <UButton
+              :label="row.email"
+              :to="`mailto:${row.email}`"
+              variant="link"
+              :padded="false"
+            />
+          </template>
 
+          <template #action-data="{ row }">
+            <div class="flex justify-end items-center">
               <UButton
-                label="Add"
-                :variant="moderatorWalletInput ? 'outline' : 'solid'"
-                :color="moderatorWalletInput ? 'primary' : 'gray'"
-                :disabled="!moderatorWalletInput"
-                @click="addModeratorWallet"
+                icon="i-heroicons-x-mark"
+                variant="soft"
+                color="red"
+                @click="() => notificationEmails.splice(row.index, 1)"
               />
             </div>
           </template>
-
-          <UTable
-            :columns="moderatorWalletsTableColumns"
-            :rows="moderatorWalletsTableRows"
-          >
-            <template #wallet-data="{ row }">
-              <UTooltip :text="row.wallet">
-                <UButton
-                  class="font-mono"
-                  :label="row.shortenWallet"
-                  :to="row.walletLink"
-                  variant="link"
-                  :padded="false"
-                  size="xs"
-                />
-              </UTooltip>
-            </template>
-            <template #authz-data="{ row }">
-              <UButton
-                :label="row.grantLabel"
-                :to="row.grantRoute"
-                :variant="row.isGranted ? 'outline' : 'solid'"
-                color="green"
-              />
-            </template>
-            <template #remove-data="{ row }">
-              <div class="flex justify-end items-center">
-                <UButton
-                  icon="i-heroicons-x-mark"
-                  variant="soft"
-                  color="red"
-                  @click="() => moderatorWallets.splice(row.index, 1)"
-                />
-              </div>
-            </template>
-          </UTable>
-        </UCard>
-
-        <UCard
-          :ui="{
-            header: { base: 'flex justify-between items-center' },
-            body: { padding: '' }
-          }"
-        >
-          <template #header>
-            <h4 class="text-sm font-bold font-mono">
-              Email to receive sales notifications
-            </h4>
-
-            <div class="flex gap-2">
-              <UInput
-                v-model="notificationEmailInput"
-                placeholder="abc@example.com"
-              />
-
-              <UButton
-                label="Add"
-                :variant="notificationEmailInput ? 'outline' : 'solid'"
-                :color="notificationEmailInput ? 'primary' : 'gray'"
-                :disabled="!notificationEmailInput"
-                @click="addNotificationEmail"
-              />
-            </div>
-          </template>
-
-          <UTable
-            :columns="[{ key: 'email', label: 'Email', sortable: true }, { key: 'action' }]"
-            :rows="notificationEmailsTableRows"
-          >
-            <template #email-data="{ row }">
-              <UButton
-                :label="row.email"
-                :to="`mailto:${row.email}`"
-                variant="link"
-                :padded="false"
-              />
-            </template>
-
-            <template #action-data="{ row }">
-              <div class="flex justify-end items-center">
-                <UButton
-                  icon="i-heroicons-x-mark"
-                  variant="soft"
-                  color="red"
-                  @click="() => notificationEmails.splice(row.index, 1)"
-                />
-              </div>
-            </template>
-          </UTable>
-        </UCard>
-
-        <template #footer>
-          <UButton
-            label="Update"
-            @click="updateSettings"
-          />
-        </template>
+        </UTable>
       </UCard>
 
       <UCard :ui="{ body: { padding: '' } }">
@@ -591,6 +442,208 @@
           </template>
         </QRCode>
       </UCard>
+
+      <UCard
+        :ui="{
+          header: { base: 'flex justify-between items-center' },
+          body: { padding: '12px' },
+        }"
+      >
+        <div class="flex justify-between items-center w-full">
+          <h3 class="font-bold font-mono">
+            Advance Settings
+          </h3>
+          <UButton
+            color="gray"
+            variant="ghost"
+            :icon="
+              shouldShowAdvanceSettings
+                ? 'i-heroicons-chevron-up'
+                : 'i-heroicons-chevron-down'
+            "
+            @click="
+              () => {
+                shouldShowAdvanceSettings = !shouldShowAdvanceSettings;
+              }
+            "
+          />
+        </div>
+        <template v-if="shouldShowAdvanceSettings">
+          <div class="mt-[24px] flex flex-col gap-[12px]">
+            <!-- Default Currency -->
+            <UCard
+              :ui="{ header: { base: 'flex justify-between items-center gap-2' } }"
+            >
+              <template #header>
+                <h3 class="font-bold font-mono">
+                  Default Currency
+                </h3>
+              </template>
+
+              <UFormGroup
+                label="Default Display Currency at Checkout"
+                help="Note that price setting is always in USD "
+              >
+                <URadio
+                  v-model="defaultPaymentCurrency"
+                  label="USD"
+                  name="USD"
+                  value="USD"
+                />
+                <URadio
+                  v-model="defaultPaymentCurrency"
+                  label="HKD"
+                  name="HKD"
+                  value="HKD"
+                />
+              </UFormGroup>
+            </UCard>
+
+            <!-- Shipping Rates -->
+            <ShippingRatesRateTable
+              :is-show-physical-goods-checkbox="false"
+              :is-loading="isUpdatingShippingRates"
+              :shipping-info="classListingInfo.shippingRates"
+              @update-shipping-rates="updateShippingRates"
+            />
+
+            <!-- Share sales data -->
+            <UCard
+              :ui="{
+                header: { base: 'flex justify-between items-center' },
+                body: { padding: '', base: 'space-y-8' }
+              }"
+            >
+              <template #header>
+                <h4 class="text-sm font-bold font-mono">
+                  Share sales data to wallets
+                </h4>
+                <div class="flex gap-2">
+                  <UInput
+                    v-model="moderatorWalletInput"
+                    class="font-mono"
+                    placeholder="like1..."
+                  />
+                  <UButton
+                    label="Add"
+                    :variant="moderatorWalletInput ? 'outline' : 'solid'"
+                    :color="moderatorWalletInput ? 'primary' : 'gray'"
+                    :disabled="!moderatorWalletInput"
+                    @click="addModeratorWallet"
+                  />
+                </div>
+              </template>
+              <UTable
+                :columns="moderatorWalletsTableColumns"
+                :rows="moderatorWalletsTableRows"
+              >
+                <template #wallet-data="{ row }">
+                  <UTooltip :text="row.wallet">
+                    <UButton
+                      class="font-mono"
+                      :label="row.shortenWallet"
+                      :to="row.walletLink"
+                      variant="link"
+                      :padded="false"
+                      size="xs"
+                    />
+                  </UTooltip>
+                </template>
+                <template #authz-data="{ row }">
+                  <UButton
+                    :label="row.grantLabel"
+                    :to="row.grantRoute"
+                    :variant="row.isGranted ? 'outline' : 'solid'"
+                    color="green"
+                  />
+                </template>
+                <template #remove-data="{ row }">
+                  <div class="flex justify-end items-center">
+                    <UButton
+                      icon="i-heroicons-x-mark"
+                      variant="soft"
+                      color="red"
+                      @click="() => moderatorWallets.splice(row.index, 1)"
+                    />
+                  </div>
+                </template>
+              </UTable>
+            </UCard>
+
+            <!-- DRM -->
+            <UCard :ui="{ body: { base: 'space-y-8' } }">
+              <template #header>
+                <h3 class="font-bold font-mono">
+                  DRM Options
+                </h3>
+              </template>
+
+              <div class="grid md:grid-cols-2 gap-4">
+                <UFormGroup
+                  label="Force NFT claim before view"
+                  :ui="{ label: { base: 'font-mono font-bold' } }"
+                >
+                  <UCheckbox
+                    v-model="mustClaimToView"
+                    name="mustClaimToView"
+                    label="Must claim NFT to view"
+                  />
+                </UFormGroup>
+
+                <UFormGroup
+                  label="Disable File Download "
+                  :ui="{ label: { base: 'font-mono font-bold' } }"
+                >
+                  <UCheckbox
+                    v-model="hideDownload"
+                    name="hideDownload"
+                    label="Disable Download"
+                  />
+                </UFormGroup>
+              </div>
+            </UCard>
+
+            <!-- Coupon -->
+            <UCard
+              :ui="{
+                header: { base: 'flex justify-between items-center' },
+                body: { padding: '' }
+              }"
+            >
+              <template #header>
+                <h3 class="font-bold font-mono">
+                  Coupon Codes
+                </h3>
+                <UButton
+                  label="Add New"
+                  icon="i-heroicons-plus-circle"
+                  variant="outline"
+                  color="primary"
+                  @click="isShowNewCouponModal = true"
+                />
+              </template>
+
+              <UTable
+                v-if="couponsTableRows.length"
+                :columns="[
+                  { key: 'id', label: 'Code', sortable: true },
+                  { key: 'discount', label: 'Discount Multiplier' },
+                  { key: 'expireTs', label: 'Expiry Date' },
+                ]"
+                :rows="couponsTableRows"
+              />
+            </UCard>
+            <NewCouponModal v-model="isShowNewCouponModal" @add="addCouponCode" />
+          </div>
+        </template>
+      </UCard>
+      <UButton
+        label="Save Changes"
+        :loading="isLoading"
+        size="lg"
+        :disabled="isLoading"
+        @click="updateSettings"
+      />
     </template>
     <NuxtPage :transition="false" />
   </main>
@@ -629,6 +682,8 @@ const isUpdatingPricesOrder = ref(false)
 const ordersData = ref<any>({})
 const connectStatus = ref<any>({})
 const isUpdatingShippingRates = ref(false)
+const shouldShowAdvanceSettings = ref<boolean>(false)
+const defaultPaymentCurrency = ref('USD')
 
 // Search
 const searchInput = ref('')
