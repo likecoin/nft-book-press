@@ -17,36 +17,155 @@
     </UProgress>
 
     <template v-if="bookStoreApiStore.isAuthenticated">
+      <!-- Collection Info -->
       <UCard :ui="{ body: { base: 'space-y-4' } }">
         <template #header>
           <h2 class="font-bold font-mono">
-            New Book Collection
+            Collection Info
           </h2>
         </template>
-
         <UFormGroup label="Books in Collection">
-          <UTable
-            :columns="[{ key: 'classId', label: 'Class ID' }, { key: 'name', label: 'Book Name'}]"
-            :rows="classIds.map((classId, index) => ({ index, classId, name: getClassMetadataById(classId)?.name }))"
-          />
-          <UInput
-            v-model="classIdInput"
-            class="font-mono"
-            placeholder="likenft...."
-          />
-          <UButton @click="addMoreClassId">
-            Add
-          </UButton>
+          <UCard :ui="{ body: { padding: '' } }">
+            <UTable
+              :columns="[{ key: 'classId', label: 'Class ID' }, { key: 'name', label: 'Book Name'}]"
+              :rows="classIds.map((classId, index) => ({ index, classId, name: getClassMetadataById(classId)?.name }))"
+            />
+            <div class="flex items-start gap-[12px] w-full px-[12px] mb-[12px]">
+              <UInput
+                v-model="classIdInput"
+                class="font-mono w-full"
+                placeholder="likenft...."
+              />
+              <UButton @click="addMoreClassId">
+                Add
+              </UButton>
+            </div>
+          </UCard>
+        </UFormGroup>
+        <UFormGroup :label="`Total number of packages available for sale`">
+          <UInput v-model="price.stock" type="number" step="0.01" :min="MINIMAL_PRICE" />
+        </UFormGroup>
+      </UCard>
+
+      <!-- Pricing and Availability -->
+      <UCard
+        :ui="{
+          body: {
+            base: 'flex flex-col gap-[20px]',
+          },
+          base: 'overflow-visible'
+        }"
+      >
+        <template #header>
+          <h3 class="font-bold font-mono">
+            Pricing and Availability
+          </h3>
+        </template>
+        <UFormGroup :label="`Price(USD) of this collection (Minimal ${MINIMAL_PRICE} or $0 (free))`">
+          <UInput v-model="price.price" type="number" step="0.01" :min="MINIMAL_PRICE" />
         </UFormGroup>
 
         <UFormGroup
-          :label="`Name of this book collection`"
-          :ui="{ container: 'space-y-2' }"
+          label="Is Physical only good"
+          :ui="{ label: { base: 'font-mono font-bold' } }"
         >
-          <UInput v-model="nameEn" placeholder="Product name in English" />
-          <UInput v-model="nameZh" placeholder="產品中文名字" />
+          <UCheckbox
+            v-model="price.isPhysicalOnly"
+            name="isPhysicalOnly"
+            label="This collection does not contain any digital file/NFT"
+          />
         </UFormGroup>
+        <UFormGroup>
+          <template #label>
+            Allow custom price
+            <ToolTips :image-style="{ width: '300px' }">
+              <template #image>
+                <img
+                  src="~/assets/images/hint/tipping.png"
+                  class="object-cover"
+                  alt=""
+                >
+              </template>
+              <UIcon name="i-heroicons-question-mark-circle" />
+            </ToolTips>
+          </template>
+          <UCheckbox
+            v-model="price.isAllowCustomPrice"
+            name="isAllowCustomPrice"
+            label="Allow user to pay more than defined price"
+          />
+        </UFormGroup>
+      </UCard>
 
+      <!-- Product Information -->
+      <UCard
+        :ui="{
+          body: {
+            base: 'flex flex-col gap-[20px]',
+          },
+          base: 'overflow-visible'
+        }"
+      >
+        <template #header>
+          <h3 class="font-bold font-mono">
+            Product Information
+          </h3>
+        </template>
+        <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
+          <template #label>
+            Product Name
+            <ToolTips :image-style="{ width: '250px' }">
+              <template #image>
+                <img
+                  src="~/assets/images/hint/editionInfo-en.png"
+                  class="object-cover"
+                  alt=""
+                >
+              </template>
+              <UIcon name="i-heroicons-question-mark-circle" />
+            </ToolTips>
+          </template>
+          <UInput v-model="nameEn" placeholder="Product name in English" />
+          <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional)</span>
+          <md-editor
+            v-model="descriptionEn"
+            language="en-US"
+            :editor-id="`en`"
+            :placeholder="mdEditorPlaceholder.en"
+            :toolbars="toolbarOptions"
+            :sanitize="sanitizeHtml"
+            :style="{ height: '200px', width: '100%', marginTop: '0px' }"
+          />
+        </UFormGroup>
+        <UFormGroup :ui="{ container: 'space-y-2 my-[20px]' }">
+          <template #label>
+            產品名稱
+            <ToolTips :image-style="{ width: '250px' }">
+              <template #image>
+                <img
+                  src="~/assets/images/hint/editionInfo-zh.png"
+                  class="object-cover"
+                  alt=""
+                >
+              </template>
+              <UIcon name="i-heroicons-question-mark-circle" />
+            </ToolTips>
+          </template>
+          <UInput
+            placeholder="產品中文名字"
+            :value="nameZh"
+          />
+          <span class="block text-[14px] text-[#374151] mt-[8px]">描述 (選填)</span>
+          <md-editor
+            v-model="descriptionZh"
+            language="en-US"
+            :editor-id="`zh`"
+            :placeholder="mdEditorPlaceholder.zh"
+            :toolbars="toolbarOptions"
+            :sanitize="sanitizeHtml"
+            :style="{ height: '200px', width: '100%', marginTop: '0px' }"
+          />
+        </UFormGroup>
         <UFormGroup
           :label="`Image of this book collection`"
           :ui="{ container: 'space-y-2' }"
@@ -56,94 +175,15 @@
             class="font-mono"
             placeholder="https://, ar://, ipfs://...."
           />
-          <img v-if="image" :src="parseImageURLFromMetadata(image)" class="w-1/2">
+          <img v-if="image" :src="parseImageURLFromMetadata(image)" class="w-1/3">
         </UFormGroup>
-
-        <UFormGroup
-          :label="`Description of this book collection`"
-          :ui="{ container: 'space-y-2' }"
-        >
-          <md-editor
-            v-model="descriptionEn"
-            language="en-US"
-            :editor-id="'en'"
-            :placeholder="mdEditorPlaceholder.en"
-            :toolbars="toolbarOptions"
-            :sanitize="sanitizeHtml"
-          />
-          <md-editor
-            v-model="descriptionZh"
-            language="en-US"
-            :editor-id="'zh'"
-            :placeholder="mdEditorPlaceholder.zh"
-            :toolbars="toolbarOptions"
-            :sanitize="sanitizeHtml"
-          />
-        </UFormGroup>
+        <ShippingRatesRateTable
+          v-model="price.hasShipping"
+          :is-show-physical-goods-checkbox="true"
+          :is-show-setting-modal-button="true"
+          :shipping-info="shippingRates"
+        />
       </UCard>
-
-      <UCard :ui="{ header: { base: 'flex justify-between items-center gap-2' } }">
-        <template #header>
-          <h3 class="font-bold font-mono">
-            Pricing and Availability
-          </h3>
-        </template>
-
-        <UFormGroup
-          label="Default display currency when user checkout"
-          help="note that prices setting are always in USD"
-        >
-          <URadio v-model="defaultPaymentCurrency" label="USD" name="USD" value="USD" />
-          <URadio v-model="defaultPaymentCurrency" label="HKD" name="HKD" value="HKD" />
-        </UFormGroup>
-      </UCard>
-
-      <div>
-        <div class="space-y-4">
-          <UFormGroup :label="`Price(USD) of this book collection (Minimal ${MINIMAL_PRICE} or $0 (free))`">
-            <UInput v-model="price.price" type="number" step="0.01" :min="0" />
-          </UFormGroup>
-
-          <UFormGroup :label="`Total number of packages available for sale`">
-            <UInput v-model="price.stock" type="number" step="0.01" :min="0" />
-          </UFormGroup>
-
-          <ShippingRatesRateTable
-            :is-show-physical-goods-checkbox="false"
-            :shipping-info="shippingRates"
-            :is-show-setting-modal-button="true"
-            @update-shipping-rates="updateShippingRate"
-          >
-            <template #header>
-              <span class="text-[14px] text-gray-500">
-                (Includes physical good that requires shipping)
-              </span>
-            </template>
-          </ShippingRatesRateTable>
-
-          <UFormGroup
-            label="Is Physical only good"
-            :ui="{ label: { base: 'font-mono font-bold' } }"
-          >
-            <UCheckbox
-              v-model="price.isPhysicalOnly"
-              name="isPhysicalOnly"
-              label="This edition does not contain digital file/NFT"
-            />
-          </UFormGroup>
-
-          <UFormGroup
-            label="Allow custom price"
-            :ui="{ label: { base: 'font-mono font-bold' } }"
-          >
-            <UCheckbox
-              v-model="price.isAllowCustomPrice"
-              name="isAllowCustomPrice"
-              label="Allow user to pay more than defined price"
-            />
-          </UFormGroup>
-        </div>
-      </div>
 
       <UCard
         :ui="{
@@ -191,126 +231,220 @@
         </template>
       </UCard>
 
-      <UCard :ui="{ body: { base: 'space-y-8' } }">
+      <UCard
+        :ui="{
+          header: { base: 'flex justify-between items-center' },
+          body: { padding: '' }
+        }"
+      >
         <template #header>
-          <h3 class="font-bold font-mono">
-            Other Settings
-          </h3>
+          <h4 class="text-sm font-bold font-mono">
+            Email to receive sales notifications
+          </h4>
+          <div class="flex gap-2">
+            <UInput
+              v-model="notificationEmailInput"
+              placeholder="abc@example.com"
+            />
+            <UButton
+              label="Add"
+              :variant="notificationEmailInput ? 'outline' : 'solid'"
+              :color="notificationEmailInput ? 'primary' : 'gray'"
+              :disabled="!notificationEmailInput"
+              @click="addNotificationEmail"
+            />
+          </div>
         </template>
-
-        <UCard
-          :ui="{
-            header: { base: 'flex justify-between items-center' },
-            body: { padding: '', base: 'space-y-8' }
-          }"
+        <UTable
+          :columns="[{ key: 'email', label: 'Email', sortable: true }, { key: 'action' }]"
+          :rows="notificationEmailsTableRows"
         >
-          <template #header>
-            <h4 class="text-sm font-bold font-mono">
-              Share sales data to wallets
-            </h4>
-            <div class="flex gap-2">
-              <UInput
-                v-model="moderatorWalletInput"
-                class="font-mono"
-                placeholder="like1..."
-              />
-
+          <template #email-data="{ row }">
+            <UButton
+              :label="row.email"
+              :to="`mailto:${row.email}`"
+              variant="link"
+              :padded="false"
+            />
+          </template>
+          <template #action-data="{ row }">
+            <div class="flex justify-end items-center">
               <UButton
-                label="Add"
-                :variant="moderatorWalletInput ? 'outline' : 'solid'"
-                :color="moderatorWalletInput ? 'primary' : 'gray'"
-                :disabled="!moderatorWalletInput"
-                @click="addModeratorWallet"
+                icon="i-heroicons-x-mark"
+                variant="soft"
+                color="red"
+                @click="() => notificationEmails.splice(row.index, 1)"
               />
             </div>
           </template>
+        </UTable>
+      </UCard>
 
-          <UTable
-            :columns="moderatorWalletsTableColumns"
-            :rows="moderatorWalletsTableRows"
-          >
-            <template #wallet-data="{ row }">
-              <UButton
-                class="font-mono"
-                :label="row.wallet"
-                :to="row.walletLink"
-                variant="link"
-                :padded="false"
-              />
-            </template>
-            <template #authz-data="{ row }">
-              <UButton
-                :label="row.grantLabel"
-                :to="row.grantRoute"
-                :variant="row.isGranted ? 'outline' : 'solid'"
-                color="green"
-              />
-            </template>
-            <template #remove-data="{ row }">
-              <div class="flex justify-end items-center">
-                <UButton
-                  icon="i-heroicons-x-mark"
-                  variant="soft"
-                  color="red"
-                  @click="() => moderatorWallets.splice(row.index, 1)"
+      <UCard
+        :ui="{
+          header: { base: 'flex justify-between items-center' },
+          body: { padding: '12px' },
+        }"
+      >
+        <div class="flex justify-between items-center w-full">
+          <h3 class="font-bold font-mono">
+            Advance Settings
+          </h3>
+          <UButton
+            color="gray"
+            variant="ghost"
+            :icon="
+              shouldShowAdvanceSettings
+                ? 'i-heroicons-chevron-up'
+                : 'i-heroicons-chevron-down'
+            "
+            @click="
+              () => {
+                shouldShowAdvanceSettings = !shouldShowAdvanceSettings;
+              }
+            "
+          />
+        </div>
+        <template v-if="shouldShowAdvanceSettings">
+          <div class="mt-[24px] flex flex-col gap-[12px]">
+            <!-- Default Currency -->
+            <UCard
+              :ui="{ header: { base: 'flex justify-between items-center gap-2' } }"
+            >
+              <template #header>
+                <h3 class="font-bold font-mono">
+                  Default Currency
+                </h3>
+              </template>
+
+              <UFormGroup
+                label="Default Display Currency at Checkout"
+                help="Note that price setting is always in USD "
+              >
+                <URadio
+                  v-model="defaultPaymentCurrency"
+                  label="USD"
+                  name="USD"
+                  value="USD"
                 />
-              </div>
-            </template>
-          </UTable>
-        </UCard>
-
-        <UCard
-          :ui="{
-            header: { base: 'flex justify-between items-center' },
-            body: { padding: '' }
-          }"
-        >
-          <template #header>
-            <h4 class="text-sm font-bold font-mono">
-              Email to receive sales notifications
-            </h4>
-
-            <div class="flex gap-2">
-              <UInput
-                v-model="notificationEmailInput"
-                placeholder="abc@example.com"
-              />
-
-              <UButton
-                label="Add"
-                :variant="notificationEmailInput ? 'outline' : 'solid'"
-                :color="notificationEmailInput ? 'primary' : 'gray'"
-                :disabled="!notificationEmailInput"
-                @click="addNotificationEmail"
-              />
-            </div>
-          </template>
-
-          <UTable
-            :columns="[{ key: 'email', label: 'Email', sortable: true }, { key: 'action' }]"
-            :rows="notificationEmailsTableRows"
-          >
-            <template #email-data="{ row }">
-              <UButton
-                :label="row.email"
-                :to="`mailto:${row.email}`"
-                variant="link"
-                :padded="false"
-              />
-            </template>
-
-            <template #action-data="{ row }">
-              <div class="flex justify-end items-center">
-                <UButton
-                  icon="i-heroicons-x-mark"
-                  variant="soft"
-                  color="red"
-                  @click="() => notificationEmails.splice(row.index, 1)"
+                <URadio
+                  v-model="defaultPaymentCurrency"
+                  label="HKD"
+                  name="HKD"
+                  value="HKD"
                 />
+              </UFormGroup>
+            </UCard>
+
+            <!-- Shipping Rates -->
+            <ShippingRatesRateTable
+              :is-show-physical-goods-checkbox="false"
+              :shipping-info="shippingRates"
+              :is-show-setting-modal-button="true"
+              @update-shipping-rates="updateShippingRate"
+            >
+              <template #header>
+                <span class="text-[14px] text-gray-500">
+                  (Includes physical good that requires shipping)
+                </span>
+              </template>
+            </ShippingRatesRateTable>
+
+            <!-- Share sales data -->
+            <UCard
+              :ui="{
+                header: { base: 'flex justify-between items-center' },
+                body: { padding: '', base: 'space-y-8' }
+              }"
+            >
+              <template #header>
+                <h4 class="text-sm font-bold font-mono">
+                  Share sales data to wallets
+                </h4>
+                <div class="flex gap-2">
+                  <UInput
+                    v-model="moderatorWalletInput"
+                    class="font-mono"
+                    placeholder="like1..."
+                  />
+                  <UButton
+                    label="Add"
+                    :variant="moderatorWalletInput ? 'outline' : 'solid'"
+                    :color="moderatorWalletInput ? 'primary' : 'gray'"
+                    :disabled="!moderatorWalletInput"
+                    @click="addModeratorWallet"
+                  />
+                </div>
+              </template>
+
+              <UTable
+                :columns="moderatorWalletsTableColumns"
+                :rows="moderatorWalletsTableRows"
+              >
+                <template #wallet-data="{ row }">
+                  <UButton
+                    class="font-mono"
+                    :label="row.wallet"
+                    :to="row.walletLink"
+                    variant="link"
+                    :padded="false"
+                  />
+                </template>
+                <template #authz-data="{ row }">
+                  <UButton
+                    :label="row.grantLabel"
+                    :to="row.grantRoute"
+                    :variant="row.isGranted ? 'outline' : 'solid'"
+                    color="green"
+                  />
+                </template>
+                <template #remove-data="{ row }">
+                  <div class="flex justify-end items-center">
+                    <UButton
+                      icon="i-heroicons-x-mark"
+                      variant="soft"
+                      color="red"
+                      @click="() => moderatorWallets.splice(row.index, 1)"
+                    />
+                  </div>
+                </template>
+              </UTable>
+            </UCard>
+
+            <!-- DRM -->
+            <UCard :ui="{ body: { base: 'space-y-8' } }">
+              <template #header>
+                <h3 class="font-bold font-mono">
+                  DRM Options
+                </h3>
+              </template>
+
+              <div class="grid md:grid-cols-2 gap-4">
+                <UFormGroup
+                  label="Force NFT claim before view"
+                  :ui="{ label: { base: 'font-mono font-bold' } }"
+                >
+                  <UCheckbox
+                    v-model="mustClaimToView"
+                    name="mustClaimToView"
+                    label="Must claim NFT to view"
+                  />
+                </UFormGroup>
+
+                <UFormGroup
+                  label="Disable File Download"
+                  :ui="{ label: { base: 'font-mono font-bold' } }"
+                >
+                  <UCheckbox
+                    v-model="hideDownload"
+                    name="hideDownload"
+                    label="Disable Download"
+                  />
+                </UFormGroup>
               </div>
-            </template>
-          </UTable>
-        </UCard>
+            </UCard>
+          </div>
+        </template>
       </UCard>
 
       <UButton
@@ -330,7 +464,7 @@ import { MdEditor, ToolbarNames, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
-import { DEFAULT_PRICE, MINIMAL_PRICE, LCD_URL, LIKE_CO_API } from '~/constant'
+import { DEFAULT_PRICE, MINIMAL_PRICE, LCD_URL, LIKE_CO_API, SUPPORT_CURRENCY } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
@@ -367,7 +501,6 @@ const image = ref('')
 
 const classIdInput = ref('')
 const classIds = ref<string[]>([])
-const defaultPaymentCurrency = ref('USD')
 const price = ref({
   price: DEFAULT_PRICE,
   stock: Number(route.query.count as string || 1),
@@ -384,6 +517,10 @@ const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
 const stripeConnectWalletInput = ref('')
+const mustClaimToView = ref(true)
+const hideDownload = ref(false)
+const shouldShowAdvanceSettings = ref<boolean>(false)
+const defaultPaymentCurrency = ref<string>(SUPPORT_CURRENCY.USD)
 
 const toolbarOptions: ToolbarNames[] = [
   'bold',
@@ -595,6 +732,8 @@ async function submitNewCollection () {
         zh: escapeHtml(descriptionZh.value)
       },
       image: image.value,
+      hideDownload,
+      mustClaimToView,
       ...formatPrice(price.value)
     })
     router.push({ name: 'nft-book-store-collection' })
