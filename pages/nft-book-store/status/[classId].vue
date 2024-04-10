@@ -388,62 +388,6 @@
       </UCard>
 
       <UCard
-        :ui="{ body: { base: 'space-y-4' } }"
-      >
-        <template #header>
-          <h3 class="font-bold font-mono">
-            Copy Purchase Link
-          </h3>
-        </template>
-
-        <div>
-          <UToggle v-model="useLikerLandPurchaseLink" />
-          Use {{ useLikerLandPurchaseLink ? 'Liker Land' : 'Stripe' }} Purchase Link
-        </div>
-
-        <UFormGroup label="Price" :required="true">
-          <USelect v-model="priceIndex" :options="priceIndexOptions" />
-        </UFormGroup>
-
-        <UFormGroup label="Sales channel for this link" hint="Optional">
-          <UInput v-model="fromChannel" placeholder="Channel ID" />
-        </UFormGroup>
-
-        <UFormGroup v-if="Object.keys(coupons).length" label="Active coupon" hint="Optional">
-          <USelect v-model="activeCoupon" :options="[''].concat(Object.keys(coupons))" />
-        </UFormGroup>
-
-        <UButton
-          class="font-mono break-all"
-          :label="`${purchaseLink}`"
-          :to="purchaseLink"
-          variant="outline"
-          color="gray"
-          target="_blank"
-        />
-        <br>
-        <UButton
-          label="Copy Purchase Link"
-          variant="outline"
-          color="primary"
-          @click="copyPurchaseLink"
-        />
-
-        <QRCode
-          :data="purchaseLink"
-          :file-name="`${nftClassName || classId}-price_${priceIndex}-channel_${fromChannel || ''}`"
-          :width="500"
-          :height="500"
-        >
-          <template #header>
-            <h3 class="font-bold font-mono">
-              Purchase Link QR Code
-            </h3>
-          </template>
-        </QRCode>
-      </UCard>
-
-      <UCard
         :ui="{
           header: { base: 'flex justify-between items-center' },
           body: { padding: '12px' },
@@ -634,6 +578,63 @@
               />
             </UCard>
             <NewCouponModal v-model="isShowNewCouponModal" @add="addCouponCode" />
+
+            <!-- Copy Purchase Link -->
+            <UCard
+              :ui="{ body: { base: 'space-y-4' } }"
+            >
+              <template #header>
+                <h3 class="font-bold font-mono">
+                  Copy Purchase Link
+                </h3>
+              </template>
+
+              <div>
+                <UToggle v-model="useLikerLandPurchaseLink" />
+                Use {{ useLikerLandPurchaseLink ? 'Liker Land' : 'Stripe' }} Purchase Link
+              </div>
+
+              <UFormGroup label="Price" :required="true">
+                <USelect v-model="priceIndex" :options="priceIndexOptions" />
+              </UFormGroup>
+
+              <UFormGroup label="Sales channel for this link" hint="Optional">
+                <UInput v-model="fromChannel" placeholder="Channel ID" />
+              </UFormGroup>
+
+              <UFormGroup v-if="Object.keys(coupons).length" label="Active coupon" hint="Optional">
+                <USelect v-model="activeCoupon" :options="[''].concat(Object.keys(coupons))" />
+              </UFormGroup>
+
+              <UButton
+                class="font-mono break-all"
+                :label="`${purchaseLink}`"
+                :to="purchaseLink"
+                variant="outline"
+                color="gray"
+                target="_blank"
+              />
+              <br>
+              <UButton
+                label="Copy Purchase Link"
+                variant="outline"
+                color="primary"
+                @click="copyPurchaseLink"
+              />
+
+              <QRCode
+                :data="purchaseLink"
+                :file-name="`${nftClassName || classId}-price_${priceIndex}-channel_${fromChannel || ''}`"
+                :width="500"
+                :height="500"
+              >
+                <template #header>
+                  <h3 class="font-bold font-mono">
+                    Purchase Link QR Code
+                  </h3>
+                </template>
+              </QRCode>
+            </UCard>
           </div>
         </template>
       </UCard>
@@ -652,7 +653,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import Draggable from 'vuedraggable'
-import { CHAIN_EXPLORER_URL, IS_TESTNET, LIKE_CO_API, LIKER_LAND_URL } from '~/constant'
+import { CHAIN_EXPLORER_URL, IS_TESTNET, LIKE_CO_API, LIKER_LAND_URL, SUPPORT_CURRENCY } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useWalletStore } from '~/stores/wallet'
@@ -668,6 +669,7 @@ const { updateBookListingSetting } = bookStoreApiStore
 const { lazyFetchClassMetadataById } = nftStore
 
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 
 const error = ref('')
@@ -683,7 +685,7 @@ const ordersData = ref<any>({})
 const connectStatus = ref<any>({})
 const isUpdatingShippingRates = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
-const defaultPaymentCurrency = ref('USD')
+const defaultPaymentCurrency = ref<string>(SUPPORT_CURRENCY.USD)
 
 // Search
 const searchInput = ref('')
@@ -1011,7 +1013,8 @@ onMounted(async () => {
       connectedWallets: classConnectedWallets,
       mustClaimToView: classMustClaimToView,
       hideDownload: classHideDownload,
-      coupons: classCoupons
+      coupons: classCoupons,
+      defaultPaymentCurrency: classDefaultPaymentCurrency
     } = classData.value as any
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
@@ -1019,6 +1022,9 @@ onMounted(async () => {
     stripeConnectWallet.value = classConnectedWallets && Object.keys(classConnectedWallets)[0]
     if (stripeConnectWallet.value !== ownerWallet.value) {
       stripeConnectWalletInput.value = stripeConnectWallet.value
+    }
+    if (classDefaultPaymentCurrency) {
+      defaultPaymentCurrency.value = classDefaultPaymentCurrency
     }
     mustClaimToView.value = classMustClaimToView
     hideDownload.value = classHideDownload
@@ -1133,7 +1139,6 @@ function addCouponCode (coupon: any) {
     discount: coupon.discount,
     expireTs: coupon.expireTs
   }
-  updateSettings()
 }
 
 function addModeratorWallet () {
@@ -1179,12 +1184,16 @@ async function updateSettings () {
         }
       : null
     await updateBookListingSetting(classId.value as string, {
+      defaultPaymentCurrency,
       moderatorWallets,
       notificationEmails,
       connectedWallets,
       hideDownload,
       mustClaimToView,
       coupons
+    })
+    router.push({
+      name: 'nft-book-store'
     })
   } catch (err) {
     const errorData = (err as any).data || err

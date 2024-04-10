@@ -551,7 +551,7 @@ import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
 import { v4 as uuidv4 } from 'uuid'
-import { DEFAULT_PRICE, MINIMAL_PRICE, LCD_URL, LIKE_CO_API } from '~/constant'
+import { DEFAULT_PRICE, MINIMAL_PRICE, LCD_URL, LIKE_CO_API, SUPPORT_CURRENCY } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { getPortfolioURL, deliverMethodOptions } from '~/utils'
@@ -584,7 +584,7 @@ const mdEditorPlaceholder = ref({
 
 const classIdInput = ref(classId || '')
 const nextPriceIndex = ref(1)
-const defaultPaymentCurrency = ref('USD')
+const defaultPaymentCurrency = ref<string>(SUPPORT_CURRENCY.USD)
 const mustClaimToView = ref(true)
 const hideDownload = ref(false)
 const prices = ref<any[]>([

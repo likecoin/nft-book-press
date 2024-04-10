@@ -300,58 +300,6 @@
       </UCard>
 
       <UCard
-        :ui="{ body: { base: 'space-y-4' } }"
-      >
-        <template #header>
-          <h3 class="font-bold font-mono">
-            Copy Purchase Link
-          </h3>
-        </template>
-
-        <div>
-          <UToggle v-model="useLikerLandPurchaseLink" />
-          Use {{ useLikerLandPurchaseLink ? 'Liker Land' : 'Stripe' }} Purchase Link
-        </div>
-
-        <UFormGroup label="Sales channel for this link" hint="Optional">
-          <UInput v-model="fromChannel" placeholder="Channel ID" />
-        </UFormGroup>
-
-        <UFormGroup v-if="Object.keys(coupons).length" label="Active coupon" hint="Optional">
-          <USelect v-model="activeCoupon" :options="[''].concat(Object.keys(coupons))" />
-        </UFormGroup>
-
-        <UButton
-          class="font-mono break-all"
-          :label="`${purchaseLink}`"
-          :to="purchaseLink"
-          variant="outline"
-          color="gray"
-          target="_blank"
-        />
-        <br>
-        <UButton
-          label="Copy Purchase Link"
-          variant="outline"
-          color="primary"
-          @click="copyPurchaseLink"
-        />
-
-        <QRCode
-          :data="purchaseLink"
-          :file-name="`collection-${collectionName}-channel_${fromChannel || ''}`"
-          :width="500"
-          :height="500"
-        >
-          <template #header>
-            <h3 class="font-bold font-mono">
-              Purchase Link QR Code
-            </h3>
-          </template>
-        </QRCode>
-      </UCard>
-
-      <UCard
         :ui="{
           header: { base: 'flex justify-between items-center' },
           body: { padding: '12px' },
@@ -548,6 +496,58 @@
               </UTable>
             </UCard>
             <NewCouponModal v-model="isShowNewCouponModal" @add="addCouponCode" />
+            <!-- Copy Purchase Link -->
+            <UCard
+              :ui="{ body: { base: 'space-y-4' } }"
+            >
+              <template #header>
+                <h3 class="font-bold font-mono">
+                  Copy Purchase Link
+                </h3>
+              </template>
+
+              <div>
+                <UToggle v-model="useLikerLandPurchaseLink" />
+                Use {{ useLikerLandPurchaseLink ? 'Liker Land' : 'Stripe' }} Purchase Link
+              </div>
+
+              <UFormGroup label="Sales channel for this link" hint="Optional">
+                <UInput v-model="fromChannel" placeholder="Channel ID" />
+              </UFormGroup>
+
+              <UFormGroup v-if="Object.keys(coupons).length" label="Active coupon" hint="Optional">
+                <USelect v-model="activeCoupon" :options="[''].concat(Object.keys(coupons))" />
+              </UFormGroup>
+
+              <UButton
+                class="font-mono break-all"
+                :label="`${purchaseLink}`"
+                :to="purchaseLink"
+                variant="outline"
+                color="gray"
+                target="_blank"
+              />
+              <br>
+              <UButton
+                label="Copy Purchase Link"
+                variant="outline"
+                color="primary"
+                @click="copyPurchaseLink"
+              />
+
+              <QRCode
+                :data="purchaseLink"
+                :file-name="`collection-${collectionName}-channel_${fromChannel || ''}`"
+                :width="500"
+                :height="500"
+              >
+                <template #header>
+                  <h3 class="font-bold font-mono">
+                    Purchase Link QR Code
+                  </h3>
+                </template>
+              </QRCode>
+            </UCard>
           </div>
         </template>
       </UCard>
@@ -998,7 +998,6 @@ function addCouponCode (coupon: any) {
     discount: coupon.discount,
     expireTs: coupon.expireTs
   }
-  updateSettings()
 }
 
 function addModeratorWallet () {
