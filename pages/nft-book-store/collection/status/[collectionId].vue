@@ -428,39 +428,6 @@
               </UTable>
             </UCard>
 
-            <!-- DRM -->
-            <UCard :ui="{ body: { base: 'space-y-8' } }">
-              <template #header>
-                <h3 class="font-bold font-mono">
-                  DRM Options
-                </h3>
-              </template>
-
-              <div class="grid md:grid-cols-2 gap-4">
-                <UFormGroup
-                  label="Force NFT claim before view"
-                  :ui="{ label: { base: 'font-mono font-bold' } }"
-                >
-                  <UCheckbox
-                    v-model="mustClaimToView"
-                    name="mustClaimToView"
-                    label="Must claim NFT to view"
-                  />
-                </UFormGroup>
-
-                <UFormGroup
-                  label="Disable File Download "
-                  :ui="{ label: { base: 'font-mono font-bold' } }"
-                >
-                  <UCheckbox
-                    v-model="hideDownload"
-                    name="hideDownload"
-                    label="Disable Download"
-                  />
-                </UFormGroup>
-              </div>
-            </UCard>
-
             <!-- Coupon -->
             <UCard
               :ui="{
@@ -609,8 +576,6 @@ const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
 const stripeConnectWalletInput = ref('')
-const mustClaimToView = ref(true)
-const hideDownload = ref(false)
 const useLikerLandPurchaseLink = ref(true)
 const isShowNewCouponModal = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
@@ -1047,8 +1012,6 @@ async function updateSettings () {
       moderatorWallets,
       notificationEmails,
       connectedWallets,
-      hideDownload,
-      mustClaimToView,
       coupons
     })
     router.push({
