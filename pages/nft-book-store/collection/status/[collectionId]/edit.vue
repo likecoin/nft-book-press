@@ -47,9 +47,6 @@
               />
             </UCard>
           </UFormGroup>
-          <UFormGroup :label="`Total number of NFT for sale of this collection`">
-            <UInput v-model="stock" type="number" step="0.01" :min="0" />
-          </UFormGroup>
         </UCard>
 
         <!-- Pricing and Availability -->
@@ -68,6 +65,9 @@
           </template>
           <UFormGroup :label="`Price(USD) of this collection (Minimal ${MINIMAL_PRICE} or $0 (free))`">
             <UInput v-model="price" type="number" step="0.01" :min="MINIMAL_PRICE" />
+          </UFormGroup>
+          <UFormGroup :label="`Total number of NFT for sale of this collection`">
+            <UInput v-model="stock" type="number" step="0.01" :min="0" />
           </UFormGroup>
           <UFormGroup
             label="Is Physical only good"

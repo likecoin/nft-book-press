@@ -46,9 +46,6 @@
               :disabled="true"
             />
           </UFormGroup>
-          <UFormGroup :label="`Total number of NFT for sale of this ${priceItemLabel}`">
-            <UInput v-model="stock" type="number" step="1" :min="0" />
-          </UFormGroup>
         </UCard>
 
         <!-- Pricing and Availability -->
@@ -67,6 +64,9 @@
           </template>
           <UFormGroup :label="`Price(USD) of this ${priceItemLabel} (Minimal ${MINIMAL_PRICE} or $0 (free))`">
             <UInput v-model="price" type="number" step="0.01" :min="MINIMAL_PRICE" />
+          </UFormGroup>
+          <UFormGroup :label="`Total number of NFT for sale of this ${priceItemLabel}`">
+            <UInput v-model="stock" type="number" step="1" :min="0" />
           </UFormGroup>
 
           <URadioGroup
