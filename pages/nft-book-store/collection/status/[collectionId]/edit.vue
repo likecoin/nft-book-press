@@ -156,8 +156,8 @@
               </ToolTips>
             </template>
             <UInput
+              v-model="nameZh"
               placeholder="產品中文名字"
-              :value="nameZh"
             />
             <span class="block text-[14px] text-[#374151] mt-[8px]">描述 (選填)</span>
             <md-editor
