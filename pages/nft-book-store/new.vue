@@ -38,10 +38,6 @@
           />
           <UInput v-else :value="classId" :readonly="true" />
         </UFormGroup>
-
-        <UFormGroup label="Total number of NFT for sale">
-          <UInput :value="`${totalStock}`" :readonly="true" disabled />
-        </UFormGroup>
       </UCard>
 
       <component
@@ -617,9 +613,6 @@ const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
 const stripeConnectWalletInput = ref('')
-const totalStock = computed(() =>
-  prices.value.reduce((acc, p) => acc + Number(p.stock), 0)
-)
 
 const toolbarOptions = ref<string[]>([
   'bold',
