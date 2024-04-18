@@ -267,7 +267,7 @@
       >
         <template #header>
           <h3 class="font-bold font-mono">
-            Stripe Connect Settings
+            Connect to a Stripe Account
           </h3>
           <UToggle v-model="isStripeConnectChecked" name="stripe" label="Use a Stripe Connect account for receiving all payment" />
         </template>
@@ -290,7 +290,7 @@
           </URadio>
           <URadio v-model="stripeConnectWallet" :value="stripeConnectWalletInput">
             <template #label>
-              <UFormGroup label="Enter a wallet address with connected account">
+              <UFormGroup label="Use another Stripe Express account">
                 <UInput
                   v-if="stripeConnectWallet !== ownerWallet"
                   v-model="stripeConnectWalletInput"

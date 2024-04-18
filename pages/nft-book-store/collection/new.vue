@@ -189,45 +189,94 @@
         :ui="{
           divide: isStripeConnectChecked ? undefined : '',
           header: { base: 'flex flex-wrap justify-between items-center gap-2' },
-          body: { padding: isStripeConnectChecked ? undefined : '', base: 'grid lg:grid-cols-2 gap-4' }
+          body: {
+            padding: isStripeConnectChecked ? undefined : '',
+          },
         }"
       >
         <template #header>
           <h3 class="font-bold font-mono">
-            Stripe Connect Settings
+            Connect to a Stripe Account
           </h3>
           <UToggle v-model="isStripeConnectChecked" name="stripe" label="Use a Stripe Connect account for receiving all payment" />
         </template>
 
         <template v-if="isStripeConnectChecked">
-          <URadio v-model="stripeConnectWallet" :disabled="!(connectStatus?.isReady)" :value="classOwnerWallet?.value?.ownerWallet">
-            <template #label>
-              <span v-if="connectStatus?.isReady">Use my account</span>
-              <span v-else>
-                No stripe account connected yet.<br>
-                <UButton
-                  class="mt-2"
-                  label="Create one here"
-                  :to="{ name: 'nft-book-store-user' }"
-                  target="_blank"
-                  variant="outline"
-                />
-              </span>
-            </template>
-          </URadio>
-          <URadio v-model="stripeConnectWallet" :value="stripeConnectWalletInput">
-            <template #label>
-              <UFormGroup label="Enter a wallet address with connected account">
-                <UInput
-                  v-if="stripeConnectWallet !== classOwnerWallet?.value?.ownerWallet"
-                  v-model="stripeConnectWalletInput"
-                  class="font-mono"
-                  placeholder="like1..."
-                  @input="onStripeConnectWalletInput"
-                />
-              </UFormGroup>
-            </template>
-          </URadio>
+          <div class="flex flex-col gap-[24px]">
+            <div class="flex items-start justify-start gap-[8px] w-full">
+              <URadio
+                v-model="isUsingDefaultAccount"
+                :value="true"
+                :disabled="!!(stripeConnectWallet)"
+              >
+                <template #label>
+                  <div class="flex w-[50%]">
+                    <div v-if="connectStatus?.isReady" class="flex flex-col items-start">
+                      <span>Use my account</span>
+                      <div class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px] border-t-[2px] border-gray-200">
+                        <span>{{ ` Email: ${connectStatus?.email}` }}</span>
+                        <span>{{ `Connected to: ${wallet}` }}</span>
+                      </div>
+                    </div>
+
+                    <span v-else>
+                      No stripe account connected yet.<br>
+                      <UButton
+                        class="mt-2"
+                        label="Create one here"
+                        :to="{ name: 'nft-book-store-user' }"
+                        target="_blank"
+                        variant="outline"
+                      />
+                    </span>
+                  </div>
+                </template>
+              </URadio>
+              <URadio
+                v-model="isUsingDefaultAccount"
+                :value="false"
+                :disabled="!!(stripeConnectWallet)"
+              >
+                <template #label>
+                  <span>Use another Stripe Express account</span>
+                  <div class="flex flex-col my-[10px]">
+                    <UInput
+                      v-model="stripeConnectWalletInput"
+                      :color="stripeConnectInputError ? 'rose' : 'white'"
+                      class="font-mon w-full"
+                      placeholder="like1..."
+                      @input="onStripeConnectWalletInput"
+                    />
+                    <span v-if="stripeConnectInputError" class="text-red-700 text-[10px]">{{ stripeConnectInputError }}</span>
+                  </div>
+                  <div v-if="isStripeConnectLoading" class="text-center">
+                    Loading ...
+                  </div>
+                  <div
+                    v-else-if="stripeConnectStatusByWalletMap[currentStripeInputWallet]"
+                    class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px]"
+                  >
+                    <div v-if="stripeConnectStatusByWalletMap[currentStripeInputWallet]?.isReady">
+                      <span> ✅ Has Stripe Account</span><br>
+                      <span v-if="stripeConnectStatusByWalletMap[currentStripeInputWallet]?.email">{{ ` Email: ${stripeConnectStatusByWalletMap[currentStripeInputWallet]?.email}` }}</span>
+                      <span>{{ `Connected to: ${currentStripeInputWallet}` }}</span>
+                    </div>
+                    <div v-else>
+                      ❌ No stripe account connected to this wallet yet.<br>
+                    </div>
+                  </div>
+                </template>
+              </URadio>
+            </div>
+            <div class="flex justify-center w-full">
+              <UButton
+                label="Save Changes"
+                :color="isStripeConnectWalletReadyToSave ? 'primary' : 'gray'"
+                :disabled="!isStripeConnectWalletReadyToSave || !!(stripeConnectWallet)"
+                @click="handleSaveStripeConnectWallet"
+              />
+            </div>
+          </div>
         </template>
       </UCard>
 
@@ -464,7 +513,7 @@ import { MdEditor, ToolbarNames, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
-import { DEFAULT_PRICE, MINIMAL_PRICE, LCD_URL, LIKE_CO_API, SUPPORT_CURRENCY } from '~/constant'
+import { DEFAULT_PRICE, MINIMAL_PRICE, LCD_URL, LIKE_CO_API, SUPPORT_CURRENCY, LIKE_ADDRESS_REGEX } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
@@ -521,6 +570,11 @@ const mustClaimToView = ref(true)
 const hideDownload = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
 const defaultPaymentCurrency = ref<string>(SUPPORT_CURRENCY.USD)
+const currentStripeInputWallet = ref('')
+const stripeConnectInputError = ref('')
+const stripeConnectStatusByWalletMap = ref({} as Record<string, any>)
+const isStripeConnectLoading = ref(false)
+const isUsingDefaultAccount = ref(true)
 
 const toolbarOptions: ToolbarNames[] = [
   'bold',
@@ -538,7 +592,6 @@ const toolbarOptions: ToolbarNames[] = [
 ]
 
 const submitButtonText = computed(() => 'Submit')
-const classOwnerWallet = ref<any>({})
 
 const moderatorWalletsTableColumns = computed(() => [
   { key: 'wallet', label: 'Wallet', sortable: true },
@@ -568,6 +621,14 @@ const notificationEmailsTableRows = computed(() => notificationEmails.value.map(
   email
 })))
 
+const isStripeConnectWalletReadyToSave = computed(() => {
+  if (!isStripeConnectChecked.value) { return false }
+  if (isUsingDefaultAccount.value && !connectStatus?.value?.isReady) { return false }
+  if ((!isUsingDefaultAccount.value && !stripeConnectStatusByWalletMap.value[currentStripeInputWallet.value]?.isReady) || stripeConnectInputError.value) { return false }
+
+  return true
+})
+
 config({
   markdownItConfig (mdit: any) {
     mdit.options.html = false
@@ -591,6 +652,7 @@ onMounted(async () => {
       throw new Error(connectStatusData.error.value.toString())
     }
     connectStatus.value = (connectStatusData?.data?.value as any) || {}
+    stripeConnectStatusByWalletMap.value[wallet.value] = connectStatus.value
   } catch (e) {
     console.error(e)
     error.value = (e as Error).toString()
@@ -635,9 +697,44 @@ function addNotificationEmail () {
   notificationEmailInput.value = ''
 }
 
-function onStripeConnectWalletInput () {
-  // force stripeConnectWallet to update when stripeConnectWalletInput is updated
-  stripeConnectWallet.value = stripeConnectWalletInput.value.trim()
+async function onStripeConnectWalletInput (input: any) {
+  if (!isStripeConnectChecked.value) { return }
+  const inputValue = input.target.value.trim()
+  currentStripeInputWallet.value = inputValue
+  stripeConnectInputError.value = ''
+
+  if (!LIKE_ADDRESS_REGEX.test(inputValue)) {
+    stripeConnectInputError.value = 'You have entered an invalid wallet address'
+    return
+  }
+  if (stripeConnectStatusByWalletMap.value[inputValue]) {
+    return stripeConnectStatusByWalletMap.value[inputValue]
+  }
+  isStripeConnectLoading.value = true
+  stripeConnectStatusByWalletMap.value[inputValue] = { isReady: false }
+  try {
+    const { data: stripeConnectStatus, error } = await useFetch(
+      `${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${inputValue}`
+    )
+    if (
+      error?.value &&
+      error?.value?.statusCode !== 404
+    ) {
+      throw new Error(error.value.toString())
+    }
+    if (stripeConnectStatus.value) {
+      stripeConnectStatusByWalletMap.value[inputValue] = stripeConnectStatus.value
+      currentStripeInputWallet.value = inputValue
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isStripeConnectLoading.value = false
+  }
+}
+
+function handleSaveStripeConnectWallet () {
+  stripeConnectWallet.value = isUsingDefaultAccount.value ? wallet.value : currentStripeInputWallet.value
 }
 
 function formatPrice (price: any) {
@@ -660,18 +757,6 @@ function escapeHtml (text = '') {
 
 function sanitizeHtml (html: string) {
   return DOMPurify.sanitize(html)
-}
-
-async function checkStripeConnect () {
-  if (isStripeConnectChecked.value && stripeConnectWallet.value) {
-    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${stripeConnectWallet.value}`)
-    if (fetchError.value && fetchError.value?.statusCode !== 404) {
-      throw new Error(fetchError.value.toString())
-    }
-    if (!(data?.value as any)?.isReady) {
-      throw new Error('CONNECTED_WALLET_STRIPE_ACCOUNT_NOT_READY')
-    }
-  }
 }
 
 async function submitNewCollection () {
@@ -703,7 +788,6 @@ async function submitNewCollection () {
     if (Number(price.value.price) !== 0 && price.value.price < MINIMAL_PRICE) {
       throw new Error(`Price of each edition must be at least $${MINIMAL_PRICE} or $0 (free)`)
     }
-    await checkStripeConnect()
 
     const connectedWallets = (isStripeConnectChecked.value && stripeConnectWallet.value)
       ? {
