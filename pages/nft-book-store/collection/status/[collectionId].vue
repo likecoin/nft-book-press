@@ -174,7 +174,9 @@
         :ui="{
           divide: isStripeConnectChecked ? undefined : '',
           header: { base: 'flex flex-wrap justify-between items-center gap-2' },
-          body: { padding: isStripeConnectChecked ? undefined : '', base: 'grid lg:grid-cols-2 gap-4' }
+          body: {
+            padding: isStripeConnectChecked ? undefined : '',
+          },
         }"
       >
         <template #header>
@@ -183,36 +185,88 @@
           </h3>
           <UToggle v-model="isStripeConnectChecked" name="stripe" label="Use a Stripe Connect account for receiving all payment" />
         </template>
-
         <template v-if="isStripeConnectChecked">
-          <URadio v-model="stripeConnectWallet" :disabled="!(connectStatus?.isReady)" :value="ownerWallet">
-            <template #label>
-              <span v-if="connectStatus?.isReady">Use my account</span>
-              <span v-else>
-                No stripe account connected yet.<br>
-                <UButton
-                  class="mt-2"
-                  label="Create one here"
-                  :to="{ name: 'nft-book-store-user' }"
-                  target="_blank"
-                  variant="outline"
-                />
-              </span>
-            </template>
-          </URadio>
-          <URadio v-model="stripeConnectWallet" :value="stripeConnectWalletInput">
-            <template #label>
-              <UFormGroup label="Use another Stripe Express account">
-                <UInput
-                  v-if="stripeConnectWallet !== ownerWallet"
-                  v-model="stripeConnectWalletInput"
-                  class="font-mono"
-                  placeholder="like1..."
-                  @input="onStripeConnectWalletInput"
-                />
-              </UFormGroup>
-            </template>
-          </URadio>
+          <div class="flex flex-col gap-[24px]">
+            <div class="flex items-start justify-start gap-[8px] w-full">
+              <URadio
+                v-model="isUsingDefaultAccount"
+                :value="true"
+                :disabled="!!(stripeConnectWallet)"
+                class="w-[50%]"
+              >
+                <template #label>
+                  <div class="flex w-[50%]">
+                    <div v-if="connectStatus?.isReady" class="flex flex-col items-start">
+                      <span>Use my account</span>
+                      <div class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px] border-t-[2px] border-gray-200">
+                        <span>{{ ` Email: ${connectStatus?.email}` }}</span>
+                        <span>{{ `Connected to: ${wallet}` }}</span>
+                      </div>
+                    </div>
+
+                    <span v-else>
+                      No stripe account connected yet.<br>
+                      <UButton
+                        class="mt-2"
+                        label="Create one here"
+                        :to="{ name: 'nft-book-store-user' }"
+                        target="_blank"
+                        variant="outline"
+                      />
+                    </span>
+                  </div>
+                </template>
+              </URadio>
+              <URadio
+                v-model="isUsingDefaultAccount"
+                :value="false"
+                :disabled="!!(stripeConnectWallet)"
+                class="w-[50%]"
+              >
+                <template #label>
+                  <span>Use another Stripe Express account</span>
+                  <div class="flex flex-col my-[10px]">
+                    <UInput
+                      v-model="stripeConnectWalletInput"
+                      :color="stripeConnectInputError ? 'rose' : 'white'"
+                      class="font-mon w-full"
+                      placeholder="like1..."
+                      @input="onStripeConnectWalletInput"
+                    />
+                    <span v-if="stripeConnectInputError" class="text-red-700 text-[10px]">{{ stripeConnectInputError }}</span>
+                  </div>
+                  <div v-if="isStripeConnectLoading" class="text-center">
+                    Loading ...
+                  </div>
+                  <div
+                    v-else-if="stripeConnectStatusByWalletMap[stripeConnectWalletInput]"
+                    class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px]"
+                  >
+                    <div v-if="stripeConnectStatusByWalletMap[stripeConnectWalletInput]?.isReady">
+                      <span> ✅ Has Stripe Account</span><br>
+                      <span v-if="stripeConnectStatusByWalletMap[stripeConnectWalletInput]?.email">{{ ` Email: ${stripeConnectStatusByWalletMap[stripeConnectWalletInput]?.email}` }}</span>
+                      <span>{{ `Connected to: ${stripeConnectWalletInput}` }}</span>
+                    </div>
+                    <div v-else>
+                      ❌ No stripe account connected to this wallet yet.<br>
+                    </div>
+                  </div>
+                </template>
+              </URadio>
+            </div>
+            <div class="flex flex-col items-center justify-center gap-[8px] w-full">
+              <UButton
+                label="Save Changes"
+                :loading="isUpdatingStripeConnect"
+                :color="isStripeConnectWalletReadyToSave ? 'primary' : 'gray'"
+                :disabled="!isStripeConnectWalletReadyToSave || !!(stripeConnectWallet)"
+                @click="handleSaveStripeConnectWallet"
+              />
+              <div v-if="!!(stripeConnectWallet) && !isUpdatingStripeConnect" class="text-center text-green-800 text-[12px]">
+                Successfully updated the Stripe Connect account!
+              </div>
+            </div>
+          </div>
         </template>
       </UCard>
 
@@ -533,7 +587,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { CHAIN_EXPLORER_URL, IS_TESTNET, LIKE_CO_API, SUPPORT_CURRENCY } from '~/constant'
+import { CHAIN_EXPLORER_URL, IS_TESTNET, LIKE_CO_API, SUPPORT_CURRENCY, LIKE_ADDRESS_REGEX } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'
@@ -575,11 +629,16 @@ const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
-const stripeConnectWalletInput = ref('')
 const useLikerLandPurchaseLink = ref(true)
 const isShowNewCouponModal = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
 const defaultPaymentCurrency = ref<string>(SUPPORT_CURRENCY.USD)
+const stripeConnectWalletInput = ref('')
+const stripeConnectInputError = ref('')
+const stripeConnectStatusByWalletMap = ref({} as Record<string, any>)
+const isStripeConnectLoading = ref(false)
+const isUsingDefaultAccount = ref(true)
+const isUpdatingStripeConnect = ref(false)
 
 const collectionName = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.name)
 const ownerWallet = computed(() => collectionListingInfo?.value?.ownerWallet)
@@ -669,6 +728,14 @@ const orderTableColumns = computed(() => {
   }
 
   return columns
+})
+
+const isStripeConnectWalletReadyToSave = computed(() => {
+  if (!isStripeConnectChecked.value) { return false }
+  if (isUsingDefaultAccount.value && !connectStatus?.value?.isReady) { return false }
+  if ((!isUsingDefaultAccount.value && !stripeConnectStatusByWalletMap.value[stripeConnectWalletInput.value]?.isReady) || stripeConnectInputError.value) { return false }
+
+  return true
 })
 
 function getOrdersTableActionItems (purchaseListItem: any) {
@@ -885,10 +952,16 @@ onMounted(async () => {
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
     isStripeConnectChecked.value = !!(classConnectedWallets && Object.keys(classConnectedWallets).length)
-    stripeConnectWallet.value = classConnectedWallets && Object.keys(classConnectedWallets)[0]
-    if (stripeConnectWallet.value !== ownerWallet.value) {
-      stripeConnectWalletInput.value = stripeConnectWallet.value
+
+    const classStripeWallet = classConnectedWallets && Object.keys(classConnectedWallets)[0]
+    if (classStripeWallet && classStripeWallet !== wallet.value) {
+      stripeConnectWalletInput.value = classStripeWallet
+
+      const { data } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${classStripeWallet}`)
+      stripeConnectStatusByWalletMap.value[classStripeWallet] = data.value
+      isUsingDefaultAccount.value = false
     }
+
     if (classDefaultPaymentCurrency) {
       defaultPaymentCurrency.value = classDefaultPaymentCurrency
     }
@@ -920,6 +993,7 @@ onMounted(async () => {
       throw new Error(fetchError.value.toString())
     }
     connectStatus.value = (data.value as any) || {}
+    stripeConnectStatusByWalletMap.value[wallet.value] = connectStatus.value
     collectionListingInfo.value.classIds.forEach((classId: string) => lazyFetchClassMetadataById(classId))
   } catch (err) {
     console.error(err)
@@ -977,9 +1051,57 @@ function addNotificationEmail () {
   notificationEmailInput.value = ''
 }
 
-function onStripeConnectWalletInput () {
-  // force stripeConnectWallet to update when stripeConnectWalletInput is updated
-  stripeConnectWallet.value = stripeConnectWalletInput.value.trim()
+async function onStripeConnectWalletInput (input: any) {
+  if (!isStripeConnectChecked.value) { return }
+  const inputValue = input.target.value.trim()
+  stripeConnectWalletInput.value = inputValue
+  stripeConnectInputError.value = ''
+
+  if (!LIKE_ADDRESS_REGEX.test(inputValue)) {
+    stripeConnectInputError.value = 'You have entered an invalid wallet address'
+    return
+  }
+  if (stripeConnectStatusByWalletMap.value[inputValue]) {
+    return stripeConnectStatusByWalletMap.value[inputValue]
+  }
+  isStripeConnectLoading.value = true
+  stripeConnectStatusByWalletMap.value[inputValue] = { isReady: false }
+  try {
+    const { data: stripeConnectStatus, error } = await useFetch(
+      `${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${inputValue}`
+    )
+    if (
+      error?.value &&
+      error?.value?.statusCode !== 404
+    ) {
+      throw new Error(error.value.toString())
+    }
+    if (stripeConnectStatus.value) {
+      stripeConnectStatusByWalletMap.value[inputValue] = stripeConnectStatus.value
+      stripeConnectWalletInput.value = inputValue
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isStripeConnectLoading.value = false
+  }
+}
+
+async function handleSaveStripeConnectWallet () {
+  stripeConnectWallet.value = isUsingDefaultAccount.value ? wallet.value : stripeConnectWalletInput.value
+  isUpdatingStripeConnect.value = true
+  try {
+    await updateNFTBookCollectionById(collectionId.value as string, {
+      connectedWallets: {
+        [stripeConnectWallet.value]: 100
+      }
+    })
+  } catch (err) {
+    const errorData = (err as any).data || err
+    error.value = errorData
+  } finally {
+    isUpdatingStripeConnect.value = false
+  }
 }
 
 async function updateSettings () {
@@ -991,16 +1113,6 @@ async function updateSettings () {
       throw new Error('Please press "Add" button to add notification email')
     }
     isLoading.value = true
-
-    if (isStripeConnectChecked.value && stripeConnectWallet.value) {
-      const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${stripeConnectWallet.value}`)
-      if (fetchError.value && fetchError.value?.statusCode !== 404) {
-        throw new Error(fetchError.value.toString())
-      }
-      if (!(data?.value as any)?.isReady) {
-        throw new Error('CONNECTED_WALLET_STRIPE_ACCOUNT_NOT_READY')
-      }
-    }
 
     const connectedWallets = (isStripeConnectChecked.value && stripeConnectWallet.value)
       ? {
@@ -1022,6 +1134,7 @@ async function updateSettings () {
     console.error(errorData)
     error.value = errorData
   } finally {
+    stripeConnectWallet.value = ''
     isLoading.value = false
   }
 }
