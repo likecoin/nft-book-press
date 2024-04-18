@@ -252,13 +252,13 @@
                     Loading ...
                   </div>
                   <div
-                    v-else-if="stripeConnectStatusByWalletMap[currentStripeInputWallet]"
+                    v-else-if="stripeConnectStatusByWalletMap[stripeConnectWalletInput]"
                     class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px]"
                   >
-                    <div v-if="stripeConnectStatusByWalletMap[currentStripeInputWallet]?.isReady">
+                    <div v-if="stripeConnectStatusByWalletMap[stripeConnectWalletInput]?.isReady">
                       <span> ✅ Has Stripe Account</span><br>
-                      <span v-if="stripeConnectStatusByWalletMap[currentStripeInputWallet]?.email">{{ ` Email: ${stripeConnectStatusByWalletMap[currentStripeInputWallet]?.email}` }}</span>
-                      <span>{{ `Connected to: ${currentStripeInputWallet}` }}</span>
+                      <span v-if="stripeConnectStatusByWalletMap[stripeConnectWalletInput]?.email">{{ ` Email: ${stripeConnectStatusByWalletMap[stripeConnectWalletInput]?.email}` }}</span>
+                      <span>{{ `Connected to: ${stripeConnectWalletInput}` }}</span>
                     </div>
                     <div v-else>
                       ❌ No stripe account connected to this wallet yet.<br>
@@ -267,13 +267,16 @@
                 </template>
               </URadio>
             </div>
-            <div class="flex justify-center w-full">
+            <div class="flex flex-col items-center justify-center gap-[8px] w-full">
               <UButton
                 label="Save Changes"
                 :color="isStripeConnectWalletReadyToSave ? 'primary' : 'gray'"
                 :disabled="!isStripeConnectWalletReadyToSave || !!(stripeConnectWallet)"
                 @click="handleSaveStripeConnectWallet"
               />
+              <div v-if="!!(stripeConnectWallet)" class="text-center text-green-800 text-[12px]">
+                Successfully save the Stripe Connect account!
+              </div>
             </div>
           </div>
         </template>
@@ -564,12 +567,11 @@ const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
-const stripeConnectWalletInput = ref('')
 const mustClaimToView = ref(true)
 const hideDownload = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
 const defaultPaymentCurrency = ref<string>(SUPPORT_CURRENCY.USD)
-const currentStripeInputWallet = ref('')
+const stripeConnectWalletInput = ref('')
 const stripeConnectInputError = ref('')
 const stripeConnectStatusByWalletMap = ref({} as Record<string, any>)
 const isStripeConnectLoading = ref(false)
@@ -623,7 +625,7 @@ const notificationEmailsTableRows = computed(() => notificationEmails.value.map(
 const isStripeConnectWalletReadyToSave = computed(() => {
   if (!isStripeConnectChecked.value) { return false }
   if (isUsingDefaultAccount.value && !connectStatus?.value?.isReady) { return false }
-  if ((!isUsingDefaultAccount.value && !stripeConnectStatusByWalletMap.value[currentStripeInputWallet.value]?.isReady) || stripeConnectInputError.value) { return false }
+  if ((!isUsingDefaultAccount.value && !stripeConnectStatusByWalletMap.value[stripeConnectWalletInput.value]?.isReady) || stripeConnectInputError.value) { return false }
 
   return true
 })
@@ -699,7 +701,7 @@ function addNotificationEmail () {
 async function onStripeConnectWalletInput (input: any) {
   if (!isStripeConnectChecked.value) { return }
   const inputValue = input.target.value.trim()
-  currentStripeInputWallet.value = inputValue
+  stripeConnectWalletInput.value = inputValue
   stripeConnectInputError.value = ''
 
   if (!LIKE_ADDRESS_REGEX.test(inputValue)) {
@@ -723,7 +725,7 @@ async function onStripeConnectWalletInput (input: any) {
     }
     if (stripeConnectStatus.value) {
       stripeConnectStatusByWalletMap.value[inputValue] = stripeConnectStatus.value
-      currentStripeInputWallet.value = inputValue
+      stripeConnectWalletInput.value = inputValue
     }
   } catch (error) {
     console.error(error)
@@ -733,7 +735,7 @@ async function onStripeConnectWalletInput (input: any) {
 }
 
 function handleSaveStripeConnectWallet () {
-  stripeConnectWallet.value = isUsingDefaultAccount.value ? wallet.value : currentStripeInputWallet.value
+  stripeConnectWallet.value = isUsingDefaultAccount.value ? wallet.value : stripeConnectWalletInput.value
 }
 
 function formatPrice (price: any) {
