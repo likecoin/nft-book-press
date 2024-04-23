@@ -190,31 +190,28 @@
             <div class="flex items-start justify-start gap-[8px] w-full">
               <URadio
                 v-model="isUsingDefaultAccount"
+                class="w-[50%]"
                 :value="true"
                 :disabled="!!(stripeConnectWallet)"
-                class="w-[50%]"
               >
                 <template #label>
-                  <div class="flex w-[50%]">
-                    <div v-if="connectStatus?.isReady" class="flex flex-col items-start">
-                      <span>Use my account</span>
-                      <div class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px] border-t-[2px] border-gray-200">
-                        <span>{{ ` Email: ${connectStatus?.email}` }}</span>
-                        <span>{{ `Connected to: ${wallet}` }}</span>
-                      </div>
+                  <div>Use my account</div>
+                  <div v-if="connectStatus?.isReady" class="flex flex-col items-start">
+                    <div class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px]">
+                      <div> ✅ Has Stripe Account</div>
+                      <div>{{ ` Email: ${connectStatus?.email}` }}</div>
                     </div>
-
-                    <span v-else>
-                      No stripe account connected yet.<br>
-                      <UButton
-                        class="mt-2"
-                        label="Create one here"
-                        :to="{ name: 'nft-book-store-user' }"
-                        target="_blank"
-                        variant="outline"
-                      />
-                    </span>
                   </div>
+
+                  <span v-else>
+                    <UButton
+                      class="mt-2"
+                      label="Create one here"
+                      :to="{ name: 'nft-book-store-user' }"
+                      target="_blank"
+                      variant="outline"
+                    />
+                  </span>
                 </template>
               </URadio>
               <URadio
@@ -245,7 +242,6 @@
                     <div v-if="stripeConnectStatusByWalletMap[stripeConnectWalletInput]?.isReady">
                       <span> ✅ Has Stripe Account</span><br>
                       <span v-if="stripeConnectStatusByWalletMap[stripeConnectWalletInput]?.email">{{ ` Email: ${stripeConnectStatusByWalletMap[stripeConnectWalletInput]?.email}` }}</span>
-                      <span>{{ `Connected to: ${stripeConnectWalletInput}` }}</span>
                     </div>
                     <div v-else>
                       ❌ No stripe account connected to this wallet yet.<br>
