@@ -6,10 +6,13 @@ export const useStripeStore = defineStore('stripe-connect', () => {
 
   async function fetchStripeConnectStatus (wallet: string) {
     stripeConnectStatusWalletMap.value[wallet] = { isReady: false }
-    const connectStatusData = await useFetch(
+    const { data, error } = await useFetch(
         `${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${wallet}`
     )
-    stripeConnectStatusWalletMap.value[wallet] = (connectStatusData?.data?.value as any) || {}
+    stripeConnectStatusWalletMap.value[wallet] = (data?.value as any) || {}
+    if (error.value) {
+      throw new Error(error.value?.data.toString())
+    }
   }
 
   return {
