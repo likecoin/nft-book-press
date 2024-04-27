@@ -171,16 +171,13 @@
 
       <StripeConnectCard
         v-if="userIsOwner"
-        :is-stripe-connect-checked="isStripeConnectChecked"
+        v-model="isStripeConnectChecked"
+        v-model:isUsingDefaultAccount="isUsingDefaultAccount"
         :stripe-connect-wallet="stripeConnectWallet"
         :stripe-connect-status-wallet-map="stripeConnectStatusWalletMap"
-        :is-using-default-account="isUsingDefaultAccount"
         :should-disable-setting="shouldDisableStripeConnectSetting"
         :login-address="wallet"
-        :is-updating-stripe-account="isUpdatingStripeConnect"
 
-        @update-is-stripe-connect-checked="updateIsStripeConnectChecked"
-        @update-is-using-default-account="updateIsUsingDefaultAccount"
         @save="handleSaveStripeConnectWallet"
       />
 
@@ -959,14 +956,6 @@ async function handleSaveStripeConnectWallet (wallet: any) {
     isUpdatingStripeConnect.value = false
     shouldDisableStripeConnectSetting.value = true
   }
-}
-
-function updateIsStripeConnectChecked (isChecked: boolean) {
-  isStripeConnectChecked.value = isChecked
-}
-
-function updateIsUsingDefaultAccount (isDefaultAccount: boolean) {
-  isUsingDefaultAccount.value = isDefaultAccount
 }
 
 async function updateSettings () {

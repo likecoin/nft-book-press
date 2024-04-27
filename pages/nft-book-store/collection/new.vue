@@ -186,15 +186,13 @@
       </UCard>
 
       <StripeConnectCard
-        :is-stripe-connect-checked="isStripeConnectChecked"
+        v-model="isStripeConnectChecked"
+        v-model:isUsingDefaultAccount="isUsingDefaultAccount"
         :stripe-connect-wallet="stripeConnectWallet"
         :stripe-connect-status-wallet-map="stripeConnectStatusWalletMap"
-        :is-using-default-account="isUsingDefaultAccount"
         :should-disable-setting="shouldDisableStripeConnectSetting"
         :login-address="wallet"
 
-        @update-is-stripe-connect-checked="updateIsStripeConnectChecked"
-        @update-is-using-default-account="updateIsUsingDefaultAccount"
         @save="handleSaveStripeConnectWallet"
       />
 
@@ -594,14 +592,6 @@ function addNotificationEmail () {
 function handleSaveStripeConnectWallet (wallet: any) {
   stripeConnectWallet.value = wallet
   shouldDisableStripeConnectSetting.value = true
-}
-
-function updateIsStripeConnectChecked (isChecked: boolean) {
-  isStripeConnectChecked.value = isChecked
-}
-
-function updateIsUsingDefaultAccount (isDefaultAccount: boolean) {
-  isUsingDefaultAccount.value = isDefaultAccount
 }
 
 function formatPrice (price: any) {
