@@ -13,8 +13,9 @@ export const useStripeStore = defineStore('stripe-connect', () => {
     if (error.value) {
       if (error.value.statusCode !== 404) {
         throw new Error(error.value?.data.toString())
+      }
       // eslint-disable-next-line no-console
-      } console.error('STRIPE_CONNECT_INFO_NOT_FOUND')
+      console.error('STRIPE_CONNECT_INFO_NOT_FOUND')
     }
   }
 
