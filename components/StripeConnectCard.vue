@@ -15,7 +15,7 @@
       <UToggle
         v-model="isStripeConnectChecked"
         name="stripe"
-        label="Use a Stripe Connect account for receiving all payment"
+        label="Use a Stripe Connect account for receiving payments"
       />
     </template>
 
@@ -37,7 +37,12 @@
                 <div
                   class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px]"
                 >
-                  <div>✅ Has Stripe Account</div>
+                  <UAlert
+                    icon="i-heroicons-check"
+                    color="primary"
+                    variant="outline"
+                    title="Has Stripe Account"
+                  />
                   <div>{{ ` Email: ${props.stripeConnectStatusWalletMap[props.loginAddress]?.email}` }}</div>
                 </div>
               </div>
@@ -65,7 +70,7 @@
                 <UInput
                   :value="inputWallet"
                   :color="stripeConnectInputError ? 'rose' : 'white'"
-                  class="font-mon w-full"
+                  class="font-mono w-full"
                   placeholder="like1..."
                   @input="onStripeConnectWalletInput"
                 />
@@ -74,31 +79,39 @@
                   class="text-red-700 text-[10px]"
                 >{{ stripeConnectInputError }}</span>
               </div>
-              <div v-if="isStripeConnectLoading" class="text-center">
-                Loading ...
-              </div>
+              <UProgress v-if="isStripeConnectLoading" animation="carousel" />
               <div
                 v-else-if="
-                  props.stripeConnectStatusWalletMap[inputWallet]
+                  connectStatusByInputWallet
                 "
                 class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px]"
               >
                 <div
                   v-if="isInputAccountReady"
                 >
-                  <span> ✅ Has Stripe Account</span><br>
+                  <span /><br>
+                  <UAlert
+                    icon="i-heroicons-check"
+                    color="primary"
+                    variant="outline"
+                    title="Has Stripe Account"
+                  />
                   <span
                     v-if="
-                      props.stripeConnectStatusWalletMap[inputWallet]
+                      connectStatusByInputWallet
                         ?.email
                     "
                   >{{
-                    ` Email: ${props.stripeConnectStatusWalletMap[inputWallet]?.email}`
+                    ` Email: ${connectStatusByInputWallet?.email}`
                   }}</span>
                 </div>
-                <div v-else>
-                  ❌ No stripe account connected to this wallet yet.<br>
-                </div>
+                <UAlert
+                  v-else
+                  icon="i-heroicons-x-mark"
+                  color="red"
+                  variant="outline"
+                  title="No stripe account connected to this wallet yet."
+                />
               </div>
             </template>
           </URadio>
@@ -175,6 +188,8 @@ const isStripeConnectWalletReadyToSave = computed(() => {
   if ((!isUsingDefaultAccount.value && !isInputAccountReady.value) || stripeConnectInputError.value) { return false }
   return true
 })
+
+const connectStatusByInputWallet = computed(() => props.stripeConnectStatusWalletMap[inputWallet.value])
 
 watch(() => props.stripeConnectWallet, (wallet) => {
   if (wallet && !isUsingDefaultAccount.value) {
