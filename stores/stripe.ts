@@ -11,7 +11,10 @@ export const useStripeStore = defineStore('stripe-connect', () => {
     )
     stripeConnectStatusWalletMap.value[wallet] = (data?.value as any) || {}
     if (error.value) {
-      throw new Error(error.value?.data.toString())
+      if (error.value.statusCode !== 404) {
+        throw new Error(error.value?.data.toString())
+      // eslint-disable-next-line no-console
+      } console.error('STRIPE_CONNECT_INFO_NOT_FOUND')
     }
   }
 

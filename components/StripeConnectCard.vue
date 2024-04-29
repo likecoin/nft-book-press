@@ -83,7 +83,7 @@
                 class="text-red-700 text-[10px]"
               >{{ stripeConnectInputError }}</span>
             </div>
-            <UProgress v-if="isStripeConnectLoading" animation="carousel" />
+            <UProgress v-if="isStripeConnectLoading" class="my-[6px]" animation="carousel" />
             <div
               v-else-if="
                 connectStatusByInputWallet
