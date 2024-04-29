@@ -134,7 +134,7 @@ const stripeStore = useStripeStore()
 const { fetchStripeConnectStatus } = stripeStore
 
 const props = defineProps({
-  modelValue: Boolean, // For isStripeConnectChecked
+  isStripeConnectChecked: Boolean,
   isUsingDefaultAccount: Boolean,
   loginAddress: {
     type: String,
@@ -160,7 +160,7 @@ const props = defineProps({
 
 // eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{
-  (e: 'update:modelValue', isChecked: boolean): void;
+  (e: 'update:isStripeConnectChecked', isChecked: boolean): void;
   (e: 'update:isUsingDefaultAccount', isUsingDefaultAccount: boolean): void;
   (e: 'save', wallet: string | undefined): void;
 }>()
@@ -170,8 +170,8 @@ const stripeConnectInputError = ref('')
 const isStripeConnectLoading = ref(false)
 
 const modelIsStripeConnectChecked = computed({
-  get: () => props.modelValue,
-  set: value => emit('update:modelValue', value)
+  get: () => props.isStripeConnectChecked,
+  set: value => emit('update:isStripeConnectChecked', value)
 })
 
 const modelIsUsingDefaultAccount = computed({

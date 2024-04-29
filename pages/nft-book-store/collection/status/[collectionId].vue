@@ -171,7 +171,7 @@
 
       <StripeConnectCard
         v-if="userIsOwner"
-        v-model="isStripeConnectChecked"
+        v-model:isStripeConnectChecked="isStripeConnectChecked"
         v-model:isUsingDefaultAccount="isUsingDefaultAccount"
         :stripe-connect-wallet="stripeConnectWallet"
         :stripe-connect-status-wallet-map="stripeConnectStatusWalletMap"
