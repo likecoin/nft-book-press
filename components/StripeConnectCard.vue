@@ -21,100 +21,102 @@
 
     <template v-if="isStripeConnectChecked">
       <div class="flex flex-col gap-[24px]">
-        <div class="flex items-start justify-start gap-[8px] w-full">
-          <URadio
-            v-model="isUsingDefaultAccount"
-            class="w-[50%]"
-            :value="true"
-            :disabled="!!props.shouldDisableSetting"
-          >
-            <template #label>
-              <div>Use my account</div>
+        <div class="grid grid-cols-2 gap-[8px] w-full">
+          <div class="flex flex-col w-full">
+            <URadio
+              v-model="isUsingDefaultAccount"
+              class="w-[50%]"
+              :value="true"
+              :disabled="!!props.shouldDisableSetting"
+            >
+              <template #label>
+                <div>Use my account</div>
+              </template>
+            </URadio>
+            <div
+              v-if="isDefaultAccountReady"
+              class="flex flex-col items-start w-full"
+            >
               <div
-                v-if="isDefaultAccountReady"
-                class="flex flex-col items-start"
+                class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px] w-[80%]"
               >
-                <div
-                  class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px]"
-                >
-                  <UAlert
-                    icon="i-heroicons-check"
-                    color="primary"
-                    variant="outline"
-                    title="Has Stripe Account"
-                  />
-                  <div>{{ ` Email: ${props.stripeConnectStatusWalletMap[props.loginAddress]?.email}` }}</div>
-                </div>
-              </div>
-
-              <span v-else>
-                <UButton
-                  class="mt-2"
-                  label="Create one here"
-                  :to="{ name: 'nft-book-store-user' }"
-                  target="_blank"
+                <UAlert
+                  icon="i-heroicons-check"
+                  color="primary"
                   variant="outline"
+                  title="Has Stripe Account"
                 />
-              </span>
-            </template>
-          </URadio>
-          <URadio
-            v-model="isUsingDefaultAccount"
-            :value="false"
-            :disabled="!!props.shouldDisableSetting"
-            class="w-[50%]"
-          >
-            <template #label>
-              <span>Use another Stripe Express account</span>
-              <div class="flex flex-col my-[10px]">
-                <UInput
-                  :value="inputWallet"
-                  :color="stripeConnectInputError ? 'rose' : 'white'"
-                  class="font-mono w-full"
-                  placeholder="like1..."
-                  @input="onStripeConnectWalletInput"
+                <div>{{ ` Email: ${props.stripeConnectStatusWalletMap[props.loginAddress]?.email}` }}</div>
+              </div>
+            </div>
+            <span v-else>
+              <UButton
+                class="mt-2"
+                label="Create one here"
+                :to="{ name: 'nft-book-store-user' }"
+                target="_blank"
+                variant="outline"
+              />
+            </span>
+          </div>
+
+          <div class="flex flex-col w-full">
+            <URadio
+              v-model="isUsingDefaultAccount"
+              :value="false"
+              :disabled="!!props.shouldDisableSetting"
+            >
+              <template #label>
+                <span>Use another Stripe Express account</span>
+              </template>
+            </URadio>
+            <div class="flex flex-col mt-[14px] w-[80%]">
+              <UInput
+                :value="inputWallet"
+                :color="stripeConnectInputError ? 'rose' : 'white'"
+                class="font-mono w-full"
+                placeholder="like1..."
+                @input="onStripeConnectWalletInput"
+              />
+              <span
+                v-if="stripeConnectInputError"
+                class="text-red-700 text-[10px]"
+              >{{ stripeConnectInputError }}</span>
+            </div>
+            <UProgress v-if="isStripeConnectLoading" animation="carousel" />
+            <div
+              v-else-if="
+                connectStatusByInputWallet
+              "
+              class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px] w-[80%]"
+            >
+              <div
+                v-if="isInputAccountReady"
+              >
+                <UAlert
+                  icon="i-heroicons-check"
+                  color="primary"
+                  variant="outline"
+                  title="Has Stripe Account"
                 />
                 <span
-                  v-if="stripeConnectInputError"
-                  class="text-red-700 text-[10px]"
-                >{{ stripeConnectInputError }}</span>
+                  v-if="
+                    connectStatusByInputWallet
+                      ?.email
+                  "
+                >{{
+                  ` Email: ${connectStatusByInputWallet?.email}`
+                }}</span>
               </div>
-              <UProgress v-if="isStripeConnectLoading" animation="carousel" />
-              <div
-                v-else-if="
-                  connectStatusByInputWallet
-                "
-                class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px]"
-              >
-                <div
-                  v-if="isInputAccountReady"
-                >
-                  <span /><br>
-                  <UAlert
-                    icon="i-heroicons-check"
-                    color="primary"
-                    variant="outline"
-                    title="Has Stripe Account"
-                  />
-                  <span
-                    v-if="
-                      connectStatusByInputWallet
-                        ?.email
-                    "
-                  >{{
-                    ` Email: ${connectStatusByInputWallet?.email}`
-                  }}</span>
-                </div>
-                <UAlert
-                  v-else
-                  icon="i-heroicons-x-mark"
-                  color="red"
-                  variant="outline"
-                  title="No stripe account connected to this wallet yet."
-                />
-              </div>
-            </template>
-          </URadio>
+              <UAlert
+                v-else
+                icon="i-heroicons-x-mark"
+                color="red"
+                variant="outline"
+                title="No stripe account connected to this wallet yet."
+              />
+            </div>
+          </div>
         </div>
         <div class="flex flex-col items-center justify-center gap-[8px] w-full">
           <UButton
