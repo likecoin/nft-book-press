@@ -1,10 +1,10 @@
 <template>
   <UCard
     :ui="{
-      divide: modelIsStripeConnectChecked ? undefined : '',
+      divide: isStripeConnectChecked ? undefined : '',
       header: { base: 'flex flex-wrap justify-between items-center gap-2' },
       body: {
-        padding: modelIsStripeConnectChecked ? undefined : '',
+        padding: isStripeConnectChecked ? undefined : '',
       },
     }"
   >
@@ -13,17 +13,17 @@
         Connect to a Stripe Account
       </h3>
       <UToggle
-        v-model="modelIsStripeConnectChecked"
+        v-model="isStripeConnectChecked"
         name="stripe"
         label="Use a Stripe Connect account for receiving all payment"
       />
     </template>
 
-    <template v-if="modelIsStripeConnectChecked">
+    <template v-if="isStripeConnectChecked">
       <div class="flex flex-col gap-[24px]">
         <div class="flex items-start justify-start gap-[8px] w-full">
           <URadio
-            v-model="modelIsUsingDefaultAccount"
+            v-model="isUsingDefaultAccount"
             class="w-[50%]"
             :value="true"
             :disabled="!!props.shouldDisableSetting"
@@ -54,7 +54,7 @@
             </template>
           </URadio>
           <URadio
-            v-model="modelIsUsingDefaultAccount"
+            v-model="isUsingDefaultAccount"
             :value="false"
             :disabled="!!props.shouldDisableSetting"
             class="w-[50%]"
@@ -132,10 +132,10 @@ import { useStripeStore } from '~/stores/stripe'
 const stripeStore = useStripeStore()
 
 const { fetchStripeConnectStatus } = stripeStore
+const isStripeConnectChecked = defineModel('isStripeConnectChecked')
+const isUsingDefaultAccount = defineModel('isUsingDefaultAccount')
 
 const props = defineProps({
-  isStripeConnectChecked: Boolean,
-  isUsingDefaultAccount: Boolean,
   loginAddress: {
     type: String,
     default: ''
@@ -160,43 +160,30 @@ const props = defineProps({
 
 // eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{
-  (e: 'update:isStripeConnectChecked', isChecked: boolean): void;
-  (e: 'update:isUsingDefaultAccount', isUsingDefaultAccount: boolean): void;
   (e: 'save', wallet: string | undefined): void;
 }>()
 
 const inputWallet = ref('')
 const stripeConnectInputError = ref('')
 const isStripeConnectLoading = ref(false)
-
-const modelIsStripeConnectChecked = computed({
-  get: () => props.isStripeConnectChecked,
-  set: value => emit('update:isStripeConnectChecked', value)
-})
-
-const modelIsUsingDefaultAccount = computed({
-  get: () => props.isUsingDefaultAccount,
-  set: value => emit('update:isUsingDefaultAccount', value)
-})
-
 const isDefaultAccountReady = computed(() => props.stripeConnectStatusWalletMap[props.loginAddress]?.isReady)
 const isInputAccountReady = computed(() => props.stripeConnectStatusWalletMap[inputWallet.value]?.isReady)
 
 const isStripeConnectWalletReadyToSave = computed(() => {
-  if (!modelIsStripeConnectChecked.value) { return false }
-  if (modelIsUsingDefaultAccount.value && !isDefaultAccountReady.value) { return false }
-  if ((!modelIsUsingDefaultAccount.value && !isInputAccountReady.value) || stripeConnectInputError.value) { return false }
+  if (!isStripeConnectChecked.value) { return false }
+  if (isUsingDefaultAccount.value && !isDefaultAccountReady.value) { return false }
+  if ((!isUsingDefaultAccount.value && !isInputAccountReady.value) || stripeConnectInputError.value) { return false }
   return true
 })
 
 watch(() => props.stripeConnectWallet, (wallet) => {
-  if (wallet && !props.isUsingDefaultAccount) {
+  if (wallet && !isUsingDefaultAccount.value) {
     inputWallet.value = wallet
   }
 }, { immediate: true })
 
 async function onStripeConnectWalletInput (input: any) {
-  if (!modelIsStripeConnectChecked.value) { return }
+  if (!isStripeConnectChecked.value) { return }
   const inputValue = input.target.value.trim()
   inputWallet.value = inputValue
   stripeConnectInputError.value = ''
@@ -224,7 +211,7 @@ async function onStripeConnectWalletInput (input: any) {
 }
 
 function handleSaveStripeConnectWallet () {
-  const wallet = modelIsUsingDefaultAccount.value ? props.loginAddress : inputWallet.value
+  const wallet = isUsingDefaultAccount.value ? props.loginAddress : inputWallet.value
   emit('save', wallet)
 }
 

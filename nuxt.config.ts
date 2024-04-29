@@ -21,7 +21,13 @@ export default defineNuxtConfig({
   vite: {
     plugins: [
       nodePolyfills()
-    ]
+    ],
+    vue: {
+      script: {
+        defineModel: true,
+        propsDestructure: true
+      }
+    }
   },
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
@@ -32,6 +38,6 @@ export default defineNuxtConfig({
   },
   tailwindcss: {
     injectPosition: { after: LikeCoinWalletConnectorCSSPath },
-    cssPath: '~/assets/css/tailwind.css',
+    cssPath: '~/assets/css/tailwind.css'
   }
 })

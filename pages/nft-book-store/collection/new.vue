@@ -186,8 +186,8 @@
       </UCard>
 
       <StripeConnectCard
-        v-model:isStripeConnectChecked="isStripeConnectChecked"
-        v-model:isUsingDefaultAccount="isUsingDefaultAccount"
+        v-model:is-stripe-connect-checked="isStripeConnectChecked"
+        v-model:is-using-default-account="isUsingDefaultAccount"
         :stripe-connect-wallet="stripeConnectWallet"
         :stripe-connect-status-wallet-map="stripeConnectStatusWalletMap"
         :should-disable-setting="shouldDisableStripeConnectSetting"
