@@ -662,6 +662,9 @@ watch(moderatorWallets, (newModeratorWallets) => {
 
 function updatePrice (e: InputEvent, key: string, index: number) {
   prices.value[index][key] = (e.target as HTMLInputElement)?.value
+  if (key === 'price' && Number((e.target as HTMLInputElement)?.value) === 0) {
+    prices.value[index].isAllowCustomPrice = true
+  }
 }
 
 function addMorePrice () {

@@ -299,6 +299,12 @@ config({
   }
 })
 
+watch(price, (newPrice, oldPrice) => {
+  if (Number(oldPrice) !== 0 && Number(newPrice) === 0) {
+    isAllowCustomPrice.value = true
+  }
+})
+
 onMounted(async () => {
   try {
     isLoading.value = true

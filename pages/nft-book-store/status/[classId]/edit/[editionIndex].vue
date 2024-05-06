@@ -300,6 +300,12 @@ config({
   }
 })
 
+watch(price, (newPrice, oldPrice) => {
+  if (Number(oldPrice) !== 0 && Number(newPrice) === 0) {
+    isAllowCustomPrice.value = true
+  }
+})
+
 watch(isAutoDeliver, (newValue) => {
   if (newValue) {
     const ok = confirm('NFT Book Press - Reminder\nOnce you choose automatic delivery, you can\'t switch it back to manual delivery.  Are you sure?')

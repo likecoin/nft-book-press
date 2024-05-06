@@ -62,7 +62,7 @@
           </h3>
         </template>
         <UFormGroup :label="`Price(USD) of this collection (Minimal ${MINIMAL_PRICE} or $0 (free))`">
-          <UInput v-model="price.price" type="number" step="0.01" :min="MINIMAL_PRICE" />
+          <UInput v-model="price.price" type="number" step="0.01" :min="MINIMAL_PRICE" @input="onPriceChange" />
         </UFormGroup>
 
         <UFormGroup
@@ -566,6 +566,12 @@ watch(moderatorWallets, (newModeratorWallets) => {
     }
   })
 })
+
+function onPriceChange (event: InputEvent) {
+  if (Number(event.data) === 0) {
+    price.value.isAllowCustomPrice = true
+  }
+}
 
 function addMoreClassId () {
   classIds.value.push(classIdInput.value as string)
