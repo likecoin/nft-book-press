@@ -167,12 +167,12 @@
         >
           <template #classId-data="{ row }">
             <a :href="`${LIKER_LAND_URL}/nft/class/${row.classId}`" target="_blank">
-              {{ row.classId }}
+              {{ nftStore.getClassMetadataById(row.classId)?.name }}
             </a>
           </template>
           <template #collectionId-data="{ row }">
             <a :href="`${LIKER_LAND_URL}/nft/collection/${row.collectionId}`" target="_blank">
-              {{ row.collectionId }}
+              {{ collectionStore.getCollectionById(row.collectionId)?.name }}
             </a>
           </template>
         </UTable>
@@ -185,10 +185,14 @@
 import { storeToRefs } from 'pinia'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
+import { useNftStore } from '~/stores/nft'
+import { useCollectionStore } from '~/stores/collection'
 import { LIKER_LAND_URL, LIKE_CO_API, LIKE_CO_HOST } from '~/constant'
 
+const nftStore = useNftStore()
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
+const collectionStore = useCollectionStore()
 const { wallet } = storeToRefs(walletStore)
 const { token } = storeToRefs(bookStoreApiStore)
 
@@ -233,6 +237,16 @@ async function loadCommissionHistory () {
       throw new Error(fetchError.value.toString())
     }
     commissionHistory.value = (data.value as any)?.commissions || []
+
+    const classIds = new Set<string>(commissionHistory.value
+      .filter((row: any) => row.classId)
+      .map((row: any) => row.classId))
+    classIds.forEach((classId: string) => nftStore.lazyFetchClassMetadataById(classId))
+
+    const collectionIds = new Set<string>(commissionHistory.value
+      .filter((row: any) => row.collectionId)
+      .map((row: any) => row.collectionId))
+    collectionIds.forEach((collectionId: string) => collectionStore.lazyFetchCollectionById(collectionId))
   } catch (e) {
     console.error(e)
     error.value = (e as Error).toString()
