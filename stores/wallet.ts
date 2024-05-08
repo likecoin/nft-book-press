@@ -88,8 +88,12 @@ export const useWalletStore = defineStore('wallet', () => {
     const session = connector.value.restoreSession()
     let connection: LikeCoinWalletConnectorConnectionResult | null = null
     if (session) {
-      const result = await connector.value.initIfNecessary()
-      if (result) { connection = result }
+      try {
+        const result = await connector.value.initIfNecessary()
+        if (result) { connection = result }
+      } catch (e) {
+        console.error(e)
+      }
     }
     if (!connection) {
       const result = await connector.value.openConnectionMethodSelectionDialog()
