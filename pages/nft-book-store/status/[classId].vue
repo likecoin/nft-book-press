@@ -509,6 +509,17 @@
                     label="Disable Download"
                   />
                 </UFormGroup>
+
+                <UFormGroup
+                  label="Insert cutomized message page in eBook"
+                  :ui="{ label: { base: 'font-mono font-bold' } }"
+                >
+                  <UCheckbox
+                    v-model="enableCustomMessagePage"
+                    name="enableCustomMessagePage"
+                    label="Enable custom message page"
+                  />
+                </UFormGroup>
               </div>
             </UCard>
 
@@ -667,6 +678,7 @@ const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
 const mustClaimToView = ref(true)
 const hideDownload = ref(false)
+const enableCustomMessagePage = ref(true)
 const useLikerLandPurchaseLink = ref(true)
 const isShowNewCouponModal = ref(false)
 const shouldDisableStripeConnectSetting = ref(false)
@@ -981,6 +993,7 @@ onMounted(async () => {
       notificationEmails: classNotificationEmails,
       connectedWallets: classConnectedWallets,
       mustClaimToView: classMustClaimToView,
+      enableCustomMessagePage: classEnableCustomMessagePage,
       hideDownload: classHideDownload,
       coupons: classCoupons,
       defaultPaymentCurrency: classDefaultPaymentCurrency
@@ -1001,6 +1014,7 @@ onMounted(async () => {
     }
     mustClaimToView.value = classMustClaimToView
     hideDownload.value = classHideDownload
+    enableCustomMessagePage.value = classEnableCustomMessagePage
     coupons.value = classCoupons || {}
     const { data: orders, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
       {
@@ -1156,6 +1170,7 @@ async function updateSettings () {
       connectedWallets,
       hideDownload,
       mustClaimToView,
+      enableCustomMessagePage,
       coupons
     })
     router.push({

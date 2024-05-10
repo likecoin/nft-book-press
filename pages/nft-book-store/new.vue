@@ -472,6 +472,17 @@
                     label="Disable Download"
                   />
                 </UFormGroup>
+
+                <UFormGroup
+                  label="Insert cutomized message page in eBook"
+                  :ui="{ label: { base: 'font-mono font-bold' } }"
+                >
+                  <UCheckbox
+                    v-model="enableCustomMessagePage"
+                    name="enableCustomMessagePage"
+                    label="Enable custom message page"
+                  />
+                </UFormGroup>
               </div>
             </UCard>
           </div>
@@ -532,6 +543,7 @@ const classIdInput = ref(classId || '')
 const nextPriceIndex = ref(1)
 const defaultPaymentCurrency = ref<string>(SUPPORT_CURRENCY.USD)
 const mustClaimToView = ref(true)
+const enableCustomMessagePage = ref(true)
 const hideDownload = ref(false)
 const prices = ref<any[]>([
   {
@@ -831,6 +843,7 @@ async function submitNewClass () {
       prices: p,
       shippingRates: s,
       mustClaimToView,
+      enableCustomMessagePage,
       hideDownload,
       autoDeliverNFTsTxHash
     })
