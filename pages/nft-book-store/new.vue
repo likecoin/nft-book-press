@@ -543,7 +543,7 @@ const classIdInput = ref(classId || '')
 const nextPriceIndex = ref(1)
 const defaultPaymentCurrency = ref<string>(SUPPORT_CURRENCY.USD)
 const mustClaimToView = ref(true)
-const enableCustomMessagePage = ref(true)
+const enableCustomMessagePage = ref(false)
 const hideDownload = ref(false)
 const prices = ref<any[]>([
   {
