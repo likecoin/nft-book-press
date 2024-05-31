@@ -216,6 +216,7 @@
             { key: 'amount', label: 'Commission' },
             { key: 'classId', label: 'Book Id' },
             { key: 'collectionId', label: 'Book Collection Id' },
+            { key: 'currency', label: 'Currency' },
             { key: 'amountTotal', label: 'Sale Amount' },
           ]"
           :rows="commissionHistoryRows"
