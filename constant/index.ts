@@ -1,4 +1,4 @@
-export const IS_TESTNET = false
+export const IS_TESTNET = true
 
 export const SITE_URL = IS_TESTNET ? 'https://likecoin-nft-book-press-testnet.netlify.app' : 'https://likecoin.github.io/nft-book-press'
 
