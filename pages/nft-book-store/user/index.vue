@@ -129,111 +129,113 @@
         </template>
       </UCard>
 
-      <UCard
-        :ui="{
-          header: { base: 'flex justify-between items-center' },
-          body: { padding: '' },
-          footer: { base: 'text-center' },
-        }"
-      >
-        <template #header>
-          <h1 class="text-center font-bold font-mono">
-            User Setting
-          </h1>
-        </template>
-
-        <UFormGroup label="Liker ID Email">
-          <UInput
-            :value="bookUser?.notificationEmail"
-            label="Liker ID Email"
-            disabled
-            :ui="{ base: 'font-mono' }"
-          />
-        </UFormGroup>
-        <UFormGroup label="Is Liker ID Email verified">
-          <UCheckbox
-            :value="bookUser?.isEmailVerified"
-            :checked="bookUser?.notificationEmail"
-            label="Is Liker ID Email verified"
-            disabled
-            :ui="{ base: 'font-mono' }"
-          />
-        </UFormGroup>
-        <UFormGroup label="Email Notification Settings">
-          <UAlert
-            v-if="!(bookUser?.notificationEmail && bookUser?.isEmailVerified)"
-            icon="i-heroicons-exclamation-circle"
-            color="orange"
-            variant="soft"
-            title="Please setup email in Liker ID."
-            description="To enable email notifications, setup and verify your Liker ID email"
-          />
-
-          <UCheckbox
-            v-model="isEnableNotificationEmails"
-            name="isEnalbeNotificationEmails"
-            label="Enable email notifications about commissions"
-            :disabled="!(bookUser?.notificationEmail && bookUser?.isEmailVerified)"
-          />
-        </UFormGroup>
-        <template #footer>
-          <UButton
-            label="Update"
-            color="gray"
-            @click="updateUserProfile"
-          />
-        </template>
-      </UCard>
-      <UCard
-        :ui="{
-          header: { base: 'flex justify-between items-center' },
-          body: { padding: '' },
-          footer: { base: 'text-center' },
-        }"
-      >
-        <template #header>
-          <h1 class="text-center font-bold font-mono">
-            Book Sales Commission History
-          </h1>
-
-          <UTooltip
-            text="Refresh Status"
-            :popper="{ placement: 'left' }"
-          >
-            <UButton
-              icon="i-heroicons-arrow-path"
-              variant="outline"
-              :disabled="isLoading"
-              @click="loadCommissionHistory"
-            />
-          </UTooltip>
-        </template>
-
-        <UTable
-          :columns="[
-            { key: 'timestamp', label: 'Timestamp' },
-            { key: 'type', label: 'Commission Type' },
-            { key: 'amount', label: 'Commission' },
-            { key: 'classId', label: 'Book Id' },
-            { key: 'collectionId', label: 'Book Collection Id' },
-            { key: 'currency', label: 'Currency' },
-            { key: 'amountTotal', label: 'Sale Amount' },
-          ]"
-          :rows="commissionHistoryRows"
-          :ui="{ th: { base: 'text-center' }, td: { base: 'text-center' } }"
+      <template v-if="connectStatus?.isReady">
+        <UCard
+          :ui="{
+            header: { base: 'flex justify-between items-center' },
+            body: { padding: '' },
+            footer: { base: 'text-center' },
+          }"
         >
-          <template #classId-data="{ row }">
-            <a :href="`${LIKER_LAND_URL}/nft/class/${row.classId}`" target="_blank">
-              {{ nftStore.getClassMetadataById(row.classId)?.name }}
-            </a>
+          <template #header>
+            <h1 class="text-center font-bold font-mono">
+              User Setting
+            </h1>
           </template>
-          <template #collectionId-data="{ row }">
-            <a :href="`${LIKER_LAND_URL}/nft/collection/${row.collectionId}`" target="_blank">
-              {{ collectionStore.getCollectionById(row.collectionId)?.name }}
-            </a>
+
+          <UFormGroup label="Liker ID Email">
+            <UInput
+              :value="bookUser?.notificationEmail"
+              label="Liker ID Email"
+              disabled
+              :ui="{ base: 'font-mono' }"
+            />
+          </UFormGroup>
+          <UFormGroup label="Is Liker ID Email verified">
+            <UCheckbox
+              :value="bookUser?.isEmailVerified"
+              :checked="bookUser?.notificationEmail"
+              label="Is Liker ID Email verified"
+              disabled
+              :ui="{ base: 'font-mono' }"
+            />
+          </UFormGroup>
+          <UFormGroup label="Email Notification Settings">
+            <UAlert
+              v-if="!(bookUser?.notificationEmail && bookUser?.isEmailVerified)"
+              icon="i-heroicons-exclamation-circle"
+              color="orange"
+              variant="soft"
+              title="Please setup email in Liker ID."
+              description="To enable email notifications, setup and verify your Liker ID email"
+            />
+
+            <UCheckbox
+              v-model="isEnableNotificationEmails"
+              name="isEnalbeNotificationEmails"
+              label="Enable email notifications about commissions"
+              :disabled="!(bookUser?.notificationEmail && bookUser?.isEmailVerified)"
+            />
+          </UFormGroup>
+          <template #footer>
+            <UButton
+              label="Update"
+              color="gray"
+              @click="updateUserProfile"
+            />
           </template>
-        </UTable>
-      </UCard>
+        </UCard>
+        <UCard
+          :ui="{
+            header: { base: 'flex justify-between items-center' },
+            body: { padding: '' },
+            footer: { base: 'text-center' },
+          }"
+        >
+          <template #header>
+            <h1 class="text-center font-bold font-mono">
+              Book Sales Commission History
+            </h1>
+
+            <UTooltip
+              text="Refresh Status"
+              :popper="{ placement: 'left' }"
+            >
+              <UButton
+                icon="i-heroicons-arrow-path"
+                variant="outline"
+                :disabled="isLoading"
+                @click="loadCommissionHistory"
+              />
+            </UTooltip>
+          </template>
+
+          <UTable
+            :columns="[
+              { key: 'timestamp', label: 'Timestamp' },
+              { key: 'type', label: 'Commission Type' },
+              { key: 'amount', label: 'Commission' },
+              { key: 'classId', label: 'Book Id' },
+              { key: 'collectionId', label: 'Book Collection Id' },
+              { key: 'currency', label: 'Currency' },
+              { key: 'amountTotal', label: 'Sale Amount' },
+            ]"
+            :rows="commissionHistoryRows"
+            :ui="{ th: { base: 'text-center' }, td: { base: 'text-center' } }"
+          >
+            <template #classId-data="{ row }">
+              <a :href="`${LIKER_LAND_URL}/nft/class/${row.classId}`" target="_blank">
+                {{ nftStore.getClassMetadataById(row.classId)?.name }}
+              </a>
+            </template>
+            <template #collectionId-data="{ row }">
+              <a :href="`${LIKER_LAND_URL}/nft/collection/${row.collectionId}`" target="_blank">
+                {{ collectionStore.getCollectionById(row.collectionId)?.name }}
+              </a>
+            </template>
+          </UTable>
+        </UCard>
+      </template>
     </template>
   </main>
 </template>
