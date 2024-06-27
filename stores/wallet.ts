@@ -73,6 +73,7 @@ export const useWalletStore = defineStore('wallet', () => {
       connectWalletTitle: 'Login',
       connectWalletMobileWarning: 'Mobile Warning',
       language: 'en',
+      authcoreClientId: 'likecoin-app-hidesocial', // 'likecoin-app' if show all social options
       authcoreApiHost: IS_TESTNET
         ? 'https://likecoin-integration-test.authcore.io'
         : 'https://authcore.like.co',
