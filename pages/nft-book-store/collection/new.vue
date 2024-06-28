@@ -545,6 +545,11 @@ onMounted(async () => {
   try {
     isLoading.value = true
     await fetchStripeConnectStatus(wallet.value)
+
+    if (stripeConnectStatusWalletMap[wallet.value]?.isReady) {
+      isStripeConnectChecked.value = true
+      stripeConnectWallet.value = wallet.value
+    }
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error(e)
