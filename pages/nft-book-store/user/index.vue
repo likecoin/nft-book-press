@@ -284,8 +284,18 @@ onMounted(async () => {
 
 const commissionHistoryRows = computed(() => {
   return commissionHistory.value.map((row: any) => {
+    let type = row.type
+    switch (type) {
+      case 'connectWallet':
+        type = 'royalties'
+        break
+      case 'channelCommission':
+        type = 'channel'
+        break
+    }
     return {
       ...row,
+      type,
       amount: `${row.currency}${row.amount / 100}`,
       amountTotal: `${row.currency}${row.amountTotal / 100}`,
       timestamp: new Date(row.timestamp).toLocaleString()

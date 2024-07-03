@@ -59,7 +59,7 @@ const items = [
         exact: true
       },
       {
-        label: 'Manage User Setting',
+        label: 'User Setting',
         icon: 'i-heroicons-user-group',
         to: { name: 'nft-book-store-user' },
         exact: true

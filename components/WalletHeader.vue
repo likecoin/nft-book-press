@@ -11,7 +11,7 @@
         />
       </UTooltip>
       <UButton
-        label="Disconnect Wallet"
+        label="Sign out"
         icon="i-heroicons-arrow-left-on-rectangle"
         color="primary"
         variant="outline"
@@ -20,7 +20,7 @@
     </template>
     <UButton
       v-else
-      label="Connect Wallet"
+      label="Sign in"
       icon="i-heroicons-arrow-right-on-rectangle"
       color="primary"
       @click="connect"

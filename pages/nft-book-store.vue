@@ -16,7 +16,7 @@
         </template>
 
         <UButton
-          label="Sign"
+          label="Sign in"
           :loading="isLoading"
           :disabled="isLoading"
           @click="onClickAuth"
