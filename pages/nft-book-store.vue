@@ -50,13 +50,12 @@ watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
 })
 
-onMounted(async () => {
+onMounted(() => {
   try {
     const payload = window.localStorage.getItem('likecoin_nft_book_press_token')
     if (payload) {
       const { wallet: storedWallet, token } = JSON.parse(payload)
       restoreSession(storedWallet, token)
-      await connect()
     }
   } catch {}
 })
