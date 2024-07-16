@@ -286,7 +286,7 @@ const commissionHistoryRows = computed(() => {
   return commissionHistory.value.map((row: any) => {
     let type = row.type
     switch (type) {
-      case 'connectWallet':
+      case 'connectedWallet':
         type = 'royalties'
         break
       case 'channelCommission':
