@@ -683,7 +683,6 @@ const useLikerLandPurchaseLink = ref(true)
 const isShowNewCouponModal = ref(false)
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
-const isUpdatingStripeConnect = ref(false)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
@@ -1003,10 +1002,12 @@ onMounted(async () => {
     isStripeConnectChecked.value = !!(classConnectedWallets && Object.keys(classConnectedWallets).length)
 
     const classStripeWallet = classConnectedWallets && Object.keys(classConnectedWallets)[0]
-    if (classStripeWallet !== wallet.value) {
+    if (classStripeWallet) {
       stripeConnectWallet.value = classStripeWallet
-      isUsingDefaultAccount.value = false
-      await fetchStripeConnectStatus(classStripeWallet)
+      if (classStripeWallet !== wallet.value) {
+        isUsingDefaultAccount.value = false
+        await fetchStripeConnectStatus(classStripeWallet)
+      }
     }
 
     if (classDefaultPaymentCurrency) {
@@ -1132,7 +1133,6 @@ function addNotificationEmail () {
 
 async function handleSaveStripeConnectWallet (wallet: any) {
   stripeConnectWallet.value = wallet
-  isUpdatingStripeConnect.value = true
   try {
     await updateBookListingSetting(classId.value as string, {
       connectedWallets: {
@@ -1143,7 +1143,6 @@ async function handleSaveStripeConnectWallet (wallet: any) {
     const errorData = (err as any).data || err
     error.value = errorData
   } finally {
-    isUpdatingStripeConnect.value = false
     shouldDisableStripeConnectSetting.value = true
   }
 }
@@ -1206,7 +1205,6 @@ async function updateShippingRates (value: any) {
     error.value = errorData
   } finally {
     isUpdatingShippingRates.value = false
-    stripeConnectWallet.value = ''
   }
 }
 

@@ -548,7 +548,6 @@ const shouldShowAdvanceSettings = ref<boolean>(false)
 const defaultPaymentCurrency = ref<string>(SUPPORT_CURRENCY.USD)
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
-const isUpdatingStripeConnect = ref(false)
 
 const collectionName = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.name)
 const ownerWallet = computed(() => collectionListingInfo?.value?.ownerWallet)
@@ -856,10 +855,12 @@ onMounted(async () => {
     isStripeConnectChecked.value = !!(classConnectedWallets && Object.keys(classConnectedWallets).length)
 
     const classStripeWallet = classConnectedWallets && Object.keys(classConnectedWallets)[0]
-    if (classStripeWallet !== wallet.value) {
+    if (classStripeWallet) {
       stripeConnectWallet.value = classStripeWallet
-      isUsingDefaultAccount.value = false
-      await fetchStripeConnectStatus(classStripeWallet)
+      if (classStripeWallet !== wallet.value) {
+        isUsingDefaultAccount.value = false
+        await fetchStripeConnectStatus(classStripeWallet)
+      }
     }
 
     if (classDefaultPaymentCurrency) {
@@ -942,7 +943,6 @@ function addNotificationEmail () {
 
 async function handleSaveStripeConnectWallet (wallet: any) {
   stripeConnectWallet.value = wallet
-  isUpdatingStripeConnect.value = true
   try {
     await updateNFTBookCollectionById(collectionId.value as string, {
       connectedWallets: {
@@ -953,7 +953,6 @@ async function handleSaveStripeConnectWallet (wallet: any) {
     const errorData = (err as any).data || err
     error.value = errorData
   } finally {
-    isUpdatingStripeConnect.value = false
     shouldDisableStripeConnectSetting.value = true
   }
 }
