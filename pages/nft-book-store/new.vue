@@ -92,6 +92,7 @@
               </UFormGroup>
               <URadioGroup
                 v-model="p.deliveryMethod"
+                :disabled="p.isPhysicalOnly"
                 :legend="`Delivery method of this ${priceItemLabel}`"
                 :options="deliverMethodOptions"
               />
@@ -753,7 +754,7 @@ function mapPrices (prices: any) {
     priceInDecimal: Math.round(Number(p.price) * 100),
     price: Number(p.price),
     stock: Number(p.stock),
-    isAutoDeliver: p.deliveryMethod === 'auto',
+    isAutoDeliver: !p.isPhysicalOnly && p.deliveryMethod === 'auto',
     isAllowCustomPrice: p.isAllowCustomPrice || false,
     autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
     hasShipping: p.hasShipping || false,

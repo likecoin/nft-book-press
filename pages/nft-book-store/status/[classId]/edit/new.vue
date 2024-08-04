@@ -71,6 +71,7 @@
 
           <URadioGroup
             v-model="deliveryMethod"
+            :disabled="isPhysicalOnly"
             :legend="`Delivery method of this ${priceItemLabel}`"
             :options="deliverMethodOptions"
           />
@@ -405,7 +406,7 @@ async function handleSubmit () {
       priceInDecimal: Math.round(Number(price.value) * 100),
       price: Number(price.value),
       stock: Number(stock.value),
-      isAutoDeliver: deliveryMethod.value === 'auto',
+      isAutoDeliver: !isPhysicalOnly.value && deliveryMethod.value === 'auto',
       autoMemo: deliveryMethod.value === 'auto' ? (autoMemo.value || '') : '',
       hasShipping: hasShipping.value || false,
       isPhysicalOnly: isPhysicalOnly.value || false,
