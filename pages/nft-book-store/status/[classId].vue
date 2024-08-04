@@ -245,7 +245,7 @@
                     icon="i-heroicons-document-magnifying-glass"
                     :to="{
                       name: 'nft-book-store-status-classId-edit-editionIndex',
-                      params: { classId, editionIndex: index }
+                      params: { classId, editionIndex: element.index }
                     }"
                     variant="soft"
                     color="gray"
