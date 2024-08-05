@@ -267,7 +267,7 @@ const descriptionZh = ref('')
 const hasShipping = ref(false)
 const shippingRates = ref<any[]>([])
 const isPhysicalOnly = ref(false)
-const isAllowCustomPrice = ref(false)
+const isAllowCustomPrice = ref(true)
 const isUpdatingShippingRates = ref(false)
 
 const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
@@ -410,7 +410,7 @@ async function handleSubmit () {
       autoMemo: deliveryMethod.value === 'auto' ? (autoMemo.value || '') : '',
       hasShipping: hasShipping.value || false,
       isPhysicalOnly: isPhysicalOnly.value || false,
-      isAllowCustomPrice: isAllowCustomPrice.value || false
+      isAllowCustomPrice: isAllowCustomPrice.value ?? true
     }
 
     if (!editedPrice || editedPrice.price === undefined) {

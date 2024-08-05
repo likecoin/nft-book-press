@@ -699,7 +699,7 @@ function addMorePrice () {
     descriptionZh: '',
     hasShipping: false,
     isPhysicalOnly: false,
-    isAllowCustomPrice: false
+    isAllowCustomPrice: true
   })
 }
 
@@ -755,7 +755,7 @@ function mapPrices (prices: any) {
     price: Number(p.price),
     stock: Number(p.stock),
     isAutoDeliver: !p.isPhysicalOnly && p.deliveryMethod === 'auto',
-    isAllowCustomPrice: p.isAllowCustomPrice || false,
+    isAllowCustomPrice: p.isAllowCustomPrice ?? true,
     autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
     hasShipping: p.hasShipping || false,
     isPhysicalOnly: p.isPhysicalOnly || false

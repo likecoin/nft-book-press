@@ -472,7 +472,7 @@ const price = ref({
   stock: Number(route.query.count as string || 1),
   hasShipping: false,
   isPhysicalOnly: false,
-  isAllowCustomPrice: false
+  isAllowCustomPrice: true
 })
 const shippingRates = ref<any[]>([])
 const moderatorWallets = ref<string[]>([])
@@ -611,7 +611,7 @@ function formatPrice (price: any) {
     stock: Number(price.stock),
     hasShipping: Boolean(price.hasShipping || shippingRates.value.length || false),
     isPhysicalOnly: Boolean(price.isPhysicalOnly || false),
-    isAllowCustomPrice: Boolean(price.isAllowCustomPrice || false)
+    isAllowCustomPrice: Boolean(price.isAllowCustomPrice ?? true)
   }
 }
 

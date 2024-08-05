@@ -262,7 +262,7 @@ const descriptionEn = ref('')
 const descriptionZh = ref('')
 const hasShipping = ref(false)
 const isPhysicalOnly = ref(false)
-const isAllowCustomPrice = ref(false)
+const isAllowCustomPrice = ref(true)
 const shippingRates = ref<any[]>([])
 const isUpdatingShippingRates = ref(false)
 const oldStock = ref(0)
@@ -350,7 +350,7 @@ onMounted(async () => {
         descriptionZh.value = currentEdition.description?.zh || legacyDescription || ' '
         hasShipping.value = !!(currentEdition.hasShipping) || false
         isPhysicalOnly.value = currentEdition.isPhysicalOnly || false
-        isAllowCustomPrice.value = currentEdition.isAllowCustomPrice || false
+        isAllowCustomPrice.value = currentEdition.isAllowCustomPrice ?? true
 
         oldStock.value = currentEdition.stock
         oldIsAutoDeliver.value = currentEdition.isAutoDeliver
@@ -443,7 +443,7 @@ async function handleSubmit () {
       autoMemo: autoMemo.value || '',
       hasShipping: hasShipping.value || false,
       isPhysicalOnly: isPhysicalOnly.value || false,
-      isAllowCustomPrice: isAllowCustomPrice.value || false
+      isAllowCustomPrice: isAllowCustomPrice.value ?? true
     }
 
     if (!editedPrice || editedPrice.price === undefined) {
