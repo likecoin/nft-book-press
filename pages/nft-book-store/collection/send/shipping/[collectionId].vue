@@ -131,7 +131,11 @@
 
       <template #footer>
         <UFormGroup label="Enter shipping information and message emailed to buyer">
-          <UTextarea v-model="message" placeholder="shipping tracking ID, ETA..." />
+          <UTextarea
+            v-model="message"
+            :disabled="isShipped"
+            placeholder="shipping tracking ID, ETA..."
+          />
         </UFormGroup>
         <UButton
           label="Set as Shipped and send email"
@@ -166,7 +170,8 @@ const message = ref('')
 const orderInfo = ref<any>({})
 
 const collectionName = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.name)
-const isSendButtonDisabled = computed(() => !message.value || isLoading.value)
+const isSendButtonDisabled = computed(() => isShipped.value || !message.value || isLoading.value)
+const isShipped = computed(() => orderInfo.value.shippingStatus === 'shipped')
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
@@ -187,6 +192,9 @@ onMounted(async () => {
     }
   } else {
     orderInfo.value = (data.value as any)
+    if (orderInfo.value.shippingMessage) {
+      message.value = orderInfo.value.shippingMessage
+    }
   }
   lazyFetchCollectionById(collectionId.value as string)
 })
