@@ -281,24 +281,6 @@
                   Default Currency
                 </h3>
               </template>
-
-              <UFormGroup
-                label="Default Display Currency at Checkout"
-                help="Note that price setting is always in USD "
-              >
-                <URadio
-                  v-model="defaultPaymentCurrency"
-                  label="USD"
-                  name="USD"
-                  value="USD"
-                />
-                <URadio
-                  v-model="defaultPaymentCurrency"
-                  label="HKD"
-                  name="HKD"
-                  value="HKD"
-                />
-              </UFormGroup>
             </UCard>
 
             <!-- Shipping Rates -->
@@ -429,7 +411,7 @@ import { MdEditor, ToolbarNames, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
-import { DEFAULT_PRICE, MINIMAL_PRICE, LCD_URL, SUPPORT_CURRENCY } from '~/constant'
+import { DEFAULT_PRICE, MINIMAL_PRICE, LCD_URL } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
@@ -484,7 +466,6 @@ const notificationEmailInput = ref('')
 const mustClaimToView = ref(true)
 const hideDownload = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
-const defaultPaymentCurrency = ref<string>(SUPPORT_CURRENCY.USD)
 const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
 const shouldDisableStripeConnectSetting = ref(false)
@@ -673,7 +654,7 @@ async function submitNewCollection () {
 
     await newNFTBookCollection({
       classIds: classIds.value,
-      defaultPaymentCurrency,
+      defaultPaymentCurrency: 'USD',
       connectedWallets,
       moderatorWallets,
       notificationEmails,

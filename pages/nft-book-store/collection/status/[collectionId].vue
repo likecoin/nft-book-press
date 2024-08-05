@@ -300,24 +300,6 @@
                   Default Currency
                 </h3>
               </template>
-
-              <UFormGroup
-                label="Default Display Currency at Checkout"
-                help="Note that price setting is always in USD "
-              >
-                <URadio
-                  v-model="defaultPaymentCurrency"
-                  label="USD"
-                  name="USD"
-                  value="USD"
-                />
-                <URadio
-                  v-model="defaultPaymentCurrency"
-                  label="HKD"
-                  name="HKD"
-                  value="HKD"
-                />
-              </UFormGroup>
             </UCard>
 
             <!-- Shipping Rates -->
@@ -545,7 +527,6 @@ const stripeConnectWallet = ref('')
 const useLikerLandPurchaseLink = ref(true)
 const isShowNewCouponModal = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
-const defaultPaymentCurrency = ref<string>(SUPPORT_CURRENCY.USD)
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
 
@@ -849,8 +830,7 @@ onMounted(async () => {
       moderatorWallets: classModeratorWallets,
       notificationEmails: classNotificationEmails,
       connectedWallets: classConnectedWallets,
-      coupons: classCoupons,
-      defaultPaymentCurrency: classDefaultPaymentCurrency
+      coupons: classCoupons
     } = collectionListingInfo.value as any
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
@@ -863,10 +843,6 @@ onMounted(async () => {
         isUsingDefaultAccount.value = false
         await fetchStripeConnectStatus(classStripeWallet)
       }
-    }
-
-    if (classDefaultPaymentCurrency) {
-      defaultPaymentCurrency.value = classDefaultPaymentCurrency
     }
     coupons.value = classCoupons || {}
     const { data: orders, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/orders`,
@@ -975,7 +951,6 @@ async function updateSettings () {
         }
       : null
     await updateNFTBookCollectionById(collectionId.value as string, {
-      defaultPaymentCurrency,
       moderatorWallets,
       notificationEmails,
       connectedWallets,

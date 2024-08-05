@@ -388,24 +388,6 @@
                   Default Currency
                 </h3>
               </template>
-
-              <UFormGroup
-                label="Default Display Currency at Checkout"
-                help="Note that price setting is always in USD "
-              >
-                <URadio
-                  v-model="defaultPaymentCurrency"
-                  label="USD"
-                  name="USD"
-                  value="USD"
-                />
-                <URadio
-                  v-model="defaultPaymentCurrency"
-                  label="HKD"
-                  name="HKD"
-                  value="HKD"
-                />
-              </UFormGroup>
             </UCard>
 
             <!-- Shipping Rates -->
@@ -663,7 +645,6 @@ const isUpdatingPricesOrder = ref(false)
 const ordersData = ref<any>({})
 const isUpdatingShippingRates = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
-const defaultPaymentCurrency = ref<string>(SUPPORT_CURRENCY.USD)
 
 // Search
 const searchInput = ref('')
@@ -996,8 +977,7 @@ onMounted(async () => {
       mustClaimToView: classMustClaimToView,
       enableCustomMessagePage: classEnableCustomMessagePage,
       hideDownload: classHideDownload,
-      coupons: classCoupons,
-      defaultPaymentCurrency: classDefaultPaymentCurrency
+      coupons: classCoupons
     } = classData.value as any
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
@@ -1010,10 +990,6 @@ onMounted(async () => {
         isUsingDefaultAccount.value = false
         await fetchStripeConnectStatus(classStripeWallet)
       }
-    }
-
-    if (classDefaultPaymentCurrency) {
-      defaultPaymentCurrency.value = classDefaultPaymentCurrency
     }
     mustClaimToView.value = classMustClaimToView
     hideDownload.value = classHideDownload
@@ -1165,7 +1141,6 @@ async function updateSettings () {
         }
       : null
     await updateBookListingSetting(classId.value as string, {
-      defaultPaymentCurrency,
       moderatorWallets,
       notificationEmails,
       connectedWallets,

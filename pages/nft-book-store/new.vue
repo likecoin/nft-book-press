@@ -354,24 +354,6 @@
                   Default Currency
                 </h3>
               </template>
-
-              <UFormGroup
-                label="Default Display Currency at Checkout"
-                help="Note that price setting is always in USD "
-              >
-                <URadio
-                  v-model="defaultPaymentCurrency"
-                  label="USD"
-                  name="USD"
-                  value="USD"
-                />
-                <URadio
-                  v-model="defaultPaymentCurrency"
-                  label="HKD"
-                  name="HKD"
-                  value="HKD"
-                />
-              </UFormGroup>
             </UCard>
 
             <!-- Shipping Rates -->
@@ -508,7 +490,7 @@ import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
 import { v4 as uuidv4 } from 'uuid'
-import { DEFAULT_PRICE, MINIMAL_PRICE, LCD_URL, SUPPORT_CURRENCY } from '~/constant'
+import { DEFAULT_PRICE, MINIMAL_PRICE, LCD_URL } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
@@ -542,7 +524,6 @@ const mdEditorPlaceholder = ref({
 
 const classIdInput = ref(classId || '')
 const nextPriceIndex = ref(1)
-const defaultPaymentCurrency = ref<string>(SUPPORT_CURRENCY.USD)
 const mustClaimToView = ref(true)
 const enableCustomMessagePage = ref(false)
 const hideDownload = ref(false)
@@ -842,7 +823,7 @@ async function submitNewClass () {
     }
 
     await newBookListing(classIdInput.value as string, {
-      defaultPaymentCurrency,
+      defaultPaymentCurrency: 'USD',
       connectedWallets,
       moderatorWallets,
       notificationEmails,

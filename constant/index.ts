@@ -39,5 +39,4 @@ export const ISCN_TOOLS_URL = IS_TESTNET ? 'https://likecoin-iscn-nft-tools-test
 export const MINIMAL_PRICE = 0.99
 export const DEFAULT_PRICE = 4.99
 
-export const SUPPORT_CURRENCY = { USD: 'USD', HKD: 'HKD' }
 export const LIKE_ADDRESS_REGEX = /^like1[ac-hj-np-z02-9]{38}$/
