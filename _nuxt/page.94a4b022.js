@@ -1,0 +1,1 @@
+import{_ as o,q as n,w as s,E as a,o as c,L as _}from"./entry.9a6527c4.js";const r={};function l(e,f){const t=a;return c(),n(t,{class:"w-full py-4"},{default:s(()=>[_(e.$slots,"default")]),_:3})}const u=o(r,[["render",l]]);export{u as default};
