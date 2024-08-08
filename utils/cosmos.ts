@@ -327,7 +327,7 @@ export function shortenWalletAddress (address: string) {
 }
 
 export async function sendNFTsToAPIWallet (
-  classId: string,
+  classIds: string[],
   nftCount: number,
   signer: OfflineSigner,
   ownerAddress: string
@@ -342,22 +342,28 @@ export async function sendNFTsToAPIWallet (
     throw new Error('Missing signer')
   }
 
-  const { nfts } = await getNFTs({
+  const results = await Promise.all(classIds.map(classId => getNFTs({
     classId,
     owner: ownerAddress,
     needCount: nftCount
-  })
-  const nftIds = nfts.map(nft => nft.id).slice(0, nftCount)
-  const classIds = nftIds.map(_ => classId)
+  })))
 
-  if (nftIds.length < nftCount) {
-    throw new Error(`Not enough NFTs, has ${nftIds.length} but need ${nftCount}`)
-  }
+  let totalClassIds: string[] = []
+  let totalNftIds: string[] = []
+  results.forEach(({ nfts }, index) => {
+    const nftIds = nfts.map(nft => nft.id).slice(0, nftCount)
+    const classId = classIds[index]
+    if (nftIds.length < nftCount) {
+      throw new Error(`Not enough NFTs, has ${nftIds.length} but need ${nftCount}`)
+    }
+    totalNftIds = totalNftIds.concat(nftIds)
+    totalClassIds = totalClassIds.concat(nftIds.map(_ => classId))
+  })
 
   const { transactionHash, code } = await signSendNFTs(
     LIKER_NFT_TARGET_ADDRESS,
-    classIds,
-    nftIds,
+    totalClassIds,
+    totalNftIds,
     signer,
     ownerAddress,
     'Commission Liker Land to help issue this NFT ebook'

@@ -65,7 +65,32 @@
           <UInput v-model="price.price" type="number" step="0.01" :min="MINIMAL_PRICE" @input="onPriceChange" />
         </UFormGroup>
 
+        <URadioGroup
+          v-model="price.deliveryMethod"
+          :disabled="price.isPhysicalOnly"
+          legend="Delivery method of this collection"
+          :options="deliverMethodOptions"
+        />
+        <UFormGroup v-if="price.deliveryMethod === 'auto'">
+          <template #label>
+            Memo of this collection
+            <ToolTips>
+              <template #image>
+                <img
+                  src="~/assets/images/hint/memo.png"
+                  class="object-cover"
+                  alt=""
+                >
+              </template>
+              <UIcon name="i-heroicons-question-mark-circle" />
+            </ToolTips>
+          </template>
+          <UInput
+            v-model="price.autoMemo"
+          />
+        </UFormGroup>
         <UFormGroup
+          v-else
           label="Is Physical only good"
           :ui="{ label: { base: 'font-mono font-bold' } }"
         >
@@ -416,8 +441,8 @@ import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { useStripeStore } from '~/stores/stripe'
-import { getPortfolioURL } from '~/utils'
-import { getNFTAuthzGrants } from '~/utils/cosmos'
+import { getPortfolioURL, deliverMethodOptions } from '~/utils'
+import { getNFTAuthzGrants, sendNFTsToAPIWallet } from '~/utils/cosmos'
 import { useCollectionStore } from '~/stores/collection'
 
 const walletStore = useWalletStore()
@@ -425,7 +450,8 @@ const bookStoreApiStore = useBookStoreApiStore()
 const collectionStore = useCollectionStore()
 const nftStore = useNftStore()
 const stripeStore = useStripeStore()
-const { wallet } = storeToRefs(walletStore)
+const { wallet, signer } = storeToRefs(walletStore)
+const { connect } = walletStore
 const { newNFTBookCollection } = collectionStore
 const { getClassMetadataById, lazyFetchClassMetadataById } = nftStore
 const { fetchStripeConnectStatus, stripeConnectStatusWalletMap } = stripeStore
@@ -454,7 +480,9 @@ const price = ref({
   stock: Number(route.query.count as string || 1),
   hasShipping: false,
   isPhysicalOnly: false,
-  isAllowCustomPrice: true
+  isAllowCustomPrice: true,
+  deliveryMethod: 'auto',
+  autoMemo: 'Thank you for your support. It means a lot to me.'
 })
 const shippingRates = ref<any[]>([])
 const moderatorWallets = ref<string[]>([])
@@ -592,7 +620,9 @@ function formatPrice (price: any) {
     stock: Number(price.stock),
     hasShipping: Boolean(price.hasShipping || shippingRates.value.length || false),
     isPhysicalOnly: Boolean(price.isPhysicalOnly || false),
-    isAllowCustomPrice: Boolean(price.isAllowCustomPrice ?? true)
+    isAllowCustomPrice: Boolean(price.isAllowCustomPrice ?? true),
+    isAutoDeliver: !price.isPhysicalOnly && price.deliveryMethod === 'auto',
+    autoMemo: price.autoMemo
   }
 }
 
@@ -652,6 +682,33 @@ async function submitNewCollection () {
         }))
       : undefined
 
+    const formattedPrice = formatPrice(price.value)
+
+    let autoDeliverNFTsTxHash
+    if (formattedPrice.isAutoDeliver) {
+      const ok = confirm(
+        "NFT Book Press - Reminder\nOnce you choose automatic delivery, you can't switch it back to manual delivery.  Are you sure?"
+      )
+      if (!ok) {
+        return
+      }
+
+      if (formattedPrice.stock > 0) {
+        if (!wallet.value || !signer.value) {
+          await connect()
+        }
+        if (!wallet.value || !signer.value) {
+          throw new Error('Unable to connect to wallet')
+        }
+        autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
+          classIds.value,
+          formattedPrice.stock,
+          signer.value,
+          wallet.value
+        )
+      }
+    }
+
     await newNFTBookCollection({
       classIds: classIds.value,
       defaultPaymentCurrency: 'USD',
@@ -667,7 +724,8 @@ async function submitNewCollection () {
       image: image.value,
       hideDownload,
       mustClaimToView,
-      ...formatPrice(price.value)
+      autoDeliverNFTsTxHash,
+      ...formattedPrice
     })
     router.push({ name: 'nft-book-store-collection' })
   } catch (err) {
