@@ -623,6 +623,8 @@ async function submitNewCollection () {
       throw new Error('Please press "Add" button to add notification email')
     }
 
+    isLoading.value = true
+
     await Promise.all(classIds.value.map(async (classId) => {
       const { data, error: fetchError } = await useFetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${classId}`)
       if (fetchError.value && fetchError.value?.statusCode !== 404) {
