@@ -67,9 +67,36 @@
             <UInput v-model="price" type="number" step="0.01" :min="MINIMAL_PRICE" />
           </UFormGroup>
           <UFormGroup :label="`Total number of NFT for sale of this collection`">
-            <UInput v-model="stock" type="number" step="0.01" :min="0" />
+            <UInput v-model="stock" type="number" step="0.01" :min="minStock" />
+          </UFormGroup>
+
+          <URadioGroup
+            v-model="deliveryMethod"
+            :disabled="oldIsAutoDeliver || isPhysicalOnly"
+            legend="Delivery method of this collection"
+            :options="deliverMethodOptions"
+          />
+
+          <UFormGroup v-if="isAutoDeliver">
+            <template #label>
+              Memo of this collection
+              <ToolTips>
+                <template #image>
+                  <img
+                    src="~/assets/images/hint/memo.png"
+                    class="object-cover"
+                    alt=""
+                  >
+                </template>
+                <UIcon name="i-heroicons-question-mark-circle" />
+              </ToolTips>
+            </template>
+            <UInput
+              v-model="autoMemo"
+            />
           </UFormGroup>
           <UFormGroup
+            v-else
             label="Is Physical only good"
             :ui="{ label: { base: 'font-mono font-bold' } }"
           >
@@ -200,18 +227,23 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import { MdEditor, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
 import { DEFAULT_PRICE, MINIMAL_PRICE } from '~/constant'
 import { useCollectionStore } from '~/stores/collection'
+import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
+import { deliverMethodOptions } from '~/utils'
 
 const collectionStore = useCollectionStore()
-const collectionListingInfo = ref<any>({})
-
 const nftStore = useNftStore()
+const walletStore = useWalletStore()
+const { connect } = walletStore
+const { wallet, signer } = storeToRefs(walletStore)
+
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
@@ -219,9 +251,12 @@ const collectionId = ref(route.params.collectionId)
 
 const isLoading = ref(false)
 
+const collectionListingInfo = ref<any>({})
 const classIds = ref<string[]>([])
 const price = ref(DEFAULT_PRICE)
 const stock = ref(1)
+const deliveryMethod = ref('auto')
+const autoMemo = ref('Thanks for purchasing this NFT ebook.')
 const nameEn = ref('Standard Edition')
 const nameZh = ref('標準版')
 const descriptionEn = ref('')
@@ -232,6 +267,8 @@ const isAllowCustomPrice = ref(true)
 const isPhysicalOnly = ref(false)
 const shippingRates = ref<any[]>([])
 const isUpdatingShippingRates = ref(false)
+const oldStock = ref(0)
+const oldIsAutoDeliver = ref(false)
 
 const toolbarOptions = ref<string[]>([
   'bold',
@@ -252,6 +289,9 @@ const mdEditorPlaceholder = ref({
   en: 'Product description in English...',
   zh: '產品中文描述...'
 })
+
+const isAutoDeliver = computed(() => deliveryMethod.value === 'auto')
+const minStock = computed(() => oldIsAutoDeliver.value ? oldStock.value : 0)
 
 const { getClassMetadataById } = nftStore
 
@@ -291,6 +331,11 @@ onMounted(async () => {
     shippingRates.value = collectionListingInfo.value.shippingRates || []
     isPhysicalOnly.value = collectionListingInfo.value.isPhysicalOnly || false
     isAllowCustomPrice.value = collectionListingInfo.value.isAllowCustomPrice || false
+    deliveryMethod.value = collectionListingInfo.value.isAutoDeliver ? 'auto' : 'manual'
+    autoMemo.value = collectionListingInfo.value.autoMemo || ''
+
+    oldStock.value = collectionListingInfo.value.stock
+    oldIsAutoDeliver.value = collectionListingInfo.value.isAutoDeliver
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)
@@ -370,6 +415,8 @@ async function handleSubmit () {
       priceInDecimal: Math.round(Number(price.value) * 100),
       price: Number(price.value),
       stock: Number(stock.value),
+      isAutoDeliver: !isPhysicalOnly.value && isAutoDeliver.value,
+      autoMemo: autoMemo.value || '',
       hasShipping: hasShipping.value || false,
       isPhysicalOnly: isPhysicalOnly.value || false,
       isAllowCustomPrice: isAllowCustomPrice.value ?? true
@@ -396,7 +443,36 @@ async function handleSubmit () {
 
     isLoading.value = true
 
-    await collectionStore.updateNFTBookCollectionById(collectionId.value as string, editedPrice)
+    let newAutoDeliverNFTsCount = 0
+    if (editedPrice.isAutoDeliver) {
+      newAutoDeliverNFTsCount = oldIsAutoDeliver.value
+        ? editedPrice.stock - oldStock.value
+        : editedPrice.stock
+    }
+
+    let autoDeliverNFTsTxHash
+    if (newAutoDeliverNFTsCount > 0) {
+      if (!wallet.value || !signer.value) {
+        await connect()
+      }
+      if (!wallet.value || !signer.value) {
+        throw new Error('Unable to connect to wallet')
+      }
+      autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
+        classIds.value,
+        newAutoDeliverNFTsCount,
+        signer.value,
+        wallet.value
+      )
+    }
+
+    await collectionStore.updateNFTBookCollectionById(
+      collectionId.value as string,
+      {
+        autoDeliverNFTsTxHash,
+        ...editedPrice
+      }
+    )
 
     router.push({
       name: 'nft-book-store-collection-status-collectionId',

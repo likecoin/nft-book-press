@@ -487,7 +487,7 @@ async function handleSubmit () {
         throw new Error('Unable to connect to wallet')
       }
       autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
-        classId.value as string,
+        [classId.value as string],
         newAutoDeliverNFTsCount,
         signer.value,
         wallet.value
