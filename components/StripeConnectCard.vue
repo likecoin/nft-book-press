@@ -156,8 +156,8 @@ const props = defineProps({
     default: ''
   },
   shouldDisableSetting: {
-    type: String,
-    default: ''
+    type: Boolean,
+    default: false
   },
   stripeConnectStatusWalletMap: {
     type: Object,
