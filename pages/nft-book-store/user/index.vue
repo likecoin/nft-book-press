@@ -230,7 +230,8 @@
             </template>
             <template #collectionId-data="{ row }">
               <a :href="`${LIKER_LAND_URL}/nft/collection/${row.collectionId}`" target="_blank">
-                {{ collectionStore.getCollectionById(row.collectionId)?.name }}
+                {{ collectionStore.getCollectionById(row.collectionId)?.name?.zh
+                  || collectionStore.getCollectionById(row.collectionId)?.name?.en }}
               </a>
             </template>
           </UTable>
