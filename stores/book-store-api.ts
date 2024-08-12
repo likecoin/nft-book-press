@@ -26,7 +26,10 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
   async function authenticate (inputWallet: string, signature: any) {
     const { error, data } = await useFetch(`${LIKE_CO_API}/wallet/authorize`, {
       method: 'POST',
-      body: signature
+      body: {
+        expiresIn: '1d',
+        ...signature
+      }
     })
     if (error.value) { throw error.value }
     if ((!data?.value as any)?.token) { throw new Error('INVALID_SIGNATURE') }
