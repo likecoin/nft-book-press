@@ -312,6 +312,7 @@ async function onSendNFTStart () {
       if (owner !== ownerWallet.value) {
         throw new Error(`NFT classId: ${classId} nftId:${nftId} is not owned by sender!`)
       }
+      nftIds.value = [nftId.value]
     } else {
       await fetchNextNFTId(orderInfo.quantity)
     }
