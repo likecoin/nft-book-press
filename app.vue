@@ -9,6 +9,24 @@
   </div>
 </template>
 
+<script setup lang="ts">
+import { useBookStoreApiStore } from '~/stores/book-store-api'
+
+const bookStoreApiStore = useBookStoreApiStore()
+const { restoreSession } = bookStoreApiStore
+
+onMounted(() => {
+  try {
+    const payload = window.localStorage.getItem('likecoin_nft_book_press_token')
+    if (payload) {
+      const { wallet: storedWallet, token } = JSON.parse(payload)
+      restoreSession(storedWallet, token)
+    }
+  } catch {}
+})
+
+</script>
+
 <style>
 .page-enter-active,
 .page-leave-active {
