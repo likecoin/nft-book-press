@@ -5,7 +5,7 @@
     </h1>
 
     <UContainer
-      v-if="!signer"
+      v-if="!signer || !bookStoreApiStore.isAuthenticated"
       class="flex justify-center items-center py-8 text-lg font-medium"
     >
       <h2>Please sign in to continue</h2>
@@ -24,17 +24,6 @@ const route = useRoute()
 const bookStoreApiStore = useBookStoreApiStore()
 const store = useWalletStore()
 const { signer } = storeToRefs(store)
-const { restoreSession } = bookStoreApiStore
-
-onMounted(() => {
-  try {
-    const payload = window.localStorage.getItem('likecoin_nft_book_press_token')
-    if (payload) {
-      const { wallet: storedWallet, token } = JSON.parse(payload)
-      restoreSession(storedWallet, token)
-    }
-  } catch {}
-})
 
 </script>
 <style scoped>
