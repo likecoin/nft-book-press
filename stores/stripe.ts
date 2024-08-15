@@ -1,13 +1,21 @@
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
+import { useBookStoreApiStore } from './book-store-api'
 import { LIKE_CO_API } from '~/constant'
 
 export const useStripeStore = defineStore('stripe-connect', () => {
+  const bookStoreApiStore = useBookStoreApiStore()
+  const { token } = storeToRefs(bookStoreApiStore)
+
   const stripeConnectStatusWalletMap = ref({} as Record<string, any>)
 
   async function fetchStripeConnectStatus (wallet: string) {
     stripeConnectStatusWalletMap.value[wallet] = { isReady: false }
-    const { data, error } = await useFetch(
-        `${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${wallet}`
+    const { data, error } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${wallet}`,
+      {
+        headers: {
+          authorization: `Bearer ${token.value}`
+        }
+      }
     )
     stripeConnectStatusWalletMap.value[wallet] = (data?.value as any) || {}
     if (error.value) {
