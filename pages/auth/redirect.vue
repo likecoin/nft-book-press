@@ -16,13 +16,14 @@ const store = useWalletStore()
 const { handleConnectorRedirect } = store
 
 const { wallet, signer } = storeToRefs(store)
-const { signMessageMemo } = store
+const { signMessageMemo, disconnect } = store
 const bookStoreApiStore = useBookStoreApiStore()
 const { authenticate } = bookStoreApiStore
 const { token, wallet: sessionWallet } = storeToRefs(bookStoreApiStore)
 
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 
 onMounted(async () => {
   const { method, code } = route.query
@@ -37,11 +38,28 @@ onMounted(async () => {
         'authorize',
         ['read:nftbook', 'write:nftbook', 'read:nftcollection', 'write:nftcollection']
       )
-      if (!signature) { return }
+      if (!signature) {
+        disconnect()
+        router.replace('/')
+        return
+      }
       await authenticate(wallet.value, signature)
       try {
         window.localStorage.setItem('likecoin_nft_book_press_token', JSON.stringify({ wallet: sessionWallet.value, token: token.value }))
-      } catch (err) {}
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err)
+      }
+    } else {
+      toast.add({
+        icon: 'i-heroicons-exclamation-circle',
+        title: 'Failed to authenticate: no signer',
+        timeout: 0,
+        color: 'red',
+        ui: {
+          title: 'text-red-400 dark:text-red-400'
+        }
+      })
     }
 
     const postAuthRoute = '/'
