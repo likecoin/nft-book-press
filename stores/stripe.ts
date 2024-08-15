@@ -1,6 +1,6 @@
 import { defineStore, storeToRefs } from 'pinia'
-import { useBookStoreApiStore } from './book-store-api'
 import { LIKE_CO_API } from '~/constant'
+import { useBookStoreApiStore } from '~/stores/book-store-api'
 
 export const useStripeStore = defineStore('stripe-connect', () => {
   const bookStoreApiStore = useBookStoreApiStore()
