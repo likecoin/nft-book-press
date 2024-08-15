@@ -266,11 +266,11 @@
               </h3>
             </template>
             <UForm :validate="validate" :state="state">
-              <UFormGroup label="NFT ID Prefix:" name="prefix">
+              <UFormGroup label="NFT ID Prefix:" name="prefix" required>
                 <UInput v-model="state.nftIdPrefix" placeholder="English only ex.MoneyVerse" />
               </UFormGroup>
 
-              <UFormGroup label="Number of NFT to mint:">
+              <UFormGroup label="Number of NFT to mint:" required>
                 <UInput
                   v-model="nftMintCount"
                   placeholder="0-100"
@@ -280,7 +280,7 @@
                 />
               </UFormGroup>
 
-              <UFormGroup label="Image URL:">
+              <UFormGroup label="Image URL:" required>
                 <UInput v-model="imageUrl" placeholder="ipfs:// ... or ar://...." />
               </UFormGroup>
 
