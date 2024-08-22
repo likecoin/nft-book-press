@@ -418,8 +418,12 @@
                 <UInput v-model="fromChannel" placeholder="Channel ID" />
               </UFormGroup>
 
-              <UFormGroup v-if="Object.keys(coupons).length" label="Active coupon" hint="Optional">
-                <USelect v-model="activeCoupon" :options="[''].concat(Object.keys(coupons))" />
+              <UFormGroup v-if="couponsTableRows.length" label="Active coupon" hint="Optional">
+                <USelect
+                  v-model="activeCoupon"
+                  :options="[{ value: '', label: 'Select a coupon' }].concat(couponsTableRows.map(({ id }) => ({ label: id, value: id })))"
+                  :ui="!activeCoupon ? { color: { white: { outline: 'text-gray-400 dark:text-gray-500' } } } : {}"
+                />
               </UFormGroup>
 
               <UButton
