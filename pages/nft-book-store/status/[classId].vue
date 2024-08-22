@@ -379,17 +379,6 @@
         </div>
         <template v-if="shouldShowAdvanceSettings">
           <div class="mt-[24px] flex flex-col gap-[12px]">
-            <!-- Default Currency -->
-            <UCard
-              :ui="{ header: { base: 'flex justify-between items-center gap-2' } }"
-            >
-              <template #header>
-                <h3 class="font-bold font-mono">
-                  Default Currency
-                </h3>
-              </template>
-            </UCard>
-
             <!-- Shipping Rates -->
             <ShippingRatesRateTable
               :is-show-physical-goods-checkbox="false"
