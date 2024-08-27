@@ -1,5 +1,5 @@
 <template>
-  <main class="space-y-4">
+  <PageBody>
     <h1 class="text-lg font-bold font-mono">
       Gift NFT Book "{{ nftClassName || classId }}"
     </h1>
@@ -78,7 +78,7 @@
         <UButton label="Confirm" :disabled="!isAllFieldsFilled" size="xl" @click="onSendGift" />
       </template>
     </UCard>
-  </main>
+  </PageBody>
 </template>
 
 <script setup lang="ts">

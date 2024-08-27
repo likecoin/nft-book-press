@@ -1,207 +1,207 @@
 <template>
-  <main class="space-y-4">
-    <h1 class="text-xl font-bold font-mono">
-      Generate Affiliation Links
-    </h1>
+  <PageContainer>
+    <PageHeader title="Generate Affiliation Links" />
 
-    <UCard v-if="!productData" :ui="{ body: { base: 'space-y-4' }, footer: { base: 'flex justify-end' } }">
-      <UFormGroup
-        label="Product ID"
-        :required="true"
-        :error="error"
-      >
-        <UInput
-          v-model="productIdInput"
-          class="font-mono"
-          placeholder="Enter NFT Class ID/Collection ID"
+    <PageBody class="flex flex-col items-stretch grow space-y-4">
+      <UCard v-if="!productData" :ui="{ body: { base: 'space-y-4' }, footer: { base: 'flex justify-end' } }">
+        <UFormGroup
+          label="Product ID"
           :required="true"
-        />
-      </UFormGroup>
-
-      <UFormGroup label="Link Settings">
-        <USelect v-model="linkSetting" :options="linkSettings" option-attribute="name" />
-      </UFormGroup>
-
-      <UFormGroup
-        v-if="isCustomLink"
-        label="Custom Link"
-        :required="true"
-      >
-        <UInput
-          v-model="customLinkInput"
-          class="font-mono"
-          placeholder="https://books.liker.land"
-          :required="true"
-        />
-      </UFormGroup>
-
-      <UFormGroup label="Custom Channels" hint="Optional">
-        <UInput
-          v-model="customChannelInput"
-          class="font-mono"
-          placeholder="Channel ID(s), separated by commas (e.g. store01, store02)"
-        />
-      </UFormGroup>
-
-      <UFormGroup label="Query Parameters" hint="Optional">
-        <UInput
-          v-model="linkQueryInput"
-          class="font-mono"
-          placeholder="utm_source=instagram&utm_medium=social"
-        />
-      </UFormGroup>
-
-      <template #footer>
-        <UButton
-          label="Generate"
-          size="lg"
-          :disabled="!productIdInput || isLoadingProductData"
-          :loading="isLoadingProductData"
-          @click="createAffiliationLink"
-        />
-      </template>
-    </UCard>
-
-    <UCard
-      v-else
-      :ui="{
-        header: { base: 'flex justify-between items-center' },
-        body: { base: 'divide-y divide-gray-200 dark:divide-gray-800', padding: '' }
-      }"
-    >
-      <template #header>
-        <div class="flex items-center gap-4">
-          <UButton
-            icon="i-heroicons-arrow-uturn-left"
-            label="Back"
-            variant="soft"
-            @click="productData = undefined"
-          />
-
-          <h2 class="font-bold">
-            {{ tableTitle }}
-          </h2>
-        </div>
-
-        <UDropdown
-          :items="[
-            [
-              {
-                label: 'Print All QR Codes',
-                icon: 'i-heroicons-qr-code',
-                click: printAllQRCodes,
-              },
-              {
-                label: 'Download QR Codes',
-                icon: 'i-heroicons-arrow-down-on-square-stack',
-                click: downloadAllQRCodes,
-              },
-              {
-                label: 'Download All Links',
-                icon: 'i-heroicons-arrow-down-on-square-stack',
-                click: downloadAllPurchaseLinks,
-              },
-              {
-                label: 'Shorten All Links',
-                icon: 'i-heroicons-sparkles',
-                click: shortenAllLinks,
-              },
-            ]
-          ]"
-          :popper="{ placement: 'top-end' }"
+          :error="error"
         >
-          <UButton
-            icon="i-heroicons-ellipsis-horizontal-20-solid"
-            color="gray"
-            variant="soft"
-          />
-        </UDropdown>
-      </template>
-
-      <div v-if="priceIndexOptions.length" class="px-4 py-5 sm:p-6">
-        <UFormGroup label="Edition">
-          <USelect
-            v-model="priceIndex"
-            :options="priceIndexOptions"
+          <UInput
+            v-model="productIdInput"
+            class="font-mono"
+            placeholder="Enter NFT Class ID/Collection ID"
+            :required="true"
           />
         </UFormGroup>
-      </div>
 
-      <div
-        v-if="linkQueryTableRows.length"
-        class="px-4 py-5 sm:p-6"
-      >
-        <UCard
-          :ui="{ body: { padding: '' } }"
+        <UFormGroup label="Link Settings">
+          <USelect v-model="linkSetting" :options="linkSettings" option-attribute="name" />
+        </UFormGroup>
+
+        <UFormGroup
+          v-if="isCustomLink"
+          label="Custom Link"
+          :required="true"
         >
-          <template #header>
-            <h3 class="text-sm font-bold">
-              Link Query Parameters
-            </h3>
-          </template>
-
-          <UTable
-            :columns="[
-              { key: 'key', label: 'Key' },
-              { key: 'value', label: 'Value' }
-            ]"
-            :rows="linkQueryTableRows"
-            :ui="{ td: { font: 'font-mono' } }"
+          <UInput
+            v-model="customLinkInput"
+            class="font-mono"
+            placeholder="https://books.liker.land"
+            :required="true"
           />
-        </UCard>
-      </div>
+        </UFormGroup>
 
-      <UTable :columns="tableColumns" :rows="tableRows">
-        <template #link-data="{ row }">
-          <div class="flex items-center gap-2">
-            <UButton
-              icon="i-heroicons-qr-code"
-              variant="outline"
-              size="xs"
-              @click="selectedPurchaseLink = row"
-            />
-            <UButton
-              icon="i-heroicons-document-duplicate"
-              variant="outline"
-              size="xs"
-              @click="copyLink(row.url || '')"
-            />
-            <UButton
-              class="font-mono break-all"
-              :label="row.url"
-              :to="row.url"
-              color="gray"
-              variant="outline"
-              size="xs"
-              target="_blank"
-            />
-          </div>
+        <UFormGroup label="Custom Channels" hint="Optional">
+          <UInput
+            v-model="customChannelInput"
+            class="font-mono"
+            placeholder="Channel ID(s), separated by commas (e.g. store01, store02)"
+          />
+        </UFormGroup>
+
+        <UFormGroup label="Query Parameters" hint="Optional">
+          <UInput
+            v-model="linkQueryInput"
+            class="font-mono"
+            placeholder="utm_source=instagram&utm_medium=social"
+          />
+        </UFormGroup>
+
+        <template #footer>
+          <UButton
+            label="Generate"
+            size="lg"
+            :disabled="!productIdInput || isLoadingProductData"
+            :loading="isLoadingProductData"
+            @click="createAffiliationLink"
+          />
         </template>
-      </UTable>
-    </UCard>
+      </UCard>
 
-    <UModal v-model="isOpenQRCodeModal">
-      <QRCodeGenerator
-        v-if="selectedPurchaseLink"
-        :data="selectedPurchaseLink.url"
-        :file-name="getQRCodeFilename(selectedPurchaseLink.channel)"
-        :width="500"
-        :height="500"
+      <UCard
+        v-else
+        :ui="{
+          header: { base: 'flex justify-between items-center' },
+          body: { base: 'divide-y divide-gray-200 dark:divide-gray-800', padding: '' }
+        }"
       >
         <template #header>
-          <h3 class="font-bold font-mono">
-            Download QR Code
-          </h3>
-          <UButton
-            icon="i-heroicons-x-mark"
-            color="gray"
-            variant="ghost"
-            @click="isOpenQRCodeModal = false"
-          />
+          <div class="flex items-center gap-4">
+            <UButton
+              icon="i-heroicons-arrow-uturn-left"
+              label="Back"
+              variant="soft"
+              @click="productData = undefined"
+            />
+
+            <h2 class="font-bold">
+              {{ tableTitle }}
+            </h2>
+          </div>
+
+          <UDropdown
+            :items="[
+              [
+                {
+                  label: 'Print All QR Codes',
+                  icon: 'i-heroicons-qr-code',
+                  click: printAllQRCodes,
+                },
+                {
+                  label: 'Download QR Codes',
+                  icon: 'i-heroicons-arrow-down-on-square-stack',
+                  click: downloadAllQRCodes,
+                },
+                {
+                  label: 'Download All Links',
+                  icon: 'i-heroicons-arrow-down-on-square-stack',
+                  click: downloadAllPurchaseLinks,
+                },
+                {
+                  label: 'Shorten All Links',
+                  icon: 'i-heroicons-sparkles',
+                  click: shortenAllLinks,
+                },
+              ]
+            ]"
+            :popper="{ placement: 'top-end' }"
+          >
+            <UButton
+              icon="i-heroicons-ellipsis-horizontal-20-solid"
+              color="gray"
+              variant="soft"
+            />
+          </UDropdown>
         </template>
-      </QRCodeGenerator>
-    </UModal>
-  </main>
+
+        <div v-if="priceIndexOptions.length" class="px-4 py-5 sm:p-6">
+          <UFormGroup label="Edition">
+            <USelect
+              v-model="priceIndex"
+              :options="priceIndexOptions"
+            />
+          </UFormGroup>
+        </div>
+
+        <div
+          v-if="linkQueryTableRows.length"
+          class="px-4 py-5 sm:p-6"
+        >
+          <UCard
+            :ui="{ body: { padding: '' } }"
+          >
+            <template #header>
+              <h3 class="text-sm font-bold">
+                Link Query Parameters
+              </h3>
+            </template>
+
+            <UTable
+              :columns="[
+                { key: 'key', label: 'Key' },
+                { key: 'value', label: 'Value' }
+              ]"
+              :rows="linkQueryTableRows"
+              :ui="{ td: { font: 'font-mono' } }"
+            />
+          </UCard>
+        </div>
+
+        <UTable :columns="tableColumns" :rows="tableRows">
+          <template #link-data="{ row }">
+            <div class="flex items-center gap-2">
+              <UButton
+                icon="i-heroicons-qr-code"
+                variant="outline"
+                size="xs"
+                @click="selectedPurchaseLink = row"
+              />
+              <UButton
+                icon="i-heroicons-document-duplicate"
+                variant="outline"
+                size="xs"
+                @click="copyLink(row.url || '')"
+              />
+              <UButton
+                class="font-mono break-all"
+                :label="row.url"
+                :to="row.url"
+                color="gray"
+                variant="outline"
+                size="xs"
+                target="_blank"
+              />
+            </div>
+          </template>
+        </UTable>
+      </UCard>
+
+      <UModal v-model="isOpenQRCodeModal">
+        <QRCodeGenerator
+          v-if="selectedPurchaseLink"
+          :data="selectedPurchaseLink.url"
+          :file-name="getQRCodeFilename(selectedPurchaseLink.channel)"
+          :width="500"
+          :height="500"
+        >
+          <template #header>
+            <h3 class="font-bold font-mono">
+              Download QR Code
+            </h3>
+            <UButton
+              icon="i-heroicons-x-mark"
+              color="gray"
+              variant="ghost"
+              @click="isOpenQRCodeModal = false"
+            />
+          </template>
+        </QRCodeGenerator>
+      </UModal>
+    </PageBody>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">

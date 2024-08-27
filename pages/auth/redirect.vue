@@ -1,16 +1,16 @@
 <template>
-  <div class="redirect-page">
-    <div class="flex flex-col items-center my-48">
-      <h1 class="text-24">
-        Redirecting
-      </h1>
-    </div>
-  </div>
+  <PageBody class="flex flex-col items-center justify-center">
+    <h1 class="text-24">
+      Redirecting
+    </h1>
+  </PageBody>
 </template>
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
+
+definePageMeta({ layout: 'page' })
 
 const store = useWalletStore()
 const { handleConnectorRedirect } = store

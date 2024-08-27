@@ -1,141 +1,141 @@
 <template>
-  <div class="space-y-4">
-    <h1 class="text-xl font-bold font-mono">
-      Send NFT Authz Grants Management Page
-    </h1>
+  <PageContainer>
+    <PageHeader title=" Send NFT Authz Grants Management Page" />
 
-    <UAlert
-      v-if="error"
-      icon="i-heroicons-exclamation-triangle"
-      color="red"
-      variant="soft"
-      :title="`${error}`"
-      :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'red', variant: 'link', padded: false }"
-      @close="error = ''"
-    />
-
-    <UProgress v-if="isLoading" animation="carousel">
-      <template #indicator>
-        Loading...
-      </template>
-    </UProgress>
-
-    <UContainer
-      v-if="!wallet"
-      class="flex justify-center items-center py-8"
-    >
-      <UCard :ui="{ body: { base: 'flex justify-center items-center' } }">
-        <template #header>
-          <h2 class="font-bold font-mono">
-            Connect your wallet
-          </h2>
-        </template>
-
-        <UButton
-          label="Connect"
-          :loading="isLoading"
-          :disabled="isLoading"
-          @click="onClickConnect"
-        />
-      </UCard>
-    </UContainer>
-
-    <template v-else>
+    <PageBody class="grow space-y-4">
       <UAlert
+        v-if="error"
         icon="i-heroicons-exclamation-triangle"
-        color="amber"
+        color="red"
         variant="soft"
-        title="Warning"
-        :ui="{ title: 'font-bold font-mono', description: 'leading-5' }"
+        :title="`${error}`"
+        :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'red', variant: 'link', padded: false }"
+        @close="error = ''"
+      />
+
+      <UProgress v-if="isLoading" animation="carousel">
+        <template #indicator>
+          Loading...
+        </template>
+      </UProgress>
+
+      <UContainer
+        v-if="!wallet"
+        class="flex justify-center items-center py-8"
       >
-        <template #description>
-          Granting other wallet send NFT Authz permission allows them to send away <b>ANY</b> NFT you own,
-          not limited to NFT books or NFT you created. Use with <b>CAUTION</b> and <b>ONLY</b> grant to those you absolutely trust!
-        </template>
-      </UAlert>
+        <UCard :ui="{ body: { base: 'flex justify-center items-center' } }">
+          <template #header>
+            <h2 class="font-bold font-mono">
+              Connect your wallet
+            </h2>
+          </template>
 
-      <UCard>
-        <template #header>
-          <h2 class="font-bold font-mono">
-            Current Grants
-          </h2>
-        </template>
-
-        <UCard :ui="{ body: { padding: '' } }">
-          <UTable
-            :columns="[
-              {
-                key: 'wallet',
-                label: 'Wallet',
-                sortable: true
-              },
-              {
-                key: 'expiration',
-                label: 'Expiration',
-                sortable: true
-              },
-              { key: 'actions' },
-            ]"
-            :rows="tableRows"
-            :sort="{ column: 'expiration', direction: 'desc' }"
-          >
-            <template #wallet-data="{ row }">
-              <UTooltip :text="row.wallet">
-                <UButton
-                  class="font-mono"
-                  :label="row.shortenWallet"
-                  :to="getPortfolioURL(row.wallet)"
-                  variant="link"
-                  :padded="false"
-                  size="xs"
-                  target="_blank"
-                />
-              </UTooltip>
-            </template>
-            <template #actions-data="{ row }">
-              <div class="flex items-center gap-2">
-                <UButton
-                  label="Renew"
-                  variant="outline"
-                  :disabled="isLoading"
-                  @click="onClickRenewGrant(row.wallet)"
-                />
-                <UButton
-                  label="Revoke"
-                  variant="outline"
-                  :disabled="isLoading"
-                  @click="onClickRevokeGrant(row.wallet)"
-                />
-              </div>
-            </template>
-          </UTable>
-        </UCard>
-      </UCard>
-
-      <UCard>
-        <template #header>
-          <h2 class="font-bold font-mono">
-            Grant new send NFT Authz
-          </h2>
-        </template>
-
-        <UInput
-          v-model="newGrantee"
-          class="font-mono"
-          placeholder="like1..."
-        />
-
-        <template #footer>
           <UButton
-            label="Submit"
+            label="Connect"
             :loading="isLoading"
-            :disabled="!newGrantee || isLoading"
-            @click="onNewGrant()"
+            :disabled="isLoading"
+            @click="onClickConnect"
           />
-        </template>
-      </UCard>
-    </template>
-  </div>
+        </UCard>
+      </UContainer>
+
+      <template v-else>
+        <UAlert
+          icon="i-heroicons-exclamation-triangle"
+          color="amber"
+          variant="soft"
+          title="Warning"
+          :ui="{ title: 'font-bold font-mono', description: 'leading-5' }"
+        >
+          <template #description>
+            Granting other wallet send NFT Authz permission allows them to send away <b>ANY</b> NFT you own,
+            not limited to NFT books or NFT you created. Use with <b>CAUTION</b> and <b>ONLY</b> grant to those you absolutely trust!
+          </template>
+        </UAlert>
+
+        <UCard>
+          <template #header>
+            <h2 class="font-bold font-mono">
+              Current Grants
+            </h2>
+          </template>
+
+          <UCard :ui="{ body: { padding: '' } }">
+            <UTable
+              :columns="[
+                {
+                  key: 'wallet',
+                  label: 'Wallet',
+                  sortable: true
+                },
+                {
+                  key: 'expiration',
+                  label: 'Expiration',
+                  sortable: true
+                },
+                { key: 'actions' },
+              ]"
+              :rows="tableRows"
+              :sort="{ column: 'expiration', direction: 'desc' }"
+            >
+              <template #wallet-data="{ row }">
+                <UTooltip :text="row.wallet">
+                  <UButton
+                    class="font-mono"
+                    :label="row.shortenWallet"
+                    :to="getPortfolioURL(row.wallet)"
+                    variant="link"
+                    :padded="false"
+                    size="xs"
+                    target="_blank"
+                  />
+                </UTooltip>
+              </template>
+              <template #actions-data="{ row }">
+                <div class="flex items-center gap-2">
+                  <UButton
+                    label="Renew"
+                    variant="outline"
+                    :disabled="isLoading"
+                    @click="onClickRenewGrant(row.wallet)"
+                  />
+                  <UButton
+                    label="Revoke"
+                    variant="outline"
+                    :disabled="isLoading"
+                    @click="onClickRevokeGrant(row.wallet)"
+                  />
+                </div>
+              </template>
+            </UTable>
+          </UCard>
+        </UCard>
+
+        <UCard>
+          <template #header>
+            <h2 class="font-bold font-mono">
+              Grant new send NFT Authz
+            </h2>
+          </template>
+
+          <UInput
+            v-model="newGrantee"
+            class="font-mono"
+            placeholder="like1..."
+          />
+
+          <template #footer>
+            <UButton
+              label="Submit"
+              :loading="isLoading"
+              :disabled="!newGrantee || isLoading"
+              @click="onNewGrant()"
+            />
+          </template>
+        </UCard>
+      </template>
+    </PageBody>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">

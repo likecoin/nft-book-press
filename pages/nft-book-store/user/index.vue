@@ -1,5 +1,5 @@
 <template>
-  <main class="space-y-4">
+  <PageBody>
     <UAlert
       v-if="error"
       icon="i-heroicons-exclamation-triangle"
@@ -23,7 +23,6 @@
       <UCard
         :ui="{
           header: { base: 'flex justify-between items-center' },
-          body: { padding: '' },
           footer: { base: 'text-center' },
         }"
       >
@@ -32,26 +31,23 @@
             Book Affiliation Program
           </h1>
         </template>
-        <div v-if="likerIdInfo?.user">
-          <h2>
-            Your affiliation channel ID
-          </h2>
-          <code class="text-center font-bold font-mono">
-            @{{ likerIdInfo?.user }}
-          </code>
-          <p v-if="!connectStatus.isReady">
+
+        <UFormGroup v-if="likerIdInfo?.user" label="Your affiliation channel ID" size="xl">
+          <UInput placeholder="Affiliation ID" :value="`@${likerIdInfo?.user}`" disabled />
+
+          <template v-if="!connectStatus.isReady" #help>
             Please setup your stripe account below to participate in the book affiliation program.
-          </p>
-          <p v-else>
-            Append <code class="font-bold font-mono">?from=@{{ likerIdInfo?.user }}</code> in any book store page to earn commission from book sales.
-          </p>
-        </div>
+          </template>
+          <template v-else #help>
+            Append <UKbd class="font-mono">?from=@{{ likerIdInfo?.user }}</UKbd> in any book store page to earn commission from book sales.
+          </template>
+        </UFormGroup>
+
         <p v-else>
           You have not setup your channel ID yet.
         </p>
-        <template #footer>
+        <template v-if="!likerIdInfo?.user" #footer>
           <UButton
-            v-if="!likerIdInfo?.user"
             label="Setup your ID"
             size="lg"
             rel="noopener"
@@ -238,7 +234,7 @@
         </UCard>
       </template>
     </template>
-  </main>
+  </PageBody>
 </template>
 
 <script setup lang="ts">

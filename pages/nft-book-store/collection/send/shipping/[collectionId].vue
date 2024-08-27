@@ -1,5 +1,5 @@
 <template>
-  <main class="space-y-4">
+  <PageBody>
     <h1 class="text-lg font-bold font-mono">
       NFT Book Collection Physical Good shipping status "{{ collectionName || collectionId }}"
     </h1>
@@ -144,7 +144,7 @@
         />
       </template>
     </UCard>
-  </main>
+  </PageBody>
 </template>
 
 <script setup lang="ts">

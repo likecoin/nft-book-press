@@ -1,5 +1,5 @@
 <template>
-  <main class="space-y-10 pb-10">
+  <PageBody class="space-y-10 pb-10">
     <div class="flex justify-between gap-4">
       <h1 class="text-lg font-bold font-mono flex-wrap">
         NFT Book Status "{{ nftClassName || classId }}"
@@ -705,7 +705,7 @@
     </UModal>
 
     <NuxtPage :transition="false" />
-  </main>
+  </PageBody>
 </template>
 
 <script setup lang="ts">

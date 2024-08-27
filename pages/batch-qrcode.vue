@@ -1,5 +1,5 @@
 <template>
-  <main class="space-y-4 print:space-y-0">
+  <PageBody class="print:space-y-0 print:p-0">
     <h1 class="text-lg font-bold font-mono print:hidden">
       Batch Create QR Codes
     </h1>
@@ -90,7 +90,7 @@
         </li>
       </ul>
     </div>
-  </main>
+  </PageBody>
 </template>
 
 <script setup lang="ts">

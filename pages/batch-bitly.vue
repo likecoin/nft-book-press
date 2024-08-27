@@ -1,113 +1,114 @@
 <template>
-  <main class="space-y-4">
-    <h1 class="text-xl font-bold font-mono ">
-      Batch Create Bitly Links
-    </h1>
-    <UFormGroup
-      label="Bitly Access Token"
-      :required="true"
-    >
-      <UInput
-        v-model="bitlyToken"
-        class="font-mono"
-        :autocomplete="false"
+  <PageContainer>
+    <PageHeader title="Batch Create Bitly Links" />
+
+    <PageBody>
+      <UFormGroup
+        label="Bitly Access Token"
         :required="true"
-      />
-    </UFormGroup>
-
-    <UFormGroup label="Title Prefix">
-      <UInput
-        v-model="titlePrefix"
-        hint="Optional"
-      />
-    </UFormGroup>
-
-    <UCard :ui="{ body: { base: 'space-y-2' } }">
-      <UFormGroup label="Upload CSV file">
-        <UInput type="file" accept="csv" @change="handleFileChange" />
-      </UFormGroup>
-      <UDivider class="print:hidden" label="OR" />
-      <UFormGroup label="Input CSV content">
-        <UTextarea
-          v-model="csvInput"
+      >
+        <UInput
+          v-model="bitlyToken"
           class="font-mono"
-          :placeholder="csvInputPlaceholder"
-          :resize="true"
+          :autocomplete="false"
+          :required="true"
         />
       </UFormGroup>
-    </UCard>
 
-    <div class="flex justify-center">
-      <UButton
-        label="Start"
-        size="lg"
-        :disabled="!csvInput || !bitlyToken"
-        @click="startShorteningURLs"
-      />
-    </div>
+      <UFormGroup label="Title Prefix">
+        <UInput
+          v-model="titlePrefix"
+          hint="Optional"
+        />
+      </UFormGroup>
 
-    <template v-if="shortenedURLItems.length">
-      <UCard
-        :ui="{
-          header: { base: 'flex justify-between items-center gap-2' },
-          body: { padding: '' }
-        }"
-      >
-        <template #header>
-          <h3 class="font-bold font-mono">
-            Results
-          </h3>
-
-          <div class="flex items-center gap-2">
-            <UButton
-              label="Download CSV"
-              variant="outline"
-              @click="downloadAllShortenedLinks"
-            />
-            <UButton
-              label="Convert to QR Codes"
-              variant="outline"
-              @click="convertToQRCode"
-            />
-          </div>
-        </template>
-
-        <UTable
-          :columns="[
-            { key: 'key', label: 'Key' },
-            { key: 'url', label: 'URL' },
-            { key: 'destination', label: 'Destination' },
-          ]"
-          :rows="shortenedURLItems"
-        >
-          <template #url-data="{ row }">
-            <UButton
-              class="font-mono"
-              :to="row.url"
-              target="_blank"
-              rel="noopener"
-              variant="link"
-              :padded="false"
-            >
-              {{ row.url }}
-            </UButton>
-          </template>
-          <template #destination-data="{ row }">
-            <UButton
-              class="font-mono"
-              :to="row.destination"
-              target="_blank"
-              rel="noopener"
-              variant="link"
-              :padded="false"
-            >
-              {{ row.destination }}
-            </UButton>
-          </template>
-        </UTable>
+      <UCard :ui="{ body: { base: 'space-y-2' } }">
+        <UFormGroup label="Upload CSV file">
+          <UInput type="file" accept="csv" @change="handleFileChange" />
+        </UFormGroup>
+        <UDivider class="print:hidden" label="OR" />
+        <UFormGroup label="Input CSV content">
+          <UTextarea
+            v-model="csvInput"
+            class="font-mono"
+            :placeholder="csvInputPlaceholder"
+            :resize="true"
+          />
+        </UFormGroup>
       </UCard>
-    </template>
-  </main>
+
+      <div class="flex justify-center">
+        <UButton
+          label="Start"
+          size="lg"
+          :disabled="!csvInput || !bitlyToken"
+          @click="startShorteningURLs"
+        />
+      </div>
+
+      <template v-if="shortenedURLItems.length">
+        <UCard
+          :ui="{
+            header: { base: 'flex justify-between items-center gap-2' },
+            body: { padding: '' }
+          }"
+        >
+          <template #header>
+            <h3 class="font-bold font-mono">
+              Results
+            </h3>
+
+            <div class="flex items-center gap-2">
+              <UButton
+                label="Download CSV"
+                variant="outline"
+                @click="downloadAllShortenedLinks"
+              />
+              <UButton
+                label="Convert to QR Codes"
+                variant="outline"
+                @click="convertToQRCode"
+              />
+            </div>
+          </template>
+
+          <UTable
+            :columns="[
+              { key: 'key', label: 'Key' },
+              { key: 'url', label: 'URL' },
+              { key: 'destination', label: 'Destination' },
+            ]"
+            :rows="shortenedURLItems"
+          >
+            <template #url-data="{ row }">
+              <UButton
+                class="font-mono"
+                :to="row.url"
+                target="_blank"
+                rel="noopener"
+                variant="link"
+                :padded="false"
+              >
+                {{ row.url }}
+              </UButton>
+            </template>
+            <template #destination-data="{ row }">
+              <UButton
+                class="font-mono"
+                :to="row.destination"
+                target="_blank"
+                rel="noopener"
+                variant="link"
+                :padded="false"
+              >
+                {{ row.destination }}
+              </UButton>
+            </template>
+          </UTable>
+        </UCard>
+      </template>
+    </PageBody>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">

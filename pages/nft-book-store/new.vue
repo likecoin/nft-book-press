@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-4 mb-[40px]">
+  <PageBody class="pb-[40px]">
     <UAlert
       v-if="error"
       icon="i-heroicons-exclamation-triangle"
@@ -469,7 +469,7 @@
         @click="onSubmit"
       />
     </template>
-  </div>
+  </PageBody>
 </template>
 
 <script setup lang="ts">

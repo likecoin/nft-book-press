@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-wrap items-center gap-2">
+  <div class="flex flex-col items-stretch gap-4">
     <template v-if="bookStoreApiStore.isAuthenticated">
       <UTooltip :text="wallet">
         <UButton
@@ -7,6 +7,7 @@
           :label="shortenWalletAddress(wallet)"
           :to="portfolioURL"
           variant="soft"
+          block
           target="_blank"
         />
       </UTooltip>
@@ -15,6 +16,8 @@
         icon="i-heroicons-arrow-left-on-rectangle"
         color="primary"
         variant="outline"
+        size="lg"
+        block
         @click="onClickDisconnect"
       />
     </template>
@@ -23,6 +26,8 @@
       label="Sign in"
       icon="i-heroicons-arrow-right-on-rectangle"
       color="primary"
+      size="lg"
+      block
       @click="onClickAuth"
     />
   </div>

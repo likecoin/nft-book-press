@@ -1,17 +1,36 @@
 <template>
+  <ul v-if="props.isLarge" class="space-y-10">
+    <li v-for="item in items" :key="item.label">
+      <UCard>
+        <template #header>
+          <h3 class="text-sm font-bold font-mono">
+            {{ item.label }}
+          </h3>
+        </template>
+
+        <ul class="flex flex-wrap gap-4">
+          <li v-for="link in item.links" :key="link.label">
+            <UButton
+              :label="link.label"
+              :leading-icon="link.icon"
+              size="xl"
+              :to="link.to"
+              color="white"
+            />
+          </li>
+        </ul>
+      </UCard>
+    </li>
+  </ul>
+
   <UAccordion
+    v-else
     :items="items"
     :default-open="true"
     :multiple="true"
   >
     <template #item="{ item }">
-      <UVerticalNavigation
-        :links="item.links"
-        :ui="{
-          icon: props.isLarge ? 'w-12 h-12' : undefined,
-          size: props.isLarge ? 'text-xl' : undefined,
-        }"
-      />
+      <UVerticalNavigation :links="item.links" />
     </template>
   </UAccordion>
 </template>
@@ -88,7 +107,8 @@ const items = [
       {
         label: 'Batch Create QR Codes',
         icon: 'i-heroicons-qr-code',
-        to: { name: 'batch-qrcode' }
+        to: { name: 'batch-qrcode' },
+        target: '_blank'
       },
       {
         label: 'Batch Create Bitly Links',

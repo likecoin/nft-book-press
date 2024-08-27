@@ -1,9 +1,26 @@
 <template>
-  <div class="flex flex-col min-h-screen">
-    <SiteHeader />
-    <NuxtLayout class="w-full flex-grow">
-      <NuxtPage />
+  <div>
+    <NuxtLayout>
+      <NuxtPage class="grow overflow-y-auto" />
     </NuxtLayout>
+
+    <USlideover
+      v-model="isMobileMenuOpen"
+      side="left"
+    >
+      <UButton
+        color="gray"
+        variant="ghost"
+        icon="i-heroicons-x-mark-20-solid"
+        class="absolute top-4 right-4 z-20"
+        square
+        padded
+        @click="isMobileMenuOpen = false"
+      />
+      <SiteNavigation />
+    </USlideover>
+
+    <NuxtLoadingIndicator />
 
     <UNotifications />
   </div>
@@ -11,9 +28,35 @@
 
 <script setup lang="ts">
 import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useUIStore } from '~/stores/ui'
 
 const bookStoreApiStore = useBookStoreApiStore()
 const { restoreSession } = bookStoreApiStore
+const uiStore = useUIStore()
+
+const isMobileMenuOpen = computed({
+  get: () => uiStore.isSiteMenuOpen,
+  set: value => uiStore.setSiteMenuOpen(value)
+})
+
+const route = useRoute()
+
+// NOTE: Close mobile menu on route change
+watch(
+  () => route.fullPath,
+  () => {
+    isMobileMenuOpen.value = false
+  }
+)
+
+useHead({
+  htmlAttrs: {
+    class: 'h-dvh'
+  },
+  bodyAttrs: {
+    class: 'h-dvh text-gray-700 dark:text-gray-200 dark:bg-gray-900'
+  }
+})
 
 onMounted(() => {
   try {
@@ -26,15 +69,3 @@ onMounted(() => {
 })
 
 </script>
-
-<style>
-.page-enter-active,
-.page-leave-active {
-  transition: all 0.4s;
-}
-.page-enter-from,
-.page-leave-to {
-  opacity: 0;
-  filter: blur(1rem);
-}
-</style>

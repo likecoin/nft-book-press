@@ -1,14 +1,13 @@
 <template>
-  <main class="flex flex-col justify-center items-center py-44">
-    <div class="space-y-4">
-      <div class="text-primary text-3xl font-bold font-mono">
-        🎉 Welcome!
-      </div>
-      <SiteMenu :is-large="true" />
-    </div>
-  </main>
-</template>
+  <PageContainer>
+    <PageHeader />
 
-<script setup lang="ts">
-definePageMeta({ layout: 'page' })
-</script>
+    <PageBody class="space-y-8">
+      <h2 class="lg:mt-10 text-3xl font-bold">
+        🎉 Welcome!
+      </h2>
+
+      <SiteMenu :is-large="true" />
+    </PageBody>
+  </PageContainer>
+</template>

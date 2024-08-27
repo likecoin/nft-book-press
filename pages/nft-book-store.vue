@@ -1,27 +1,20 @@
 <template>
-  <main :key="route.path">
-    <h1
-      :class="[
-        'text-xl',
-        'font-bold',
-        'font-mono',
-        'mb-4',
-        'print:hidden',
-        { hidden: isHeaderHidden },
-      ]"
-    >
-      NFT Book Store Management Page
-    </h1>
+  <PageContainer :key="route.path">
+    <PageHeader :class="{ hidden: isHeaderHidden }" title="NFT Book Store Management Page" />
 
-    <UContainer
+    <PageBody
       v-if="!signer || !bookStoreApiStore.isAuthenticated"
-      class="flex justify-center items-center py-8 text-lg font-medium"
+      :ui="{ base: 'flex justify-center items-center grow' }"
     >
-      <h2>Please sign in to continue</h2>
-    </UContainer>
-
+      <UCard :ui="{ body: { base: 'flex items-center gap-2' } }">
+        <UIcon name="i-heroicons-light-bulb" class="w-5 h-5" />
+        <h2 class="text-lg font-medium">
+          Please sign in to continue
+        </h2>
+      </UCard>
+    </PageBody>
     <NuxtPage v-else />
-  </main>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">

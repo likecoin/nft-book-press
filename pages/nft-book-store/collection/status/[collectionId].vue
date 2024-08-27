@@ -1,5 +1,5 @@
 <template>
-  <main class="space-y-10 pb-10">
+  <PageBody class="space-y-10 pb-10">
     <h1 class="text-lg font-bold font-mono">
       NFT Book Collection Status "{{ collectionName }}"
     </h1>
@@ -468,7 +468,7 @@
     </template>
 
     <NuxtPage :transition="false" />
-  </main>
+  </PageBody>
 </template>
 
 <script setup lang="ts">

@@ -1,5 +1,5 @@
 <template>
-  <main class="space-y-4">
+  <PageBody :ui="{ constrained: '' }">
     <UAlert
       v-if="error"
       class="mt-4"
@@ -58,7 +58,7 @@
         </template>
       </UTabs>
     </UCard>
-  </main>
+  </PageBody>
 </template>
 
 <script setup lang="ts">
