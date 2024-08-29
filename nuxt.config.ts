@@ -31,29 +31,29 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      IS_TESTNET: process.env.IS_TESTNET || 'TRUE',
+      IS_TESTNET: process.env.IS_TESTNET,
 
-      SITE_URL: process.env.SITE_URL || 'https://likecoin-nft-book-press-testnet.netlify.app',
+      SITE_URL: process.env.SITE_URL,
 
-      CHAIN_ID: process.env.CHAIN_ID || 'likecoin-public-testnet-5',
-      CHAIN_NAME: process.env.CHAIN_NAME || 'LikeCoin public test chain',
-      CHAIN_DENOM: process.env.CHAIN_DENOM || 'EKIL',
-      CHAIN_MINIMAL_DENOM: process.env.CHAIN_MINIMAL_DENOM || 'nanoekil',
-      COINGECKO_ID: process.env.COINGECKO_ID || undefined,
-      RPC_URL: process.env.RPC_URL || 'https://node.testnet.like.co/rpc/',
-      LCD_URL: process.env.LCD_URL || 'https://node.testnet.like.co',
-      CHAIN_EXPLORER_URL: process.env.CHAIN_EXPLORER_URL || 'https://node.testnet.like.co/cosmos/tx/v1beta1/txs',
+      CHAIN_ID: process.env.CHAIN_ID,
+      CHAIN_NAME: process.env.CHAIN_NAME,
+      CHAIN_DENOM: process.env.CHAIN_DENOM,
+      CHAIN_MINIMAL_DENOM: process.env.CHAIN_MINIMAL_DENOM,
+      COINGECKO_ID: process.env.COINGECKO_ID,
+      RPC_URL: process.env.RPC_URL,
+      LCD_URL: process.env.LCD_URL,
+      CHAIN_EXPLORER_URL: process.env.CHAIN_EXPLORER_URL,
 
-      LIKER_NFT_FEE_WALLET: process.env.LIKER_NFT_FEE_WALLET || 'like1yney2cqn5qdrlc50yr5l53898ufdhxafqz9gxp',
-      LIKER_NFT_TARGET_ADDRESS: process.env.LIKER_NFT_TARGET_ADDRESS || 'like1yney2cqn5qdrlc50yr5l53898ufdhxafqz9gxp',
+      LIKER_NFT_FEE_WALLET: process.env.LIKER_NFT_FEE_WALLET,
+      LIKER_NFT_TARGET_ADDRESS: process.env.LIKER_NFT_TARGET_ADDRESS,
 
-      AUTHCORE_API_HOST: process.env.AUTHCORE_API_HOST || 'https://likecoin-integration-test.authcore.io',
-      LIKER_LAND_URL: process.env.LIKER_LAND_URL || 'https://rinkeby.liker.land',
-      LIKE_CO_HOST: process.env.LIKE_CO_HOST || 'https://rinkeby.like.co',
-      LIKE_CO_API: process.env.LIKE_CO_API || 'https://api.rinkeby.like.co',
-      APP_LIKE_CO_URL: process.env.APP_LIKE_CO_URL || 'https://app.rinkeby.like.co',
-      NFT_MARKETPLACE_URL: process.env.NFT_MARKETPLACE_URL || 'https://likecoin-nft-marketplace-testnet.netlify.app',
-      ISCN_TOOLS_URL: process.env.ISCN_TOOLS_URL || 'https://likecoin-iscn-nft-tools-testnet.netlify.app'
+      AUTHCORE_API_HOST: process.env.AUTHCORE_API_HOST,
+      LIKER_LAND_URL: process.env.LIKER_LAND_URL,
+      LIKE_CO_HOST: process.env.LIKE_CO_HOST,
+      LIKE_CO_API: process.env.LIKE_CO_API,
+      APP_LIKE_CO_URL: process.env.APP_LIKE_CO_URL,
+      NFT_MARKETPLACE_URL: process.env.NFT_MARKETPLACE_URL,
+      ISCN_TOOLS_URL: process.env.ISCN_TOOLS_URL
     }
   },
   app: {

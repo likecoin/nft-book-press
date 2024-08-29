@@ -2,7 +2,7 @@ export default function () {
   const config = useRuntimeConfig().public
   const coinDenom = config.CHAIN_DENOM
   const coinMinimalDenom = config.CHAIN_MINIMAL_DENOM
-  const coinGeckoId = config.COINGECKO_ID
+  const coinGeckoId = config.COINGECKO_ID || undefined
   return {
     chainId: config.CHAIN_ID,
     chainName: config.CHAIN_NAME,
