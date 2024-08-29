@@ -39,7 +39,9 @@
             Please setup your stripe account below to participate in the book affiliation program.
           </template>
           <template v-else #help>
-            Append <UKbd class="font-mono">?from=@{{ likerIdInfo?.user }}</UKbd> in any book store page to earn commission from book sales.
+            Append <UKbd class="font-mono">
+              ?from=@{{ likerIdInfo?.user }}
+            </UKbd> in any book store page to earn commission from book sales.
           </template>
         </UFormGroup>
 

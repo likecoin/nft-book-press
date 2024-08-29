@@ -3,7 +3,7 @@
     <PageHeader :class="{ hidden: isHeaderHidden }" title="NFT Book Store Management Page" />
 
     <PageBody
-      v-if="!signer || !bookStoreApiStore.isAuthenticated"
+      v-if="!wallet || !bookStoreApiStore.isAuthenticated"
       :ui="{ base: 'flex justify-center items-center grow' }"
     >
       <UCard :ui="{ body: { base: 'flex items-center gap-2' } }">
@@ -25,7 +25,7 @@ import { useWalletStore } from '~/stores/wallet'
 const route = useRoute()
 const bookStoreApiStore = useBookStoreApiStore()
 const store = useWalletStore()
-const { signer } = storeToRefs(store)
+const { wallet } = storeToRefs(store)
 
 const isHeaderHidden = computed(() => route.query.print === '1')
 </script>

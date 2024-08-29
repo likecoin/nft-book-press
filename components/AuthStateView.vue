@@ -53,16 +53,6 @@ const portfolioURL = computed(() => getPortfolioURL(wallet.value))
 
 const isLoading = ref(false)
 
-onMounted(async () => {
-  try {
-    const payload = window.localStorage.getItem('likecoin_nft_book_press_token')
-    if (payload) {
-      const { wallet: storedWallet } = JSON.parse(payload)
-      if (storedWallet) { await connect() }
-    }
-  } catch {}
-})
-
 async function onClickAuth () {
   try {
     isLoading.value = true
