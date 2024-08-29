@@ -78,7 +78,7 @@
               icon="i-heroicons-arrow-path"
               variant="outline"
               :disabled="isLoading"
-              @click="loadStripeConnectStatus"
+              @click="refreshStripeConnectStatus"
             />
           </UTooltip>
         </template>
@@ -276,7 +276,7 @@ onMounted(async () => {
   await Promise.all([
     loadCommissionHistory(),
     loadLikerId(),
-    loadStripeConnectStatus(),
+    refreshStripeConnectStatus(),
     userStore.lazyFetchBookUserProfile()
   ])
 })
@@ -340,6 +340,35 @@ async function loadLikerId () {
       throw new Error(fetchError.value.toString())
     }
     likerIdInfo.value = (data.value as any) || {}
+  } catch (e) {
+    console.error(e)
+    error.value = (e as Error).toString()
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function refreshStripeConnectStatus () {
+  try {
+    await loadStripeConnectStatus()
+
+    if (connectStatus.value?.hasAccount && !connectStatus.value?.isReady) {
+      const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/refresh`,
+        {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${token.value}`
+          }
+        }
+      )
+      if (fetchError.value && fetchError.value?.statusCode !== 404) {
+        throw new Error(fetchError.value.toString())
+      }
+      if ((data.value as any).isReady) {
+        connectStatus.value.isReady = true
+        await loadStripeConnectStatus()
+      }
+    }
   } catch (e) {
     console.error(e)
     error.value = (e as Error).toString()
