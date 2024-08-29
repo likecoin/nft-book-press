@@ -182,7 +182,7 @@
       <UModal v-model="isOpenQRCodeModal">
         <QRCodeGenerator
           v-if="selectedPurchaseLink"
-          :data="selectedPurchaseLink.url"
+          :data="selectedPurchaseLink.qrCodeUrl"
           :file-name="getQRCodeFilename(selectedPurchaseLink.channel)"
           :width="500"
           :height="500"
@@ -231,16 +231,27 @@ const productId = computed(() => {
   return input
 })
 
-const linkQueryInput = ref('utm_medium=qrcode')
+const linkQueryInput = ref('')
+const defaultQuery = computed(() => {
+  const isUseLikerLandLink = linkSetting.value === 'liker_land'
+  let utmSource = isUseLikerLandLink ? 'likerland' : 'stripe'
+  if (isCustomLink.value) {
+    utmSource = 'custom-link'
+  }
+  return {
+    utm_medium: 'affiliate',
+    utm_source: utmSource
+  }
+})
 const linkQuery = computed(() => {
   if (linkQueryInput.value) {
-    return Object.fromEntries(new URLSearchParams(linkQueryInput.value.trim()))
+    return { ...defaultQuery.value, ...Object.fromEntries(new URLSearchParams(linkQueryInput.value.trim())) }
   }
   const input = productIdInput.value?.trim() || ''
   if (input.startsWith('http')) {
-    return Object.fromEntries(new URL(input).searchParams)
+    return { ...defaultQuery.value, ...Object.fromEntries(new URL(input).searchParams) }
   }
-  return {}
+  return defaultQuery.value
 })
 const linkQueryTableRows = computed(() => Object.entries(linkQuery.value).map(([key, value]) => ({
   key,
@@ -331,23 +342,40 @@ const tableRows = computed(() => {
     }
     return a.id.replace('@', '').localeCompare(b.id.replace('@', ''))
   })
-  return channels.map(channel => ({
-    id: channel.id,
-    channel: channel.name,
-    url: getPurchaseLink({
+  return channels.map((channel) => {
+    const utmCampaignQuery = {
+      utm_campaign: `${channel.id}_bookpress`
+    }
+    const qrUtmSourceQuery: Record<string, string> = {}
+    if (linkQuery.value.utm_source === defaultQuery.value.utm_source) {
+      qrUtmSourceQuery.utm_source = `${defaultQuery.value.utm_source}-qr`
+    }
+    const urlConfig = {
       [isCollection.value ? 'collectionId' : 'classId']: productId.value,
       channel: channel.id,
       priceIndex: priceIndex.value,
       customLink: isCustomLink.value ? customLinkInput.value : undefined,
-      isUseLikerLandLink: linkSetting.value === 'liker_land',
-      query: linkQuery.value
-    })
-  }))
+      isUseLikerLandLink: linkSetting.value === 'liker_land'
+    }
+    return {
+      id: channel.id,
+      channel: channel.name,
+      url: getPurchaseLink({
+        ...urlConfig,
+        query: { ...utmCampaignQuery, ...linkQuery.value }
+      }),
+      qrCodeUrl: getPurchaseLink({
+        ...urlConfig,
+        query: { ...utmCampaignQuery, ...linkQuery.value, ...qrUtmSourceQuery }
+      })
+    }
+  })
 })
 
 const selectedPurchaseLink = ref<{
   channel: string,
   url: string,
+  qrCodeUrl: string
 } | undefined>(undefined)
 const isOpenQRCodeModal = computed({
   get: () => !!selectedPurchaseLink.value,
@@ -425,7 +453,7 @@ function printAllQRCodes () {
   try {
     sessionStorage.setItem(
       'nft_book_press_batch_qrcode',
-      convertArrayOfObjectsToCSV(tableRows.value.map(({ channel, ...link }) => ({ key: channel, ...link })))
+      convertArrayOfObjectsToCSV(tableRows.value.map(({ channel, qrCodeUrl, ...link }) => ({ key: channel, ...link, url: qrCodeUrl })))
     )
     window.open('/batch-qrcode?print=1', 'batch_qrcode', 'popup,menubar=no,location=no,status=no')
   } catch (error) {
@@ -478,7 +506,7 @@ async function downloadAllQRCodes () {
   try {
     const { default: QRCodeStyling } = await import('@likecoin/qr-code-styling')
     const qrCodeResults = await Promise.all(tableRows.value.map(async (link) => {
-      const qrCode = new QRCodeStyling(getQRCodeOptions({ data: link.url }))
+      const qrCode = new QRCodeStyling(getQRCodeOptions({ data: link.qrCodeUrl }))
       const dataResults = await Promise.all(DOWNLOAD_QRCODE_FILE_TYPES.map(type => qrCode.getRawData(type.value)))
       const filename = getQRCodeFilename(link.channel)
       return DOWNLOAD_QRCODE_FILE_TYPES.map(({ value: ext }, index) => {
