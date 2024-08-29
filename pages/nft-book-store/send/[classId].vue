@@ -159,12 +159,13 @@
 <script setup lang="ts">
 import { DeliverTxResponse } from '@cosmjs/stargate'
 import { storeToRefs } from 'pinia'
-import { LIKE_CO_API, LCD_URL } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { parseImageURLFromMetadata } from '~/utils'
 import { signExecNFTSendAuthz, signSendNFTs } from '~/utils/cosmos'
+
+const { LIKE_CO_API, LCD_URL } = useRuntimeConfig().public
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)

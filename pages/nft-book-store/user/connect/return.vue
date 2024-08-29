@@ -66,7 +66,8 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
-import { LIKE_CO_API } from '~/constant'
+
+const { LIKE_CO_API } = useRuntimeConfig().public
 
 const router = useRouter()
 const bookStoreApiStore = useBookStoreApiStore()

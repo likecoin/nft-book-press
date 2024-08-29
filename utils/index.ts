@@ -1,6 +1,9 @@
 import { stringify as csvStringify } from 'csv-stringify/sync'
 
-import { LIKE_CO_API, LIKER_LAND_URL } from '~/constant'
+export function getIsTestnet () {
+  const { IS_TESTNET } = useRuntimeConfig().public
+  return IS_TESTNET === 'TRUE'
+}
 
 export function addParamToUrl (url: string, params: { [key: string]: string }) {
   const urlObject = new URL(url)
@@ -68,6 +71,7 @@ export function convertArrayOfObjectsToCSV (data: Record<string, any>[]): string
 }
 
 export function getPortfolioURL (wallet: string) {
+  const { LIKER_LAND_URL } = useRuntimeConfig().public
   return `${LIKER_LAND_URL}/${wallet}`
 }
 
@@ -139,6 +143,7 @@ export function getPurchaseLink ({
     return url.toString()
   }
 
+  const { LIKE_CO_API, LIKER_LAND_URL } = useRuntimeConfig().public
   const queryString = `?${new URLSearchParams({ ...query, ...payload }).toString()}`
   if (collectionId) {
     return isUseLikerLandLink

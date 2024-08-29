@@ -226,12 +226,14 @@ import { storeToRefs } from 'pinia'
 import { MdEditor, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
-import { DEFAULT_PRICE, LIKE_CO_API, MINIMAL_PRICE } from '~/constant'
+import { DEFAULT_PRICE, MINIMAL_PRICE } from '~/constant'
 
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { deliverMethodOptions } from '~/utils'
 import { sendNFTsToAPIWallet } from '~/utils/cosmos'
+
+const { LIKE_CO_API } = useRuntimeConfig().public
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()

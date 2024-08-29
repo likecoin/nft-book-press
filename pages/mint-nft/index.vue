@@ -412,9 +412,9 @@ import { stringify } from 'csv-stringify/sync'
 import type { FormError } from '#ui/types'
 
 import { useWalletStore } from '~/stores/wallet'
-import { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } from '~/constant'
 import { downloadFile, convertArrayOfObjectsToCSV, sleep } from '~/utils'
 
+const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } = useRuntimeConfig().public
 const router = useRouter()
 const route = useRoute()
 

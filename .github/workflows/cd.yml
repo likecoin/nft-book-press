@@ -27,7 +27,7 @@ jobs:
         run: yarn
 
       - name: Generate
-        run: NUXT_APP_BASE_URL=/${{ github.event.repository.name }}/ yarn generate
+        run: NUXT_APP_BASE_URL=/${{ github.event.repository.name }}/ yarn generate:production
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

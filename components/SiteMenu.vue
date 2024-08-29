@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { ISCN_TOOLS_URL } from '~/constant'
+const { ISCN_TOOLS_URL } = useRuntimeConfig().public
 
 const props = defineProps({
   isLarge: {

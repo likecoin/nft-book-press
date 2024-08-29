@@ -9,8 +9,6 @@ import { parseAuthzGrant } from '@likecoin/iscn-js/dist/messages/parsing'
 import { GenericAuthorization } from 'cosmjs-types/cosmos/authz/v1beta1/authz'
 import { formatMsgSend } from '@likecoin/iscn-js/dist/messages/likenft'
 import { addParamToUrl } from '.'
-import { RPC_URL, LIKER_NFT_FEE_WALLET, LIKER_NFT_TARGET_ADDRESS } from '~/constant'
-import network from '~/constant/network'
 
 const DEFAULT_GAS_AMOUNT = 200000
 const DEFAULT_GAS_PRICE = 10000
@@ -23,6 +21,7 @@ let iscnSigningClient: ISCNSigningClient | null = null
 
 export async function getSigningClient (): Promise<ISCNSigningClient> {
   if (!iscnSigningClient) {
+    const { RPC_URL } = useRuntimeConfig().public
     const c = new ISCNSigningClient()
     await c.connect(RPC_URL)
     iscnSigningClient = c
@@ -31,12 +30,14 @@ export async function getSigningClient (): Promise<ISCNSigningClient> {
 }
 
 export async function getSigningClientWithSigner (signer: OfflineSigner): Promise<ISCNSigningClient> {
+  const { RPC_URL } = useRuntimeConfig().public
   const signingClient = await getSigningClient()
   await signingClient.connectWithSigner(RPC_URL, signer)
   return signingClient
 }
 
 export function getGasFee (count: number) {
+  const network = getNetworkConfig()
   return {
     amount: [
       {
@@ -121,6 +122,7 @@ export async function signCreateISCNRecord (
   address: string,
   memo?: string
 ) {
+  const { RPC_URL } = useRuntimeConfig().public
   const signingClient = await getSigningClient()
   await signingClient.connectWithSigner(RPC_URL, signer)
   const { contentMetadata, ...otherData } = data
@@ -139,6 +141,7 @@ export async function signCreateNFTClass (
   { nftMaxSupply }: { nftMaxSupply?: number } = {},
   memo?: string
 ) {
+  const { RPC_URL } = useRuntimeConfig().public
   const signingClient = await getSigningClient()
   await signingClient.connectWithSigner(RPC_URL, signer)
   let classConfig: any = null
@@ -174,6 +177,7 @@ export async function signCreateRoyltyConfig (
   signer: OfflineSigner,
   address: string
 ) {
+  const { RPC_URL, LIKER_NFT_FEE_WALLET } = useRuntimeConfig().public
   try {
     const rateBasisPoints = royaltyRateBasisPoints
     const feeAmount = royaltyFeeAmount
@@ -225,6 +229,7 @@ export async function signMintNFT (
   address: string,
   memo?: string
 ) {
+  const { RPC_URL } = useRuntimeConfig().public
   const signingClient = await getSigningClient()
   await signingClient.connectWithSigner(RPC_URL, signer)
   const res = await signingClient.mintNFTs(
@@ -244,6 +249,7 @@ export async function signSendNFTs (
   address: string,
   memo?: string
 ) {
+  const { RPC_URL } = useRuntimeConfig().public
   const signingClient = await getSigningClient()
   await signingClient.connectWithSigner(RPC_URL, signer)
   const messages = classIds.map((classId, index) => formatMsgSend(
@@ -266,6 +272,7 @@ export async function signGrantNFTSendAuthz (
   address: string,
   memo?: string
 ) {
+  const { RPC_URL } = useRuntimeConfig().public
   const signingClient = await getSigningClient()
   await signingClient.connectWithSigner(RPC_URL, signer)
   const expirationInMs = Date.now() + 1000 * 5184000 // 60 days
@@ -282,6 +289,7 @@ export async function signExecNFTSendAuthz (
   address: string,
   memo?: string
 ) {
+  const { RPC_URL } = useRuntimeConfig().public
   const signingClient = await getSigningClient()
   await signingClient.connectWithSigner(RPC_URL, signer)
   const messages = [{
@@ -315,6 +323,7 @@ export async function signRevokeNFTSendAuthz (
   address: string,
   memo?: string
 ) {
+  const { RPC_URL } = useRuntimeConfig().public
   const signingClient = await getSigningClient()
   await signingClient.connectWithSigner(RPC_URL, signer)
   const res = await signingClient.revokeGenericGrant(address, grantee, '/cosmos.nft.v1beta1.MsgSend', { memo })
@@ -360,6 +369,7 @@ export async function sendNFTsToAPIWallet (
     totalClassIds = totalClassIds.concat(nftIds.map(_ => classId))
   })
 
+  const { LIKER_NFT_TARGET_ADDRESS } = useRuntimeConfig().public
   const { transactionHash, code } = await signSendNFTs(
     LIKER_NFT_TARGET_ADDRESS,
     totalClassIds,

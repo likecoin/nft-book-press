@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import { LCD_URL } from '~/constant'
 
 export const useNftStore = defineStore('nft', () => {
+  const { LCD_URL } = useRuntimeConfig().public
   const classMetadataByIdMap = ref({} as Record<string, any>)
 
   const getClassMetadataById = computed(() => (classId: string) => classMetadataByIdMap.value[classId])

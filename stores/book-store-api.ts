@@ -1,9 +1,9 @@
 import { defineStore, storeToRefs } from 'pinia'
 import * as jwt from 'jsonwebtoken'
 import { useWalletStore } from './wallet'
-import { LIKE_CO_API } from '~/constant'
 
 export const useBookStoreApiStore = defineStore('book-api', () => {
+  const { LIKE_CO_API } = useRuntimeConfig().public
   const walletStore = useWalletStore()
   const { wallet: storeWallet } = storeToRefs(walletStore)
   const token = ref('')

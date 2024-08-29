@@ -206,10 +206,11 @@
 
 <script setup lang="ts">
 import { type FileExtension } from '@likecoin/qr-code-styling'
-import { AFFILIATION_CHANNELS, LIKE_CO_API } from '~/constant'
+import { AFFILIATION_CHANNELS } from '~/constant'
 import { useCollectionStore } from '~/stores/collection'
 import { getPurchaseLink } from '~/utils'
 
+const { LIKE_CO_API } = useRuntimeConfig().public
 const collectionStore = useCollectionStore()
 const route = useRoute()
 const router = useRouter()

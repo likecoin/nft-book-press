@@ -141,8 +141,10 @@
 </template>
 
 <script setup lang="ts">
-import { LIKE_ADDRESS_REGEX, LIKE_CO_API } from '~/constant'
+import { LIKE_ADDRESS_REGEX } from '~/constant'
 import { useStripeStore } from '~/stores/stripe'
+
+const { LIKE_CO_API } = useRuntimeConfig().public
 
 const stripeStore = useStripeStore()
 

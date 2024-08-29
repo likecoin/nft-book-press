@@ -160,8 +160,8 @@ import { storeToRefs } from 'pinia'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
-import { LIKE_CO_API } from '~/constant'
 
+const { LIKE_CO_API } = useRuntimeConfig().public
 const route = useRoute()
 const router = useRouter()
 const walletStore = useWalletStore()

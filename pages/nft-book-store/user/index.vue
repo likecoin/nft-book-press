@@ -244,7 +244,8 @@ import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'
-import { LIKER_LAND_URL, LIKE_CO_API, LIKE_CO_HOST } from '~/constant'
+
+const { LIKER_LAND_URL, LIKE_CO_API, LIKE_CO_HOST } = useRuntimeConfig().public
 
 const nftStore = useNftStore()
 const walletStore = useWalletStore()

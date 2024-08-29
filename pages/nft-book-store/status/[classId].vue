@@ -711,7 +711,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import Draggable from 'vuedraggable'
-import { CHAIN_EXPLORER_URL, LIKE_CO_API, LIKER_LAND_URL } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useWalletStore } from '~/stores/wallet'
@@ -719,6 +718,7 @@ import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL, downloadFile, convertArrayOfObjectsToCSV, getPurchaseLink, formatShippingAddress } from '~/utils'
 import { getNFTAuthzGrants, shortenWalletAddress } from '~/utils/cosmos'
 
+const { CHAIN_EXPLORER_URL, LIKE_CO_API, LIKER_LAND_URL } = useRuntimeConfig().public
 const store = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const nftStore = useNftStore()

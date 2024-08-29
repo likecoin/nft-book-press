@@ -473,7 +473,6 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { CHAIN_EXPLORER_URL, LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'
@@ -482,6 +481,7 @@ import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL, formatShippingAddress, getPurchaseLink } from '~/utils'
 import { getNFTAuthzGrants, shortenWalletAddress } from '~/utils/cosmos'
 
+const { CHAIN_EXPLORER_URL, LIKE_CO_API } = useRuntimeConfig().public
 const store = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const nftStore = useNftStore()

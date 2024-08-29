@@ -5,8 +5,11 @@
   },
   "scripts": {
     "build": "nuxt build",
+    "build:production": "nuxt build --dotenv .env.production",
     "dev": "nuxt dev",
+    "dev:production": "nuxt dev --dotenv .env.production",
     "generate": "nuxt generate",
+    "generate:production": "nuxt generate --dotenv .env.production",
     "lint": "eslint . --ext \".js,.vue,.ts\" --fix",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"

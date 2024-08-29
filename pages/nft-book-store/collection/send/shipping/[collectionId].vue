@@ -149,9 +149,10 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { LIKE_CO_API } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useCollectionStore } from '~/stores/collection'
+
+const { LIKE_CO_API } = useRuntimeConfig().public
 
 const bookStoreApiStore = useBookStoreApiStore()
 const { token } = storeToRefs(bookStoreApiStore)

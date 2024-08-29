@@ -12,14 +12,14 @@ import type {
   LikeCoinWalletConnectorMethodType
 } from '@likecoin/wallet-connector'
 
-import network from '@/constant/network'
-import { IS_TESTNET, SITE_URL } from '~/constant'
-
 declare global {
   interface Window extends KeplrWindow {}
 }
 
 export const useWalletStore = defineStore('wallet', () => {
+  const { AUTHCORE_API_HOST, SITE_URL } = useRuntimeConfig().public
+  const network = getNetworkConfig()
+
   const accounts = ref([] as readonly AccountData[])
   const signer = ref(null as (OfflineAminoSigner & OfflineDirectSigner) | null)
 
@@ -74,9 +74,7 @@ export const useWalletStore = defineStore('wallet', () => {
       connectWalletMobileWarning: 'Mobile Warning',
       language: 'en',
       authcoreClientId: 'likecoin-app-hidesocial', // 'likecoin-app' if show all social options
-      authcoreApiHost: IS_TESTNET
-        ? 'https://likecoin-integration-test.authcore.io'
-        : 'https://authcore.like.co',
+      authcoreApiHost: AUTHCORE_API_HOST,
       authcoreRedirectUrl: `${SITE_URL}/auth/redirect?method=${LikeCoinWalletConnectorMethodType.LikerId}`
     })
     return con

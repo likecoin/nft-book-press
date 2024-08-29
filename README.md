@@ -9,20 +9,19 @@ Make sure to install the dependencies:
 ```bash
 # yarn
 yarn install
-
-# npm
-npm install
-
-# pnpm
-pnpm install
 ```
 
 ## Development Server
 
-Start the development server on `http://localhost:3000`
+Start the development server on `http://localhost:3000`:
 
 ```bash
-npm run dev
+yarn dev
+```
+
+Run in production config:
+```bash
+yarn dev:production
 ```
 
 ## Production
@@ -30,13 +29,21 @@ npm run dev
 Build the application for production:
 
 ```bash
-npm run build
+yarn build:production
 ```
 
 Locally preview production build:
 
 ```bash
-npm run preview
+yarn preview
+```
+
+### Static Site
+
+Build the application for static site hosting (e.g. Netlify):
+
+```bash
+yarn generate:production
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.

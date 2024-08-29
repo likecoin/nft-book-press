@@ -8,7 +8,7 @@
         :to="{ name: 'index' }"
       />
       <UBadge
-        v-if="IS_TESTNET"
+        v-if="isTestnet"
         label="TESTNET"
         variant="subtle"
         color="amber"
@@ -25,5 +25,5 @@
 </template>
 
 <script setup lang="ts">
-import { IS_TESTNET } from '~/constant'
+const isTestnet = getIsTestnet()
 </script>
