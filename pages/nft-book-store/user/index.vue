@@ -336,7 +336,7 @@ async function loadCommissionHistory () {
 async function loadLikerId () {
   try {
     isLoading.value = true
-    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/users/addr/${wallet.value}/min`)
+    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/users/addr/${wallet.value}/min?ts=${Math.round(new Date().getTime() / 1000)}`)
     if (fetchError.value && fetchError.value?.statusCode !== 404) {
       throw new Error(fetchError.value.toString())
     }
