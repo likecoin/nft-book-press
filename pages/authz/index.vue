@@ -2,44 +2,24 @@
   <PageContainer>
     <PageHeader title=" Send NFT Authz Grants Management Page" />
 
-    <PageBody class="grow space-y-4">
-      <UAlert
-        v-if="error"
-        icon="i-heroicons-exclamation-triangle"
-        color="red"
-        variant="soft"
-        :title="`${error}`"
-        :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'red', variant: 'link', padded: false }"
-        @close="error = ''"
-      />
+    <AuthRequiredView>
+      <PageBody class="grow space-y-4">
+        <UAlert
+          v-if="error"
+          icon="i-heroicons-exclamation-triangle"
+          color="red"
+          variant="soft"
+          :title="`${error}`"
+          :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'red', variant: 'link', padded: false }"
+          @close="error = ''"
+        />
 
-      <UProgress v-if="isLoading" animation="carousel">
-        <template #indicator>
-          Loading...
-        </template>
-      </UProgress>
-
-      <UContainer
-        v-if="!wallet"
-        class="flex justify-center items-center py-8"
-      >
-        <UCard :ui="{ body: { base: 'flex justify-center items-center' } }">
-          <template #header>
-            <h2 class="font-bold font-mono">
-              Connect your wallet
-            </h2>
+        <UProgress v-if="isLoading" animation="carousel">
+          <template #indicator>
+            Loading...
           </template>
+        </UProgress>
 
-          <UButton
-            label="Connect"
-            :loading="isLoading"
-            :disabled="isLoading"
-            @click="onClickConnect"
-          />
-        </UCard>
-      </UContainer>
-
-      <template v-else>
         <UAlert
           icon="i-heroicons-exclamation-triangle"
           color="amber"
@@ -133,8 +113,8 @@
             />
           </template>
         </UCard>
-      </template>
-    </PageBody>
+      </PageBody>
+    </AuthRequiredView>
   </PageContainer>
 </template>
 
@@ -151,7 +131,6 @@ import {
 
 const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
-const { connect } = walletStore
 const route = useRoute()
 
 const error = ref('')
@@ -220,21 +199,4 @@ async function onClickRevokeGrant (grantee) {
     isLoading.value = false
   }
 }
-
-async function onClickConnect () {
-  try {
-    error.value = ''
-    isLoading.value = true
-    if (!wallet.value) {
-      await connect()
-    }
-    if (!wallet.value) { return }
-  } catch (err) {
-    console.error(err)
-    error.value = (err as Error).toString()
-  } finally {
-    isLoading.value = false
-  }
-}
-
 </script>
