@@ -28,6 +28,7 @@
       color="primary"
       size="lg"
       :loading="isLoading"
+      :disabled="isRestoringSession"
       block
       @click="onClickAuth"
     />
@@ -46,6 +47,7 @@ const { wallet, signer } = storeToRefs(store)
 const { connect, disconnect, signMessageMemo } = store
 const bookStoreApiStore = useBookStoreApiStore()
 const { authenticate, clearSession } = bookStoreApiStore
+const { isRestoringSession } = storeToRefs(bookStoreApiStore)
 
 const toast = useToast()
 

@@ -20,6 +20,15 @@
       <SiteNavigation />
     </USlideover>
 
+    <UModal
+      :model-value="isRestoringSession"
+      :prevent-close="true"
+      :ui="{ base: 'p-4 items-center gap-2' }"
+    >
+      <span>Restoring session ...</span>
+      <UProgress animation="carousel" />
+    </UModal>
+
     <NuxtLoadingIndicator />
 
     <UNotifications />
@@ -27,11 +36,14 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useUIStore } from '~/stores/ui'
 
 const bookStoreApiStore = useBookStoreApiStore()
 const { restoreSession } = bookStoreApiStore
+const { isRestoringSession } = storeToRefs(bookStoreApiStore)
 const uiStore = useUIStore()
 
 const isMobileMenuOpen = computed({
