@@ -30,11 +30,21 @@
           <h1 class="text-center font-bold font-mono">
             Book Affiliation Program
           </h1>
+          <UTooltip
+            text="Refresh Liker ID"
+            :popper="{ placement: 'left' }"
+          >
+            <UButton
+              icon="i-heroicons-arrow-path"
+              variant="outline"
+              :disabled="isLikerIdLoading"
+              @click="refreshLikerIdInfo"
+            />
+          </utooltip>
         </template>
 
         <UFormGroup v-if="likerIdInfo?.user" label="Your affiliation channel ID" size="xl">
           <UInput placeholder="Affiliation ID" :value="`@${likerIdInfo?.user}`" disabled />
-
           <template v-if="!connectStatus.isReady" #help>
             Please setup your stripe account below to participate in the book affiliation program.
           </template>
@@ -54,7 +64,7 @@
             size="lg"
             rel="noopener"
             target="_blank"
-            :to="`${LIKE_CO_HOST}/in`"
+            :to="`${LIKE_CO_HOST}/in/register`"
           />
         </template>
       </UCard>
@@ -264,6 +274,7 @@ const connectStatus = ref<any>({})
 const likerIdInfo = ref<any>({})
 const commissionHistory = ref<any>([])
 const isEnableNotificationEmails = ref(true)
+const isLikerIdLoading = ref(false)
 
 watch(bookUser, (user) => {
   isEnableNotificationEmails.value = user?.isEnableNotificationEmails || false
@@ -333,10 +344,13 @@ async function loadCommissionHistory () {
   }
 }
 
-async function loadLikerId () {
+async function loadLikerId ({ nocache = false } = {}) {
   try {
-    isLoading.value = true
-    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/users/addr/${wallet.value}/min?ts=${Math.round(new Date().getTime() / 1000)}`)
+    isLikerIdLoading.value = true
+    const timestamp = nocache ? `?ts=${Math.round(new Date().getTime() / 1000)}` : ''
+    const url = `${LIKE_CO_API}/users/addr/${wallet.value}/min${timestamp}`
+    const { data, error: fetchError } = await useFetch(url)
+
     if (fetchError.value && fetchError.value?.statusCode !== 404) {
       throw new Error(fetchError.value.toString())
     }
@@ -345,7 +359,7 @@ async function loadLikerId () {
     console.error(e)
     error.value = (e as Error).toString()
   } finally {
-    isLoading.value = false
+    isLikerIdLoading.value = false
   }
 }
 
@@ -460,6 +474,10 @@ async function updateUserProfile () {
   await userStore.updateBookUserProfile({
     isEnableNotificationEmails: isEnableNotificationEmails.value
   })
+}
+
+async function refreshLikerIdInfo () {
+  await loadLikerId({ nocache: true })
 }
 
 </script>
