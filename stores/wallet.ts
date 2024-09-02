@@ -108,7 +108,7 @@ export const useWalletStore = defineStore('wallet', () => {
   }
 
   async function handleConnectorRedirect (
-    { method, params }: { method: string, params: string }
+    { method, params }: { method: string, params: any }
   ) {
     if (!connector.value) {
       connector.value = await initConnector()

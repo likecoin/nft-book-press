@@ -18,42 +18,38 @@ const { handleConnectorRedirect } = store
 const { wallet, signer } = storeToRefs(store)
 const { signMessageMemo, disconnect } = store
 const bookStoreApiStore = useBookStoreApiStore()
-const { authenticate } = bookStoreApiStore
-const { token, wallet: sessionWallet } = storeToRefs(bookStoreApiStore)
+const { authenticate, clearSession } = bookStoreApiStore
 
 const route = useRoute()
-const router = useRouter()
 const toast = useToast()
 
 onMounted(async () => {
   const { method, code } = route.query
   if (method && code) {
-    await handleConnectorRedirect({
-      method: method as string,
-      params: { code }
-    })
+    try {
+      await handleConnectorRedirect({
+        method: method as string,
+        params: { code }
+      })
 
-    if (signer.value) {
-      const signature = await signMessageMemo(
-        'authorize',
-        ['read:nftbook', 'write:nftbook', 'read:nftcollection', 'write:nftcollection']
-      )
-      if (!signature) {
-        disconnect()
-        router.replace('/')
-        return
+      if (signer.value) {
+        const signature = await signMessageMemo(
+          'authorize',
+          ['read:nftbook', 'write:nftbook', 'read:nftcollection', 'write:nftcollection']
+        )
+        if (!signature) {
+          disconnect()
+          clearSession()
+        } else {
+          await authenticate(wallet.value, signature)
+        }
+      } else {
+        throw new Error('Failed to authenticate: no signer')
       }
-      await authenticate(wallet.value, signature)
-      try {
-        window.localStorage.setItem('likecoin_nft_book_press_token', JSON.stringify({ wallet: sessionWallet.value, token: token.value }))
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err)
-      }
-    } else {
+    } catch (error) {
       toast.add({
         icon: 'i-heroicons-exclamation-circle',
-        title: 'Failed to authenticate: no signer',
+        title: (error as Error).toString(),
         timeout: 0,
         color: 'red',
         ui: {
@@ -61,10 +57,9 @@ onMounted(async () => {
         }
       })
     }
-
-    const postAuthRoute = '/'
-    router.replace(postAuthRoute)
   }
+
+  executePostAuthRedirect()
 })
 
 </script>

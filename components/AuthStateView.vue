@@ -27,6 +27,7 @@
       icon="i-heroicons-arrow-right-on-rectangle"
       color="primary"
       size="lg"
+      :loading="isLoading"
       block
       @click="onClickAuth"
     />
@@ -44,8 +45,7 @@ const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
 const { connect, disconnect, signMessageMemo } = store
 const bookStoreApiStore = useBookStoreApiStore()
-const { authenticate } = bookStoreApiStore
-const { token, wallet: sessionWallet } = storeToRefs(bookStoreApiStore)
+const { authenticate, clearSession } = bookStoreApiStore
 
 const toast = useToast()
 
@@ -56,6 +56,8 @@ const isLoading = ref(false)
 async function onClickAuth () {
   try {
     isLoading.value = true
+    savePostAuthRedirect()
+
     if (!wallet.value || !signer.value) {
       await connect()
     }
@@ -66,10 +68,9 @@ async function onClickAuth () {
     )
     if (!signature) { return }
     await authenticate(wallet.value, signature)
-    try {
-      window.localStorage.setItem('likecoin_nft_book_press_token', JSON.stringify({ wallet: sessionWallet.value, token: token.value }))
-    } catch (err) {}
   } catch (err) {
+    disconnect()
+    clearSession()
     // eslint-disable-next-line no-console
     console.error(err)
     toast.add({
@@ -83,11 +84,12 @@ async function onClickAuth () {
     })
   } finally {
     isLoading.value = false
+    clearPostAuthRedirect()
   }
 }
 
 function onClickDisconnect () {
   disconnect()
-  window.localStorage.removeItem('likecoin_nft_book_press_token')
+  clearSession()
 }
 </script>
