@@ -175,7 +175,7 @@
                   v-model="nftMintCount"
                   type="number"
                   :min="0"
-                  :max="classMaxSupply"
+                  :max="mintMaxCount"
                 />
               </UFormGroup>
 
@@ -413,6 +413,7 @@ import type { FormError } from '#ui/types'
 
 import { useWalletStore } from '~/stores/wallet'
 import { downloadFile, convertArrayOfObjectsToCSV, sleep } from '~/utils'
+import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
 
 const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } = useRuntimeConfig().public
 const router = useRouter()
@@ -446,7 +447,7 @@ const classCreateData = ref<any>(null)
 
 const nftMintListData = ref<any>([])
 const nftMintDefaultData = ref<any>(null)
-const nftMintCount = ref(100)
+const nftMintCount = ref(NFT_DEFAULT_MINT_AMOUNT)
 const nftData = ref<any>(null)
 const nftCSVData = ref('')
 const existingNftCount = ref(0)
@@ -454,6 +455,8 @@ const existingNftCount = ref(0)
 const iscnId = computed(() => iscnData.value?.['@id'])
 const classId = computed(() => classData.value?.id)
 const isCreatingClass = computed(() => !classId.value && step.value === 2)
+// HACK: set max supply to 50 to avoid authcore max int issue
+const mintMaxCount = computed(() => Math.min(classMaxSupply.value || NFT_DEFAULT_MINT_AMOUNT))
 
 const shouldShowDownloadLink = ref(false)
 
