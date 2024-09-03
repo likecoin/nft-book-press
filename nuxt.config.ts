@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     '@/assets/styles/global.css'
   ],
   modules: [
+    '@sentry/nuxt/module',
     '@pinia/nuxt',
     '@nuxtjs/eslint-module',
     '@nuxt/ui',
