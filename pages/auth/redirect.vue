@@ -32,21 +32,22 @@ onMounted(async () => {
         params: { code }
       })
 
-      if (signer.value) {
-        const signature = await signMessageMemo(
-          'authorize',
-          ['read:nftbook', 'write:nftbook', 'read:nftcollection', 'write:nftcollection']
-        )
-        if (!signature) {
-          disconnect()
-          clearSession()
-        } else {
-          await authenticate(wallet.value, signature)
-        }
-      } else {
+      if (!signer.value) {
         throw new Error('Failed to authenticate: no signer')
       }
+
+      const signature = await signMessageMemo(
+        'authorize',
+        ['read:nftbook', 'write:nftbook', 'read:nftcollection', 'write:nftcollection']
+      )
+      if (!signature) {
+        throw new Error('Failed to authenticate: no signature')
+      }
+
+      await authenticate(wallet.value, signature)
     } catch (error) {
+      disconnect()
+      clearSession()
       toast.add({
         icon: 'i-heroicons-exclamation-circle',
         title: (error as Error).toString(),
