@@ -58,7 +58,7 @@ const isLoading = ref(false)
 async function onClickAuth () {
   try {
     isLoading.value = true
-    savePostAuthRedirect()
+    setupPostAuthRedirect()
 
     if (!wallet.value || !signer.value) {
       await connect()

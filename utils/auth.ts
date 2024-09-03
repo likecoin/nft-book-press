@@ -1,5 +1,5 @@
 const AUTH_SESSION_KEY = 'likecoin_nft_book_press_token'
-const POST_AUTH_REDIRECT_KEY = 'likecoin_nft_book_press_post_auth_redirect'
+const POST_AUTH_REDIRECT_ROUTE_KEY = 'likecoin_nft_book_press_post_auth_redirect'
 
 export function loadAuthSession () {
   try {
@@ -28,16 +28,16 @@ export function clearAuthSession () {
   } catch {}
 }
 
-export function savePostAuthRedirect () {
+export function setupPostAuthRedirect () {
   try {
     const route = useRoute()
-    window.sessionStorage.setItem(POST_AUTH_REDIRECT_KEY, route.fullPath)
+    window.sessionStorage.setItem(POST_AUTH_REDIRECT_ROUTE_KEY, route.fullPath)
   } catch {}
 }
 
 export function executePostAuthRedirect () {
   try {
-    const route = window.sessionStorage.getItem(POST_AUTH_REDIRECT_KEY)
+    const route = window.sessionStorage.getItem(POST_AUTH_REDIRECT_ROUTE_KEY)
     const router = useRouter()
     router.replace(route || '/')
   } finally {
@@ -47,6 +47,6 @@ export function executePostAuthRedirect () {
 
 export function clearPostAuthRedirect () {
   try {
-    window.sessionStorage.removeItem(POST_AUTH_REDIRECT_KEY)
+    window.sessionStorage.removeItem(POST_AUTH_REDIRECT_ROUTE_KEY)
   } catch {}
 }
