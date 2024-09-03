@@ -5,7 +5,7 @@ import { parseAndCalculateStakeholderRewards } from '@likecoin/iscn-js/dist/iscn
 import { MsgSend } from 'cosmjs-types/cosmos/nft/v1beta1/tx'
 import { DeliverTxResponse } from '@cosmjs/stargate'
 import { PageRequest } from 'cosmjs-types/cosmos/base/query/v1beta1/pagination'
-import { parseAuthzGrant } from '@likecoin/iscn-js/dist/messages/parsing'
+import { parseAuthzGrant, parseTxInfoFromIndexedTx } from '@likecoin/iscn-js/dist/messages/parsing'
 import { GenericAuthorization } from 'cosmjs-types/cosmos/authz/v1beta1/authz'
 import { formatMsgSend } from '@likecoin/iscn-js/dist/messages/likenft'
 import { addParamToUrl } from '.'
@@ -52,6 +52,16 @@ export function getGasFee (count: number) {
       .multipliedBy(DEFAULT_GAS_AMOUNT)
       .toFixed(0)
   }
+}
+
+export async function queryTxByHash (txHash: string) {
+  const client = await (await getSigningClient()).getISCNQueryClient().getStargateClient()
+  const tx = await client.getTx(txHash)
+  if (!tx) { return null }
+  const { code } = tx
+  if (code) { throw new Error(`Tx failed with code: ${code}`) }
+  const parsed = parseTxInfoFromIndexedTx(tx)
+  return parsed
 }
 
 export async function queryISCNById (iscnId: string) {
@@ -382,5 +392,17 @@ export async function sendNFTsToAPIWallet (
   if (!transactionHash || code !== 0) {
     throw new Error('Failed to sign and send NFTs')
   }
+
+  for (let tryCount = 0; tryCount < 3; tryCount++) {
+    await sleep(3000)
+    try {
+      const tx = await queryTxByHash(transactionHash)
+      if (tx) {
+        break
+      }
+    } catch (err) {
+    }
+  }
+
   return transactionHash
 }
