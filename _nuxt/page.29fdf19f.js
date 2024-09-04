@@ -1,1 +1,0 @@
-import{_ as t}from"./PageContainer.9282a5a2.js";import{_ as n,q as a,w as r,o as _,Z as s}from"./entry.06ca1e55.js";const c={};function f(e,l){const o=t;return _(),a(o,null,{default:r(()=>[s(e.$slots,"default")]),_:3})}const u=n(c,[["render",f]]);export{u as default};
