@@ -745,6 +745,8 @@ async function submitNewClass () {
       throw new Error('Please press "Add" button to add notification email')
     }
 
+    isLoading.value = true
+
     const { data, error: fetchError } = await useFetch(
       `${LCD_URL}/cosmos/nft/v1beta1/classes/${classIdInput.value}`
     )
