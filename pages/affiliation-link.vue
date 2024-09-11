@@ -5,14 +5,14 @@
     <PageBody class="flex flex-col items-stretch grow space-y-4">
       <UCard v-if="!productData" :ui="{ body: { base: 'space-y-4' }, footer: { base: 'flex justify-end' } }">
         <UFormGroup
-          label="Product ID"
+          label="Product ID/URL"
           :required="true"
           :error="error"
         >
           <UInput
             v-model="productIdInput"
             class="font-mono"
-            placeholder="Enter NFT Class ID/Collection ID"
+            placeholder="https://liker.land/nft/class/likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83"
             :required="true"
           />
         </UFormGroup>
