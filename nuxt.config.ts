@@ -2,6 +2,12 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 const LikeCoinWalletConnectorCSSPath = '@likecoin/wallet-connector/dist/style.css'
 
+const {
+  SENTRY_ORG,
+  SENTRY_PROJECT,
+  SENTRY_AUTH_TOKEN
+} = process.env
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   css: [
@@ -17,6 +23,15 @@ export default defineNuxtConfig({
   ],
   gtag: {
     id: 'G-815EFDL3PS'
+  },
+  sentry: {
+    sourceMapsUploadOptions: SENTRY_AUTH_TOKEN
+      ? {
+          org: SENTRY_ORG,
+          project: SENTRY_PROJECT,
+          authToken: SENTRY_AUTH_TOKEN
+        }
+      : undefined
   },
   plugins: ['~/plugins/buffer.ts'],
   vite: {

@@ -8,6 +8,7 @@ on:
 jobs:
   cd:
     runs-on: ${{ matrix.os }}
+    environment: github-pages
 
     strategy:
       matrix:
@@ -28,6 +29,10 @@ jobs:
 
       - name: Generate
         run: NUXT_APP_BASE_URL=/${{ github.event.repository.name }}/ yarn generate:production
+        env:
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
