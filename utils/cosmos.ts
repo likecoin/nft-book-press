@@ -400,8 +400,7 @@ export async function sendNFTsToAPIWallet (
       if (tx) {
         break
       }
-    } catch (err) {
-    }
+    } catch {}
   }
 
   return transactionHash
