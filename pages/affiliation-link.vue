@@ -333,16 +333,7 @@ const tableRows = computed(() => {
   if (!productData.value) {
     return []
   }
-  const channels = [...AFFILIATION_CHANNELS, ...customChannels.value]
-  channels.sort((a, b) => {
-    if (a.id === 'liker_land') {
-      return -1
-    }
-    if (b.id === 'liker_land') {
-      return 1
-    }
-    return a.id.replace('@', '').localeCompare(b.id.replace('@', ''))
-  })
+  const channels = [...customChannels.value, ...AFFILIATION_CHANNELS]
   return channels.map((channel) => {
     const utmCampaignQuery = {
       utm_campaign: `${channel.id}_bookpress`
