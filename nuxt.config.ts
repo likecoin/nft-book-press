@@ -5,7 +5,8 @@ const LikeCoinWalletConnectorCSSPath = '@likecoin/wallet-connector/dist/style.cs
 const {
   SENTRY_ORG,
   SENTRY_PROJECT,
-  SENTRY_AUTH_TOKEN
+  SENTRY_AUTH_TOKEN,
+  GA_TRACKING_ID,
 } = process.env
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
@@ -22,7 +23,7 @@ export default defineNuxtConfig({
     'nuxt-gtag'
   ],
   gtag: {
-    id: 'G-815EFDL3PS'
+    id: GA_TRACKING_ID
   },
   sentry: {
     sourceMapsUploadOptions: SENTRY_AUTH_TOKEN
