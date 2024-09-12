@@ -1,0 +1,232 @@
+<template>
+  <PageContainer :key="route.path">
+    <PageHeader title="LikerLand Book Store POS" />
+    <PageBody class="flex flex-col items-stretch grow space-y-4">
+      <UCard>
+        <UFormGroup label="Edit">
+          <UButton @click="toggleEditMode">
+            Toggle Edit Mode
+          </UButton>
+        </UFormGroup>
+        <UFormGroup v-if="isEditMode" label="Enter NFT Class ID">
+          <UInput
+            v-model="newClassId"
+            class="font-mono"
+            placeholder="likenft....,https://liker.land/nft/class/likenft...."
+          />
+          <UButton @click="addSaleItem">
+            Add
+          </UButton>
+        </UFormGroup>
+        <UFormGroup label="Sale Items">
+          <UTable
+            :columns="saleItemTableColumns"
+            :rows="saleItemTableRows"
+            :ui="{ td: { font: 'font-mono' } }"
+            @select="onSelectTableRow"
+          >
+            <template #selected-data="{ row }">
+              <UCheckbox :checked="row.selected.value" />
+            </template>
+            <template #image-data="{ row }">
+              <img
+                v-if="row.image"
+                class="max-w-[100px] object-contain"
+                :src="row.image"
+              >
+            </template>
+            <template #delete-action-data="{ row }">
+              <UButton @click="removeSaleItem(row.classId)">
+                Delete
+              </UButton>
+            </template>
+          </UTable>
+        </UFormGroup>
+
+        <UFormGroup label="Direct Checkout">
+          <UButton :disabled="!selectedClassIds.length" @click="copyCartUrl">
+            Copy Cart URL
+          </UButton>
+          <UButton :disabled="!selectedClassIds.length" @click="goToCartUrl">
+            Go to Cart URL
+          </UButton>
+          <UButton :disabled="!selectedClassIds.length" @click="generateQRCode">
+            Generate QR Code
+          </UButton>
+          <UModal v-model="isOpenQRCodeModal">
+            <QRCodeGenerator
+              :data="checkoutUrl"
+              file-name="likerland_checkout"
+              :width="500"
+              :height="500"
+            >
+              <template #header>
+                <h3 class="font-bold font-mono">
+                  Download QR Code
+                </h3>
+                <UButton
+                  icon="i-heroicons-x-mark"
+                  color="gray"
+                  variant="ghost"
+                  @click="isOpenQRCodeModal = false"
+                />
+              </template>
+            </QRCodeGenerator>
+          </UModal>
+        </UFormGroup>
+        <UFormGroup label="Gift Checkout">
+          <UInput v-model="giftToEmail" type="email" placeholder="Target Email" />
+          <UButton
+            :disabled="!selectedClassIds.length || !giftToEmail"
+            @click="onClickGift"
+          >
+            Gift
+          </UButton>
+        </UFormGroup>
+      </UCard>
+    </PageBody>
+  </PageContainer>
+</template>
+
+<script setup lang="ts">
+import { useNftStore } from '~/stores/nft'
+
+const route = useRoute()
+const { LIKER_LAND_URL } = useRuntimeConfig().public
+const nftStore = useNftStore()
+
+const { lazyFetchClassMetadataById } = nftStore
+
+const newClassId = ref('')
+const giftToEmail = ref('')
+const saleItemList = ref<any[]>([])
+const isOpenQRCodeModal = ref(false)
+const isEditMode = ref(false)
+
+const saleItemTableColumns = computed(() => {
+  const columns = [
+    { key: 'selected', label: 'Selected' },
+    { key: 'image', label: 'Cover' },
+    { key: 'name', label: 'Name' }
+  ]
+  if (isEditMode.value) {
+    columns.push({ key: 'delete-action', label: 'Delete' })
+  }
+  return columns
+})
+
+const saleItemTableRows = computed(() => {
+  return saleItemList.value.map((item) => {
+    return {
+      classId: item.classId,
+      selected: { value: item.selected, class: item.selected ? 'bg-green-500/50 animate-pulse' : '' },
+      name: nftStore.getClassMetadataById(item.classId)?.name,
+      image: parseImageURLFromMetadata(nftStore.getClassMetadataById(item.classId)?.data?.metadata?.image)
+    }
+  })
+})
+
+const selectedClassIds = computed(() => {
+  return saleItemList.value.filter(item => item.selected).map(item => item.classId)
+})
+
+const checkoutUrl = computed(() => {
+  const params = new URLSearchParams()
+  selectedClassIds.value.forEach((classId) => {
+    params.append('class_id', classId)
+  })
+  return `${LIKER_LAND_URL}/shopping-cart/book?${params.toString()}`
+})
+
+const giftUrl = computed(() => {
+  const params = new URLSearchParams({
+    gift_to_email: giftToEmail.value,
+    checkout: '1'
+  })
+  selectedClassIds.value.forEach((classId) => {
+    params.append('class_id', classId)
+  })
+  return `${LIKER_LAND_URL}/shopping-cart/book?${params.toString()}`
+})
+
+onMounted(() => {
+  try {
+    const storedString = window.localStorage.getItem('nft_book_store_pos_items')
+    if (storedString) {
+      const items = JSON.parse(storedString)
+      saleItemList.value = items
+        .map((item: any) => ({ classId: item.classId, selected: false }))
+    }
+  } catch (e) {
+    console.error(e)
+  }
+  // useFetch fails on mount...
+  nextTick(() => {
+    saleItemList.value.forEach((item) => {
+      lazyFetchClassMetadataById(item.classId)
+    })
+  })
+})
+
+function addSaleItem () {
+  const classId = newClassId.value
+  classId.split(',').forEach((input) => {
+    let classId = input.trim()
+    if (classId.startsWith('http')) {
+      const url = new URL(classId)
+      classId = url.pathname.split('/').pop() || ''
+    }
+    if (!classId.startsWith('likenft')) {
+      alert('Invalid class ID:' + classId)
+      return
+    }
+    saleItemList.value.push({ classId, selected: false })
+    lazyFetchClassMetadataById(classId)
+  })
+  newClassId.value = ''
+  saveSaleClassIds()
+}
+
+function removeSaleItem (classId: string) {
+  saleItemList.value = saleItemList.value.filter(item => item.classId !== classId)
+  saveSaleClassIds()
+}
+
+function toggleEditMode () {
+  isEditMode.value = !isEditMode.value
+}
+
+function onSelectTableRow (row: any) {
+  saleItemList.value = saleItemList.value.map((item) => {
+    if (item.classId === row.classId) {
+      item.selected = !item.selected
+    }
+    return item
+  })
+}
+
+function saveSaleClassIds () {
+  window.localStorage.setItem('nft_book_store_pos_items', JSON.stringify(saleItemList.value))
+}
+
+function copyCartUrl () {
+  navigator.clipboard.writeText(checkoutUrl.value)
+}
+
+function goToCartUrl () {
+  window.open(checkoutUrl.value)
+}
+
+function generateQRCode () {
+  isOpenQRCodeModal.value = true
+}
+
+function onClickGift () {
+  if (!giftToEmail.value) {
+    alert('Please enter email')
+    return
+  }
+  window.open(giftUrl.value)
+}
+
+</script>

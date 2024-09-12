@@ -92,6 +92,17 @@ const items = [
     ]
   },
   {
+    label: 'Sales',
+    links: [
+      {
+        label: 'Book Store POS',
+        icon: 'i-heroicons-shopping-cart',
+        to: { name: 'sales-pos' },
+        exact: true
+      }
+    ]
+  },
+  {
     label: 'Others',
     links: [
       {
