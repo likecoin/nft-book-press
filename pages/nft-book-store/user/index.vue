@@ -339,8 +339,9 @@ const commissionHistoryRows = computed(() => {
     return {
       ...row,
       type,
-      amount: `${row.currency}${row.amount / 100}`,
-      amountTotal: `${row.currency}${row.amountTotal / 100}`,
+      amount: row.amount / 100,
+      amountTotal: row.amountTotal / 100,
+      currency: row.currency || 'usd',
       timestamp: new Date(row.timestamp).toLocaleString()
     }
   })
