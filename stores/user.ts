@@ -55,6 +55,7 @@ export const useUserStore = defineStore('user', () => {
 
   return {
     bookUser,
+    isUpdatingBookUserProfile,
     fetchBookUserProfile,
     lazyFetchBookUserProfile,
     updateBookUserProfile
