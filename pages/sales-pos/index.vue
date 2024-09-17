@@ -44,12 +44,6 @@
         </UFormGroup>
 
         <UFormGroup label="Direct Checkout">
-          <UButton :disabled="!selectedClassIds.length" @click="copyCartUrl">
-            Copy Cart URL
-          </UButton>
-          <UButton :disabled="!selectedClassIds.length" @click="goToCartUrl">
-            Go to Cart URL
-          </UButton>
           <UButton :disabled="!selectedClassIds.length" @click="generateQRCode">
             Generate QR Code
           </UButton>
@@ -81,6 +75,19 @@
             @click="onClickGift"
           >
             Gift
+          </UButton>
+        </UFormGroup>
+        <UFormGroup label="Checkout URL">
+          <UInput
+            v-model="checkoutUrl"
+            class="font-mono"
+            readonly
+          />
+          <UButton @click="copyCartUrl">
+            Copy
+          </UButton>
+          <UButton @click="goToCartUrl">
+            Go to Cart
           </UButton>
         </UFormGroup>
       </UCard>
