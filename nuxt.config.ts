@@ -70,7 +70,8 @@ export default defineNuxtConfig({
       LIKE_CO_API: process.env.LIKE_CO_API,
       APP_LIKE_CO_URL: process.env.APP_LIKE_CO_URL,
       NFT_MARKETPLACE_URL: process.env.NFT_MARKETPLACE_URL,
-      ISCN_TOOLS_URL: process.env.ISCN_TOOLS_URL
+      ISCN_TOOLS_URL: process.env.ISCN_TOOLS_URL,
+      ARWEAVE_ENDPOINT: process.env.ARWEAVE_ENDPOINT
     }
   },
   app: {

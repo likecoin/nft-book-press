@@ -1,5 +1,3 @@
-export const ARWEAVE_ENDPOINT = 'https://arweave.net'
-
 export const IPFS_VIEW_GATEWAY_URL = 'https://ipfs.io/ipfs'
 
 export const MINIMAL_PRICE = 0.99

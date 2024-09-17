@@ -30,8 +30,9 @@ export function downloadBlob (content: string, filename: string, contentType: st
 }
 
 export function parseImageURLFromMetadata (image: string): string {
+  const { ARWEAVE_ENDPOINT } = useRuntimeConfig().public
   if (!image) { return '' }
-  return image.replace('ar://', 'https://arweave.net/').replace('ipfs://', 'https://ipfs.io/ipfs/')
+  return image.replace('ar://', `${ARWEAVE_ENDPOINT}/`).replace('ipfs://', 'https://ipfs.io/ipfs/')
 }
 
 export function downloadFile ({ data, fileName, fileType }:{data:any, fileName:string, fileType:string}) {
