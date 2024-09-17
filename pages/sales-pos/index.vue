@@ -35,6 +35,19 @@
                 :src="row.image"
               >
             </template>
+            <template #priceIndex-data="{ row }">
+              <UInput
+                v-if="!!row.classId"
+                v-model="row.priceIndex"
+                type="number"
+                :disabled="!isEditMode"
+                min="0"
+                step="1"
+                class="w-16"
+                @click.stop
+                @change="(e: InputEvent) => changePriceIndex(e, row)"
+              />
+            </template>
             <template #delete-action-data="{ row }">
               <UButton @click="removeSaleItem(row)">
                 Delete
@@ -117,7 +130,8 @@ const saleItemTableColumns = computed(() => {
   const columns = [
     { key: 'selected', label: 'Selected' },
     { key: 'image', label: 'Cover' },
-    { key: 'name', label: 'Name' }
+    { key: 'name', label: 'Name' },
+    { key: 'priceIndex', label: 'Edition' }
   ]
   if (isEditMode.value) {
     columns.push({ key: 'delete-action', label: 'Delete' })
@@ -126,31 +140,45 @@ const saleItemTableColumns = computed(() => {
 })
 
 const saleItemTableRows = computed(() => {
-  return saleItemList.value.map((item) => {
+  return saleItemList.value.map((item, index) => {
     return item.collectionId
       ? {
           collectionId: item.collectionId,
+          priceIndex: undefined,
           selected: { value: item.selected, class: item.selected ? 'bg-green-500/50 animate-pulse' : '' },
           name: collectionStore.getCollectionById(item.collectionId)?.name,
-          image: parseImageURLFromMetadata(collectionStore.getCollectionById(item.collectionId)?.image)
+          image: parseImageURLFromMetadata(collectionStore.getCollectionById(item.collectionId)?.image),
+          index
         }
       : {
           classId: item.classId,
+          priceIndex: item.priceIndex,
           selected: { value: item.selected, class: item.selected ? 'bg-green-500/50 animate-pulse' : '' },
           name: nftStore.getClassMetadataById(item.classId)?.name,
-          image: parseImageURLFromMetadata(nftStore.getClassMetadataById(item.classId)?.data?.metadata?.image)
+          image: parseImageURLFromMetadata(nftStore.getClassMetadataById(item.classId)?.data?.metadata?.image),
+          index
         }
   })
 })
 
 const selectedItems = computed(() => {
-  return saleItemList.value.filter(item => item.selected)
+  const items = saleItemList.value.filter(item => item.selected)
+  return items.sort((a, b) => {
+    if (a.priceIndex !== undefined && !b.priceIndex) {
+      return -1
+    } else if (!a.priceIndex && b.priceIndex !== undefined) {
+      return 1
+    } else {
+      return 0
+    }
+  })
 })
 
 const checkoutUrl = computed(() => {
   const params = new URLSearchParams()
-  selectedItems.value.forEach(({ classId, collectionId }) => {
+  selectedItems.value.forEach(({ classId, priceIndex, collectionId }) => {
     if (classId) { params.append('class_id', classId) }
+    if (priceIndex) { params.append('price_index', priceIndex.toString()) }
     if (collectionId) { params.append('collection_id', collectionId) }
   })
   return `${LIKER_LAND_URL}/shopping-cart/book?${params.toString()}`
@@ -161,8 +189,9 @@ const giftUrl = computed(() => {
     gift_to_email: giftToEmail.value,
     checkout: '1'
   })
-  selectedItems.value.forEach(({ classId, collectionId }) => {
+  selectedItems.value.forEach(({ classId, priceIndex, collectionId }) => {
     if (classId) { params.append('class_id', classId) }
+    if (priceIndex) { params.append('price_index', priceIndex.toString()) }
     if (collectionId) { params.append('collection_id', collectionId) }
   })
   return `${LIKER_LAND_URL}/shopping-cart/book?${params.toString()}`
@@ -177,6 +206,7 @@ onMounted(() => {
         .map((item: any) => ({
           collectionId: item.collectionId,
           classId: item.classId,
+          priceIndex: item.priceIndex,
           selected: false
         }))
     }
@@ -214,10 +244,14 @@ function addSaleItem () {
   saveSaleProductIds()
 }
 
-function removeSaleItem ({ classId, collectionId }: { classId?: string, collectionId?: string }) {
-  const productId = classId || collectionId
-  saleItemList.value = saleItemList.value
-    .filter(item => item.classId !== productId && item.collectionId !== productId)
+function changePriceIndex (e: InputEvent, { index }: { index: number }) {
+  const eventValue = (e.target as HTMLInputElement)?.value
+  saleItemList.value[index].priceIndex = Number(eventValue)
+  saveSaleProductIds()
+}
+
+function removeSaleItem ({ index }: { index: number }) {
+  saleItemList.value.splice(index, 1)
   saveSaleProductIds()
 }
 
@@ -225,14 +259,8 @@ function toggleEditMode () {
   isEditMode.value = !isEditMode.value
 }
 
-function onSelectTableRow (row: any) {
-  saleItemList.value = saleItemList.value.map((item) => {
-    if ((row.classId && item.classId === row.classId) ||
-      (row.collectionId && item.collectionId === row.collectionId)) {
-      item.selected = !item.selected
-    }
-    return item
-  })
+function onSelectTableRow ({ index }: { index: number }) {
+  saleItemList.value[index].selected = !saleItemList.value[index].selected
 }
 
 function saveSaleProductIds () {
