@@ -10,7 +10,7 @@
         </UFormGroup>
         <UFormGroup v-if="isEditMode" label="Enter NFT Class ID">
           <UInput
-            v-model="newClassId"
+            v-model="newProductId"
             class="font-mono"
             placeholder="likenft....,https://liker.land/nft/class/likenft...."
           />
@@ -36,7 +36,7 @@
               >
             </template>
             <template #delete-action-data="{ row }">
-              <UButton @click="removeSaleItem(row.classId)">
+              <UButton @click="removeSaleItem(row)">
                 Delete
               </UButton>
             </template>
@@ -44,7 +44,7 @@
         </UFormGroup>
 
         <UFormGroup label="Direct Checkout">
-          <UButton :disabled="!selectedClassIds.length" @click="generateQRCode">
+          <UButton :disabled="!selectedItems.length" @click="generateQRCode">
             Generate QR Code
           </UButton>
           <UModal v-model="isOpenQRCodeModal">
@@ -71,7 +71,7 @@
         <UFormGroup label="Gift Checkout">
           <UInput v-model="giftToEmail" type="email" placeholder="Target Email" />
           <UButton
-            :disabled="!selectedClassIds.length || !giftToEmail"
+            :disabled="!selectedItems.length || !giftToEmail"
             @click="onClickGift"
           >
             Gift
@@ -97,14 +97,17 @@
 
 <script setup lang="ts">
 import { useNftStore } from '~/stores/nft'
+import { useCollectionStore } from '~/stores/collection'
 
 const route = useRoute()
 const { LIKER_LAND_URL } = useRuntimeConfig().public
 const nftStore = useNftStore()
+const collectionStore = useCollectionStore()
 
 const { lazyFetchClassMetadataById } = nftStore
+const { lazyFetchCollectionById } = collectionStore
 
-const newClassId = ref('')
+const newProductId = ref('')
 const giftToEmail = ref('')
 const saleItemList = ref<any[]>([])
 const isOpenQRCodeModal = ref(false)
@@ -124,23 +127,31 @@ const saleItemTableColumns = computed(() => {
 
 const saleItemTableRows = computed(() => {
   return saleItemList.value.map((item) => {
-    return {
-      classId: item.classId,
-      selected: { value: item.selected, class: item.selected ? 'bg-green-500/50 animate-pulse' : '' },
-      name: nftStore.getClassMetadataById(item.classId)?.name,
-      image: parseImageURLFromMetadata(nftStore.getClassMetadataById(item.classId)?.data?.metadata?.image)
-    }
+    return item.collectionId
+      ? {
+          collectionId: item.collectionId,
+          selected: { value: item.selected, class: item.selected ? 'bg-green-500/50 animate-pulse' : '' },
+          name: collectionStore.getCollectionById(item.collectionId)?.name,
+          image: parseImageURLFromMetadata(collectionStore.getCollectionById(item.collectionId)?.image)
+        }
+      : {
+          classId: item.classId,
+          selected: { value: item.selected, class: item.selected ? 'bg-green-500/50 animate-pulse' : '' },
+          name: nftStore.getClassMetadataById(item.classId)?.name,
+          image: parseImageURLFromMetadata(nftStore.getClassMetadataById(item.classId)?.data?.metadata?.image)
+        }
   })
 })
 
-const selectedClassIds = computed(() => {
-  return saleItemList.value.filter(item => item.selected).map(item => item.classId)
+const selectedItems = computed(() => {
+  return saleItemList.value.filter(item => item.selected)
 })
 
 const checkoutUrl = computed(() => {
   const params = new URLSearchParams()
-  selectedClassIds.value.forEach((classId) => {
-    params.append('class_id', classId)
+  selectedItems.value.forEach(({ classId, collectionId }) => {
+    if (classId) { params.append('class_id', classId) }
+    if (collectionId) { params.append('collection_id', collectionId) }
   })
   return `${LIKER_LAND_URL}/shopping-cart/book?${params.toString()}`
 })
@@ -150,8 +161,9 @@ const giftUrl = computed(() => {
     gift_to_email: giftToEmail.value,
     checkout: '1'
   })
-  selectedClassIds.value.forEach((classId) => {
-    params.append('class_id', classId)
+  selectedItems.value.forEach(({ classId, collectionId }) => {
+    if (classId) { params.append('class_id', classId) }
+    if (collectionId) { params.append('collection_id', collectionId) }
   })
   return `${LIKER_LAND_URL}/shopping-cart/book?${params.toString()}`
 })
@@ -162,7 +174,11 @@ onMounted(() => {
     if (storedString) {
       const items = JSON.parse(storedString)
       saleItemList.value = items
-        .map((item: any) => ({ classId: item.classId, selected: false }))
+        .map((item: any) => ({
+          collectionId: item.collectionId,
+          classId: item.classId,
+          selected: false
+        }))
     }
   } catch (e) {
     console.error(e)
@@ -170,33 +186,39 @@ onMounted(() => {
   // useFetch fails on mount...
   nextTick(() => {
     saleItemList.value.forEach((item) => {
-      lazyFetchClassMetadataById(item.classId)
+      if (item.classId) { lazyFetchClassMetadataById(item.classId) }
+      if (item.collectionId) { lazyFetchCollectionById(item.collectionId) }
     })
   })
 })
 
 function addSaleItem () {
-  const classId = newClassId.value
-  classId.split(',').forEach((input) => {
-    let classId = input.trim()
-    if (classId.startsWith('http')) {
-      const url = new URL(classId)
-      classId = url.pathname.split('/').pop() || ''
+  const productId = newProductId.value
+  productId.split(',').forEach((input) => {
+    let productId = input.trim()
+    if (productId.startsWith('http')) {
+      const url = new URL(productId)
+      productId = url.pathname.split('/').pop() || ''
     }
-    if (!classId.startsWith('likenft')) {
-      alert('Invalid class ID:' + classId)
-      return
+    if (productId.startsWith('likenft')) {
+      saleItemList.value.push({ classId: productId, selected: false })
+      lazyFetchClassMetadataById(productId)
+    } else if (productId.startsWith('col_book_')) {
+      saleItemList.value.push({ collectionId: productId, selected: false })
+      lazyFetchCollectionById(productId)
+    } else {
+      alert('Invalid product ID:' + productId)
     }
-    saleItemList.value.push({ classId, selected: false })
-    lazyFetchClassMetadataById(classId)
   })
-  newClassId.value = ''
-  saveSaleClassIds()
+  newProductId.value = ''
+  saveSaleProductIds()
 }
 
-function removeSaleItem (classId: string) {
-  saleItemList.value = saleItemList.value.filter(item => item.classId !== classId)
-  saveSaleClassIds()
+function removeSaleItem ({ classId, collectionId }: { classId?: string, collectionId?: string }) {
+  const productId = classId || collectionId
+  saleItemList.value = saleItemList.value
+    .filter(item => item.classId !== productId && item.collectionId !== productId)
+  saveSaleProductIds()
 }
 
 function toggleEditMode () {
@@ -205,14 +227,15 @@ function toggleEditMode () {
 
 function onSelectTableRow (row: any) {
   saleItemList.value = saleItemList.value.map((item) => {
-    if (item.classId === row.classId) {
+    if ((row.classId && item.classId === row.classId) ||
+      (row.collectionId && item.collectionId === row.collectionId)) {
       item.selected = !item.selected
     }
     return item
   })
 }
 
-function saveSaleClassIds () {
+function saveSaleProductIds () {
   window.localStorage.setItem('nft_book_store_pos_items', JSON.stringify(saleItemList.value))
 }
 
