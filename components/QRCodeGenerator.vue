@@ -10,7 +10,7 @@
       <slot name="header" />
     </template>
 
-    <div class="grid grid-cols-2 gap-4 p-4 print:hidden">
+    <div v-if="!isReadonlyMode" class="grid grid-cols-2 gap-4 p-4 print:hidden">
       <UFormGroup label="Pick an icon">
         <URadioGroup
           v-model="selectedIcon"
@@ -27,7 +27,7 @@
       </UFormGroup>
     </div>
 
-    <UDivider />
+    <UDivider v-if="!isReadonlyMode" />
 
     <div
       id="qr-code"
@@ -35,7 +35,7 @@
       class="flex justify-center items-center py-2"
     />
 
-    <template #footer>
+    <template v-if="!isReadonlyMode" #footer>
       <template v-if="isDownloadMode">
         <USelect
           v-model="downloadFileExtension"
@@ -102,6 +102,7 @@ const props = defineProps({
   }
 })
 
+const isReadonlyMode = computed(() => props.mode === 'readonly')
 const isDownloadMode = computed(() => props.mode === 'download')
 const isConfigMode = computed(() => props.mode === 'config')
 

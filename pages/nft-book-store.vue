@@ -1,6 +1,6 @@
 <template>
   <PageContainer :key="route.path">
-    <PageHeader :class="{ hidden: isHeaderHidden }" title="NFT Book Store Management Page" />
+    <PageHeader :class="{ hidden: isHeaderHidden }" title="NFT Bookstore Management Page" />
 
     <AuthRequiredView>
       <NuxtPage />

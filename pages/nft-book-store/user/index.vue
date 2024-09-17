@@ -51,7 +51,7 @@
           <template v-else #help>
             Append <UKbd class="font-mono">
               ?from={{ channelId }}
-            </UKbd> in any book store page to earn commission from book sales.
+            </UKbd> in any bookstore page to earn commission from book sales.
           </template>
         </UFormGroup>
 
