@@ -1980,10 +1980,10 @@
     nanoassert "^1.1.0"
     tweetnacl "^1.0.1"
 
-"@likecoin/qr-code-styling@^1.6.5":
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/@likecoin/qr-code-styling/-/qr-code-styling-1.6.5.tgz#52ffdcc43574f9c5c3fa4a6ee5abb4fc224e6e81"
-  integrity sha512-MNrbSIbU8vEdZR6/0uBZRyOCFQtbagA7mnpB3TkqLoDTTpktYHAfq9RYHxUyGJ5tdw7HZEhsQZOrzb/YoXF9fQ==
+"@likecoin/qr-code-styling@^1.6.6":
+  version "1.6.6"
+  resolved "https://registry.yarnpkg.com/@likecoin/qr-code-styling/-/qr-code-styling-1.6.6.tgz#f7783356224445b34087a039909b7ec923474030"
+  integrity sha512-RbGK/+20bJhFZR70r8MeDvfyz3W7U5zXpykSTYOYxZGyo6wC+Y4QnbUpL+YdAtzT2ZIFeCNOcRs2W2FNrKPoaA==
   dependencies:
     qrcode-generator "^1.4.3"
 
