@@ -90,10 +90,7 @@
                 <UIcon name="i-heroicons-question-mark-circle" />
               </ToolTips>
             </template>
-            <UInput
-              :value="autoMemo"
-              @input="(e) => updatePrice(e, 'autoMemo', index)"
-            />
+            <UInput v-model="autoMemo" />
           </UFormGroup>
           <UFormGroup
             v-else
