@@ -154,3 +154,12 @@ export function getPurchaseLink ({
     ? `${LIKER_LAND_URL}/nft/class/${classId}${queryString}`
     : `${LIKE_CO_API}/likernft/book/purchase/${classId}/new${queryString}`
 }
+
+export function formatCurrency (currency: string) {
+  return currency?.toUpperCase() || ''
+}
+
+export function formatNumberWithCurrency (value: number, currency: string) {
+  const suffix = currency ? ` ${formatCurrency(currency)}` : ''
+  return `${value.toLocaleString('en-US')}${suffix}`
+}
