@@ -19,7 +19,7 @@
     "@cosmjs/stargate": "^0.30.1",
     "@likecoin/iscn-js": "^0.6.10",
     "@likecoin/qr-code-styling": "^1.6.4",
-    "@likecoin/wallet-connector": "^0.26.6",
+    "@likecoin/wallet-connector": "^0.26.7",
     "@nuxt/ui": "2.13.0",
     "@pinia/nuxt": "^0.4.8",
     "@sentry/nuxt": "^8.27.0",
