@@ -136,7 +136,7 @@ const payoutDataRows = computed(() => {
     {
       id,
       createdTs: new Date(createdTs * 1000).toLocaleString(),
-      amount: formatNumberWithCurrency(amount / 100, currency),
+      amount: formatNumberWithCurrency(amount, currency),
       status,
       currency: formatCurrency(currency),
       arrivalTs: arrivalTs ? new Date(arrivalTs * 1000).toLocaleString() : ''
@@ -158,7 +158,7 @@ const payoutItemRows = computed(() => {
     return {
       commissionId,
       createdTs: new Date(createdTs * 1000).toLocaleString(),
-      amount: formatNumberWithCurrency(amount / 100, currency),
+      amount: formatNumberWithCurrency(amount, currency),
       currency: formatCurrency(currency),
       description,
       status,

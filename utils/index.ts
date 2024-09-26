@@ -159,7 +159,17 @@ export function formatCurrency (currency: string) {
   return currency?.toUpperCase() || ''
 }
 
-export function formatNumberWithCurrency (value: number, currency: string) {
+export function formatNumberWithCurrency (valueInDecimal: number, currency: string) {
+  let value = 0
+  switch (currency) {
+    case 'usdc':
+      value = valueInDecimal / 1000000
+      break
+    case 'usd':
+    default:
+      value = valueInDecimal / 100
+      break
+  }
   const suffix = currency ? ` ${formatCurrency(currency)}` : ''
   return `${value.toLocaleString('en-US')}${suffix}`
 }
