@@ -1,17 +1,39 @@
 <template>
   <PageContainer>
-    <PageHeader title="Batch Create Bitly Links" />
+    <PageHeader title="Batch Create Short Links" />
 
     <PageBody>
       <UFormGroup
-        label="Bitly Access Token"
+        label="Short Link Provider"
+        :required="true"
+      >
+        <USelect
+          v-model="shortLinkProvider"
+          :options="shortLinkProviders"
+        />
+      </UFormGroup>
+
+      <UFormGroup
+        :label="apiKeyLabel"
         :required="true"
       >
         <UInput
-          v-model="bitlyToken"
+          v-model="apiKey"
           class="font-mono"
           :autocomplete="false"
-          :required="true"
+        />
+      </UFormGroup>
+
+      <UFormGroup
+        v-if="shouldShowShortLinkDomain"
+        label="Short.io Domain"
+        :required="true"
+      >
+        <UInput
+          v-model="shortLinkDomain"
+          class="font-mono"
+          placeholder="link.liker.land"
+          :autocomplete="false"
         />
       </UFormGroup>
 
@@ -41,7 +63,7 @@
         <UButton
           label="Start"
           size="lg"
-          :disabled="!csvInput || !bitlyToken"
+          :disabled="!csvInput || !apiKey || (shouldShowShortLinkDomain && !shortLinkDomain)"
           @click="startShorteningURLs"
         />
       </div>
@@ -120,12 +142,40 @@ const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 
+enum ShortLinkProvider {
+  Bitly = 'bitly',
+  ShortIO = 'shortio'
+}
+const shortLinkProviders = [
+  {
+    label: 'Bitly',
+    value: ShortLinkProvider.Bitly
+  },
+  {
+    label: 'Short.io',
+    value: ShortLinkProvider.ShortIO
+  }
+]
+const shortLinkProvider = ref(route.query.provider as string || ShortLinkProvider.Bitly)
+const shouldShowShortLinkDomain = computed(() => shortLinkProvider.value === ShortLinkProvider.ShortIO)
+const shortLinkDomain = ref('')
+
 const titlePrefix = ref(route.query.title_prefix as string || 'NFT Book Press')
 const csvInput = ref('')
 const csvInputPlaceholder = `key,url
 example01,https://example01.com,
 example02,https://example02.com,`
-const bitlyToken = ref('')
+const apiKey = ref('')
+const apiKeyLabel = computed(() => {
+  switch (shortLinkProvider.value) {
+    case ShortLinkProvider.Bitly:
+      return 'Bitly Access Token'
+    case ShortLinkProvider.ShortIO:
+      return 'Short.io API Key'
+    default:
+      return ''
+  }
+})
 const shortenedURLItems = ref<{ key: string, url: string, destination: string }[]>([])
 
 onMounted(() => {
@@ -141,12 +191,12 @@ onMounted(() => {
   }
 })
 
-async function shortenURL ({ url, key }: { url: string, key: string }) {
+async function shortenURLWithBitly ({ url, key }: { url: string, key: string }) {
   try {
     const { data, error } = await useFetch<{ link: string }>('https://api-ssl.bitly.com/v4/bitlinks', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${bitlyToken.value}`
+        Authorization: `Bearer ${apiKey.value}`
       },
       body: {
         long_url: url,
@@ -157,10 +207,53 @@ async function shortenURL ({ url, key }: { url: string, key: string }) {
         ]
       }
     })
-    if (error) {
+    if (error.value) {
       throw error.value
     }
-    return data.value?.link
+    if (!data.value) {
+      throw new Error('No data returned from Bitly')
+    }
+    return data.value.link
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: (error as Error).toString(),
+      timeout: 0,
+      color: 'red',
+      ui: {
+        title: 'text-red-400 dark:text-red-400'
+      }
+    })
+    return 'error'
+  }
+}
+
+async function shortenURLWithShortIO ({ url, key }: { url: string, key: string }) {
+  try {
+    const { data, error } = await useFetch<{ shortURL: string }>('https://api.short.io/links/public', {
+      method: 'POST',
+      headers: {
+        Authorization: apiKey.value
+      },
+      body: {
+        allowDuplicates: true,
+        domain: shortLinkDomain.value,
+        originalURL: url,
+        title: [titlePrefix.value, key].join(' - '),
+        tags: [
+          'nft-book-press'
+        ]
+      }
+    })
+    if (error.value) {
+      throw error.value
+    }
+    if (!data.value) {
+      throw new Error('No data returned from Short.io')
+    }
+    return data.value.shortURL
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)
@@ -201,9 +294,20 @@ async function startShorteningURLs () {
 
   try {
     for (const { key, url } of urlItems) {
+      let shortenedURL = ''
+      switch (shortLinkProvider.value) {
+        case ShortLinkProvider.Bitly:
+          shortenedURL = await shortenURLWithBitly({ url, key })
+          break
+        case ShortLinkProvider.ShortIO:
+          shortenedURL = await shortenURLWithShortIO({ url, key })
+          break
+        default:
+          break
+      }
       shortenedURLItems.value.push({
         key,
-        url: await shortenURL({ url, key }),
+        url: shortenedURL,
         destination: url
       })
     }

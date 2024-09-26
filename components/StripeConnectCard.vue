@@ -34,7 +34,7 @@
               </template>
             </URadio>
             <div
-              v-if="isDefaultAccountReady"
+              v-if="defaultAccountConnectStatus.isReady"
               class="flex flex-col items-start w-full"
             >
               <div
@@ -46,7 +46,10 @@
                   variant="outline"
                   title="Has Stripe Account"
                 />
-                <div>{{ ` Email: ${props.stripeConnectStatusWalletMap[props.loginAddress]?.email}` }}</div>
+                <div
+                  v-if="defaultAccountConnectStatus.email"
+                  v-text="`Email: ${defaultAccountConnectStatus.email}`"
+                />
               </div>
             </div>
             <span v-else>
@@ -85,35 +88,27 @@
             </div>
             <UProgress v-if="isStripeConnectLoading" class="my-[6px]" animation="carousel" />
             <div
-              v-else-if="
-                connectStatusByInputWallet
-              "
+              v-else-if="inputWallet && inputAccountConnectStatus"
               class="flex flex-col gap-[8px] mt-[12px] px-[6px] py-[4px] w-[80%]"
             >
-              <div
-                v-if="isInputAccountReady"
-              >
+              <div v-if="inputAccountConnectStatus.isReady">
                 <UAlert
                   icon="i-heroicons-check"
                   color="primary"
                   variant="outline"
                   title="Has Stripe Account"
                 />
-                <span
-                  v-if="
-                    connectStatusByInputWallet
-                      ?.email
-                  "
-                >{{
-                  ` Email: ${connectStatusByInputWallet?.email}`
-                }}</span>
+                <div
+                  v-if="inputAccountConnectStatus.email"
+                  v-text="`Email: ${inputAccountConnectStatus.email}`"
+                />
               </div>
               <UAlert
                 v-else
                 icon="i-heroicons-x-mark"
                 color="red"
                 variant="outline"
-                title="No stripe account connected to this wallet yet."
+                title="No Stripe account connected to this wallet yet."
               />
             </div>
           </div>
@@ -141,6 +136,8 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+
 import { LIKE_ADDRESS_REGEX } from '~/constant'
 import { useStripeStore } from '~/stores/stripe'
 
@@ -148,7 +145,9 @@ const { LIKE_CO_API } = useRuntimeConfig().public
 
 const stripeStore = useStripeStore()
 
-const { fetchStripeConnectStatus } = stripeStore
+const { fetchStripeConnectStatusByWallet } = stripeStore
+const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
+
 const isStripeConnectChecked = defineModel('isStripeConnectChecked')
 const isUsingDefaultAccount = defineModel('isUsingDefaultAccount')
 
@@ -160,10 +159,6 @@ const props = defineProps({
   shouldDisableSetting: {
     type: Boolean,
     default: false
-  },
-  stripeConnectStatusWalletMap: {
-    type: Object,
-    default: () => {}
   },
   stripeConnectWallet: {
     type: String,
@@ -183,17 +178,15 @@ const emit = defineEmits<{
 const inputWallet = ref('')
 const stripeConnectInputError = ref('')
 const isStripeConnectLoading = ref(false)
-const isDefaultAccountReady = computed(() => props.stripeConnectStatusWalletMap[props.loginAddress]?.isReady)
-const isInputAccountReady = computed(() => props.stripeConnectStatusWalletMap[inputWallet.value]?.isReady)
+const defaultAccountConnectStatus = computed(() => getStripeConnectStatusByWallet.value(props.loginAddress))
+const inputAccountConnectStatus = computed(() => getStripeConnectStatusByWallet.value(inputWallet.value))
 
 const isStripeConnectWalletReadyToSave = computed(() => {
   if (!isStripeConnectChecked.value) { return false }
-  if (isUsingDefaultAccount.value && !isDefaultAccountReady.value) { return false }
-  if ((!isUsingDefaultAccount.value && !isInputAccountReady.value) || stripeConnectInputError.value) { return false }
+  if (isUsingDefaultAccount.value && !defaultAccountConnectStatus.value.isReady) { return false }
+  if ((!isUsingDefaultAccount.value && !inputAccountConnectStatus.value.isReady) || stripeConnectInputError.value) { return false }
   return true
 })
-
-const connectStatusByInputWallet = computed(() => props.stripeConnectStatusWalletMap[inputWallet.value])
 
 watch(() => props.stripeConnectWallet, (wallet) => {
   if (wallet && !isUsingDefaultAccount.value) {
@@ -211,8 +204,10 @@ async function onStripeConnectWalletInput (input: any) {
     stripeConnectInputError.value = 'You have entered an invalid wallet address'
     return
   }
-  if (props.stripeConnectStatusWalletMap[inputValue]) {
-    return props.stripeConnectStatusWalletMap[inputValue]
+
+  const status = getStripeConnectStatusByWallet.value(inputValue)
+  if (status) {
+    return status
   }
 
   isStripeConnectLoading.value = true
@@ -220,7 +215,7 @@ async function onStripeConnectWalletInput (input: any) {
     await useFetch(
       `${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${inputValue}`
     )
-    await fetchStripeConnectStatus(inputValue)
+    await fetchStripeConnectStatusByWallet(inputValue)
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)

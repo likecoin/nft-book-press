@@ -63,13 +63,20 @@
         :disabled="!csvInput"
         @click="drawQRCodes"
       />
-      <UButton
-        v-else
-        label="Print"
-        size="lg"
-        variant="outline"
-        @click="handleClickPrint"
-      />
+      <template v-else>
+        <UButton
+          label="Print"
+          size="lg"
+          variant="outline"
+          @click="handleClickPrint"
+        />
+        <UButton
+          label="Download"
+          size="lg"
+          variant="outline"
+          @click="handleClickDownload"
+        />
+      </template>
     </nav>
 
     <div class="flex flex-col items-center gap-[2cm] print:gap-0">
@@ -215,6 +222,13 @@ function handleClickPrint () {
   if (csvInput.value) {
     window.print()
   }
+}
+
+function handleClickDownload () {
+  downloadQRCodes(urlItems.value.map(item => ({
+    filename: item.key,
+    url: item.url
+  })))
 }
 </script>
 

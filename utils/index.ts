@@ -30,8 +30,9 @@ export function downloadBlob (content: string, filename: string, contentType: st
 }
 
 export function parseImageURLFromMetadata (image: string): string {
+  const { ARWEAVE_ENDPOINT } = useRuntimeConfig().public
   if (!image) { return '' }
-  return image.replace('ar://', 'https://arweave.net/').replace('ipfs://', 'https://ipfs.io/ipfs/')
+  return image.replace('ar://', `${ARWEAVE_ENDPOINT}/`).replace('ipfs://', 'https://ipfs.io/ipfs/')
 }
 
 export function downloadFile ({ data, fileName, fileType }:{data:any, fileName:string, fileType:string}) {
@@ -114,37 +115,39 @@ export function getPurchaseLink ({
   collectionId,
   priceIndex = 0,
   channel,
-  coupon,
   customLink,
   isUseLikerLandLink,
-  query
+  isForQRCode,
+  query: queryInput
 }:{
   classId?: string
   collectionId?: string
   priceIndex?: number
   channel?: string
-  coupon?: string
   customLink?: string
   isUseLikerLandLink?: boolean
+  isForQRCode?: boolean
   query?: Record<string, string>
 }) {
-  const payload: Record<string, string> = {
+  const query: Record<string, string> = {
     from: channel || ''
   }
   if (classId) {
-    payload.price_index = priceIndex.toString()
+    query.price_index = priceIndex.toString()
   }
-  if (coupon) { payload.coupon = coupon }
   if (customLink) {
     const url = new URL(customLink)
-    Object.entries(payload).forEach(([key, value]) => {
+    Object.entries(query).forEach(([key, value]) => {
       url.searchParams.set(key, value)
     })
     return url.toString()
   }
+  if (isForQRCode) {
+    query.utm_medium = queryInput?.utm_medium ? `${queryInput.utm_medium}-qr` : 'qrcode'
+  }
 
   const { LIKE_CO_API, LIKER_LAND_URL } = useRuntimeConfig().public
-  const queryString = `?${new URLSearchParams({ ...query, ...payload }).toString()}`
+  const queryString = `?${new URLSearchParams({ ...queryInput, ...query }).toString()}`
   if (collectionId) {
     return isUseLikerLandLink
       ? `${LIKER_LAND_URL}/nft/collection/${collectionId}${queryString}`
@@ -172,4 +175,16 @@ export function formatNumberWithCurrency (valueInDecimal: number, currency: stri
   }
   const suffix = currency ? ` ${formatCurrency(currency)}` : ''
   return `${value.toLocaleString('en-US')}${suffix}`
+}
+
+export function validateChannelId (channelId: string) {
+  return channelId.startsWith('@')
+}
+
+export function convertChannelIdToLikerId (channelId: string) {
+  return channelId.replace(/^@/, '')
+}
+
+export function convertLikerIdToChannelId (likerId: string) {
+  return `@${likerId}`
 }

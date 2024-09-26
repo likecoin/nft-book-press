@@ -174,7 +174,6 @@
         v-model:is-stripe-connect-checked="isStripeConnectChecked"
         v-model:is-using-default-account="isUsingDefaultAccount"
         :stripe-connect-wallet="stripeConnectWallet"
-        :stripe-connect-status-wallet-map="stripeConnectStatusWalletMap"
         :should-disable-setting="shouldDisableStripeConnectSetting"
         :login-address="wallet"
 
@@ -364,41 +363,6 @@
               </UTable>
             </UCard>
 
-            <!-- Coupon -->
-            <UCard
-              :ui="{
-                header: { base: 'flex justify-between items-center' },
-                body: { padding: '' }
-              }"
-            >
-              <template #header>
-                <h3 class="font-bold font-mono">
-                  Coupon Codes
-                </h3>
-                <UButton
-                  label="Add New"
-                  icon="i-heroicons-plus-circle"
-                  variant="outline"
-                  color="primary"
-                  @click="isShowNewCouponModal = true"
-                />
-              </template>
-
-              <UTable
-                v-if="couponsTableRows.length"
-                :columns="[
-                  { key: 'id', label: 'Code', sortable: true },
-                  { key: 'discount', label: 'Discount Multiplier' },
-                  { key: 'expireTs', label: 'Expiry Date' },
-                ]"
-                :rows="couponsTableRows"
-              >
-                <template #id-data="{ row }">
-                  <span class="font-mono">{{ row.id }}</span>
-                </template>
-              </UTable>
-            </UCard>
-            <NewCouponModal v-model="isShowNewCouponModal" @add="addCouponCode" />
             <!-- Copy Purchase Link -->
             <UCard
               :ui="{ body: { base: 'space-y-4' } }"
@@ -416,14 +380,6 @@
 
               <UFormGroup label="Sales channel for this link" hint="Optional">
                 <UInput v-model="fromChannel" placeholder="Channel ID" />
-              </UFormGroup>
-
-              <UFormGroup v-if="couponsTableRows.length" label="Active coupon" hint="Optional">
-                <USelect
-                  v-model="activeCoupon"
-                  :options="[{ value: '', label: 'Select a coupon' }].concat(couponsTableRows.map(({ id }) => ({ label: id, value: id })))"
-                  :ui="!activeCoupon ? { color: { white: { outline: 'text-gray-400 dark:text-gray-500' } } } : {}"
-                />
               </UFormGroup>
 
               <UButton
@@ -491,7 +447,7 @@ const { token } = storeToRefs(bookStoreApiStore)
 const { wallet } = storeToRefs(store)
 const { updateNFTBookCollectionById } = collectionStore
 const { getClassMetadataById, lazyFetchClassMetadataById } = nftStore
-const { fetchStripeConnectStatus, stripeConnectStatusWalletMap } = stripeStore
+const { fetchStripeConnectStatusByWallet } = stripeStore
 
 const route = useRoute()
 const router = useRouter()
@@ -501,7 +457,6 @@ const error = ref('')
 const isLoading = ref(false)
 const collectionId = ref(route.params.collectionId)
 const fromChannel = ref<string | undefined>(undefined)
-const activeCoupon = ref('')
 const collectionListingInfo = ref<any>({})
 const ordersData = ref<any>({})
 const isUpdatingShippingRates = ref(false)
@@ -511,14 +466,12 @@ const searchInput = ref('')
 
 const moderatorWallets = ref<string[]>([])
 const moderatorWalletsGrants = ref<any>({})
-const coupons = ref<any>({})
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
 const useLikerLandPurchaseLink = ref(true)
-const isShowNewCouponModal = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
@@ -531,7 +484,6 @@ const userCanSendNFT = computed(() => userIsOwner.value || (wallet.value && mode
 const purchaseLink = computed(() => getPurchaseLink({
   collectionId: collectionId.value as string,
   channel: fromChannel.value,
-  coupon: activeCoupon.value,
   isUseLikerLandLink: useLikerLandPurchaseLink.value
 }))
 const salesChannelMap = computed(() => {
@@ -568,17 +520,6 @@ const purchaseList = computed(() => {
     }).sort((a: any, b: any) => b.timestamp - a.timestamp)
   }
   return []
-})
-
-const couponsTableRows = computed(() => {
-  if (!coupons.value) {
-    return []
-  }
-  return Object.entries(coupons.value).map(([id, value]) => ({
-    id,
-    expireTs: (value as any).expireTs ? new Date((value as any).expireTs) : '',
-    discount: (value as any).discount
-  }))
 })
 
 const orderTableColumns = computed(() => {
@@ -818,8 +759,7 @@ onMounted(async () => {
     const {
       moderatorWallets: classModeratorWallets,
       notificationEmails: classNotificationEmails,
-      connectedWallets: classConnectedWallets,
-      coupons: classCoupons
+      connectedWallets: classConnectedWallets
     } = collectionListingInfo.value as any
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
@@ -830,10 +770,9 @@ onMounted(async () => {
       stripeConnectWallet.value = classStripeWallet
       if (classStripeWallet !== wallet.value) {
         isUsingDefaultAccount.value = false
-        await fetchStripeConnectStatus(classStripeWallet)
+        await fetchStripeConnectStatusByWallet(classStripeWallet)
       }
     }
-    coupons.value = classCoupons || {}
     const { data: orders, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/orders`,
       {
         headers: {
@@ -850,7 +789,7 @@ onMounted(async () => {
 
     ordersData.value = orders.value
 
-    await fetchStripeConnectStatus(wallet.value)
+    await fetchStripeConnectStatusByWallet(wallet.value)
     collectionListingInfo.value.classIds.forEach((classId: string) => lazyFetchClassMetadataById(classId))
   } catch (err) {
     console.error(err)
@@ -887,13 +826,6 @@ async function hardSetStatusToCompleted (purchase: any) {
     throw fetchError.value
   }
   collectionListingInfo.value.pendingNFTCount -= 1
-}
-
-function addCouponCode (coupon: any) {
-  coupons.value[coupon.id] = {
-    discount: coupon.discount,
-    expireTs: coupon.expireTs
-  }
 }
 
 function addModeratorWallet () {
@@ -942,8 +874,7 @@ async function updateSettings () {
     await updateNFTBookCollectionById(collectionId.value as string, {
       moderatorWallets,
       notificationEmails,
-      connectedWallets,
-      coupons
+      connectedWallets
     })
     router.push({
       name: 'nft-book-store-collection'

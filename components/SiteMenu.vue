@@ -111,9 +111,9 @@ const items = [
         target: '_blank'
       },
       {
-        label: 'Batch Create Bitly Links',
+        label: 'Batch Create Short Links',
         icon: 'i-heroicons-sparkles',
-        to: { name: 'batch-bitly' }
+        to: { name: 'batch-short-links' }
       },
       {
         label: 'LikeCoin ISCN/NFT Tools',

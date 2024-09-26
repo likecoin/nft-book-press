@@ -37,20 +37,20 @@
             <UButton
               icon="i-heroicons-arrow-path"
               variant="outline"
-              :disabled="isLikerIdLoading"
-              @click="refreshLikerIdInfo"
+              :disabled="isFetchingUserLikerInfo"
+              @click="refreshUserLikerInfo"
             />
           </utooltip>
         </template>
 
-        <UFormGroup v-if="likerIdInfo?.user" label="Your affiliation channel ID" size="xl">
-          <UInput placeholder="Affiliation ID" :value="`@${likerIdInfo?.user}`" disabled />
+        <UFormGroup v-if="userLikerInfo?.user" label="Your affiliation channel ID" size="xl">
+          <UInput placeholder="Affiliation ID" :value="channelId" disabled />
           <template v-if="!isStripeConnectReady" #help>
             Please setup your stripe account below to participate in the book affiliation program.
           </template>
           <template v-else #help>
             Append <UKbd class="font-mono">
-              ?from=@{{ likerIdInfo?.user }}
+              ?from={{ channelId }}
             </UKbd> in any book store page to earn commission from book sales.
           </template>
         </UFormGroup>
@@ -58,7 +58,7 @@
         <p v-else>
           You have not setup your channel ID yet.
         </p>
-        <template v-if="!likerIdInfo?.user" #footer>
+        <template v-if="!userLikerInfo?.user" #footer>
           <UButton
             label="Setup your ID"
             size="lg"
@@ -331,30 +331,32 @@
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '~/stores/user'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
-import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'
 
 const { LIKER_LAND_URL, LIKE_CO_API, LIKE_CO_HOST } = useRuntimeConfig().public
 
 const nftStore = useNftStore()
-const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const collectionStore = useCollectionStore()
 const userStore = useUserStore()
-const { wallet } = storeToRefs(walletStore)
-const { token } = storeToRefs(bookStoreApiStore)
-const { bookUser, isUpdatingBookUserProfile } = storeToRefs(userStore)
+const { token, wallet } = storeToRefs(bookStoreApiStore)
+const { bookUser, isUpdatingBookUserProfile, userLikerInfo, isFetchingUserLikerInfo } = storeToRefs(userStore)
 const toast = useToast()
 
 const error = ref('')
 const isLoading = ref(false)
 const connectStatus = ref<any>({})
-const likerIdInfo = ref<any>({})
 const commissionHistory = ref<any>([])
 const payoutHistory = ref<any>([])
 const isEnableNotificationEmails = ref(true)
-const isLikerIdLoading = ref(false)
+
+const channelId = computed(() => {
+  if (userLikerInfo.value?.user) {
+    return convertLikerIdToChannelId(userLikerInfo.value?.user)
+  }
+  return ''
+})
 
 watch(bookUser, (user) => {
   isEnableNotificationEmails.value = user?.isEnableNotificationEmails || false
@@ -371,7 +373,7 @@ const isAllowChangingNotificationEmailSettings = computed(() =>
 onMounted(async () => {
   await Promise.all([
     loadCommissionHistory(),
-    loadLikerId(),
+    refreshUserLikerInfo(),
     refreshStripeConnectStatus(),
     userStore.lazyFetchBookUserProfile()
   ])
@@ -472,22 +474,13 @@ async function loadPayoutHistory () {
   }
 }
 
-async function loadLikerId ({ nocache = false } = {}) {
+async function refreshUserLikerInfo () {
   try {
-    isLikerIdLoading.value = true
-    const timestamp = nocache ? `?ts=${Math.round(new Date().getTime() / 1000)}` : ''
-    const url = `${LIKE_CO_API}/users/addr/${wallet.value}/min${timestamp}`
-    const { data, error: fetchError } = await useFetch(url)
-
-    if (fetchError.value && fetchError.value?.statusCode !== 404) {
-      throw new Error(fetchError.value.toString())
-    }
-    likerIdInfo.value = (data.value as any) || {}
+    await userStore.fetchUserLikerInfo({ nocache: true })
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error(e)
     error.value = (e as Error).toString()
-  } finally {
-    isLikerIdLoading.value = false
   }
 }
 
@@ -625,10 +618,6 @@ async function updateUserProfile () {
       }
     })
   }
-}
-
-async function refreshLikerIdInfo () {
-  await loadLikerId({ nocache: true })
 }
 
 </script>

@@ -214,7 +214,6 @@
         v-model:is-stripe-connect-checked="isStripeConnectChecked"
         v-model:is-using-default-account="isUsingDefaultAccount"
         :stripe-connect-wallet="stripeConnectWallet"
-        :stripe-connect-status-wallet-map="stripeConnectStatusWalletMap"
         :should-disable-setting="shouldDisableStripeConnectSetting"
         :login-address="wallet"
 
@@ -444,7 +443,8 @@ const { wallet, signer } = storeToRefs(walletStore)
 const { connect } = walletStore
 const { newNFTBookCollection } = collectionStore
 const { getClassMetadataById, lazyFetchClassMetadataById } = nftStore
-const { fetchStripeConnectStatus, stripeConnectStatusWalletMap } = stripeStore
+const { fetchStripeConnectStatusByWallet } = stripeStore
+const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
 
 const router = useRouter()
 const route = useRoute()
@@ -543,9 +543,9 @@ config({
 onMounted(async () => {
   try {
     isLoading.value = true
-    await fetchStripeConnectStatus(wallet.value)
+    await fetchStripeConnectStatusByWallet(wallet.value)
 
-    if (stripeConnectStatusWalletMap[wallet.value]?.isReady) {
+    if (getStripeConnectStatusByWallet.value(wallet.value).isReady) {
       isStripeConnectChecked.value = true
       stripeConnectWallet.value = wallet.value
     }

@@ -7,39 +7,57 @@
         <UFormGroup
           label="Product ID/URL"
           :required="true"
-          :error="error"
+          :error="productIdError"
         >
           <UInput
             v-model="productIdInput"
             class="font-mono"
             placeholder="https://liker.land/nft/class/likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83"
+            name="product_id"
             :required="true"
           />
         </UFormGroup>
 
-        <UFormGroup label="Link Settings">
+        <UFormGroup label="Landing Page">
           <USelect v-model="linkSetting" :options="linkSettings" option-attribute="name" />
         </UFormGroup>
 
         <UFormGroup
           v-if="isCustomLink"
-          label="Custom Link"
+          label="Custom Page Link"
           :required="true"
         >
           <UInput
             v-model="customLinkInput"
             class="font-mono"
             placeholder="https://books.liker.land"
+            name="custom_link"
             :required="true"
           />
         </UFormGroup>
 
-        <UFormGroup label="Custom Channels" hint="Optional">
-          <UInput
-            v-model="customChannelInput"
-            class="font-mono"
-            placeholder="Channel ID(s), separated by commas (e.g. store01, store02)"
-          />
+        <UFormGroup
+          label="Channel ID(s)"
+          hint="Optional"
+          :error="customChannelInputError"
+        >
+          <div class="flex gap-2">
+            <UInput
+              v-model="customChannelInput"
+              class="grow font-mono"
+              placeholder="Channel ID(s), separated by commas (e.g. @store01, @store02)"
+              name="channel_ids"
+            />
+            <UButton
+              v-show="!customChannelInput && userLikerInfo"
+              class="relative"
+              label="Prefill from Account"
+              color="gray"
+              variant="outline"
+              size="2xs"
+              @click="prefillChannelIdIfPossible"
+            />
+          </div>
         </UFormGroup>
 
         <UFormGroup label="Query Parameters" hint="Optional">
@@ -47,6 +65,7 @@
             v-model="linkQueryInput"
             class="font-mono"
             placeholder="utm_source=instagram&utm_medium=social"
+            name="query_params"
           />
         </UFormGroup>
 
@@ -134,9 +153,10 @@
             :ui="{ body: { padding: '' } }"
           >
             <template #header>
-              <h3 class="text-sm font-bold">
-                Link Query Parameters
-              </h3>
+              <h3
+                class="text-sm font-bold"
+                v-text="'Common Link Query Parameters'"
+              />
             </template>
 
             <UTable
@@ -151,6 +171,16 @@
         </div>
 
         <UTable :columns="tableColumns" :rows="tableRows">
+          <template #channelId-data="{ row }">
+            <div v-text="row.channelName" />
+            <div
+              class="text-gray-400 dark:text-gray-700 text-xs font-mono"
+              v-text="row.channelId"
+            />
+          </template>
+          <template #utmCampaign-data="{ row }">
+            <UKbd class="font-mono" :value="row.utmCampaign" />
+          </template>
           <template #link-data="{ row }">
             <div class="flex items-center gap-2">
               <UButton
@@ -205,13 +235,23 @@
 </template>
 
 <script setup lang="ts">
-import { type FileExtension } from '@likecoin/qr-code-styling'
-import { AFFILIATION_CHANNELS } from '~/constant'
+import { storeToRefs } from 'pinia'
+
+import { AFFILIATION_CHANNEL_DEFAULT, AFFILIATION_CHANNELS } from '~/constant'
+
 import { useCollectionStore } from '~/stores/collection'
+import { useLikerStore } from '~/stores/liker'
+import { useStripeStore } from '~/stores/stripe'
+import { useUserStore } from '~/stores/user'
+
 import { getPurchaseLink } from '~/utils'
 
 const { LIKE_CO_API } = useRuntimeConfig().public
 const collectionStore = useCollectionStore()
+const likerStore = useLikerStore()
+const stripeStore = useStripeStore()
+const userStore = useUserStore()
+const { userLikerInfo } = storeToRefs(userStore)
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
@@ -233,7 +273,7 @@ const productId = computed(() => {
 })
 
 const linkQueryInput = ref('')
-const defaultQuery = computed(() => {
+const linkQueryDefault = computed(() => {
   const isUseLikerLandLink = linkSetting.value === 'liker_land'
   let utmSource = isUseLikerLandLink ? 'likerland' : 'stripe'
   if (isCustomLink.value) {
@@ -245,14 +285,18 @@ const defaultQuery = computed(() => {
   }
 })
 const linkQuery = computed(() => {
-  if (linkQueryInput.value) {
-    return { ...defaultQuery.value, ...Object.fromEntries(new URLSearchParams(linkQueryInput.value.trim())) }
-  }
+  const mergedQuery = { ...linkQueryDefault.value }
+
   const input = productIdInput.value?.trim() || ''
   if (input.startsWith('http')) {
-    return { ...defaultQuery.value, ...Object.fromEntries(new URL(input).searchParams) }
+    Object.assign(mergedQuery, Object.fromEntries(new URL(input).searchParams))
   }
-  return defaultQuery.value
+
+  if (linkQueryInput.value) {
+    Object.assign(mergedQuery, Object.fromEntries(new URLSearchParams(linkQueryInput.value)))
+  }
+
+  return mergedQuery
 })
 const linkQueryTableRows = computed(() => Object.entries(linkQuery.value).map(([key, value]) => ({
   key,
@@ -263,15 +307,15 @@ const isCollection = computed(() => productId.value?.startsWith('col_'))
 
 const linkSettings = ref([
   {
-    name: 'Use Liker Land Link (Product page)',
+    name: 'Liker Land Product Page',
     value: 'liker_land'
   },
   {
-    name: 'Direct Link (Stripe)',
+    name: 'Stripe Checkout Page',
     value: 'direct'
   },
   {
-    name: 'Custom Link',
+    name: 'Custom Page',
     value: 'custom'
   }
 ])
@@ -283,15 +327,25 @@ const customChannelInput = ref('')
 const customChannels = computed(
   () => customChannelInput.value
     .split(',')
-    .map(channel => channel.trim())
+    .map(channelId => channelId.trim())
     .filter(Boolean)
-    .map(channel => ({
-      id: channel,
-      name: channel
-    }))
+    .map((channelId) => {
+      const channelInfo = likerStore.getChannelInfoById(channelId)
+      return {
+        id: channelId,
+        name: channelInfo?.displayName || channelId
+      }
+    })
 )
 
-const error = ref('')
+const productIdError = ref('')
+watch(productId, () => {
+  productIdError.value = ''
+})
+const customChannelInputError = ref('')
+watch(customChannelInput, () => {
+  customChannelInputError.value = ''
+})
 
 const isLoadingProductData = ref(false)
 const productData = ref<any>(undefined)
@@ -316,12 +370,16 @@ const priceIndexOptions = computed(() => {
   }))
 })
 
-const tableTitle = computed(() => `${productName.value} Affiliation Links`)
+const tableTitle = computed(() => `${productName.value ? `${productName.value} ` : ''}Affiliation Links`)
 const tableColumns = [
   {
-    key: 'channel',
+    key: 'channelId',
     label: 'Channel',
     sortable: true
+  },
+  {
+    key: 'utmCampaign',
+    label: 'UTM Campaign'
   },
   {
     key: 'link',
@@ -335,30 +393,29 @@ const tableRows = computed(() => {
   }
   const channels = [...customChannels.value, ...AFFILIATION_CHANNELS]
   return channels.map((channel) => {
-    const utmCampaignQuery = {
-      utm_campaign: `${channel.id}_bookpress`
-    }
-    const qrUtmSourceQuery: Record<string, string> = {}
-    if (linkQuery.value.utm_source === defaultQuery.value.utm_source) {
-      qrUtmSourceQuery.utm_source = `${defaultQuery.value.utm_source}-qr`
+    let utmCampaign = 'bookpress'
+    if (channel.id !== AFFILIATION_CHANNEL_DEFAULT) {
+      utmCampaign = `${convertChannelIdToLikerId(channel.id)}_${utmCampaign}`
     }
     const urlConfig = {
       [isCollection.value ? 'collectionId' : 'classId']: productId.value,
       channel: channel.id,
       priceIndex: priceIndex.value,
       customLink: isCustomLink.value ? customLinkInput.value : undefined,
-      isUseLikerLandLink: linkSetting.value === 'liker_land'
+      isUseLikerLandLink: linkSetting.value === 'liker_land',
+      query: {
+        utm_campaign: utmCampaign,
+        ...linkQuery.value
+      }
     }
     return {
-      id: channel.id,
-      channel: channel.name,
-      url: getPurchaseLink({
-        ...urlConfig,
-        query: { ...utmCampaignQuery, ...linkQuery.value }
-      }),
+      channelId: channel.id,
+      channelName: channel.name,
+      utmCampaign,
+      url: getPurchaseLink(urlConfig),
       qrCodeUrl: getPurchaseLink({
         ...urlConfig,
-        query: { ...utmCampaignQuery, ...linkQuery.value, ...qrUtmSourceQuery }
+        isForQRCode: linkQuery.value.utm_source === linkQueryDefault.value.utm_source
       })
     }
   })
@@ -385,23 +442,53 @@ async function fetchProductData () {
     } else {
       const { data: classData, error: classFetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/${productId.value}`)
       if (classFetchError.value) {
-        error.value = 'Cannot fetch class data.'
+        productIdError.value = 'Cannot fetch class data.'
       } else {
         return classData.value
       }
     }
   } catch {
-    error.value = 'Cannot fetch product data.'
+    productIdError.value = 'Cannot fetch product data.'
   }
   return undefined
 }
 
 async function createAffiliationLink () {
-  error.value = ''
+  productIdError.value = ''
   productData.value = undefined
+  customChannelInputError.value = ''
 
   if (!productId.value) {
     return
+  }
+
+  // Validate custom channels
+  if (customChannels.value.length) {
+    const invalidChannel = customChannels.value.find(channel => !validateChannelId(channel.id))
+    if (invalidChannel) {
+      customChannelInputError.value = `Invalid channel "${invalidChannel.id}", please enter a valid channel ID starting with "@"`
+      return
+    }
+
+    try {
+      await Promise.all(customChannels.value.map(async (channel) => {
+        const channelInfo = await likerStore.lazyFetchChannelInfoById(channel.id)
+        if (!channelInfo) {
+          throw new Error(`Channel ID "${channel.id}" has not registered for Liker ID`)
+        }
+
+        const stripeConnectStatus = await stripeStore.fetchStripeConnectStatusByWallet(channelInfo.likeWallet)
+        if (!stripeConnectStatus?.hasAccount) {
+          throw new Error(`Channel ID "${channel.id}" has not connected to Stripe`)
+        }
+        if (!stripeConnectStatus?.isReady) {
+          throw new Error(`Channel ID "${channel.id}" has not completed Stripe Connect setup`)
+        }
+      }))
+    } catch (error) {
+      customChannelInputError.value = (error as Error).message
+      return
+    }
   }
 
   isLoadingProductData.value = true
@@ -445,7 +532,7 @@ function printAllQRCodes () {
   try {
     sessionStorage.setItem(
       'nft_book_press_batch_qrcode',
-      convertArrayOfObjectsToCSV(tableRows.value.map(({ channel, qrCodeUrl, ...link }) => ({ key: channel, ...link, url: qrCodeUrl })))
+      convertArrayOfObjectsToCSV(tableRows.value.map(({ channelId, qrCodeUrl, ...link }) => ({ key: channelId, ...link, url: qrCodeUrl })))
     )
     window.open('/batch-qrcode?print=1', 'batch_qrcode', 'popup,menubar=no,location=no,status=no')
   } catch (error) {
@@ -467,9 +554,9 @@ function shortenAllLinks () {
   try {
     sessionStorage.setItem(
       'nft_book_press_batch_shorten_url',
-      convertArrayOfObjectsToCSV(tableRows.value.map(({ channel, ...link }) => ({ key: channel, ...link })))
+      convertArrayOfObjectsToCSV(tableRows.value.map(({ channelId, ...link }) => ({ key: channelId, ...link })))
     )
-    router.push({ name: 'batch-bitly', query: { print: 1 } })
+    router.push({ name: 'batch-short-links', query: { print: 1 } })
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)
@@ -485,65 +572,33 @@ function shortenAllLinks () {
   }
 }
 
-// TODO: UI for file types selection
-const DOWNLOAD_QRCODE_FILE_TYPES: {
-  value: FileExtension
-  label: string
-}[] = [
-  { value: 'svg', label: 'SVG' },
-  { value: 'png', label: 'PNG' }
-]
-
 async function downloadAllQRCodes () {
-  try {
-    const { default: QRCodeStyling } = await import('@likecoin/qr-code-styling')
-    const qrCodeResults = await Promise.all(tableRows.value.map(async (link) => {
-      const qrCode = new QRCodeStyling(getQRCodeOptions({ data: link.qrCodeUrl }))
-      const dataResults = await Promise.all(DOWNLOAD_QRCODE_FILE_TYPES.map(type => qrCode.getRawData(type.value)))
-      const filename = getQRCodeFilename(link.channel)
-      return DOWNLOAD_QRCODE_FILE_TYPES.map(({ value: ext }, index) => {
-        const data = dataResults[index]
-        if (!data) {
-          throw new Error(`Failed to generate QR code for ${filename}.${ext}`)
-        }
-        return {
-          filename: `${filename}.${ext}`,
-          data
-        }
-      })
-    }))
+  const items = tableRows.value.map(link => ({
+    url: link.qrCodeUrl,
+    filename: getQRCodeFilename(link.channelId)
+  }))
+  await downloadQRCodes(items, {
+    zipFilename: `${productName.value || productId.value}_QR Codes`
+  })
+}
 
-    const { default: JSZip } = await import('jszip')
-    const zip = new JSZip().folder(productId.value)
-    if (!zip) {
-      throw new Error('Failed to create zip file')
-    }
-    qrCodeResults.flat().forEach((qrCode) => {
-      zip.file(qrCode.filename, qrCode.data)
-    })
-
-    const { saveAs } = await import('file-saver')
-    await zip.generateAsync({ type: 'blob' }).then((content) => {
-      saveAs(content, `${productName.value || productId.value}_qrcodes.zip`)
-    })
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error)
-    toast.add({
-      icon: 'i-heroicons-exclamation-circle',
-      title: 'Failed to download QR codes',
-      timeout: 0,
-      color: 'red',
-      ui: {
-        title: 'text-red-400 dark:text-red-400'
-      }
-    })
+function prefillChannelIdIfPossible () {
+  if (!customChannelInput.value && userLikerInfo.value) {
+    customChannelInput.value = convertLikerIdToChannelId(userLikerInfo.value.user)
   }
 }
 
 onMounted(() => {
   if (productId.value) {
     nextTick(createAffiliationLink)
+  }
+
+  prefillChannelIdIfPossible()
+})
+
+watch(userLikerInfo, () => {
+  if (userLikerInfo.value) {
+    prefillChannelIdIfPossible()
   }
 })
 </script>

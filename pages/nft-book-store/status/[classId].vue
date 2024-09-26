@@ -262,7 +262,6 @@
         v-model:is-stripe-connect-checked="isStripeConnectChecked"
         v-model:is-using-default-account="isUsingDefaultAccount"
         :stripe-connect-wallet="stripeConnectWallet"
-        :stripe-connect-status-wallet-map="stripeConnectStatusWalletMap"
         :should-disable-setting="shouldDisableStripeConnectSetting"
         :login-address="wallet"
 
@@ -494,38 +493,6 @@
               </div>
             </UCard>
 
-            <!-- Coupon -->
-            <UCard
-              :ui="{
-                header: { base: 'flex justify-between items-center' },
-                body: { padding: '' }
-              }"
-            >
-              <template #header>
-                <h3 class="font-bold font-mono">
-                  Coupon Codes
-                </h3>
-                <UButton
-                  label="Add New"
-                  icon="i-heroicons-plus-circle"
-                  variant="outline"
-                  color="primary"
-                  @click="isShowNewCouponModal = true"
-                />
-              </template>
-
-              <UTable
-                v-if="couponsTableRows.length"
-                :columns="[
-                  { key: 'id', label: 'Code', sortable: true },
-                  { key: 'discount', label: 'Discount Multiplier' },
-                  { key: 'expireTs', label: 'Expiry Date' },
-                ]"
-                :rows="couponsTableRows"
-              />
-            </UCard>
-            <NewCouponModal v-model="isShowNewCouponModal" @add="addCouponCode" />
-
             <!-- Copy Purchase Link -->
             <UCard
               :ui="{ body: { base: 'space-y-4' } }"
@@ -547,14 +514,6 @@
 
               <UFormGroup label="Sales channel for the link(s)" hint="Optional">
                 <UInput v-model="fromChannelInput" placeholder="Channel ID(s), separated by commas (e.g. store01, store02)" />
-              </UFormGroup>
-
-              <UFormGroup v-if="couponsTableRows.length" label="Active coupon" hint="Optional">
-                <USelect
-                  v-model="activeCoupon"
-                  :options="[{ value: '', label: 'Select a coupon' }].concat(couponsTableRows.map(({ id }) => ({ label: id, value: id })))"
-                  :ui="!activeCoupon ? { color: { white: { outline: 'text-gray-400 dark:text-gray-500' } } } : {}"
-                />
               </UFormGroup>
 
               <UCard
@@ -727,7 +686,7 @@ const { token } = storeToRefs(bookStoreApiStore)
 const { wallet } = storeToRefs(store)
 const { updateBookListingSetting } = bookStoreApiStore
 const { lazyFetchClassMetadataById } = nftStore
-const { fetchStripeConnectStatus, stripeConnectStatusWalletMap } = stripeStore
+const { fetchStripeConnectStatusByWallet } = stripeStore
 
 const route = useRoute()
 const router = useRouter()
@@ -738,7 +697,6 @@ const isLoading = ref(false)
 const classId = ref<string>(route.params.classId as string)
 const fromChannelInput = ref('')
 const priceIndex = ref(0)
-const activeCoupon = ref('')
 const classListingInfo = ref<any>({})
 const prices = ref<any[]>([])
 const isUpdatingPricesOrder = ref(false)
@@ -751,7 +709,6 @@ const searchInput = ref('')
 
 const moderatorWallets = ref<string[]>([])
 const moderatorWalletsGrants = ref<any>({})
-const coupons = ref<any>({})
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
@@ -761,7 +718,6 @@ const mustClaimToView = ref(true)
 const hideDownload = ref(false)
 const enableCustomMessagePage = ref(true)
 const useLikerLandPurchaseLink = ref(true)
-const isShowNewCouponModal = ref(false)
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
 
@@ -781,7 +737,6 @@ const purchaseLinks = computed(() =>
         classId: classId.value,
         priceIndex: priceIndex.value,
         channel,
-        coupon: activeCoupon.value,
         isUseLikerLandLink: useLikerLandPurchaseLink.value
       })
     }))
@@ -837,16 +792,6 @@ const purchaseList = computed(() => {
   return []
 })
 
-const couponsTableRows = computed(() => {
-  if (!coupons.value) {
-    return []
-  }
-  return Object.entries(coupons.value).map(([id, value]) => ({
-    id,
-    expireTs: (value as any).expireTs ? new Date((value as any).expireTs) : '',
-    discount: (value as any).discount
-  }))
-})
 const orderTableColumns = computed(() => {
   const columns = [
     { key: 'actions', label: 'Actions', sortable: false },
@@ -1104,8 +1049,7 @@ onMounted(async () => {
       connectedWallets: classConnectedWallets,
       mustClaimToView: classMustClaimToView,
       enableCustomMessagePage: classEnableCustomMessagePage,
-      hideDownload: classHideDownload,
-      coupons: classCoupons
+      hideDownload: classHideDownload
     } = classData.value as any
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
@@ -1116,13 +1060,12 @@ onMounted(async () => {
       stripeConnectWallet.value = classStripeWallet
       if (classStripeWallet !== wallet.value) {
         isUsingDefaultAccount.value = false
-        await fetchStripeConnectStatus(classStripeWallet)
+        await fetchStripeConnectStatusByWallet(classStripeWallet)
       }
     }
     mustClaimToView.value = classMustClaimToView
     hideDownload.value = classHideDownload
     enableCustomMessagePage.value = classEnableCustomMessagePage
-    coupons.value = classCoupons || {}
     const { data: orders, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
       {
         headers: {
@@ -1139,7 +1082,7 @@ onMounted(async () => {
 
     ordersData.value = orders.value
 
-    await fetchStripeConnectStatus(wallet.value)
+    await fetchStripeConnectStatusByWallet(wallet.value)
     lazyFetchClassMetadataById(classId.value as string)
   } catch (err) {
     console.error(err)
@@ -1218,13 +1161,6 @@ async function hardSetStatusToCompleted (purchase: any) {
   classListingInfo.value.pendingNFTCount -= 1
 }
 
-function addCouponCode (coupon: any) {
-  coupons.value[coupon.id] = {
-    discount: coupon.discount,
-    expireTs: coupon.expireTs
-  }
-}
-
 function addModeratorWallet () {
   if (!moderatorWalletInput.value) { return }
   moderatorWallets.value.push(moderatorWalletInput.value)
@@ -1274,8 +1210,7 @@ async function updateSettings () {
       connectedWallets,
       hideDownload,
       mustClaimToView,
-      enableCustomMessagePage,
-      coupons
+      enableCustomMessagePage
     })
     router.push({
       name: 'nft-book-store'
@@ -1359,7 +1294,7 @@ function shortenAllLinks () {
       'nft_book_press_batch_shorten_url',
       convertArrayOfObjectsToCSV(purchaseLinks.value.map(({ channel, ...link }) => ({ key: channel, ...link })))
     )
-    router.push({ name: 'batch-bitly', query: { print: 1 } })
+    router.push({ name: 'batch-short-links', query: { print: 1 } })
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)

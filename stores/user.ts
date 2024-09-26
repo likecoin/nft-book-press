@@ -1,14 +1,24 @@
 import { defineStore, storeToRefs } from 'pinia'
+
 import { useBookStoreApiStore } from './book-store-api'
+import { useLikerStore } from './liker'
 
 export const useUserStore = defineStore('user', () => {
   const { LIKE_CO_API } = useRuntimeConfig().public
 
   const bookStoreApiStore = useBookStoreApiStore()
-  const { token } = storeToRefs(bookStoreApiStore)
+  const { token, isAuthenticated, wallet } = storeToRefs(bookStoreApiStore)
+  const likerStore = useLikerStore()
 
-  const bookUser = ref(null as any)
+  const bookUser = ref<any>(null)
   const isUpdatingBookUserProfile = ref(false)
+  const userLikerInfo = computed(() => {
+    if (isAuthenticated.value && wallet.value) {
+      return likerStore.getLikerInfoByWallet(wallet.value)
+    }
+    return null
+  })
+  const isFetchingUserLikerInfo = ref(false)
 
   async function fetchBookUserProfile () {
     const { error, data } = await useFetch(
@@ -53,10 +63,48 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  async function fetchUserLikerInfo ({ nocache = false } = {}) {
+    if (!isAuthenticated.value) {
+      return null
+    }
+    try {
+      isFetchingUserLikerInfo.value = true
+      const likerInfo = await likerStore.fetchLikerInfoByWallet(wallet.value, { nocache })
+      return likerInfo
+    } finally {
+      isFetchingUserLikerInfo.value = false
+    }
+  }
+
+  async function lazyFetchUserLikerInfo () {
+    if (!isAuthenticated.value) {
+      return null
+    }
+    if (userLikerInfo.value) {
+      return userLikerInfo.value
+    }
+    const likerInfo = await fetchUserLikerInfo()
+    return likerInfo
+  }
+
+  watch(isAuthenticated, () => {
+    if (isAuthenticated.value) {
+      lazyFetchUserLikerInfo()
+      lazyFetchBookUserProfile()
+    } else {
+      bookUser.value = null
+    }
+  })
+
   return {
     bookUser,
+    isUpdatingBookUserProfile,
+    userLikerInfo,
+    isFetchingUserLikerInfo,
     fetchBookUserProfile,
     lazyFetchBookUserProfile,
-    updateBookUserProfile
+    updateBookUserProfile,
+    fetchUserLikerInfo,
+    lazyFetchUserLikerInfo
   }
 })
