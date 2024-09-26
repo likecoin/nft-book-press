@@ -13,7 +13,6 @@
     </UProgress>
 
     <UCard
-      v-if="bookStoreApiStore.isAuthenticated"
       :ui="{ body: { padding: '' } }"
     >
       <template #header>
