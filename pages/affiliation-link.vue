@@ -7,20 +7,20 @@
         v-if="!productData && productData !== null"
         :ui="{ body: { base: 'space-y-4' }, footer: { base: 'flex justify-end' } }"
       >
-        <UFormGroup label="Landing Page">
-          <USelect v-model="linkSetting" :options="linkSettings" option-attribute="name" />
+        <UFormGroup label="Destination">
+          <USelect v-model="destinationSetting" :options="destinationSettings" option-attribute="name" />
         </UFormGroup>
 
         <UFormGroup
-          v-if="isCustomLink"
-          label="Custom Page Link"
+          v-if="isUsingCustomDestination"
+          label="Custom Page URL"
           :required="true"
         >
           <UInput
-            v-model="customLinkInput"
+            v-model="customDestinationURLInput"
             class="font-mono"
             placeholder="https://books.liker.land"
-            name="custom_link"
+            name="custom_destination_url"
           />
         </UFormGroup>
 
@@ -104,9 +104,9 @@
 
               <UFormGroup label="Additional Query String">
                 <UInput
-                  v-model="linkQueryInput"
+                  v-model="additionalQueryStringInput"
                   class="font-mono"
-                  :placeholder="linkQueryInputPlaceholder"
+                  :placeholder="additionalQueryStringInputPlaceholder"
                   name="query_params"
                 />
               </UFormGroup>
@@ -196,7 +196,7 @@
         </div>
 
         <div
-          v-if="linkQueryTableRows.length"
+          v-if="commonQueryStringTableRows.length"
           class="px-4 py-5 sm:p-6"
         >
           <UCard
@@ -214,13 +214,13 @@
                 { key: 'key', label: 'Key' },
                 { key: 'value', label: 'Value' }
               ]"
-              :rows="linkQueryTableRows"
+              :rows="commonQueryStringTableRows"
               :ui="{ td: { font: 'font-mono' } }"
             />
           </UCard>
         </div>
 
-        <UTable :columns="tableColumns" :rows="tableRows">
+        <UTable :columns="linkTableColumns" :rows="linkTableRows">
           <template #channelId-data="{ row }">
             <div v-text="row.channelName" />
             <div
@@ -349,15 +349,15 @@ const utmMediumDefault = 'affiliate'
 
 const utmSourceInput = ref('')
 const utmSourceDefault = computed(() => {
-  const isUseLikerLandLink = linkSetting.value === 'liker_land'
-  if (isCustomLink.value) {
+  const isUseLikerLandLink = destinationSetting.value === 'liker_land'
+  if (isUsingCustomDestination.value) {
     return 'custom-link'
   }
   return isUseLikerLandLink ? 'likerland' : 'stripe'
 })
 
 const linkQueryInputModel = ref('')
-const linkQueryInput = computed({
+const additionalQueryStringInput = computed({
   get: () => {
     if (linkQueryInputModel.value) {
       return linkQueryInputModel.value
@@ -373,7 +373,7 @@ const linkQueryInput = computed({
   }
 })
 
-const linkQueryInputPlaceholder = computed(() => {
+const additionalQueryStringInputPlaceholder = computed(() => {
   return constructUTMQueryString({
     utmCampaign: utmCampaignDefault,
     utmSource: utmSourceDefault.value,
@@ -388,22 +388,22 @@ const linkQueryDefault = computed(() => {
     utm_campaign: utmCampaignDefault
   }
 })
-const linkQuery = computed<Record<string, string>>(() => {
-  const mergedQuery = { ...linkQueryDefault.value }
+const mergedQueryStringObject = computed<Record<string, string>>(() => {
+  const mergedObject = { ...linkQueryDefault.value }
 
   const input = productIdInput.value?.trim() || ''
   if (input.startsWith('http')) {
-    Object.assign(mergedQuery, Object.fromEntries(new URL(input).searchParams))
+    Object.assign(mergedObject, Object.fromEntries(new URL(input).searchParams))
   }
 
-  if (linkQueryInput.value) {
-    Object.assign(mergedQuery, Object.fromEntries(new URLSearchParams(linkQueryInput.value)))
+  if (additionalQueryStringInput.value) {
+    Object.assign(mergedObject, Object.fromEntries(new URLSearchParams(additionalQueryStringInput.value)))
   }
 
-  return mergedQuery
+  return mergedObject
 })
-const linkQueryTableRows = computed(() => {
-  return Object.entries(linkQuery.value)
+const commonQueryStringTableRows = computed(() => {
+  return Object.entries(mergedQueryStringObject.value)
     .filter(([key]) => !(key === 'utm_campaign' && shouldPrefixChannelIdForUTMCampaign.value))
     .map(([key, value]) => ({
       key,
@@ -413,7 +413,7 @@ const linkQueryTableRows = computed(() => {
 
 const isCollection = computed(() => productId.value?.startsWith('col_'))
 
-const linkSettings = ref([
+const destinationSettings = ref([
   {
     name: 'Liker Land Product Page',
     value: 'liker_land'
@@ -427,9 +427,9 @@ const linkSettings = ref([
     value: 'custom'
   }
 ])
-const linkSetting = ref(linkSettings.value[0].value)
-const isCustomLink = computed(() => linkSetting.value === 'custom')
-const customLinkInput = ref(route.query.custom_link as string || '')
+const destinationSetting = ref(destinationSettings.value[0].value)
+const isUsingCustomDestination = computed(() => destinationSetting.value === 'custom')
+const customDestinationURLInput = ref(route.query.custom_link as string || '')
 
 const customChannelInput = ref('')
 const customChannels = computed(
@@ -457,8 +457,8 @@ watch(customChannelInput, () => {
 
 const isCreatingAffiliationLinks = ref(false)
 const canCreateAffiliationLink = computed(() => {
-  if (isCustomLink.value) {
-    return customLinkInput.value
+  if (isUsingCustomDestination.value) {
+    return customDestinationURLInput.value
   }
   return !!productId.value && !isCreatingAffiliationLinks.value
 })
@@ -486,7 +486,7 @@ const priceIndexOptions = computed(() => {
 })
 
 const tableTitle = computed(() => `${productName.value ? `${productName.value} ` : ''}Affiliation Links`)
-const tableColumns = [
+const linkTableColumns = [
   {
     key: 'channelId',
     label: 'Channel',
@@ -502,10 +502,10 @@ const tableColumns = [
     sortable: false
   }
 ]
-const tableRows = computed(() => {
+const linkTableRows = computed(() => {
   const channels = [...customChannels.value, ...AFFILIATION_CHANNELS]
   return channels.map((channel) => {
-    const utmCampaignInput = linkQuery.value.utm_campaign
+    const utmCampaignInput = mergedQueryStringObject.value.utm_campaign
     let utmCampaign = utmCampaignInput || utmCampaignDefault
     if (shouldPrefixChannelIdForUTMCampaign.value && channel.id !== AFFILIATION_CHANNEL_DEFAULT) {
       utmCampaign = `${convertChannelIdToLikerId(channel.id)}_${utmCampaign}`
@@ -514,11 +514,11 @@ const tableRows = computed(() => {
       [isCollection.value ? 'collectionId' : 'classId']: productId.value || '',
       channel: channel.id,
       priceIndex: priceIndex.value,
-      customLink: isCustomLink.value ? customLinkInput.value : undefined,
-      isUseLikerLandLink: linkSetting.value === 'liker_land',
+      customLink: isUsingCustomDestination.value ? customDestinationURLInput.value : undefined,
+      isUseLikerLandLink: destinationSetting.value === 'liker_land',
       query: {
         utm_campaign: utmCampaign,
-        ...linkQuery.value
+        ...mergedQueryStringObject.value
       }
     }
     return {
@@ -528,7 +528,7 @@ const tableRows = computed(() => {
       url: getPurchaseLink(urlConfig),
       qrCodeUrl: getPurchaseLink({
         ...urlConfig,
-        isForQRCode: linkQuery.value.utm_source === linkQueryDefault.value.utm_source
+        isForQRCode: mergedQueryStringObject.value.utm_source === linkQueryDefault.value.utm_source
       })
     }
   })
@@ -636,8 +636,8 @@ async function createAffiliationLink () {
 
 function getQRCodeFilename (channel = '') {
   const filenameParts: string[] = []
-  if (isCustomLink.value) {
-    const url = new URL(customLinkInput.value)
+  if (isUsingCustomDestination.value) {
+    const url = new URL(customDestinationURLInput.value)
     filenameParts.push(url.hostname)
   } else if (isCollection.value) {
     filenameParts.push(`price_${priceIndex.value}`)
@@ -662,7 +662,7 @@ async function copyLink (text = '') {
 
 function downloadAllPurchaseLinks () {
   downloadFile({
-    data: tableRows.value,
+    data: linkTableRows.value,
     fileName: `${productName.value}_purchase_links.csv`,
     fileType: 'csv'
   })
@@ -672,7 +672,7 @@ function printAllQRCodes () {
   try {
     sessionStorage.setItem(
       'nft_book_press_batch_qrcode',
-      convertArrayOfObjectsToCSV(tableRows.value.map(({ channelId, qrCodeUrl, ...link }) => ({ key: channelId, ...link, url: qrCodeUrl })))
+      convertArrayOfObjectsToCSV(linkTableRows.value.map(({ channelId, qrCodeUrl, ...link }) => ({ key: channelId, ...link, url: qrCodeUrl })))
     )
     window.open('/batch-qrcode?print=1', 'batch_qrcode', 'popup,menubar=no,location=no,status=no')
   } catch (error) {
@@ -694,7 +694,7 @@ function shortenAllLinks () {
   try {
     sessionStorage.setItem(
       'nft_book_press_batch_shorten_url',
-      convertArrayOfObjectsToCSV(tableRows.value.map(({ channelId, ...link }) => ({ key: channelId, ...link })))
+      convertArrayOfObjectsToCSV(linkTableRows.value.map(({ channelId, ...link }) => ({ key: channelId, ...link })))
     )
     router.push({ name: 'batch-short-links', query: { print: 1 } })
   } catch (error) {
@@ -713,7 +713,7 @@ function shortenAllLinks () {
 }
 
 async function downloadAllQRCodes () {
-  const items = tableRows.value.map(link => ({
+  const items = linkTableRows.value.map(link => ({
     url: link.qrCodeUrl,
     filename: getQRCodeFilename(link.channelId)
   }))
