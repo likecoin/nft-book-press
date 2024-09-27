@@ -135,19 +135,15 @@ export function getPurchaseLink ({
   if (classId) {
     query.price_index = priceIndex.toString()
   }
-  if (customLink) {
-    const url = new URL(customLink)
-    Object.entries(query).forEach(([key, value]) => {
-      url.searchParams.set(key, value)
-    })
-    return url.toString()
-  }
   if (isForQRCode) {
     query.utm_medium = queryInput?.utm_medium ? `${queryInput.utm_medium}-qr` : 'qrcode'
   }
 
   const { LIKE_CO_API, LIKER_LAND_URL } = useRuntimeConfig().public
   const queryString = `?${new URLSearchParams({ ...queryInput, ...query }).toString()}`
+  if (customLink) {
+    return `${customLink}${queryString}`
+  }
   if (collectionId) {
     return isUseLikerLandLink
       ? `${LIKER_LAND_URL}/nft/collection/${collectionId}${queryString}`

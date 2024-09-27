@@ -3,21 +3,10 @@
     <PageHeader title="Generate Affiliation Links" />
 
     <PageBody class="flex flex-col items-stretch grow space-y-4">
-      <UCard v-if="!productData" :ui="{ body: { base: 'space-y-4' }, footer: { base: 'flex justify-end' } }">
-        <UFormGroup
-          label="Product ID/URL"
-          :required="true"
-          :error="productIdError"
-        >
-          <UInput
-            v-model="productIdInput"
-            class="font-mono"
-            placeholder="https://liker.land/nft/class/likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83"
-            name="product_id"
-            :required="true"
-          />
-        </UFormGroup>
-
+      <UCard
+        v-if="!productData && productData !== null"
+        :ui="{ body: { base: 'space-y-4' }, footer: { base: 'flex justify-end' } }"
+      >
         <UFormGroup label="Landing Page">
           <USelect v-model="linkSetting" :options="linkSettings" option-attribute="name" />
         </UFormGroup>
@@ -32,7 +21,20 @@
             class="font-mono"
             placeholder="https://books.liker.land"
             name="custom_link"
-            :required="true"
+          />
+        </UFormGroup>
+
+        <UFormGroup
+          v-else
+          label="Product ID/URL"
+          :error="productIdError"
+          :required="true"
+        >
+          <UInput
+            v-model="productIdInput"
+            class="font-mono"
+            placeholder="https://liker.land/nft/class/likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83"
+            name="product_id"
           />
         </UFormGroup>
 
@@ -60,11 +62,39 @@
           </div>
         </UFormGroup>
 
+        <UCard :ui="{ body: { base: 'relative flex max-md:flex-col flex-wrap gap-4', padding: 'pt-2 sm:pt-2' } }">
+          <UDivider label="UTM Parameters" />
+          <UFormGroup class="flex-1" label="UTM Campaign" hint="Optional">
+            <UInput
+              v-model="utmCampaignInput"
+              class="font-mono"
+              name="utm_campaign"
+              :placeholder="`e.g. ${utmCampaignDefault}`"
+            />
+          </UFormGroup>
+          <UFormGroup class="flex-1" label="UTM Source" hint="Optional">
+            <UInput
+              v-model="utmSourceInput"
+              class="font-mono"
+              name="utm_source"
+              :placeholder="`e.g. ${utmSourceDefault}`"
+            />
+          </UFormGroup>
+          <UFormGroup class="flex-1" label="UTM Medium" hint="Optional">
+            <UInput
+              v-model="utmMediumInput"
+              class="font-mono"
+              name="utm_medium"
+              :placeholder="`e.g. ${utmMediumDefault}`"
+            />
+          </UFormGroup>
+        </UCard>
+
         <UFormGroup label="Query Parameters" hint="Optional">
           <UInput
             v-model="linkQueryInput"
             class="font-mono"
-            placeholder="utm_source=instagram&utm_medium=social"
+            :placeholder="linkQueryInputPlaceholder"
             name="query_params"
           />
         </UFormGroup>
@@ -73,8 +103,8 @@
           <UButton
             label="Generate"
             size="lg"
-            :disabled="!productIdInput || isLoadingProductData"
-            :loading="isLoadingProductData"
+            :disabled="!canCreateAffiliationLink"
+            :loading="isCreatingAffiliationLinks"
             @click="createAffiliationLink"
           />
         </template>
@@ -272,19 +302,71 @@ const productId = computed(() => {
   return input
 })
 
-const linkQueryInput = ref('')
-const linkQueryDefault = computed(() => {
-  const isUseLikerLandLink = linkSetting.value === 'liker_land'
-  let utmSource = isUseLikerLandLink ? 'likerland' : 'stripe'
-  if (isCustomLink.value) {
-    utmSource = 'custom-link'
+function constructUTMQueryString (input: {
+  utmCampaign?: string,
+  utmSource?: string,
+  utmMedium?: string
+} = {}) {
+  const searchParams = new URLSearchParams()
+  if (input.utmCampaign) {
+    searchParams.set('utm_campaign', input.utmCampaign)
   }
-  return {
-    utm_medium: 'affiliate',
-    utm_source: utmSource
+  if (input.utmSource) {
+    searchParams.set('utm_source', input.utmSource)
+  }
+  if (input.utmMedium) {
+    searchParams.set('utm_medium', input.utmMedium)
+  }
+  return searchParams.toString().replace('?', '')
+}
+
+const utmCampaignInput = ref('')
+const utmCampaignDefault = 'bookpress'
+
+const utmMediumInput = ref('')
+const utmMediumDefault = 'affiliate'
+
+const utmSourceInput = ref('')
+const utmSourceDefault = computed(() => {
+  const isUseLikerLandLink = linkSetting.value === 'liker_land'
+  if (isCustomLink.value) {
+    return 'custom-link'
+  }
+  return isUseLikerLandLink ? 'likerland' : 'stripe'
+})
+
+const linkQueryInputModel = ref('')
+const linkQueryInput = computed({
+  get: () => {
+    if (linkQueryInputModel.value) {
+      return linkQueryInputModel.value
+    }
+    return constructUTMQueryString({
+      utmCampaign: utmCampaignInput.value,
+      utmSource: utmSourceInput.value,
+      utmMedium: utmMediumInput.value
+    })
+  },
+  set: (value) => {
+    linkQueryInputModel.value = value
   }
 })
-const linkQuery = computed(() => {
+
+const linkQueryInputPlaceholder = computed(() => {
+  return constructUTMQueryString({
+    utmCampaign: utmCampaignDefault,
+    utmSource: utmSourceDefault.value,
+    utmMedium: utmMediumDefault
+  })
+})
+
+const linkQueryDefault = computed(() => {
+  return {
+    utm_medium: utmMediumDefault,
+    utm_source: utmSourceDefault.value
+  }
+})
+const linkQuery = computed<Record<string, string>>(() => {
   const mergedQuery = { ...linkQueryDefault.value }
 
   const input = productIdInput.value?.trim() || ''
@@ -347,7 +429,14 @@ watch(customChannelInput, () => {
   customChannelInputError.value = ''
 })
 
-const isLoadingProductData = ref(false)
+const isCreatingAffiliationLinks = ref(false)
+const canCreateAffiliationLink = computed(() => {
+  if (isCustomLink.value) {
+    return customLinkInput.value
+  }
+  return !!productId.value && !isCreatingAffiliationLinks.value
+})
+
 const productData = ref<any>(undefined)
 const productName = computed(() => {
   if (!productData.value) {
@@ -388,17 +477,15 @@ const tableColumns = [
   }
 ]
 const tableRows = computed(() => {
-  if (!productData.value) {
-    return []
-  }
   const channels = [...customChannels.value, ...AFFILIATION_CHANNELS]
   return channels.map((channel) => {
-    let utmCampaign = 'bookpress'
-    if (channel.id !== AFFILIATION_CHANNEL_DEFAULT) {
+    const utmCampaignInput = linkQuery.value.utm_campaign
+    let utmCampaign = utmCampaignInput || utmCampaignDefault
+    if (!utmCampaignInput && channel.id !== AFFILIATION_CHANNEL_DEFAULT) {
       utmCampaign = `${convertChannelIdToLikerId(channel.id)}_${utmCampaign}`
     }
-    const urlConfig = {
-      [isCollection.value ? 'collectionId' : 'classId']: productId.value,
+    const urlConfig: any = {
+      [isCollection.value ? 'collectionId' : 'classId']: productId.value || '',
       channel: channel.id,
       priceIndex: priceIndex.value,
       customLink: isCustomLink.value ? customLinkInput.value : undefined,
@@ -458,44 +545,66 @@ async function createAffiliationLink () {
   productData.value = undefined
   customChannelInputError.value = ''
 
-  if (!productId.value) {
+  if (!canCreateAffiliationLink.value) {
     return
   }
 
-  // Validate custom channels
-  if (customChannels.value.length) {
-    const invalidChannel = customChannels.value.find(channel => !validateChannelId(channel.id))
-    if (invalidChannel) {
-      customChannelInputError.value = `Invalid channel "${invalidChannel.id}", please enter a valid channel ID starting with "@"`
-      return
+  try {
+    isCreatingAffiliationLinks.value = true
+
+    // Validate custom channels
+    if (customChannels.value.length) {
+      const invalidChannel = customChannels.value.find(channel => !validateChannelId(channel.id))
+      if (invalidChannel) {
+        customChannelInputError.value = `Invalid channel "${invalidChannel.id}", please enter a valid channel ID starting with "@"`
+        return
+      }
+
+      try {
+        await Promise.all(customChannels.value.map(async (channel) => {
+          const channelInfo = await likerStore.lazyFetchChannelInfoById(channel.id)
+          if (!channelInfo) {
+            throw new Error(`Channel ID "${channel.id}" has not registered for Liker ID`)
+          }
+
+          const stripeConnectStatus = await stripeStore.fetchStripeConnectStatusByWallet(channelInfo.likeWallet)
+          if (!stripeConnectStatus?.hasAccount) {
+            throw new Error(`Channel ID "${channel.id}" has not connected to Stripe`)
+          }
+          if (!stripeConnectStatus?.isReady) {
+            throw new Error(`Channel ID "${channel.id}" has not completed Stripe Connect setup`)
+          }
+        }))
+      } catch (error) {
+        customChannelInputError.value = (error as Error).message
+        return
+      }
     }
 
-    try {
-      await Promise.all(customChannels.value.map(async (channel) => {
-        const channelInfo = await likerStore.lazyFetchChannelInfoById(channel.id)
-        if (!channelInfo) {
-          throw new Error(`Channel ID "${channel.id}" has not registered for Liker ID`)
-        }
-
-        const stripeConnectStatus = await stripeStore.fetchStripeConnectStatusByWallet(channelInfo.likeWallet)
-        if (!stripeConnectStatus?.hasAccount) {
-          throw new Error(`Channel ID "${channel.id}" has not connected to Stripe`)
-        }
-        if (!stripeConnectStatus?.isReady) {
-          throw new Error(`Channel ID "${channel.id}" has not completed Stripe Connect setup`)
-        }
-      }))
-    } catch (error) {
-      customChannelInputError.value = (error as Error).message
-      return
+    if (productId.value) {
+      isCreatingAffiliationLinks.value = true
+      const data = await fetchProductData()
+      isCreatingAffiliationLinks.value = false
+      if (data) {
+        productData.value = data
+      }
+    } else {
+      productData.value = null
     }
-  }
-
-  isLoadingProductData.value = true
-  const data = await fetchProductData()
-  isLoadingProductData.value = false
-  if (data) {
-    productData.value = data
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: 'Failed to create affiliation link',
+      timeout: 0,
+      color: 'red',
+      ui: {
+        title: 'text-red-400 dark:text-red-400'
+      }
+    })
+  } finally {
+    isCreatingAffiliationLinks.value = false
   }
 }
 
