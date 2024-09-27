@@ -609,9 +609,14 @@ async function createAffiliationLink () {
 }
 
 function getQRCodeFilename (channel = '') {
-  const filenameParts = [`${productName.value || productId.value}`]
-  if (!isCollection.value) {
+  const filenameParts: string[] = []
+  if (isCustomLink.value) {
+    const url = new URL(customLinkInput.value)
+    filenameParts.push(url.hostname)
+  } else if (isCollection.value) {
     filenameParts.push(`price_${priceIndex.value}`)
+  } else {
+    filenameParts.push(`${productName.value || productId.value}`)
   }
   if (channel) {
     filenameParts.push(`channel_${channel}`)
