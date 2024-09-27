@@ -79,6 +79,50 @@
         </UTable>
 
         <template #footer>
+          <UFormGroup v-if="isEditMode" label="Add Coupon">
+            <div class="flex items-center gap-2">
+              <UInput
+                v-model="newCouponNameInput"
+                placeholder="Coupon Name (For POS Display Only)"
+                class="grow font-mono"
+              />
+              <UInput
+                v-model="newCouponCodeInput"
+                placeholder="Coupon Code"
+                class="grow font-mono"
+              />
+              <UButton
+                icon="i-heroicons-plus-circle"
+                variant="soft"
+                color="gray"
+                :disabled="!newCouponNameInput || !newCouponCodeInput"
+                @click="addCouponCode"
+              />
+            </div>
+            <div class="flex items-center gap-2">
+              <UButton
+                label="Clear All"
+                variant="outline"
+                @click="clearAllCoupons"
+              />
+            </div>
+          </UFormGroup>
+
+          <UFormGroup label="Apply Coupon">
+            <div class="flex justify-center items-center gap-4">
+              <USelect
+                v-model="selectedCouponCode"
+                :options="coupons.map(coupon => ({
+                  label: coupon.name,
+                  value: coupon.code
+                }))"
+                placeholder="Select Coupon"
+              />
+            </div>
+          </UFormGroup>
+
+          <hr class="my-4 border-t border-gray-200 dark:border-gray-700">
+
           <UTabs
             class="w-full"
             :items="[
@@ -249,6 +293,12 @@ const { lazyFetchCollectionById } = collectionStore
 
 const newProductIdInputs = ref<{ id: number; value: string, error?: Error }[]>([{ id: 0, value: '' }])
 const newProductIdInputNextId = ref(1)
+
+const newCouponNameInput = ref('')
+const newCouponCodeInput = ref('')
+const coupons = ref<{name: string, code: string}[]>([])
+const selectedCouponCode = ref('')
+
 const giftToEmail = ref('')
 const saleItemList = ref<any[]>([])
 const isShowAddItemModal = ref(false)
@@ -322,6 +372,9 @@ const checkoutUrl = computed(() => {
     if (priceIndex) { params.append('price_index', priceIndex.toString()) }
     if (collectionId) { params.append('collection_id', collectionId) }
   })
+  if (selectedCouponCode.value) {
+    params.append('coupon', selectedCouponCode.value)
+  }
   return `${LIKER_LAND_URL}/shopping-cart/book?${params.toString()}`
 })
 
@@ -335,19 +388,31 @@ const giftUrl = computed(() => {
     if (priceIndex) { params.append('price_index', priceIndex.toString()) }
     if (collectionId) { params.append('collection_id', collectionId) }
   })
+  if (selectedCouponCode.value) {
+    params.append('coupon', selectedCouponCode.value)
+  }
   return `${LIKER_LAND_URL}/shopping-cart/book?${params.toString()}`
 })
 
 onMounted(() => {
   try {
-    const storedString = window.localStorage.getItem('nft_book_store_pos_items')
-    if (storedString) {
-      const items = JSON.parse(storedString)
+    const storedItemString = window.localStorage.getItem('nft_book_store_pos_items')
+    if (storedItemString) {
+      const items = JSON.parse(storedItemString)
       saleItemList.value = items
         .map((item: any) => ({
           collectionId: item.collectionId,
           classId: item.classId,
           priceIndex: item.priceIndex
+        }))
+    }
+    const storedCouponString = window.localStorage.getItem('nft_book_store_pos_coupons')
+    if (storedCouponString) {
+      const items = JSON.parse(storedCouponString)
+      coupons.value = items
+        .map((item: any) => ({
+          name: item.name,
+          code: item.code
         }))
     }
   } catch (e) {
@@ -424,8 +489,25 @@ function toggleEditMode () {
   isEditMode.value = !isEditMode.value
 }
 
+function addCouponCode () {
+  coupons.value.push({ name: newCouponNameInput.value, code: newCouponCodeInput.value })
+  newCouponNameInput.value = ''
+  newCouponCodeInput.value = ''
+  saveSaleCoupons()
+}
+
+function clearAllCoupons () {
+  coupons.value = []
+  selectedCouponCode.value = ''
+  saveSaleCoupons()
+}
+
 function saveSaleProductIds () {
   window.localStorage.setItem('nft_book_store_pos_items', JSON.stringify(saleItemList.value))
+}
+
+function saveSaleCoupons () {
+  window.localStorage.setItem('nft_book_store_pos_coupons', JSON.stringify(coupons.value))
 }
 
 function copyCartUrl () {
