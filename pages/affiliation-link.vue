@@ -608,9 +608,7 @@ async function createAffiliationLink () {
     }
 
     if (productId.value) {
-      isCreatingAffiliationLinks.value = true
       const data = await fetchProductData()
-      isCreatingAffiliationLinks.value = false
       if (data) {
         productData.value = data
       }
