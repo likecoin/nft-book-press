@@ -458,7 +458,7 @@ watch(customChannelInput, () => {
 const isCreatingAffiliationLinks = ref(false)
 const canCreateAffiliationLink = computed(() => {
   if (isUsingCustomDestination.value) {
-    return customDestinationURLInput.value
+    return !!customDestinationURLInput.value
   }
   return !!productId.value && !isCreatingAffiliationLinks.value
 })
