@@ -62,42 +62,57 @@
           </div>
         </UFormGroup>
 
-        <UCard :ui="{ body: { base: 'relative flex max-md:flex-col flex-wrap gap-4', padding: 'pt-2 sm:pt-2' } }">
-          <UDivider label="UTM Parameters" />
-          <UFormGroup class="flex-1" label="UTM Campaign" hint="Optional">
-            <UInput
-              v-model="utmCampaignInput"
-              class="font-mono"
-              name="utm_campaign"
-              :placeholder="`e.g. ${utmCampaignDefault}`"
-            />
-          </UFormGroup>
-          <UFormGroup class="flex-1" label="UTM Source" hint="Optional">
-            <UInput
-              v-model="utmSourceInput"
-              class="font-mono"
-              name="utm_source"
-              :placeholder="`e.g. ${utmSourceDefault}`"
-            />
-          </UFormGroup>
-          <UFormGroup class="flex-1" label="UTM Medium" hint="Optional">
-            <UInput
-              v-model="utmMediumInput"
-              class="font-mono"
-              name="utm_medium"
-              :placeholder="`e.g. ${utmMediumDefault}`"
-            />
-          </UFormGroup>
-        </UCard>
+        <UAccordion
+          color="gray"
+          variant="soft"
+          size="md"
+          :items="[{
+            label: 'Query String (Optional)',
+            defaultOpen: true,
+            slot: 'body'
+          }]"
+          :ui="{ item: { padding: 'p-0' } }"
+        >
+          <template #body>
+            <UCard :ui="{ body: { base: 'space-y-4' } }">
+              <div class="relative flex max-md:flex-col flex-wrap gap-4">
+                <UFormGroup class="flex-1" label="UTM Campaign">
+                  <UInput
+                    v-model="utmCampaignInput"
+                    class="font-mono"
+                    name="utm_campaign"
+                    :placeholder="`e.g. ${utmCampaignDefault}`"
+                  />
+                </UFormGroup>
+                <UFormGroup class="flex-1" label="UTM Source">
+                  <UInput
+                    v-model="utmSourceInput"
+                    class="font-mono"
+                    name="utm_source"
+                    :placeholder="`e.g. ${utmSourceDefault}`"
+                  />
+                </UFormGroup>
+                <UFormGroup class="flex-1" label="UTM Medium">
+                  <UInput
+                    v-model="utmMediumInput"
+                    class="font-mono"
+                    name="utm_medium"
+                    :placeholder="`e.g. ${utmMediumDefault}`"
+                  />
+                </UFormGroup>
+              </div>
 
-        <UFormGroup label="Query Parameters" hint="Optional">
-          <UInput
-            v-model="linkQueryInput"
-            class="font-mono"
-            :placeholder="linkQueryInputPlaceholder"
-            name="query_params"
-          />
-        </UFormGroup>
+              <UFormGroup label="Additional Query String">
+                <UInput
+                  v-model="linkQueryInput"
+                  class="font-mono"
+                  :placeholder="linkQueryInputPlaceholder"
+                  name="query_params"
+                />
+              </UFormGroup>
+            </UCard>
+          </template>
+        </UAccordion>
 
         <template #footer>
           <UButton
