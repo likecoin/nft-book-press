@@ -110,6 +110,11 @@
                   name="query_params"
                 />
               </UFormGroup>
+
+              <div class="flex items-center gap-2">
+                <UToggle v-model="shouldPrefixChannelIdForUTMCampaign" />
+                <span v-text="'Prefix Channel ID for UTM Campaign'" />
+              </div>
             </UCard>
           </template>
         </UAccordion>
@@ -337,6 +342,7 @@ function constructUTMQueryString (input: {
 
 const utmCampaignInput = ref('')
 const utmCampaignDefault = 'bookpress'
+const shouldPrefixChannelIdForUTMCampaign = ref(true)
 
 const utmMediumInput = ref('')
 const utmMediumDefault = 'affiliate'
@@ -378,7 +384,8 @@ const linkQueryInputPlaceholder = computed(() => {
 const linkQueryDefault = computed(() => {
   return {
     utm_medium: utmMediumDefault,
-    utm_source: utmSourceDefault.value
+    utm_source: utmSourceDefault.value,
+    utm_campaign: utmCampaignDefault
   }
 })
 const linkQuery = computed<Record<string, string>>(() => {
@@ -395,10 +402,14 @@ const linkQuery = computed<Record<string, string>>(() => {
 
   return mergedQuery
 })
-const linkQueryTableRows = computed(() => Object.entries(linkQuery.value).map(([key, value]) => ({
-  key,
-  value
-})))
+const linkQueryTableRows = computed(() => {
+  return Object.entries(linkQuery.value)
+    .filter(([key]) => !(key === 'utm_campaign' && shouldPrefixChannelIdForUTMCampaign.value))
+    .map(([key, value]) => ({
+      key,
+      value
+    }))
+})
 
 const isCollection = computed(() => productId.value?.startsWith('col_'))
 
@@ -496,7 +507,7 @@ const tableRows = computed(() => {
   return channels.map((channel) => {
     const utmCampaignInput = linkQuery.value.utm_campaign
     let utmCampaign = utmCampaignInput || utmCampaignDefault
-    if (!utmCampaignInput && channel.id !== AFFILIATION_CHANNEL_DEFAULT) {
+    if (shouldPrefixChannelIdForUTMCampaign.value && channel.id !== AFFILIATION_CHANNEL_DEFAULT) {
       utmCampaign = `${convertChannelIdToLikerId(channel.id)}_${utmCampaign}`
     }
     const urlConfig: any = {
