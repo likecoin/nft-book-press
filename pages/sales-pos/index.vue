@@ -316,7 +316,10 @@ const selectedItems = computed(() => {
 })
 
 const checkoutUrl = computed(() => {
-  const params = new URLSearchParams()
+  const params = new URLSearchParams({
+    utm_source: 'direct-checkout',
+    utm_medium: 'pos'
+  })
   selectedItems.value.forEach(({ classId, priceIndex, collectionId }) => {
     if (classId) { params.append('class_id', classId) }
     if (priceIndex) { params.append('price_index', priceIndex.toString()) }
@@ -328,7 +331,9 @@ const checkoutUrl = computed(() => {
 const giftUrl = computed(() => {
   const params = new URLSearchParams({
     gift_to_email: giftToEmail.value,
-    checkout: '1'
+    checkout: '1',
+    utm_source: 'direct-sales',
+    utm_medium: 'pos'
   })
   selectedItems.value.forEach(({ classId, priceIndex, collectionId }) => {
     if (classId) { params.append('class_id', classId) }
