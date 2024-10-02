@@ -31,7 +31,7 @@
           :required="true"
         >
           <UInput
-            v-model="productIdInput"
+            v-model="productIdInputModel"
             class="font-mono"
             placeholder="https://liker.land/nft/class/likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83"
             name="product_id"
@@ -306,20 +306,49 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 
-const productIdInput = ref(route.query.product_id as string || '')
-const productId = computed(() => {
-  if (!productIdInput.value) {
-    return ''
-  }
-  const input = productIdInput.value.trim()
-  if (input.startsWith('http')) {
-    const url = new URL(input)
-    const id = url.pathname.split('/').pop()
-    if (id?.startsWith('col_') || id?.startsWith('likenft')) {
-      return id
+const productIdInputModelValue = ref('')
+const productIdInputModel = computed<string>({
+  get: () => {
+    if (productIdInputModelValue.value) {
+      return productIdInputModelValue.value
     }
+    const productIdQs = route.query.product_id
+    if (productIdQs) {
+      if (Array.isArray(productIdQs)) {
+        return productIdQs.join(',')
+      }
+      return productIdQs
+    }
+    return ''
+  },
+  set: (value: string) => {
+    productIdInputModelValue.value = value
   }
-  return input
+})
+
+const productIdInputs = computed(() => {
+  return productIdInputModel.value.split(',')
+    .map(input => input.trim())
+    .filter(Boolean)
+})
+const productIdInput = computed(() => {
+  return productIdInputs.value[0] || ''
+})
+
+const productIds = computed(() => {
+  return productIdInputs.value.map((input) => {
+    if (input.startsWith('http')) {
+      const url = new URL(input)
+      const id = url.pathname.split('/').pop()
+      if (id?.startsWith('col_') || id?.startsWith('likenft')) {
+        return id
+      }
+    }
+    return input
+  })
+})
+const productId = computed(() => {
+  return productIds.value[0] || ''
 })
 
 function constructUTMQueryString (input: {
