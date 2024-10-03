@@ -473,7 +473,25 @@ const destinationSetting = ref(destinationSettings.value[0].value)
 const isUsingCustomDestination = computed(() => destinationSetting.value === 'custom')
 const customDestinationURLInput = ref(route.query.custom_link as string || '')
 
-const customChannelInput = ref('')
+const customChannelInputValue = ref('')
+const customChannelInput = computed<string>({
+  get: () => {
+    if (customChannelInputValue.value) {
+      return customChannelInputValue.value
+    }
+    const channelIdQs = route.query.from
+    if (channelIdQs) {
+      if (Array.isArray(channelIdQs)) {
+        return channelIdQs.join(',')
+      }
+      return channelIdQs
+    }
+    return ''
+  },
+  set: (value: string) => {
+    customChannelInputValue.value = value
+  }
+})
 const customChannels = computed(
   () => customChannelInput.value
     .split(',')
