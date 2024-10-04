@@ -1,10 +1,24 @@
 <template>
   <PageContainer>
-    <PageHeader title="Generate Affiliation Links" />
+    <PageHeader :title="pageTitle" />
 
     <PageBody class="flex flex-col items-stretch grow space-y-4">
+      <div
+        v-if="(!productDataList && isSharingMode) || isCreatingAffiliationLinks"
+        class="flex flex-col items-center justify-center self-stretch gap-4 py-10"
+      >
+        <UIcon
+          class="w-10 h-10 animate-spin"
+          name="i-heroicons-arrow-path-20-solid"
+        />
+        <span
+          class="text-gray-400 dark:text-gray-700 text-sm"
+          v-text="creatingAffiliationLinkState || 'Creating affiliation links...'"
+        />
+      </div>
+
       <UCard
-        v-if="!productDataList"
+        v-else-if="!productDataList"
         :ui="{ body: { base: 'space-y-4' }, footer: { base: 'flex justify-end' } }"
       >
         <UFormGroup label="Destination">
@@ -124,14 +138,13 @@
             label="Generate"
             size="lg"
             :disabled="!canCreateAffiliationLink"
-            :loading="isCreatingAffiliationLinks"
             @click="createAffiliationLink"
           />
         </template>
       </UCard>
 
       <template v-else>
-        <header>
+        <header v-if="!isSharingMode">
           <UButton
             icon="i-heroicons-arrow-uturn-left"
             label="Back to configuration"
@@ -151,7 +164,6 @@
               { key: 'editionSelect', label: 'Selected Edition' }
             ]"
             :rows="productTableRows"
-            :loading="isCreatingAffiliationLinks"
           >
             <template #name-data="{ row }">
               <div class="font-bold" v-text="row.name" />
@@ -168,7 +180,10 @@
           </UTable>
         </UCard>
 
-        <UCard v-if="commonQueryStringTableRows.length" :ui="{ body: { padding: '' } }">
+        <UCard
+          v-if="!isSharingMode && commonQueryStringTableRows.length"
+          :ui="{ body: { padding: '' } }"
+        >
           <template #header>
             <h3 class="text-lg font-bold" v-text="'Common Query String'" />
           </template>
@@ -232,7 +247,6 @@
           <UTable
             :columns="linkTableColumns"
             :rows="linkTableRows"
-            :loading="isCreatingAffiliationLinks"
           >
             <template #productId-data="{ row }">
               <div v-text="row.productName" />
@@ -320,6 +334,22 @@ const { userLikerInfo } = storeToRefs(userStore)
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
+
+const isSharingMode = computed({
+  get: () => route.query.share === '1',
+  set: (value) => {
+    router.replace({
+      query: {
+        ...route.query,
+        share: value ? '1' : undefined
+      }
+    })
+  }
+})
+
+const pageTitle = computed(() => {
+  return isSharingMode.value ? 'Affiliation Links' : 'Affiliation Link Generator'
+})
 
 const productIdInputModelValue = ref('')
 const productIdInputModel = computed<string>({
@@ -515,7 +545,8 @@ watch(customChannelInput, () => {
   customChannelInputError.value = ''
 })
 
-const isCreatingAffiliationLinks = ref(false)
+const creatingAffiliationLinkState = ref('')
+const isCreatingAffiliationLinks = computed(() => !!creatingAffiliationLinkState.value)
 const canCreateAffiliationLink = computed(() => {
   if (isUsingCustomDestination.value) {
     return !!customDestinationURLInput.value
@@ -551,31 +582,37 @@ const productTableRows = computed(() => {
   })) || []
 })
 
-const linkTableColumns = [
-  {
-    key: 'productId',
-    label: 'Product',
-    sortable: true
-  },
-  {
-    key: 'selectedEditionLabel',
-    label: 'Edition'
-  },
-  {
-    key: 'channelId',
-    label: 'Channel',
-    sortable: true
-  },
-  {
-    key: 'utmCampaign',
-    label: 'UTM Campaign'
-  },
-  {
-    key: 'link',
-    label: 'Link',
-    sortable: false
+const linkTableColumns = computed(() => {
+  const cols = [
+    {
+      key: 'productId',
+      label: 'Product',
+      sortable: true
+    },
+    {
+      key: 'selectedEditionLabel',
+      label: 'Edition'
+    },
+    {
+      key: 'channelId',
+      label: 'Channel',
+      sortable: true
+    }
+  ]
+
+  if (!isSharingMode.value) {
+    cols.push({
+      key: 'utmCampaign',
+      label: 'UTM Campaign',
+      sortable: true
+    })
   }
-]
+  cols.push({
+    key: 'link',
+    label: 'Link'
+  })
+  return cols
+})
 
 interface AffiliationLink {
   productId: string,
@@ -679,16 +716,16 @@ async function createAffiliationLink () {
   productDataList.value = undefined
   productEditionSelectModelValue.value = {}
   customChannelInputError.value = ''
+  creatingAffiliationLinkState.value = ''
 
   if (!canCreateAffiliationLink.value) {
     return
   }
 
   try {
-    isCreatingAffiliationLinks.value = true
-
     // Validate custom channels
     if (customChannels.value.length) {
+      creatingAffiliationLinkState.value = 'Validating custom channels...'
       const invalidChannel = customChannels.value.find(channel => !validateChannelId(channel.id))
       if (invalidChannel) {
         customChannelInputError.value = `Invalid channel "${invalidChannel.id}", please enter a valid channel ID starting with "@"`
@@ -712,15 +749,18 @@ async function createAffiliationLink () {
         }))
       } catch (error) {
         customChannelInputError.value = (error as Error).message
+        isSharingMode.value = false
         return
       }
     }
 
+    creatingAffiliationLinkState.value = 'Fetching product data...'
     try {
       const dataList = await Promise.all(productIds.value.map(id => fetchProductData(id)))
       productDataList.value = dataList
     } catch (error) {
       productIdError.value = (error as Error).message
+      isSharingMode.value = false
       return
     }
   } catch (error) {
@@ -735,8 +775,9 @@ async function createAffiliationLink () {
         title: 'text-red-400 dark:text-red-400'
       }
     })
+    isSharingMode.value = false
   } finally {
-    isCreatingAffiliationLinks.value = false
+    creatingAffiliationLinkState.value = ''
   }
 }
 
@@ -845,11 +886,21 @@ function prefillChannelIdIfPossible () {
 }
 
 onMounted(() => {
-  if (productId.value) {
-    nextTick(createAffiliationLink)
+  if (isSharingMode.value) {
+    nextTick(() => {
+      createAffiliationLink()
+    })
   }
 
   prefillChannelIdIfPossible()
+})
+
+watch(isSharingMode, (value) => {
+  if (value) {
+    createAffiliationLink()
+  } else {
+    productDataList.value = undefined
+  }
 })
 
 watch(userLikerInfo, () => {
