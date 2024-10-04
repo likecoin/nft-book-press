@@ -3,7 +3,7 @@
     <div class="flex items-center gap-2">
       <UButton
         v-if="isShowMenuToggle"
-        class="lg:hidden"
+        :class="{ 'lg:hidden': !isNavigationCollapsed }"
         icon="i-heroicons-bars-3"
         size="lg"
         variant="ghost"
@@ -20,6 +20,8 @@
 <script setup lang="ts">
 import { useUIStore } from '~/stores/ui'
 const { toggleSiteMenuOpen } = useUIStore()
+
+const { isNavigationCollapsed } = useAppLayout()
 
 const props = defineProps({
   title: {

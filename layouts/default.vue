@@ -1,6 +1,7 @@
 <template>
   <div class="fixed print:relative print:inset-auto inset-0 flex">
     <SiteNavigation
+      v-if="!isNavigationCollapsed"
       :class="[
         'max-lg:hidden',
         'w-full',
@@ -20,4 +21,5 @@ if (colorMode.value !== 'light') {
   colorMode.preference = 'light'
 }
 
+const { isNavigationCollapsed } = useAppLayout()
 </script>
