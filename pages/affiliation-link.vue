@@ -181,6 +181,55 @@
         </UCard>
 
         <UCard
+          v-if="channelTableRows.length"
+          :ui="{
+            body: { base: 'divide-y divide-gray-200 dark:divide-gray-800', padding: '' },
+            footer: { base: 'flex justify-end' }
+          }"
+        >
+          <template #header>
+            <h3
+              class="text-lg font-bold"
+              v-text="`Channel${channelTableRows.length > 1 ? 's' : ''}`"
+            />
+          </template>
+
+          <div
+            v-if="customChannels.length > channelTablePageSize"
+            class="flex justify-between items-center px-4 py-3"
+          >
+            <div class="flex items-center gap-1.5">
+              <span class="text-sm leading-5">Page size</span>
+
+              <USelect
+                v-model="channelTablePageSize"
+                :options="[5, 10, 20]"
+                class="w-20"
+                size="xs"
+              />
+            </div>
+
+            <UPagination
+              v-model="channelTablePageNumber"
+              :page-count="channelTablePageSize"
+              :total="customChannels.length"
+            />
+          </div>
+
+          <UTable
+            :columns="channelTableColumns"
+            :rows="channelTableRows"
+          >
+            <template #id-data="{ row }">
+              <div
+                class="text-gray-400 dark:text-gray-700 text-xs font-mono"
+                v-text="row.id"
+              />
+            </template>
+          </UTable>
+        </UCard>
+
+        <UCard
           v-if="!isSharingMode && commonQueryStringTableRows.length"
           :ui="{ body: { padding: '' } }"
         >
@@ -535,6 +584,27 @@ const customChannels = computed(
       }
     })
 )
+
+const channelTablePageSize = ref(5)
+const channelTablePageNumber = ref(1)
+const channelTableRows = computed(() => {
+  const size = channelTablePageSize.value
+  const pageNumber = channelTablePageNumber.value
+  return customChannels.value.slice((pageNumber - 1) * size, (pageNumber) * size)
+})
+const channelTableColumns = computed(() => {
+  return [
+    {
+      key: 'id',
+      label: 'ID',
+      sortable: channelTableRows.value.length > 1
+    },
+    {
+      key: 'name',
+      label: 'Channel'
+    }
+  ]
+})
 
 const productIdError = ref('')
 watch(productId, () => {
