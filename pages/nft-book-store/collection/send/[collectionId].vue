@@ -89,7 +89,14 @@
       </UCard>
 
       <UFormGroup label="Enter Author's Message" hint="optional">
-        <UTextarea v-model="memo" placeholder="default memo" />
+        <UTextarea
+          v-model="memo"
+          placeholder="default memo"
+          :color="isLimitReached? 'red' : 'primary'"
+        />
+        <p class="text-gray-500 text-[12px]">
+          {{ `${messageCharCount} / ${AUTHOR_MESSAGE_LIMIT}` }}
+        </p>
       </UFormGroup>
 
       <UFormGroup
@@ -161,6 +168,8 @@ import { useCollectionStore } from '~/stores/collection'
 import { parseImageURLFromMetadata } from '~/utils'
 import { getNFTs, getNFTOwner, signExecNFTSendAuthz, signSendNFTs } from '~/utils/cosmos'
 
+const AUTHOR_MESSAGE_LIMIT = 98
+
 const { LIKE_CO_API, LCD_URL } = useRuntimeConfig().public
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
@@ -196,10 +205,18 @@ const orderInfo = ref<any>({})
 const nftImages = ref<string[]>([])
 
 const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
-const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || isAutoFetchingNFTId.value || !!nftIdError.value)
+const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || isAutoFetchingNFTId.value || !!nftIdError.value || isLimitReached.value)
 
 const collectionName = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.name)
 const classIds = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.classIds)
+const messageCharCount = computed(() => {
+  let count = 0
+  for (let i = 0; i < memo.value.length; i++) {
+    count += isFullWidth(memo.value[i]) ? 2 : 1
+  }
+  return count
+})
+const isLimitReached = computed(() => { return messageCharCount.value > AUTHOR_MESSAGE_LIMIT })
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
@@ -390,6 +407,10 @@ async function onSendNFTStart () {
   } finally {
     isLoading.value = false
   }
+}
+
+function isFullWidth (char:any) {
+  return char.charCodeAt(0) > 255
 }
 
 </script>
