@@ -96,7 +96,14 @@
       </UCard>
 
       <UFormGroup label="Enter Author's Message" hint="optional">
-        <UTextarea v-model="memo" placeholder="default memo" />
+        <UTextarea
+          v-model="memo"
+          placeholder="default memo"
+          :color="isLimitReached? 'red' : 'primary'"
+        />
+        <p class="text-gray-500 text-[12px]">
+          {{ `${messageCharCount} / ${AUTHOR_MESSAGE_LIMIT}` }}
+        </p>
       </UFormGroup>
 
       <UFormGroup
@@ -165,6 +172,8 @@ import { useNftStore } from '~/stores/nft'
 import { parseImageURLFromMetadata } from '~/utils'
 import { signExecNFTSendAuthz, signSendNFTs } from '~/utils/cosmos'
 
+const AUTHOR_MESSAGE_LIMIT = 98
+
 const { LIKE_CO_API, LCD_URL } = useRuntimeConfig().public
 
 const store = useWalletStore()
@@ -199,9 +208,17 @@ const orderInfo = ref<any>({})
 const nftImage = ref('')
 
 const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
-const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || isAutoFetchingNFTId.value || !!nftIdError.value)
+const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || isAutoFetchingNFTId.value || !!nftIdError.value || isLimitReached.value)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
+const messageCharCount = computed(() => {
+  let count = 0
+  for (let i = 0; i < memo.value.length; i++) {
+    count += isFullWidth(memo.value[i]) ? 2 : 1
+  }
+  return count
+})
+const isLimitReached = computed(() => { return messageCharCount.value > AUTHOR_MESSAGE_LIMIT })
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
@@ -374,6 +391,10 @@ async function onSendNFTStart () {
   } finally {
     isLoading.value = false
   }
+}
+
+function isFullWidth (char: any) {
+  return char.charCodeAt(0) > 255
 }
 
 </script>
