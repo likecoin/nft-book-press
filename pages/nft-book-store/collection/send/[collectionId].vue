@@ -167,6 +167,7 @@ import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'
 import { parseImageURLFromMetadata } from '~/utils'
 import { getNFTs, getNFTOwner, signExecNFTSendAuthz, signSendNFTs } from '~/utils/cosmos'
+import { useMessageCharCount } from '~/composables/useMessageCharCount'
 
 const AUTHOR_MESSAGE_LIMIT = 98
 
@@ -192,6 +193,7 @@ const collectionId = ref(route.params.collectionId as string)
 const paymentId = ref(route.query.payment_id as string)
 const ownerWallet = ref(route.query.owner_wallet as string || wallet.value)
 const memo = ref('')
+const { messageCharCount, isLimitReached } = useMessageCharCount(memo, AUTHOR_MESSAGE_LIMIT)
 
 const nftIds = ref<string[]>([])
 const nftNestedIds = ref<string[][]>([])
@@ -209,14 +211,6 @@ const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.va
 
 const collectionName = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.name)
 const classIds = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.classIds)
-const messageCharCount = computed(() => {
-  let count = 0
-  for (let i = 0; i < memo.value.length; i++) {
-    count += isFullWidthChar(memo.value[i]) ? 2 : 1
-  }
-  return count
-})
-const isLimitReached = computed(() => { return messageCharCount.value > AUTHOR_MESSAGE_LIMIT })
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
@@ -407,10 +401,6 @@ async function onSendNFTStart () {
   } finally {
     isLoading.value = false
   }
-}
-
-function isFullWidthChar (char:any) {
-  return char.charCodeAt(0) > 255
 }
 
 </script>
