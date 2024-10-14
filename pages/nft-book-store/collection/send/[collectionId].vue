@@ -88,15 +88,15 @@
         </table>
       </UCard>
 
-      <UFormGroup label="Enter Author's Message" hint="optional">
+      <UFormGroup
+        label="Enter Author's Message"
+        :error="isLimitReached"
+        :hint="`${messageCharCount} / ${AUTHOR_MESSAGE_LIMIT}`"
+      >
         <UTextarea
           v-model="memo"
           placeholder="default memo"
-          :color="isLimitReached? 'red' : 'primary'"
         />
-        <p class="text-gray-500 text-[12px]">
-          {{ `${messageCharCount} / ${AUTHOR_MESSAGE_LIMIT}` }}
-        </p>
       </UFormGroup>
 
       <UFormGroup
@@ -212,7 +212,7 @@ const classIds = computed(() => collectionStore.getCollectionById(collectionId.v
 const messageCharCount = computed(() => {
   let count = 0
   for (let i = 0; i < memo.value.length; i++) {
-    count += isFullWidth(memo.value[i]) ? 2 : 1
+    count += isFullWidthChar(memo.value[i]) ? 2 : 1
   }
   return count
 })
@@ -409,7 +409,7 @@ async function onSendNFTStart () {
   }
 }
 
-function isFullWidth (char:any) {
+function isFullWidthChar (char:any) {
   return char.charCodeAt(0) > 255
 }
 
