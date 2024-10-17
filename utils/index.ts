@@ -184,3 +184,25 @@ export function convertChannelIdToLikerId (channelId: string) {
 export function convertLikerIdToChannelId (likerId: string) {
   return `@${likerId}`
 }
+
+export function copyToClipboard (text: string): void {
+  const copyText = document.createElement('p')
+  copyText.textContent = text
+  document.body.appendChild(copyText)
+
+  const selection = window.getSelection()
+  const range = document.createRange()
+
+  if (!selection) {
+    return
+  }
+
+  range.selectNode(copyText)
+  selection.removeAllRanges()
+  selection.addRange(range)
+
+  document.execCommand('copy')
+  selection.removeAllRanges()
+
+  document.body.removeChild(copyText)
+}
