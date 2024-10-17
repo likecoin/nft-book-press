@@ -40,14 +40,15 @@
 
         <UFormGroup
           v-else
-          label="Product ID/URL"
+          label="Product ID/URL(s)"
           :error="productIdError"
           :required="true"
         >
-          <UInput
+          <UTextarea
             v-model="productIdInputModel"
             class="font-mono"
-            placeholder="https://liker.land/nft/class/likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83"
+            :placeholder="`likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83\nlikenft1wrskn9a683stkje3wdmcwuvpuqrp5eevjsnn9y4f55wlystzxausuhj3em`"
+            :autoresize="true"
             name="product_id"
           />
         </UFormGroup>
@@ -415,7 +416,7 @@ const productIdInputModel = computed<string>({
     const productIdQs = route.query.product_id
     if (productIdQs) {
       if (Array.isArray(productIdQs)) {
-        return productIdQs.join(',')
+        return productIdQs.join('\n')
       }
       return productIdQs
     }
@@ -427,7 +428,7 @@ const productIdInputModel = computed<string>({
 })
 
 const productIdInputs = computed(() => {
-  return productIdInputModel.value.split(',')
+  return productIdInputModel.value.split('\n')
     .map(input => input.trim())
     .filter(Boolean)
 })
