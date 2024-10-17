@@ -186,6 +186,7 @@ export function convertLikerIdToChannelId (likerId: string) {
 }
 
 export function copyToClipboard (text: string): void {
+  const toast = useToast()
   const copyText = document.createElement('p')
   copyText.textContent = text
   document.body.appendChild(copyText)
@@ -205,4 +206,10 @@ export function copyToClipboard (text: string): void {
   selection.removeAllRanges()
 
   document.body.removeChild(copyText)
+
+  toast.add({
+    icon: 'i-heroicons-clipboard',
+    title: 'Copied to clipboard',
+    timeout: 3000
+  })
 }

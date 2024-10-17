@@ -12,13 +12,12 @@
             target="_blank"
           />
         </UTooltip>
-        <UTooltip text="copy address">
+        <UTooltip text="Copy address">
           <UButton
             icon="i-heroicons-document-duplicate"
             size="sm"
-            color="gray"
             square
-            variant="link"
+            variant="soft"
             @click="onClickCopy"
           />
         </UTooltip>
@@ -110,10 +109,5 @@ function onClickDisconnect () {
 
 function onClickCopy () {
   copyToClipboard(wallet.value)
-  toast.add({
-    icon: 'i-heroicons-clipboard',
-    title: 'Copied to clipboard',
-    timeout: 3000
-  })
 }
 </script>
