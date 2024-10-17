@@ -9,7 +9,7 @@ function isFullWidthChar (char: string): boolean {
   return char.charCodeAt(0) > 255
 }
 
-export function useMessageCharCount (memo: Ref<string>, AUTHOR_MESSAGE_LIMIT: number): UseMessageCharCountReturn {
+export function useMessageCharCount (memo: Ref<string>, limit: number): UseMessageCharCountReturn {
   const messageCharCount = computed((): number => {
     let count = 0
     for (let i = 0; i < memo.value.length; i++) {
@@ -19,7 +19,7 @@ export function useMessageCharCount (memo: Ref<string>, AUTHOR_MESSAGE_LIMIT: nu
   })
 
   const isLimitReached = computed((): boolean => {
-    return messageCharCount.value > AUTHOR_MESSAGE_LIMIT
+    return messageCharCount.value > limit
   })
 
   return {
