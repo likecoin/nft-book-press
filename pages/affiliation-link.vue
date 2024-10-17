@@ -56,6 +56,7 @@
           label="Channel ID(s)"
           hint="Optional"
           :error="customChannelInputError"
+          :ui="{ help: 'flex items-center gap-2' }"
         >
           <div class="flex gap-2">
             <UInput
@@ -74,6 +75,11 @@
               @click="prefillChannelIdIfPossible"
             />
           </div>
+
+          <template #help>
+            <UToggle v-model="isIncludeDefaultChannels" :disabled="!customChannelInput" />
+            <span v-text="'Include default channels'" />
+          </template>
         </UFormGroup>
 
         <UAccordion
@@ -195,7 +201,7 @@
           </template>
 
           <div
-            v-if="customChannels.length > channelTablePageSize"
+            v-if="allChannelTableRows.length > channelTablePageSize"
             class="flex justify-between items-center px-4 py-3"
           >
             <div class="flex items-center gap-1.5">
@@ -212,7 +218,7 @@
             <UPagination
               v-model="channelTablePageNumber"
               :page-count="channelTablePageSize"
-              :total="customChannels.length"
+              :total="allChannelTableRows.length"
             />
           </div>
 
@@ -584,13 +590,23 @@ const customChannels = computed(
       }
     })
 )
+const shouldIncludeDefaultChannels = ref(false)
+const isIncludeDefaultChannels = computed({
+  get: () => !customChannels.value.length || shouldIncludeDefaultChannels.value,
+  set: (value) => {
+    shouldIncludeDefaultChannels.value = value
+  }
+})
+const allChannelTableRows = computed(() => {
+  return customChannels.value.concat(isIncludeDefaultChannels.value ? AFFILIATION_CHANNELS : [])
+})
 
 const channelTablePageSize = ref(5)
 const channelTablePageNumber = ref(1)
 const channelTableRows = computed(() => {
   const size = channelTablePageSize.value
   const pageNumber = channelTablePageNumber.value
-  return customChannels.value.slice((pageNumber - 1) * size, (pageNumber) * size)
+  return allChannelTableRows.value.slice((pageNumber - 1) * size, (pageNumber) * size)
 })
 const channelTableColumns = computed(() => {
   return [
@@ -703,7 +719,7 @@ interface AffiliationLink {
 
 const linkTableRows = computed(() => {
   const rows: AffiliationLink[] = []
-  const channels = [...new Map([...customChannels.value, ...AFFILIATION_CHANNELS].map(c => [c.id, c])).values()]
+  const channels = [...new Map(allChannelTableRows.value.map(c => [c.id, c])).values()]
 
   const items = isUsingCustomDestination.value
     ? [{ id: 'custom', data: { name: 'Custom' } }]
