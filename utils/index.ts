@@ -187,29 +187,36 @@ export function convertLikerIdToChannelId (likerId: string) {
 
 export function copyToClipboard (text: string): void {
   const toast = useToast()
-  const copyText = document.createElement('p')
-  copyText.textContent = text
-  document.body.appendChild(copyText)
 
-  const selection = window.getSelection()
-  const range = document.createRange()
+  navigator.clipboard.writeText(text).then(() => {
+    toast.add({
+      icon: 'i-heroicons-clipboard',
+      title: 'Copied to clipboard',
+      timeout: 3000
+    })
+  }).catch(() => {
+    const copyText = document.createElement('p')
+    copyText.textContent = text
+    document.body.appendChild(copyText)
 
-  if (!selection) {
-    return
-  }
+    const selection = window.getSelection()
+    const range = document.createRange()
 
-  range.selectNode(copyText)
-  selection.removeAllRanges()
-  selection.addRange(range)
+    if (!selection) {
+      return
+    }
+    range.selectNode(copyText)
+    selection.removeAllRanges()
+    selection.addRange(range)
 
-  document.execCommand('copy')
-  selection.removeAllRanges()
+    document.execCommand('copy')
+    selection.removeAllRanges()
+    document.body.removeChild(copyText)
 
-  document.body.removeChild(copyText)
-
-  toast.add({
-    icon: 'i-heroicons-clipboard',
-    title: 'Copied to clipboard',
-    timeout: 3000
+    toast.add({
+      icon: 'i-heroicons-clipboard',
+      title: 'Copied to clipboard',
+      timeout: 3000
+    })
   })
 }
