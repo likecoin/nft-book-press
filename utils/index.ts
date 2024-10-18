@@ -184,3 +184,39 @@ export function convertChannelIdToLikerId (channelId: string) {
 export function convertLikerIdToChannelId (likerId: string) {
   return `@${likerId}`
 }
+
+export function copyToClipboard (text: string): void {
+  const toast = useToast()
+
+  navigator.clipboard.writeText(text).then(() => {
+    toast.add({
+      icon: 'i-heroicons-clipboard',
+      title: 'Copied to clipboard',
+      timeout: 3000
+    })
+  }).catch(() => {
+    const copyText = document.createElement('p')
+    copyText.textContent = text
+    document.body.appendChild(copyText)
+
+    const selection = window.getSelection()
+    const range = document.createRange()
+
+    if (!selection) {
+      return
+    }
+    range.selectNode(copyText)
+    selection.removeAllRanges()
+    selection.addRange(range)
+
+    document.execCommand('copy')
+    selection.removeAllRanges()
+    document.body.removeChild(copyText)
+
+    toast.add({
+      icon: 'i-heroicons-clipboard',
+      title: 'Copied to clipboard',
+      timeout: 3000
+    })
+  })
+}

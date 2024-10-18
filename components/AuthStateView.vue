@@ -1,16 +1,28 @@
 <template>
   <div class="flex flex-col items-stretch gap-4">
     <template v-if="bookStoreApiStore.isAuthenticated">
-      <UTooltip :text="wallet">
-        <UButton
-          class="text-xs font-mono"
-          :label="shortenWalletAddress(wallet)"
-          :to="portfolioURL"
-          variant="soft"
-          block
-          target="_blank"
-        />
-      </UTooltip>
+      <div class="w-full flex items-center gap-[8px] justify-between">
+        <UTooltip class="flex w-full" :text="wallet">
+          <UButton
+            class="text-xs font-mon"
+            :label="shortenWalletAddress(wallet)"
+            :to="portfolioURL"
+            variant="soft"
+            block
+            target="_blank"
+          />
+        </UTooltip>
+        <UTooltip text="Copy address">
+          <UButton
+            icon="i-heroicons-document-duplicate"
+            size="sm"
+            square
+            variant="soft"
+            @click="onClickCopy"
+          />
+        </UTooltip>
+      </div>
+
       <UButton
         label="Sign out"
         icon="i-heroicons-arrow-left-on-rectangle"
@@ -38,7 +50,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
-import { getPortfolioURL } from '~/utils'
+import { getPortfolioURL, copyToClipboard } from '~/utils'
 import { shortenWalletAddress } from '~/utils/cosmos'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 
@@ -93,5 +105,9 @@ async function onClickAuth () {
 function onClickDisconnect () {
   disconnect()
   clearSession()
+}
+
+function onClickCopy () {
+  copyToClipboard(wallet.value)
 }
 </script>
