@@ -172,8 +172,7 @@ import { useNftStore } from '~/stores/nft'
 import { parseImageURLFromMetadata } from '~/utils'
 import { signExecNFTSendAuthz, signSendNFTs } from '~/utils/cosmos'
 import { useMessageCharCount } from '~/composables/useMessageCharCount'
-
-const AUTHOR_MESSAGE_LIMIT = 98
+import { AUTHOR_MESSAGE_LIMIT } from '~/constant'
 
 const { LIKE_CO_API, LCD_URL } = useRuntimeConfig().public
 

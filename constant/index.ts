@@ -22,3 +22,5 @@ export const AFFILIATION_CHANNELS = [
   { id: '@nowherebooks', name: '飛地書店' },
   { id: '@samkeebook', name: '森記圖書公司' }
 ]
+
+export const AUTHOR_MESSAGE_LIMIT = 98
