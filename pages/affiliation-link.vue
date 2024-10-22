@@ -661,7 +661,7 @@ const linkTableRows = computed(() => {
         productName: data.name?.zh || data.name?.en || data.name,
         isCollection,
         selectedEditionIndex: priceIndex,
-        selectedEditionLabel: productEditionOptionsMap.value?.[id][priceIndex].label || '',
+        selectedEditionLabel: productEditionOptionsMap.value?.[id][priceIndex]?.label || '',
         channelId: channel.id,
         channelName: channel.name,
         utmCampaign,
