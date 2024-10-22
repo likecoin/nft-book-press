@@ -648,10 +648,18 @@ const productEditionOptionsMap = computed(() => {
   if (productDataList.value) {
     for (const { id, data } of productDataList.value) {
       if (data.prices) {
-        optionsMap[id] = data.prices.map((price: any) => ({
-          label: `${price.name?.zh || price.name?.en || price.name} - $${price.price}`,
-          value: price.index || 0
-        }))
+        optionsMap[id] = data.prices.map((price: any) => {
+          let name = ''
+          if (typeof price.name === 'object') {
+            name = price.name?.zh || price.name?.en || ''
+          } else {
+            name = price.name
+          }
+          return {
+            label: [name, `$${price.price}`].filter(Boolean).join(' - '),
+            value: price.index || 0
+          }
+        })
       } else {
         optionsMap[id] = []
       }
