@@ -1,4 +1,5 @@
 import { stringify as csvStringify } from 'csv-stringify/sync'
+import { useClipboard } from '@vueuse/core'
 
 export function getIsTestnet () {
   const { IS_TESTNET } = useRuntimeConfig().public
@@ -187,35 +188,18 @@ export function convertLikerIdToChannelId (likerId: string) {
 
 export function copyToClipboard (text: string): void {
   const toast = useToast()
+  const { copy } = useClipboard()
 
-  navigator.clipboard.writeText(text).then(() => {
+  copy(text).then(() => {
     toast.add({
       icon: 'i-heroicons-clipboard',
       title: 'Copied to clipboard',
       timeout: 3000
     })
   }).catch(() => {
-    const copyText = document.createElement('p')
-    copyText.textContent = text
-    document.body.appendChild(copyText)
-
-    const selection = window.getSelection()
-    const range = document.createRange()
-
-    if (!selection) {
-      return
-    }
-    range.selectNode(copyText)
-    selection.removeAllRanges()
-    selection.addRange(range)
-
-    document.execCommand('copy')
-    selection.removeAllRanges()
-    document.body.removeChild(copyText)
-
     toast.add({
-      icon: 'i-heroicons-clipboard',
-      title: 'Copied to clipboard',
+      icon: 'i-heroicons-warning',
+      title: 'Failed to copy',
       timeout: 3000
     })
   })
