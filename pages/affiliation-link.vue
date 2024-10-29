@@ -33,7 +33,7 @@
           <UInput
             v-model="customDestinationURLInput"
             class="font-mono"
-            placeholder="https://books.liker.land"
+            placeholder="https://liker.land/store?tag=blockchain"
             name="custom_destination_url"
           />
         </UFormGroup>
@@ -583,8 +583,9 @@ const productTableRows = computed(() => {
 })
 
 const linkTableColumns = computed(() => {
-  const cols = [
-    {
+  const cols: { key: string, label: string, sortable?: boolean }[] = []
+  if (!isUsingCustomDestination.value) {
+    cols.push({
       key: 'productId',
       label: 'Product',
       sortable: true
@@ -592,13 +593,14 @@ const linkTableColumns = computed(() => {
     {
       key: 'selectedEditionLabel',
       label: 'Edition'
-    },
-    {
-      key: 'channelId',
-      label: 'Channel',
-      sortable: true
-    }
-  ]
+    })
+  }
+
+  cols.push({
+    key: 'channelId',
+    label: 'Channel',
+    sortable: true
+  })
 
   if (!isSharingMode.value) {
     cols.push({
@@ -633,7 +635,11 @@ const linkTableRows = computed(() => {
   const rows: AffiliationLink[] = []
   const channels = [...new Map([...customChannels.value, ...AFFILIATION_CHANNELS].map(c => [c.id, c])).values()]
 
-  productDataList.value?.forEach(({ id, data }) => {
+  const items = isUsingCustomDestination.value
+    ? [{ id: 'custom', data: { name: 'Custom' } }]
+    : productDataList.value || []
+
+  items.forEach(({ id, data }) => {
     const isCollection = id.startsWith('col_')
 
     channels.forEach((channel) => {
@@ -661,7 +667,7 @@ const linkTableRows = computed(() => {
         productName: data.name?.zh || data.name?.en || data.name,
         isCollection,
         selectedEditionIndex: priceIndex,
-        selectedEditionLabel: productEditionOptionsMap.value?.[id][priceIndex]?.label || '',
+        selectedEditionLabel: productEditionOptionsMap.value?.[id]?.[priceIndex]?.label || '',
         channelId: channel.id,
         channelName: channel.name,
         utmCampaign,
