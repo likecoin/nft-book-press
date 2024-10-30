@@ -141,8 +141,6 @@ import { storeToRefs } from 'pinia'
 import { LIKE_ADDRESS_REGEX } from '~/constant'
 import { useStripeStore } from '~/stores/stripe'
 
-const { LIKE_CO_API } = useRuntimeConfig().public
-
 const stripeStore = useStripeStore()
 
 const { fetchStripeConnectStatusByWallet } = stripeStore
@@ -206,15 +204,12 @@ async function onStripeConnectWalletInput (input: any) {
   }
 
   const status = getStripeConnectStatusByWallet.value(inputValue)
-  if (status) {
+  if (status.isReady) {
     return status
   }
 
   isStripeConnectLoading.value = true
   try {
-    await useFetch(
-      `${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${inputValue}`
-    )
     await fetchStripeConnectStatusByWallet(inputValue)
   } catch (error) {
     // eslint-disable-next-line no-console
