@@ -120,6 +120,13 @@
             label="Allow user to pay more than defined price"
           />
         </UFormGroup>
+        <UFormGroup label="Unlist Edition">
+          <UCheckbox
+            v-model="price.isUnlisted"
+            name="isUnlisted"
+            label="Pause selling of this Edition"
+          />
+        </UFormGroup>
       </UCard>
 
       <!-- Product Information -->
@@ -471,6 +478,7 @@ const price = ref({
   hasShipping: false,
   isPhysicalOnly: false,
   isAllowCustomPrice: true,
+  isUnlisted: false,
   deliveryMethod: 'auto',
   autoMemo: 'Thank you for your support. It means a lot to me.'
 })
@@ -611,6 +619,7 @@ function formatPrice (price: any) {
     hasShipping: Boolean(price.hasShipping || shippingRates.value.length || false),
     isPhysicalOnly: Boolean(price.isPhysicalOnly || false),
     isAllowCustomPrice: Boolean(price.isAllowCustomPrice ?? true),
+    isUnlisted: Boolean(price.isUnlisted ?? false),
     isAutoDeliver: !price.isPhysicalOnly && price.deliveryMethod === 'auto',
     autoMemo: price.autoMemo
   }

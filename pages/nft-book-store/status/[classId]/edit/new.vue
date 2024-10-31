@@ -125,6 +125,13 @@
               label="Allow user to pay more than defined price"
             />
           </UFormGroup>
+          <UFormGroup label="Unlist Edition">
+            <UCheckbox
+              v-model="isUnlisted"
+              name="isUnlisted"
+              label="Pause selling of this Edition"
+            />
+          </UFormGroup>
         </UCard>
 
         <!-- Product Information -->
@@ -270,6 +277,7 @@ const hasShipping = ref(false)
 const shippingRates = ref<any[]>([])
 const isPhysicalOnly = ref(false)
 const isAllowCustomPrice = ref(true)
+const isUnlisted = ref(false)
 const isUpdatingShippingRates = ref(false)
 
 const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'book')
@@ -412,7 +420,8 @@ async function handleSubmit () {
       autoMemo: deliveryMethod.value === 'auto' ? (autoMemo.value || '') : '',
       hasShipping: hasShipping.value || false,
       isPhysicalOnly: isPhysicalOnly.value || false,
-      isAllowCustomPrice: isAllowCustomPrice.value ?? true
+      isAllowCustomPrice: isAllowCustomPrice.value ?? true,
+      isUnlisted: isUnlisted.value ?? false
     }
 
     if (!editedPrice || editedPrice.price === undefined) {

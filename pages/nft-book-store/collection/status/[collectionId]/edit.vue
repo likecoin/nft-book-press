@@ -126,6 +126,13 @@
               label="Allow user to pay more than defined price"
             />
           </UFormGroup>
+          <UFormGroup label="Unlist Edition">
+            <UCheckbox
+              v-model="isUnlisted"
+              name="isUnlisted"
+              label="Pause selling of this Edition"
+            />
+          </UFormGroup>
         </UCard>
 
         <!-- Product Information -->
@@ -264,6 +271,7 @@ const descriptionZh = ref('')
 const image = ref('')
 const hasShipping = ref(false)
 const isAllowCustomPrice = ref(true)
+const isUnlisted = ref(false)
 const isPhysicalOnly = ref(false)
 const shippingRates = ref<any[]>([])
 const isUpdatingShippingRates = ref(false)
@@ -331,6 +339,7 @@ onMounted(async () => {
     shippingRates.value = collectionListingInfo.value.shippingRates || []
     isPhysicalOnly.value = collectionListingInfo.value.isPhysicalOnly || false
     isAllowCustomPrice.value = collectionListingInfo.value.isAllowCustomPrice || false
+    isUnlisted.value = collectionListingInfo.value.isUnlisted || false
     deliveryMethod.value = collectionListingInfo.value.isAutoDeliver ? 'auto' : 'manual'
     autoMemo.value = collectionListingInfo.value.autoMemo || ''
 
@@ -419,7 +428,8 @@ async function handleSubmit () {
       autoMemo: autoMemo.value || '',
       hasShipping: hasShipping.value || false,
       isPhysicalOnly: isPhysicalOnly.value || false,
-      isAllowCustomPrice: isAllowCustomPrice.value ?? true
+      isAllowCustomPrice: isAllowCustomPrice.value ?? true,
+      isUnlisted: isUnlisted.value ?? false
     }
 
     if (!editedPrice || editedPrice.price === undefined) {

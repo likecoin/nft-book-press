@@ -146,6 +146,13 @@
                   label="Allow user to pay more than defined price"
                 />
               </UFormGroup>
+              <UFormGroup label="Unlist Edition">
+                <UCheckbox
+                  v-model="p.isUnlisted"
+                  name="isUnlisted"
+                  label="Pause selling of this Edition"
+                />
+              </UFormGroup>
             </UCard>
 
             <UCard
@@ -529,7 +536,8 @@ const prices = ref<any[]>([
     descriptionZh: '',
     hasShipping: false,
     isPhysicalOnly: false,
-    isAllowCustomPrice: false
+    isAllowCustomPrice: false,
+    isUnlisted: false
   }
 ])
 const shippingRates = ref<any[]>([])
@@ -670,7 +678,8 @@ function addMorePrice () {
     descriptionZh: '',
     hasShipping: false,
     isPhysicalOnly: false,
-    isAllowCustomPrice: true
+    isAllowCustomPrice: true,
+    isUnlisted: false
   })
 }
 
@@ -727,6 +736,7 @@ function mapPrices (prices: any) {
     stock: Number(p.stock),
     isAutoDeliver: !p.isPhysicalOnly && p.deliveryMethod === 'auto',
     isAllowCustomPrice: p.isAllowCustomPrice ?? true,
+    isUnlisted: p.isUnlisted ?? false,
     autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
     hasShipping: p.hasShipping || false,
     isPhysicalOnly: p.isPhysicalOnly || false
