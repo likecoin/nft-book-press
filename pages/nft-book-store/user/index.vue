@@ -129,6 +129,14 @@
             @click="onLoginToStripe"
           />
           <UButton
+            v-else-if="!userLikerInfo?.user"
+            label="Liker ID is required"
+            size="lg"
+            rel="noopener"
+            target="_blank"
+            :to="`${LIKE_CO_HOST}/in/register`"
+          />
+          <UButton
             v-else
             label="Setup Stripe Payment Recipient Account"
             size="lg"
