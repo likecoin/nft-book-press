@@ -130,7 +130,7 @@
           />
           <UButton
             v-else-if="!userLikerInfo?.user"
-            label="Liker ID is required"
+            label="Setup your ID"
             size="lg"
             rel="noopener"
             target="_blank"
