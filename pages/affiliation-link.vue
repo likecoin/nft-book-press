@@ -2,7 +2,7 @@
   <PageContainer>
     <PageHeader :title="pageTitle" />
 
-    <PageBody class="flex flex-col items-stretch grow space-y-4">
+    <PageBody class="flex flex-col items-stretch grow space-y-8">
       <div
         v-if="(!productDataList && isSharingMode) || isCreatingAffiliationLinks"
         class="flex flex-col items-center justify-center self-stretch gap-4 py-10"
@@ -173,7 +173,7 @@
             :rows="productTableRows"
           >
             <template #name-data="{ row }">
-              <div class="font-bold" v-text="row.name" />
+              <span v-text="row.name" />
             </template>
             <template #editionSelect-data="{ row }">
               <USelect
@@ -182,55 +182,6 @@
                 :model-value="productEditionSelectModelValue[row.id] || 0"
                 :options="row.editionOptions"
                 @update:model-value="productEditionSelectModelValue[row.id] = $event"
-              />
-            </template>
-          </UTable>
-        </UCard>
-
-        <UCard
-          v-if="channelTableRows.length"
-          :ui="{
-            body: { base: 'divide-y divide-gray-200 dark:divide-gray-800', padding: '' },
-            footer: { base: 'flex justify-end' }
-          }"
-        >
-          <template #header>
-            <h3
-              class="text-lg font-bold"
-              v-text="`Channel${channelTableRows.length > 1 ? 's' : ''}`"
-            />
-          </template>
-
-          <div
-            v-if="allChannelTableRows.length > channelTablePageSize"
-            class="flex justify-between items-center px-4 py-3"
-          >
-            <div class="flex items-center gap-1.5">
-              <span class="text-sm leading-5">Page size</span>
-
-              <USelect
-                v-model="channelTablePageSize"
-                :options="[5, 10, 20]"
-                class="w-20"
-                size="xs"
-              />
-            </div>
-
-            <UPagination
-              v-model="channelTablePageNumber"
-              :page-count="channelTablePageSize"
-              :total="allChannelTableRows.length"
-            />
-          </div>
-
-          <UTable
-            :columns="channelTableColumns"
-            :rows="channelTableRows"
-          >
-            <template #id-data="{ row }">
-              <div
-                class="text-gray-400 dark:text-gray-700 text-xs font-mono"
-                v-text="row.id"
               />
             </template>
           </UTable>
@@ -256,14 +207,18 @@
 
         <UCard
           :ui="{
-            header: { base: 'flex justify-between items-center' },
-            body: { base: 'divide-y divide-gray-200 dark:divide-gray-800', padding: '' }
+            header: { base: 'flex justify-between items-center gap-4' },
+            body: {
+              base: 'space-y-8',
+              padding: hasMoreThanOneChannel ? undefined : ''
+            }
           }"
         >
-          <template #header>
-            <div class="flex items-center gap-4">
-              <h2 class="font-bold" v-text="'Affiliation Links'" />
-            </div>
+          <template v-if="hasMoreThanOneChannel" #header>
+            <h2
+              class="text-lg font-bold"
+              v-text="'Affiliation Links by Channel'"
+            />
 
             <UDropdown
               :items="[
@@ -300,49 +255,106 @@
             </UDropdown>
           </template>
 
-          <UTable
-            :columns="linkTableColumns"
-            :rows="linkTableRows"
+          <UCard
+            v-for="channel in allChannelTableRows"
+            :key="channel.id"
+            :ui="{
+              base: 'overflow-hidden',
+              ring: hasMoreThanOneChannel ? undefined : '',
+              shadow: hasMoreThanOneChannel ? undefined : '',
+              header: { base: 'flex justify-between items-center gap-4' },
+              body: { padding: '' }
+            }"
           >
-            <template #productId-data="{ row }">
-              <div v-text="row.productName" />
-            </template>
-            <template #channelId-data="{ row }">
-              <div v-text="row.channelName" />
-              <div
-                class="text-gray-400 dark:text-gray-700 text-xs font-mono"
-                v-text="row.channelId"
-              />
-            </template>
-            <template #utmCampaign-data="{ row }">
-              <UKbd class="font-mono" :value="row.utmCampaign" />
-            </template>
-            <template #link-data="{ row }">
-              <div class="flex items-center gap-2">
-                <UButton
-                  icon="i-heroicons-qr-code"
-                  variant="outline"
-                  size="xs"
-                  @click="selectedPurchaseLink = row"
+            <template #header>
+              <h3 class="flex items-center gap-2 font-bold">
+                <span
+                  :class="hasMoreThanOneChannel ? 'text-md' : 'text-lg'"
+                  v-text="channel.name"
                 />
-                <UButton
-                  icon="i-heroicons-document-duplicate"
-                  variant="outline"
-                  size="xs"
-                  @click="copyLink(row.url || '')"
+                <span
+                  :class="[
+                    hasMoreThanOneChannel ? 'text-xs' : 'text-sm',
+                    'text-gray-400 dark:text-gray-700',
+                    'font-mono',
+                  ]"
+                  v-text="channel.id"
                 />
+              </h3>
+
+              <UDropdown
+                :items="[
+                  [
+                    {
+                      label: 'Print QR Codes',
+                      icon: 'i-heroicons-qr-code',
+                      click: printQRCodesByChannelId(channel.id),
+                    },
+                    {
+                      label: 'Download QR Codes',
+                      icon: 'i-heroicons-arrow-down-on-square-stack',
+                      click: downloadQRCodesByChannelId(channel.id),
+                    },
+                    {
+                      label: 'Download Links',
+                      icon: 'i-heroicons-arrow-down-on-square-stack',
+                      click: downloadPurchaseLinksByChannelId(channel.id),
+                    },
+                    {
+                      label: 'Shorten Links',
+                      icon: 'i-heroicons-sparkles',
+                      click: shortenLinksByChannelId(channel.id),
+                    },
+                  ]
+                ]"
+                :popper="{ placement: 'top-end' }"
+              >
                 <UButton
-                  class="font-mono break-all"
-                  :label="row.url"
-                  :to="row.url"
+                  icon="i-heroicons-ellipsis-horizontal-20-solid"
                   color="gray"
-                  variant="outline"
-                  size="xs"
-                  target="_blank"
+                  size="sm"
+                  variant="soft"
                 />
-              </div>
+              </UDropdown>
             </template>
-          </UTable>
+
+            <UTable
+              :columns="linkTableColumns"
+              :rows="linkTableRowsMapByChannel.get(channel.id)"
+            >
+              <template #productId-data="{ row }">
+                <div v-text="row.productName" />
+              </template>
+              <template #utmCampaign-data="{ row }">
+                <UKbd class="font-mono" :value="row.utmCampaign" />
+              </template>
+              <template #link-data="{ row }">
+                <div class="flex items-center gap-2">
+                  <UButton
+                    icon="i-heroicons-qr-code"
+                    variant="outline"
+                    size="xs"
+                    @click="selectedPurchaseLink = row"
+                  />
+                  <UButton
+                    icon="i-heroicons-document-duplicate"
+                    variant="outline"
+                    size="xs"
+                    @click="copyLink(row.url || '')"
+                  />
+                  <UButton
+                    class="font-mono break-all"
+                    :label="row.url"
+                    :to="row.url"
+                    color="gray"
+                    variant="outline"
+                    size="xs"
+                    target="_blank"
+                  />
+                </div>
+              </template>
+            </UTable>
+          </UCard>
         </UCard>
 
         <UModal v-model="isOpenQRCodeModal">
@@ -601,27 +613,7 @@ const isIncludeDefaultChannels = computed({
 const allChannelTableRows = computed(() => {
   return customChannels.value.concat(isIncludeDefaultChannels.value ? AFFILIATION_CHANNELS : [])
 })
-
-const channelTablePageSize = ref(5)
-const channelTablePageNumber = ref(1)
-const channelTableRows = computed(() => {
-  const size = channelTablePageSize.value
-  const pageNumber = channelTablePageNumber.value
-  return allChannelTableRows.value.slice((pageNumber - 1) * size, (pageNumber) * size)
-})
-const channelTableColumns = computed(() => {
-  return [
-    {
-      key: 'id',
-      label: 'ID',
-      sortable: channelTableRows.value.length > 1
-    },
-    {
-      key: 'name',
-      label: 'Channel'
-    }
-  ]
-})
+const hasMoreThanOneChannel = computed(() => allChannelTableRows.value.length > 1)
 
 const productIdError = ref('')
 watch(productId, () => {
@@ -691,12 +683,6 @@ const linkTableColumns = computed(() => {
     })
   }
 
-  cols.push({
-    key: 'channelId',
-    label: 'Channel',
-    sortable: true
-  })
-
   if (!isSharingMode.value) {
     cols.push({
       key: 'utmCampaign',
@@ -726,8 +712,9 @@ interface AffiliationLink {
   qrCodeUrl: string,
 }
 
-const linkTableRows = computed(() => {
-  const rows: AffiliationLink[] = []
+const linkTableRowsMapByChannel = computed(() => {
+  const map = new Map<string, AffiliationLink[]>()
+
   const channels = [...new Map(allChannelTableRows.value.map(c => [c.id, c])).values()]
 
   const items = isUsingCustomDestination.value
@@ -738,6 +725,9 @@ const linkTableRows = computed(() => {
     const isCollection = id.startsWith('col_')
 
     channels.forEach((channel) => {
+      if (!map.has(channel.id)) {
+        map.set(channel.id, [])
+      }
       const utmCampaignInput = mergedQueryStringObject.value.utm_campaign
       let utmCampaign = utmCampaignInput || linkQueryDefault.value.utm_campaign || ''
       if (shouldPrefixChannelIdForUTMCampaign.value && channel.id !== AFFILIATION_CHANNEL_DEFAULT) {
@@ -757,7 +747,7 @@ const linkTableRows = computed(() => {
         }
       }
 
-      rows.push({
+      map.get(channel.id)?.push({
         productId: id,
         productName: data.name?.zh || data.name?.en || data.name,
         isCollection,
@@ -777,8 +767,14 @@ const linkTableRows = computed(() => {
     })
   })
 
-  return rows
+  return map
 })
+
+const linkTableRows = computed(() =>
+  allChannelTableRows.value.flatMap(channel => linkTableRowsMapByChannel.value.get(channel.id) || [])
+)
+
+const getLinkTableRowsMapByChannel = (channelId: string) => linkTableRowsMapByChannel.value.get(channelId) || []
 
 const selectedPurchaseLink = ref<AffiliationLink | undefined>(undefined)
 const isOpenQRCodeModal = computed({
@@ -910,9 +906,9 @@ async function copyLink (text = '') {
   })
 }
 
-function downloadAllPurchaseLinks () {
+function downloadPurchaseLinksByTableRows (rows: AffiliationLink[] = [], channelId?: string) {
   downloadFile({
-    data: linkTableRows.value.map(({
+    data: rows.map(({
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       isCollection,
       selectedEditionIndex,
@@ -921,16 +917,24 @@ function downloadAllPurchaseLinks () {
       edition: `${selectedEditionIndex + 1}. ${selectedEditionLabel}`,
       ...link
     })),
-    fileName: `affiliation_links_${Date.now()}.csv`,
+    fileName: ['affiliation_links', channelId, Date.now()].filter(Boolean).join('_').concat('.csv'),
     fileType: 'csv'
   })
 }
 
-function printAllQRCodes () {
+function downloadAllPurchaseLinks () {
+  downloadPurchaseLinksByTableRows(linkTableRows.value)
+}
+
+function downloadPurchaseLinksByChannelId (channelId: string) {
+  return () => downloadPurchaseLinksByTableRows(getLinkTableRowsMapByChannel(channelId))
+}
+
+function printQRCodesByTableRows (rows: AffiliationLink[] = []) {
   try {
     sessionStorage.setItem(
       'nft_book_press_batch_qrcode',
-      convertArrayOfObjectsToCSV(linkTableRows.value.map(({ channelId, qrCodeUrl, ...link }) => ({ key: channelId, ...link, url: qrCodeUrl })))
+      convertArrayOfObjectsToCSV(rows.map(({ channelId, qrCodeUrl, ...link }) => ({ key: channelId, ...link, url: qrCodeUrl })))
     )
     window.open('/batch-qrcode?print=1', 'batch_qrcode', 'popup,menubar=no,location=no,status=no')
   } catch (error) {
@@ -948,11 +952,19 @@ function printAllQRCodes () {
   }
 }
 
-function shortenAllLinks () {
+function printAllQRCodes () {
+  printQRCodesByTableRows(linkTableRows.value)
+}
+
+function printQRCodesByChannelId (channelId: string) {
+  return () => printQRCodesByTableRows(getLinkTableRowsMapByChannel(channelId))
+}
+
+function shortenLinksByTableRows (rows: AffiliationLink[] = []) {
   try {
     sessionStorage.setItem(
       'nft_book_press_batch_shorten_url',
-      convertArrayOfObjectsToCSV(linkTableRows.value.map(({ channelId, ...link }) => ({ key: channelId, ...link })))
+      convertArrayOfObjectsToCSV(rows.map(({ channelId, ...link }) => ({ key: channelId, ...link })))
     )
     router.push({ name: 'batch-short-links', query: { print: 1 } })
   } catch (error) {
@@ -970,14 +982,30 @@ function shortenAllLinks () {
   }
 }
 
-async function downloadAllQRCodes () {
-  const items = linkTableRows.value.map(link => ({
+function shortenAllLinks () {
+  shortenLinksByTableRows(linkTableRows.value)
+}
+
+function shortenLinksByChannelId (channelId: string) {
+  return () => shortenLinksByTableRows(getLinkTableRowsMapByChannel(channelId))
+}
+
+async function downloadQRCodesByTableRows (rows: AffiliationLink[] = [], channelId?: string) {
+  const items = rows.map(link => ({
     url: link.qrCodeUrl,
     filename: getQRCodeFilename(link)
   }))
   await downloadQRCodes(items, {
-    zipFilename: `affiliation_links_qrcodes_${Date.now()}`
+    zipFilename: ['affiliation_links_qrcodes', channelId, Date.now()].filter(Boolean).join('_')
   })
+}
+
+async function downloadAllQRCodes () {
+  await downloadQRCodesByTableRows(linkTableRows.value)
+}
+
+function downloadQRCodesByChannelId (channelId: string) {
+  return () => downloadQRCodesByTableRows(getLinkTableRowsMapByChannel(channelId), channelId)
 }
 
 function prefillChannelIdIfPossible () {
