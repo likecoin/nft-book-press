@@ -160,7 +160,7 @@
           />
         </header>
 
-        <UCard v-if="productTableRows.length" :ui="{ body: { padding: '' } }">
+        <UCard v-if="hasMoreThanOneChannel && productTableRows.length" :ui="{ body: { padding: '' } }">
           <template #header>
             <h3 class="text-lg font-bold" v-text="'Product List'" />
           </template>
@@ -324,6 +324,15 @@
             >
               <template #productId-data="{ row }">
                 <div v-text="row.productName" />
+              </template>
+              <template v-if="!hasMoreThanOneChannel" #selectedEditionLabel-data="{ row }">
+                <USelect
+                  v-if="productEditionOptionsMap?.[row.productId].length"
+                  class="min-w-[200px]"
+                  :model-value="productEditionSelectModelValue[row.productId] || 0"
+                  :options="productEditionOptionsMap?.[row.productId] || []"
+                  @update:model-value="productEditionSelectModelValue[row.productId] = $event"
+                />
               </template>
               <template #utmCampaign-data="{ row }">
                 <UKbd class="font-mono" :value="row.utmCampaign" />
