@@ -544,7 +544,9 @@ const mergedQueryStringObject = computed<Record<string, string>>(() => {
 
   const input = productIdInput.value?.trim() || ''
   if (input.startsWith('http')) {
-    Object.assign(mergedObject, Object.fromEntries(new URL(input).searchParams))
+    const { searchParams } = new URL(input)
+    searchParams.delete('from')
+    Object.assign(mergedObject, Object.fromEntries(searchParams))
   }
 
   if (additionalQueryStringInput.value) {
