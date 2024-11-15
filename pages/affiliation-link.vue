@@ -761,7 +761,9 @@ const linkTableRowsMapByChannel = computed(() => {
         productName: data.name?.zh || data.name?.en || data.name,
         isCollection,
         selectedEditionIndex: priceIndex,
-        selectedEditionLabel: productEditionOptionsMap.value?.[id]?.[priceIndex]?.label || '',
+        selectedEditionLabel: isCollection
+          ? `$${(data?.typePayload?.priceInDecimal || 0) / 100}`
+          : productEditionOptionsMap.value?.[id]?.[priceIndex]?.label || '',
         channelId: channel.id,
         channelName: channel.name,
         utmCampaign,
