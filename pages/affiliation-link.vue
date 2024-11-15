@@ -305,6 +305,11 @@
                       icon: 'i-heroicons-sparkles',
                       click: shortenLinksByChannelId(channel.id),
                     },
+                    {
+                      label: 'Share Table',
+                      icon: 'i-heroicons-document-duplicate',
+                      click: shareTableLinkByChannelId(channel.id),
+                    },
                   ]
                 ]"
                 :popper="{ placement: 'top-end' }"
@@ -402,7 +407,7 @@ import { useLikerStore } from '~/stores/liker'
 import { useStripeStore } from '~/stores/stripe'
 import { useUserStore } from '~/stores/user'
 
-const { LIKE_CO_API } = useRuntimeConfig().public
+const { LIKE_CO_API, SITE_URL } = useRuntimeConfig().public
 const collectionStore = useCollectionStore()
 const likerStore = useLikerStore()
 const stripeStore = useStripeStore()
@@ -1001,6 +1006,20 @@ function shortenAllLinks () {
 
 function shortenLinksByChannelId (channelId: string) {
   return () => shortenLinksByTableRows(getLinkTableRowsMapByChannel(channelId))
+}
+
+function shareTableLinkByChannelId (channelId: string) {
+  return () => {
+    const url = new URL(`${SITE_URL}/affiliation-link`)
+    url.searchParams.set('from', channelId)
+    url.searchParams.set('share', '1')
+    url.searchParams.set('nav', '0')
+    const tableRows = getLinkTableRowsMapByChannel(channelId)
+    tableRows.forEach((row) => {
+      url.searchParams.append('product_id', row.productId)
+    })
+    copyLink(url.toString())
+  }
 }
 
 async function downloadQRCodesByTableRows (rows: AffiliationLink[] = [], channelId?: string) {
