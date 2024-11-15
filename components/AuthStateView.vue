@@ -4,7 +4,7 @@
       <div class="w-full flex items-center gap-[8px] justify-between">
         <UTooltip class="flex w-full" :text="wallet">
           <UButton
-            class="text-xs font-mon"
+            class="text-xs font-mono"
             :label="shortenWalletAddress(wallet)"
             :to="portfolioURL"
             variant="soft"
