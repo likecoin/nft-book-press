@@ -142,6 +142,8 @@ const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 
+const CSV_HEADER = 'key,url'
+
 enum ShortLinkProvider {
   Bitly = 'bitly',
   ShortIO = 'shortio'
@@ -162,7 +164,7 @@ const shortLinkDomain = ref('')
 
 const titlePrefix = ref(route.query.title_prefix as string || 'NFT Book Press')
 const csvInput = ref('')
-const csvInputPlaceholder = `key,url
+const csvInputPlaceholder = `${CSV_HEADER}
 example01,https://example01.com,
 example02,https://example02.com,`
 const apiKey = ref('')
@@ -273,7 +275,11 @@ async function shortenURLWithShortIO ({ url, key }: { url: string, key: string }
 async function startShorteningURLs () {
   let urlItems: { key: string, url: string }[] = []
   try {
-    urlItems = csvParse(csvInput.value, {
+    let input = csvInput.value
+    if (!input.includes(CSV_HEADER)) {
+      input = `${CSV_HEADER}\n${input}`
+    }
+    urlItems = csvParse(input, {
       columns: true,
       skip_empty_lines: true
     })

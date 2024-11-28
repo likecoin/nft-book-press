@@ -105,12 +105,14 @@ import { parse as csvParse } from 'csv-parse/sync'
 
 import { getQRCodeOptions, DEFAULT_QR_CODE_ICON } from '~/utils/qrcode'
 
+const CSV_HEADER = 'key,url'
+
 definePageMeta({ layout: 'page' })
 
 const toast = useToast()
 
 const csvInput = ref('')
-const csvInputPlaceholder = `key,url
+const csvInputPlaceholder = `${CSV_HEADER}
 example01,https://example01.com
 example02,https://example02.com`
 
@@ -160,7 +162,11 @@ onMounted(() => {
 
 async function drawQRCodes () {
   try {
-    urlItems.value = csvParse(csvInput.value, {
+    let input = csvInput.value
+    if (!input.includes(CSV_HEADER)) {
+      input = `${CSV_HEADER}\n${input}`
+    }
+    urlItems.value = csvParse(input, {
       columns: true,
       skip_empty_lines: true
     }) as { key: string, url: string }[]
