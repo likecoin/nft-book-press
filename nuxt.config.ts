@@ -35,6 +35,9 @@ export default defineNuxtConfig({
         }
       : undefined
   },
+  security: {
+    removeLoggers: false
+  },
   plugins: ['~/plugins/buffer.ts'],
   vite: {
     plugins: [
