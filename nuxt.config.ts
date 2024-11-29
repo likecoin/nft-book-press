@@ -20,7 +20,8 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxtjs/eslint-module',
     '@nuxt/ui',
-    'nuxt-gtag'
+    'nuxt-gtag',
+    'nuxt-security'
   ],
   gtag: {
     id: GA_TRACKING_ID
