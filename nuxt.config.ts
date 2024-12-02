@@ -36,6 +36,11 @@ export default defineNuxtConfig({
       : undefined
   },
   security: {
+    headers: {
+      contentSecurityPolicy: {
+        'img-src': ["'self'", 'data:', '*']
+      }
+    },
     removeLoggers: false
   },
   plugins: ['~/plugins/buffer.ts'],
