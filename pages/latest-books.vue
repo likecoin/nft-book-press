@@ -52,6 +52,9 @@
             class="w-12 h-12 object-cover rounded-lg"
           >
         </template>
+        <template #className-data="{ row }">
+          <div class="max-w-[20vw] whitespace-normal" v-text="row.className" />
+        </template>
         <template #url-data="{ row }">
           <UButton
             label="Copy"
