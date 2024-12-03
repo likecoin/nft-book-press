@@ -17,4 +17,4 @@ const router = useRouter()
 onMounted(() => {
   router.replace({ name: 'latest-books' })
 })
-</script>s
+</script>
