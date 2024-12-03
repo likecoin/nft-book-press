@@ -117,6 +117,28 @@ const items = [
         to: { name: 'batch-short-links' }
       }
     ]
+  }, {
+    label: 'Help 幫助',
+    links: [
+      {
+        label: 'Publisher Guide',
+        icon: 'i-heroicons-document-text',
+        to: 'https://docs.like.co/depub/nft-book-press',
+        target: '_blank'
+      },
+      {
+        label: '出版教學',
+        icon: 'i-heroicons-document-text',
+        to: 'https://docs.like.co/zh/depub/nft-book-press',
+        target: '_blank'
+      },
+      {
+        label: 'Chat with Us 聯絡我們',
+        icon: 'i-heroicons-chat-bubble-bottom-center',
+        to: 'https://go.crisp.chat/chat/embed/?website_id=5c009125-5863-4059-ba65-43f177ca33f7',
+        target: '_blank'
+      }
+    ]
   },
   {
     label: 'Misc Tools',
