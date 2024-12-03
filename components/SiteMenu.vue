@@ -53,36 +53,18 @@ function handleLinkClick () {
 
 const items = [
   {
-    label: 'Mint NFT',
+    label: 'NFT Book',
     links: [
       {
-        label: 'Mint NFT',
+        label: 'Mint New Books',
         icon: 'i-heroicons-sparkles',
         to: { name: 'mint-nft' }
       }
     ]
   },
   {
-    label: 'NFT Book Press',
+    label: 'Bookstore & Listing',
     links: [
-      {
-        label: 'Manage NFT Books',
-        icon: 'i-heroicons-rectangle-stack',
-        to: { name: 'nft-book-store' },
-        exact: true
-      },
-      {
-        label: 'Manage Book Collection',
-        icon: 'i-heroicons-rectangle-stack',
-        to: { name: 'nft-book-store-collection' },
-        exact: true
-      },
-      {
-        label: 'User Setting',
-        icon: 'i-heroicons-user-group',
-        to: { name: 'nft-book-store-user' },
-        exact: true
-      },
       {
         label: 'Latest Books',
         icon: 'i-heroicons-user-group',
@@ -90,37 +72,39 @@ const items = [
         exact: true
       },
       {
-        label: 'Affiliation Link',
-        icon: 'i-heroicons-user-group',
-        to: { name: 'affiliation-link' },
+        label: 'Manage Book',
+        icon: 'i-heroicons-rectangle-stack',
+        to: { name: 'nft-book-store' },
+        exact: true
+      },
+      {
+        label: 'Manage Collection',
+        icon: 'i-heroicons-rectangle-stack',
+        to: { name: 'nft-book-store-collection' },
         exact: true
       }
     ]
   },
   {
-    label: 'Sales',
+    label: 'Authors & Affiliates',
+    links: [
+      {
+        label: 'User Setting',
+        icon: 'i-heroicons-user-group',
+        to: { name: 'nft-book-store-user' },
+        exact: true
+      }
+    ]
+  },
+  {
+    label: 'Sales Tools',
     links: [
       {
         label: 'Bookstore POS',
         icon: 'i-heroicons-shopping-cart',
         to: { name: 'sales-pos' },
         exact: true
-      }
-    ]
-  },
-  {
-    label: 'Others',
-    links: [
-      {
-        label: 'NFT Authz Grants',
-        icon: 'i-heroicons-user-plus',
-        to: { name: 'authz' }
-      }
-    ]
-  },
-  {
-    label: 'More Tools',
-    links: [
+      },
       {
         label: 'Batch Create QR Codes',
         icon: 'i-heroicons-qr-code',
@@ -131,6 +115,16 @@ const items = [
         label: 'Batch Create Short Links',
         icon: 'i-heroicons-sparkles',
         to: { name: 'batch-short-links' }
+      }
+    ]
+  },
+  {
+    label: 'Misc Tools',
+    links: [
+      {
+        label: 'NFT Authz Grants',
+        icon: 'i-heroicons-user-plus',
+        to: { name: 'authz' }
       },
       {
         label: 'LikeCoin ISCN/NFT Tools',
