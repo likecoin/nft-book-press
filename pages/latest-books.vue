@@ -55,7 +55,7 @@
         <template #url-data="{ row }">
           <UButton
             label="Copy"
-            @click="e => copyToClipboard(e, row.url)"
+            @click="handleCopyButtonClick($event, row.url)"
           />
         </template>
       </UTable>
@@ -77,7 +77,6 @@ const stripeStore = useStripeStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const walletStore = useWalletStore()
 
-const toast = useToast()
 const router = useRouter()
 
 const { wallet } = storeToRefs(walletStore)
@@ -166,15 +165,9 @@ function selectTableRow (row: any) {
   window.open(row.url, '_blank')
 }
 
-function copyToClipboard (e: MouseEvent, text: string) {
+function handleCopyButtonClick (e: MouseEvent, text: string) {
   e.stopPropagation()
-  navigator.clipboard.writeText(text)
-  toast.add({
-    icon: 'i-heroicons-clipboard-check-solid',
-    title: 'Copied to clipboard',
-    color: 'green',
-    timeout: 3000
-  })
+  copyToClipboard(text)
 }
 
 watch(isAuthenticated, () => {
