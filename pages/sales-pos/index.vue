@@ -491,6 +491,11 @@ const giftUrl = computed(() => {
   return `${LIKER_LAND_URL}/shopping-cart/book?${params.toString()}`
 })
 
+useSeoMeta({
+  title: 'Point of Sale Page',
+  ogTitle: 'Point of Sale Page'
+})
+
 onMounted(() => {
   try {
     const storedItemString = window.localStorage.getItem('nft_book_store_pos_items')

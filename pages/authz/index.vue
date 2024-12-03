@@ -158,6 +158,11 @@ watch(wallet, async (wallet) => {
   }
 }, { immediate: true })
 
+useSeoMeta({
+  title: 'Send LikeCoin NFT Authz Grants Management',
+  ogTitle: 'Send LikeCoin NFT Authz Grants Management',
+})
+
 async function fetchAuthzGrants () {
   const g = await getNFTAuthzGranterGrants(wallet.value)
   grants.value = g

@@ -621,6 +621,11 @@ config({
   }
 })
 
+useSeoMeta({
+  title: 'New Book Listing',
+  ogTitle: 'New Book Listing'
+})
+
 onMounted(async () => {
   try {
     isLoading.value = true

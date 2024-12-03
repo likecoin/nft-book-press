@@ -160,6 +160,11 @@ const tableRows = computed(() => (tabItems[selectedTabItemIndex.value].key === '
   stock: b.typePayload?.stock || 0
 })))
 
+useSeoMeta({
+  title: 'Book Collection Management',
+  ogTitle: 'Book Collection Management'
+})
+
 function selectTableRow (row: any) {
   router.push({
     name: 'nft-book-store-collection-status-collectionId',

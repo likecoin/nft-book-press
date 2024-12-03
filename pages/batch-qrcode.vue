@@ -142,6 +142,11 @@ watch(selectedQRCodeIcon, () => {
   urlItems.value = []
 })
 
+useSeoMeta({
+  title: 'Batch Create QR Codes',
+  ogTitle: 'Batch Create QR Codes'
+})
+
 onMounted(() => {
   try {
     const loadedInput = sessionStorage.getItem('nft_book_press_batch_qrcode')

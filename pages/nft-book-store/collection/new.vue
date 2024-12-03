@@ -579,6 +579,11 @@ watch(moderatorWallets, (newModeratorWallets) => {
   })
 })
 
+useSeoMeta({
+  title: 'New Book Collection',
+  ogTitle: 'New Book Collection'
+})
+
 function onPriceChange (event: InputEvent) {
   if (Number(event.data) === 0) {
     price.value.isAllowCustomPrice = true

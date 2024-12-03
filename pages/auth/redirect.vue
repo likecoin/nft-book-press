@@ -23,6 +23,10 @@ const { authenticate, clearSession } = bookStoreApiStore
 const route = useRoute()
 const toast = useToast()
 
+useSeoMeta({
+  title: 'Redirecting ...'
+})
+
 onMounted(async () => {
   const { method, code } = route.query
   if (method && code) {

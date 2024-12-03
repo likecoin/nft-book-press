@@ -69,9 +69,6 @@ useHead({
   bodyAttrs: {
     class: 'h-dvh text-gray-700 dark:text-gray-200 dark:bg-gray-900'
   },
-  titleTemplate: (titleChunk) => {
-    return titleChunk ? `${titleChunk} - Liker Land Book Press` : 'Liker Land Book Press'
-  },
   link: [
     {
       rel: 'icon',
@@ -79,6 +76,18 @@ useHead({
       href: `${SITE_URL}/favicon.ico`
     }
   ]
+})
+
+useSeoMeta({
+  titleTemplate: (titleChunk) => {
+    return titleChunk ? `${titleChunk} - Liker Land Book Press` : 'Liker Land Book Press'
+  },
+  ogTitle: 'Liker Land Book Press',
+  description: 'Liker Land Web3 Book Press – the future of direct and self-publishing. Empowering authors to create, share, and monetize ebooks seamlessly through decentralized Web3 technology. Start your publishing journey today!',
+  ogDescription: 'Liker Land Web3 Book Press – the future of direct and self-publishing. Empowering authors to create, share, and monetize ebooks seamlessly through decentralized Web3 technology. Start your publishing journey today!',
+  ogType: 'website',
+  ogSiteName: 'Liker Land Book Press',
+  themeColor: '#28646e'
 })
 
 onMounted(async () => {

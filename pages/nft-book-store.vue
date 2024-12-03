@@ -12,4 +12,10 @@
 const route = useRoute()
 
 const isHeaderHidden = computed(() => route.query.print === '1')
+
+useSeoMeta({
+  title: 'Book Listing Management',
+  ogTitle: 'Book Listing Management'
+})
+
 </script>

@@ -135,6 +135,11 @@ const tableRows = computed(() => bookList.value.map((b: any) => ({
   url: `${LIKER_LAND_URL}/nft/class/${b.classId}?from=${channelId.value}`
 })))
 
+useSeoMeta({
+  title: 'Latest Books',
+  ogTitle: 'Latest Books'
+})
+
 onMounted(() => {
   nextTick(async () => {
     await fetchBookList()

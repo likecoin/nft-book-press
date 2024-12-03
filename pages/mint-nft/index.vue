@@ -1,6 +1,6 @@
 <template>
   <PageContainer :key="route.path">
-    <PageHeader title="Mint LikeCoin NFT/NFT Book" />
+    <PageHeader title="Mint Liker Land NFT Book" />
 
     <PageBody class="flex flex-col items-stretch grow space-y-4">
       <UAlert
@@ -498,6 +498,11 @@ watch(iscnData, (recordData) => {
   if (recordData) {
     imageUrl.value = recordData.contentMetadata?.thumbnailUrl || ''
   }
+})
+
+useSeoMeta({
+  title: 'Mint Liker Land NFT Book',
+  ogTitle: 'Mint Liker Land NFT Book'
 })
 
 onMounted(() => {

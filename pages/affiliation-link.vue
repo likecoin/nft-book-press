@@ -478,6 +478,11 @@ const productId = computed(() => {
   return productIds.value[0] || ''
 })
 
+useSeoMeta({
+  title: 'Affiliation Link Generator',
+  ogTitle: 'Affiliation Link Generator'
+})
+
 function constructUTMQueryString (input: {
   utmCampaign?: string,
   utmSource?: string,
