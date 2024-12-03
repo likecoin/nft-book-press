@@ -129,7 +129,7 @@ const tableColumns = computed(() => [
 
 const tableRows = computed(() => bookList.value.map((b: any) => ({
   className: b.name,
-  image: parseImageURLFromMetadata(b.thumbnailUrl),
+  image: b.thumbnailUrl ? getImageResizeURL(parseImageURLFromMetadata(b.thumbnailUrl), { width: 96 }) : undefined,
   author: b.author,
   priceInUSD: `US$${b.prices[0].price}`,
   url: `${LIKER_LAND_URL}/nft/class/${b.classId}?from=${channelId.value}`

@@ -68,6 +68,7 @@ export default defineNuxtConfig({
       LIKER_LAND_URL: process.env.LIKER_LAND_URL,
       LIKE_CO_HOST: process.env.LIKE_CO_HOST,
       LIKE_CO_API: process.env.LIKE_CO_API,
+      LIKE_CO_STATIC_ENDPOINT: process.env.LIKE_CO_STATIC_ENDPOINT,
       APP_LIKE_CO_URL: process.env.APP_LIKE_CO_URL,
       NFT_MARKETPLACE_URL: process.env.NFT_MARKETPLACE_URL,
       ISCN_TOOLS_URL: process.env.ISCN_TOOLS_URL,

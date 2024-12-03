@@ -210,3 +210,8 @@ export function copyToClipboard (text: string): void {
     })
   })
 }
+
+export function getImageResizeURL (url: string, { width = 300 }: { width?: number } = {}) {
+  const { LIKE_CO_STATIC_ENDPOINT } = useRuntimeConfig().public
+  return `${LIKE_CO_STATIC_ENDPOINT}/thumbnail/?url=${encodeURIComponent(url)}&width=${width}`
+}
