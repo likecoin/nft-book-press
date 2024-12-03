@@ -37,7 +37,7 @@
     >
       <template #header>
         <h2 class="text-xl font-bold font-mono">
-          Latest Books on LikerLand Bookstore
+          Latest Books on Liker Land Bookstore
         </h2>
       </template>
       <UTable
@@ -105,7 +105,7 @@ const tableColumns = computed(() => [
   },
   {
     key: 'className',
-    label: 'Class Name',
+    label: 'Book Name',
     sortable: true
   },
   {
@@ -115,7 +115,7 @@ const tableColumns = computed(() => [
   },
   {
     key: 'priceInUSD',
-    label: 'Price in USD',
+    label: 'Price',
     sortable: true
   }, {
     key: 'url',
