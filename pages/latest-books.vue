@@ -9,26 +9,24 @@
       :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'red', variant: 'link', padded: false }"
       @close="error = ''"
     />
-    <UCard>
-      <template
-        v-if="!isAffiliationReady"
-      >
-        <UAlert
-          icon="i-heroicons-exclamation-circle"
-          color="orange"
-          variant="soft"
-          title="Join Our Affiliation Program!"
-          description="Setup your Liker ID and Stripe Connect Account to participate in sales affiliation program on Liker Land Bookstore."
-        />
-        <UButton @click="OnClickAffiliationSetup">
-          Go to Affiliation Setup
-        </UButton>
-      </template>
-      <template v-else>
-        Append <UKbd class="font-mono">
-          ?from={{ channelId }}
-        </UKbd> in any bookstore page to earn commission from book sales.
-      </template>
+    <UAlert
+      v-if="!isAffiliationReady"
+      icon="i-heroicons-exclamation-circle"
+      color="orange"
+      variant="soft"
+      title="Join Our Affiliation Program!"
+      description="Setup your Liker ID and Stripe Connect Account to participate in sales affiliation program on Liker Land Bookstore."
+      :actions="[{
+        label: 'Setup',
+        color: 'orange',
+        variant: 'outline',
+        click: handleAffiliationSetupButtonClick,
+      }]"
+    />
+    <UCard v-else>
+      Append <UKbd class="font-mono">
+        ?from={{ channelId }}
+      </UKbd> in any bookstore page to earn commission from book sales.
     </UCard>
     <UCard
       :ui="{
@@ -160,7 +158,7 @@ async function fetchUserStripeInfo () {
   isStripeConnectReady.value = stripeConnectStatus?.isReady
 }
 
-function OnClickAffiliationSetup () {
+function handleAffiliationSetupButtonClick () {
   router.push({ name: 'nft-book-store-user' })
 }
 
