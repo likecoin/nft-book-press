@@ -53,10 +53,10 @@ function handleLinkClick () {
 
 const items = [
   {
-    label: 'NFT Book',
+    label: 'Publish NFT Book',
     links: [
       {
-        label: 'Mint New Books',
+        label: 'Print New Books',
         icon: 'i-heroicons-sparkles',
         to: { name: 'mint-nft' }
       }
@@ -67,7 +67,7 @@ const items = [
     links: [
       {
         label: 'Latest Books',
-        icon: 'i-heroicons-user-group',
+        icon: 'i-heroicons-book-open',
         to: { name: 'latest-books' },
         exact: true
       },
