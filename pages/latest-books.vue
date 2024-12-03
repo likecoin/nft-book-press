@@ -47,6 +47,7 @@
       >
         <template #image-data="{ row }">
           <img
+            v-if="row.image"
             :src="row.image"
             :alt="row.className"
             class="w-12 h-12 object-cover rounded-lg"
