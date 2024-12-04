@@ -1,0 +1,2 @@
+import{_ as t,o as c,c as o,ac as s}from"./entry.7afc7943.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},n=new Error().stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="fd64518a-2ff8-43a6-be06-ec0492c60c4b",e._sentryDebugIdIdentifier="sentry-dbid-fd64518a-2ff8-43a6-be06-ec0492c60c4b")}catch{}})();const f={},r={class:"flex flex-col"};function d(e,n){return c(),o("main",r,[s(e.$slots,"default")])}const l=t(f,[["render",d]]);export{l as _};
+//# sourceMappingURL=PageContainer.91ad7ca5.js.map
