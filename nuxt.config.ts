@@ -1,5 +1,3 @@
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
-
 const LikeCoinWalletConnectorCSSPath = '@likecoin/wallet-connector/dist/style.css'
 
 const {
@@ -45,9 +43,6 @@ export default defineNuxtConfig({
   },
   plugins: ['~/plugins/buffer.ts'],
   vite: {
-    plugins: [
-      nodePolyfills()
-    ],
     vue: {
       script: {
         defineModel: true,

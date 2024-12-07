@@ -1,5 +1,5 @@
 import { defineStore, storeToRefs } from 'pinia'
-import * as jwt from 'jsonwebtoken'
+import { jwtDecode } from 'jwt-decode'
 import { useWalletStore } from './wallet'
 
 export const useBookStoreApiStore = defineStore('book-api', () => {
@@ -14,9 +14,12 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
     const isWalletMatch = storeWallet.value === sessionWallet.value
     const tokenExists = !!token.value
     if (!isWalletMatch || !tokenExists) { return false }
-    const decoded = jwt.decode(token.value) as jwt.JwtPayload
-    if (!decoded) { return false }
-    return decoded.exp && (decoded.exp > (Date.now() / 1000))
+    const decoded = jwtDecode(token.value)
+    if (!decoded) {
+      return false
+    }
+    const isExpired = decoded.exp && decoded.exp * 1000 < Date.now()
+    return !isExpired
   })
 
   function clearSession () {
