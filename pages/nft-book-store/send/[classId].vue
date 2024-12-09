@@ -29,69 +29,71 @@
     >
       <UCard :ui="{ body: { padding: '' } }">
         <table class="divide-y w-full">
-          <tr>
-            <th class="text-left px-4 py-3">
-              Buyer Email
-            </th><td class="px-4 py-3">
-              {{ orderInfo.email }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Reader Email
-            </th><td class="px-4 py-3">
-              {{ orderInfo.giftInfo?.toEmail || orderInfo.email }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Status
-            </th><td class="px-4 py-3">
-              {{ orderInfo.status }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Buyer Wallet
-            </th><td class="px-4 py-3">
-              {{ orderInfo.wallet }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Price Name
-            </th><td class="px-4 py-3">
-              {{ orderInfo.priceName }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Price
-            </th><td class="px-4 py-3">
-              {{ orderInfo.price }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Quantity
-            </th><td class="px-4 py-3">
-              {{ orderInfo.quantity }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Buyer message
-            </th><td class="px-4 py-3">
-              {{ orderInfo.message }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Sales channel
-            </th><td class="px-4 py-3">
-              {{ orderInfo.from }}
-            </td>
-          </tr>
+          <tbody>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Buyer Email
+              </th><td class="px-4 py-3">
+                {{ orderInfo.email }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Reader Email
+              </th><td class="px-4 py-3">
+                {{ orderInfo.giftInfo?.toEmail || orderInfo.email }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Status
+              </th><td class="px-4 py-3">
+                {{ orderInfo.status }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Buyer Wallet
+              </th><td class="px-4 py-3">
+                {{ orderInfo.wallet }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Price Name
+              </th><td class="px-4 py-3">
+                {{ orderInfo.priceName }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Price
+              </th><td class="px-4 py-3">
+                {{ orderInfo.price }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Quantity
+              </th><td class="px-4 py-3">
+                {{ orderInfo.quantity }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Buyer message
+              </th><td class="px-4 py-3">
+                {{ orderInfo.message }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Sales channel
+              </th><td class="px-4 py-3">
+                {{ orderInfo.from }}
+              </td>
+            </tr>
+          </tbody>
         </table>
       </UCard>
 

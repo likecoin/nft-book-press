@@ -29,77 +29,79 @@
 
       <UCard :ui="{ body: { padding: '' } }">
         <table class="divide-y w-full">
-          <tr>
-            <th class="text-left px-4 py-3">
-              Buyer Email
-            </th><td class="px-4 py-3">
-              {{ orderInfo.email }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Buyer Phone Number
-            </th><td class="px-4 py-3">
-              {{ orderInfo.phone }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Reader Email
-            </th><td class="px-4 py-3">
-              {{ orderInfo.giftInfo?.toEmail || orderInfo.email }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Shipping Status
-            </th><td class="text-left px-4 py-3">
-              {{ orderInfo.shippingStatus }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Shipping cost paid
-            </th><td class="text-left px-4 py-3">
-              {{ orderInfo.shippingCost }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Buyer Wallet
-            </th><td class="text-left px-4 py-3">
-              {{ orderInfo.wallet }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Price
-            </th><td class="text-left px-4 py-3">
-              {{ orderInfo.price }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Quantity
-            </th>
-            <td class="text-left px-4 py-3">
-              {{ orderInfo.quantity }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Buyer message
-            </th><td class="text-left px-4 py-3">
-              {{ orderInfo.message }}
-            </td>
-          </tr>
-          <tr>
-            <th class="text-left px-4 py-3">
-              Sales channel
-            </th><td class="text-left px-4 py-3">
-              {{ orderInfo.from }}
-            </td>
-          </tr>
+          <tbody>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Buyer Email
+              </th><td class="px-4 py-3">
+                {{ orderInfo.email }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Buyer Phone Number
+              </th><td class="px-4 py-3">
+                {{ orderInfo.phone }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Reader Email
+              </th><td class="px-4 py-3">
+                {{ orderInfo.giftInfo?.toEmail || orderInfo.email }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Shipping Status
+              </th><td class="text-left px-4 py-3">
+                {{ orderInfo.shippingStatus }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Shipping cost paid
+              </th><td class="text-left px-4 py-3">
+                {{ orderInfo.shippingCost }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Buyer Wallet
+              </th><td class="text-left px-4 py-3">
+                {{ orderInfo.wallet }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Price
+              </th><td class="text-left px-4 py-3">
+                {{ orderInfo.price }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Quantity
+              </th>
+              <td class="text-left px-4 py-3">
+                {{ orderInfo.quantity }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Buyer message
+              </th><td class="text-left px-4 py-3">
+                {{ orderInfo.message }}
+              </td>
+            </tr>
+            <tr>
+              <th class="text-left px-4 py-3">
+                Sales channel
+              </th><td class="text-left px-4 py-3">
+                {{ orderInfo.from }}
+              </td>
+            </tr>
+          </tbody>
         </table>
       </UCard>
 
@@ -110,22 +112,24 @@
           </h3>
         </template>
         <table class="divide-y w-full">
-          <tr v-if="orderInfo.shippingDetails?.name">
-            <td class="text-left px-4 py-3">
-              Name
-            </td>
-            <td class="text-left px-4 py-3">
-              {{ orderInfo.shippingDetails.name }}
-            </td>
-          </tr>
-          <tr v-for="[key, value] in Object.entries(orderInfo.shippingDetails?.address)" :key="key">
-            <td class="text-left px-4 py-3">
-              {{ key }}
-            </td>
-            <td class="text-left px-4 py-3">
-              {{ value }}
-            </td>
-          </tr>
+          <tbody>
+            <tr v-if="orderInfo.shippingDetails?.name">
+              <td class="text-left px-4 py-3">
+                Name
+              </td>
+              <td class="text-left px-4 py-3">
+                {{ orderInfo.shippingDetails.name }}
+              </td>
+            </tr>
+            <tr v-for="[key, value] in Object.entries(orderInfo.shippingDetails?.address)" :key="key">
+              <td class="text-left px-4 py-3">
+                {{ key }}
+              </td>
+              <td class="text-left px-4 py-3">
+                {{ value }}
+              </td>
+            </tr>
+          </tbody>
         </table>
       </UCard>
 
