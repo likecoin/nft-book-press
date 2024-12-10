@@ -378,6 +378,10 @@
         </div>
         <template v-if="shouldShowAdvanceSettings">
           <div class="mt-[24px] flex flex-col gap-[12px]">
+            <UFormGroup label="Table Of Content">
+              <UTextarea v-model="tableOfContents" />
+            </UFormGroup>
+
             <!-- Shipping Rates -->
             <ShippingRatesRateTable
               :is-show-physical-goods-checkbox="false"
@@ -706,6 +710,8 @@ const shouldShowAdvanceSettings = ref<boolean>(false)
 
 // Search
 const searchInput = ref('')
+
+const tableOfContents = ref('')
 
 const moderatorWallets = ref<string[]>([])
 const moderatorWalletsGrants = ref<any>({})
@@ -1048,6 +1054,7 @@ onMounted(async () => {
       notificationEmails: classNotificationEmails,
       connectedWallets: classConnectedWallets,
       mustClaimToView: classMustClaimToView,
+      tableOfContents: classTableOfContent,
       enableCustomMessagePage: classEnableCustomMessagePage,
       hideDownload: classHideDownload
     } = classData.value as any
@@ -1066,6 +1073,7 @@ onMounted(async () => {
     mustClaimToView.value = classMustClaimToView
     hideDownload.value = classHideDownload
     enableCustomMessagePage.value = classEnableCustomMessagePage
+    tableOfContents.value = classTableOfContent
     const { data: orders, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
       {
         headers: {
@@ -1210,6 +1218,7 @@ async function updateSettings () {
       connectedWallets,
       hideDownload,
       mustClaimToView,
+      tableOfContents,
       enableCustomMessagePage
     })
     router.push({
