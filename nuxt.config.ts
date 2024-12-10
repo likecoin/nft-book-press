@@ -47,8 +47,18 @@ export default defineNuxtConfig({
   security: {
     headers: {
       contentSecurityPolicy: {
+        'script-src': [
+          "'self'",
+          'https:',
+          "'unsafe-inline'",
+          "'wasm-unsafe-eval'",
+          "'nonce-{{nonce}}'",
+          'https://client.crisp.chat'
+        ],
+        'worker-src': ["'self'", 'blob:'],
         'img-src': ["'self'", 'data:', '*']
-      }
+      },
+      referrerPolicy: 'strict-origin'
     },
     removeLoggers: false
   },
