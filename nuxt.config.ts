@@ -62,12 +62,17 @@ export default defineNuxtConfig({
 
   plugins: ['~/plugins/buffer.ts'],
 
+  alias: {
+    // polyfill process
+    process: 'unenv/runtime/node/process'
+  },
   vite: {
     define: {
       global: 'globalThis'
     },
     plugins: [
       nodePolyfills({
+        // global breaks on dev
         globals: {
           process: false,
           Buffer: false,
