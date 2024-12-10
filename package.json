@@ -20,7 +20,7 @@
     "@likecoin/iscn-js": "^0.7.0-beta.0",
     "@likecoin/qr-code-styling": "^1.6.6",
     "@likecoin/wallet-connector": "^0.27.1",
-    "@nuxt/ui": "2.13.0",
+    "@nuxt/ui": "2.17.0",
     "@pinia/nuxt": "^0.4.8",
     "@sentry/nuxt": "^8.27.0",
     "bignumber.js": "^9.1.0",
