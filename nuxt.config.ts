@@ -24,8 +24,15 @@ export default defineNuxtConfig({
     '@nuxtjs/eslint-module',
     '@nuxt/ui',
     'nuxt-gtag',
-    'nuxt-security'
+    'nuxt-security',
+    '@nuxt/scripts'
   ],
+
+  scripts: {
+    registry: {
+      crisp: true
+    }
+  },
 
   gtag: {
     id: GA_TRACKING_ID
@@ -51,7 +58,8 @@ export default defineNuxtConfig({
           'https:',
           "'unsafe-inline'",
           "'wasm-unsafe-eval'",
-          "'nonce-{{nonce}}'"
+          "'nonce-{{nonce}}'",
+          'https://l.crisp.chat'
         ],
         'worker-src': ["'self'", 'blob:'],
         'img-src': ["'self'", 'data:', '*']
@@ -107,6 +115,11 @@ exports.randomFillSync = randomFillSync`
 
   runtimeConfig: {
     public: {
+      scripts: {
+        crisp: {
+          id: ''
+        }
+      },
       IS_TESTNET: process.env.IS_TESTNET,
 
       SITE_URL: process.env.SITE_URL,
