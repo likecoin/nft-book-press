@@ -90,7 +90,12 @@ export const useUserStore = defineStore('user', () => {
   watch(isAuthenticated, () => {
     if (isAuthenticated.value) {
       lazyFetchUserLikerInfo()
-      lazyFetchBookUserProfile()
+      lazyFetchBookUserProfile().catch((e: Error) => {
+        if (e.message !== 'USER_NOT_FOUND') {
+          // eslint-disable-next-line no-console
+          console.error(e)
+        }
+      })
     } else {
       bookUser.value = null
     }
