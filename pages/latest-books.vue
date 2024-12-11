@@ -1,5 +1,6 @@
 <template>
   <PageBody>
+    <PageHeader title="Latest Books on Liker Land Bookstore" />
     <UAlert
       v-if="error"
       icon="i-heroicons-exclamation-triangle"
@@ -35,11 +36,6 @@
         footer: { base: 'text-center' },
       }"
     >
-      <template #header>
-        <h2 class="text-xl font-bold font-mono">
-          Latest Books on Liker Land Bookstore
-        </h2>
-      </template>
       <UTable
         :columns="tableColumns"
         :rows="tableRows"
