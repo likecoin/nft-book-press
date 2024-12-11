@@ -38,6 +38,10 @@
           />
           <UInput v-else :value="classId" :readonly="true" />
         </UFormGroup>
+
+        <UFormGroup label="Table Of Content">
+          <UTextarea v-model="tableOfContents" />
+        </UFormGroup>
       </UCard>
 
       <component
@@ -521,6 +525,7 @@ const mdEditorPlaceholder = ref({
 
 const classIdInput = ref(classId || '')
 const nextPriceIndex = ref(1)
+const tableOfContents = ref('')
 const mustClaimToView = ref(true)
 const enableCustomMessagePage = ref(false)
 const hideDownload = ref(false)
@@ -830,6 +835,7 @@ async function submitNewClass () {
     }
 
     await newBookListing(classIdInput.value as string, {
+      tableOfContents,
       defaultPaymentCurrency: 'USD',
       connectedWallets,
       moderatorWallets,
