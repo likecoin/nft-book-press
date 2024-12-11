@@ -383,7 +383,12 @@ onMounted(async () => {
     loadCommissionHistory(),
     refreshUserLikerInfo(),
     refreshStripeConnectStatus(),
-    userStore.lazyFetchBookUserProfile()
+    userStore.lazyFetchBookUserProfile().catch((e: Error) => {
+      if (e.message !== 'USER_NOT_FOUND') {
+        // eslint-disable-next-line no-console
+        console.error(e)
+      }
+    })
   ])
   if (isStripeConnectReady.value) { await loadPayoutHistory() }
 })
