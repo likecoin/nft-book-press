@@ -16,10 +16,10 @@
       label="Sign in"
       icon="i-heroicons-arrow-right-on-rectangle"
       color="primary"
-      :loading="isLoading"
+      :loading="isAuthenticating"
       :disabled="isRestoringSession"
       block
-      @click="onClickAuth"
+      @click="onAuthenticate"
     />
   </PageBody>
   <slot v-else />
@@ -32,6 +32,6 @@ import { useAuth } from '~/composables/useAuth'
 
 const bookStoreApiStore = useBookStoreApiStore()
 const { isRestoringSession } = storeToRefs(bookStoreApiStore)
-const { isLoading, onClickAuth } = useAuth()
+const { isAuthenticating, onAuthenticate } = useAuth()
 
 </script>

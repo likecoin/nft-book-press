@@ -11,11 +11,11 @@ export function useAuth () {
   const { authenticate, clearSession } = bookStoreApiStore
   const toast = useToast()
 
-  const isLoading = ref(false)
+  const isAuthenticating = ref(false)
 
-  async function onClickAuth () {
+  async function onAuthenticate () {
     try {
-      isLoading.value = true
+      isAuthenticating.value = true
       setupPostAuthRedirect()
 
       if (!wallet.value || !signer.value) {
@@ -50,13 +50,13 @@ export function useAuth () {
         }
       })
     } finally {
-      isLoading.value = false
+      isAuthenticating.value = false
       clearPostAuthRedirect()
     }
   }
 
   return {
-    isLoading,
-    onClickAuth
+    isAuthenticating,
+    onAuthenticate
   }
 }

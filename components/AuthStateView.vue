@@ -39,10 +39,10 @@
       icon="i-heroicons-arrow-right-on-rectangle"
       color="primary"
       size="lg"
-      :loading="isLoading"
+      :loading="isAuthenticating"
       :disabled="isRestoringSession"
       block
-      @click="onClickAuth"
+      @click="onAuthenticate"
     />
   </div>
 </template>
@@ -61,7 +61,7 @@ const { disconnect } = store
 const bookStoreApiStore = useBookStoreApiStore()
 const { clearSession } = bookStoreApiStore
 const { isRestoringSession } = storeToRefs(bookStoreApiStore)
-const { isLoading, onClickAuth } = useAuth()
+const { isAuthenticating, onAuthenticate } = useAuth()
 
 const portfolioURL = computed(() => getPortfolioURL(wallet.value))
 
