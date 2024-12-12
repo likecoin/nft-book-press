@@ -50,57 +50,20 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
-import { getPortfolioURL, copyToClipboard } from '~/utils'
+import { getPortfolioURL, copyToClipboard } from '~/utils/index'
 import { shortenWalletAddress } from '~/utils/cosmos'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useAuth } from '~/composables/useAuth'
 
 const store = useWalletStore()
-const { wallet, signer } = storeToRefs(store)
-const { connect, disconnect, signMessageMemo } = store
+const { wallet } = storeToRefs(store)
+const { disconnect } = store
 const bookStoreApiStore = useBookStoreApiStore()
-const { authenticate, clearSession } = bookStoreApiStore
+const { clearSession } = bookStoreApiStore
 const { isRestoringSession } = storeToRefs(bookStoreApiStore)
-
-const toast = useToast()
+const { isLoading, onClickAuth } = useAuth()
 
 const portfolioURL = computed(() => getPortfolioURL(wallet.value))
-
-const isLoading = ref(false)
-
-async function onClickAuth () {
-  try {
-    isLoading.value = true
-    setupPostAuthRedirect()
-
-    if (!wallet.value || !signer.value) {
-      await connect()
-    }
-    if (!wallet.value || !signer.value) { return }
-    const signature = await signMessageMemo(
-      'authorize',
-      ['read:nftbook', 'write:nftbook', 'read:nftcollection', 'write:nftcollection']
-    )
-    if (!signature) { return }
-    await authenticate(wallet.value, signature)
-  } catch (err) {
-    disconnect()
-    clearSession()
-    // eslint-disable-next-line no-console
-    console.error(err)
-    toast.add({
-      icon: 'i-heroicons-exclamation-circle',
-      title: (err as Error).toString(),
-      timeout: 0,
-      color: 'red',
-      ui: {
-        title: 'text-red-400 dark:text-red-400'
-      }
-    })
-  } finally {
-    isLoading.value = false
-    clearPostAuthRedirect()
-  }
-}
 
 function onClickDisconnect () {
   disconnect()
