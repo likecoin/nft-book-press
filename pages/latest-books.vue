@@ -55,6 +55,7 @@
         <template #url-data="{ row }">
           <UButton
             label="Copy"
+            :disabled="!isAffiliationReady"
             @click="handleCopyButtonClick($event, row.url)"
           />
         </template>
