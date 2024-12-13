@@ -1,6 +1,6 @@
 <template>
   <PageContainer>
-    <PageHeader title="Batch Create Short Links" />
+    <PageHeader title="Batch Create Book Short Links" />
 
     <PageBody>
       <UFormGroup
@@ -179,6 +179,11 @@ const apiKeyLabel = computed(() => {
   }
 })
 const shortenedURLItems = ref<{ key: string, url: string, destination: string }[]>([])
+
+useSeoMeta({
+  title: 'Batch Create Book Short Links',
+  ogTitle: 'Batch Create Book Short Links'
+})
 
 onMounted(() => {
   try {

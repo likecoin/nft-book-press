@@ -1,6 +1,6 @@
 <template>
   <PageContainer :key="route.path">
-    <PageHeader title="Liker Land Bookstore POS" />
+    <PageHeader :title="pageTitle" />
     <PageBody
       :ui="{
         base: 'flex flex-col items-stretch grow space-y-4',
@@ -491,9 +491,10 @@ const giftUrl = computed(() => {
   return `${LIKER_LAND_URL}/shopping-cart/book?${params.toString()}`
 })
 
+const pageTitle = computed(() => 'Liker Land Point Of Sale')
 useSeoMeta({
-  title: 'Point of Sale Page',
-  ogTitle: 'Point of Sale Page'
+  title: pageTitle.value,
+  ogTitle: pageTitle.value
 })
 
 onMounted(() => {

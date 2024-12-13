@@ -1,7 +1,7 @@
 <template>
   <PageBody class="print:space-y-0 print:p-0">
     <h1 class="text-lg font-bold font-mono print:hidden">
-      Batch Create QR Codes
+      Batch Create Book QR Codes
     </h1>
 
     <UFormGroup
@@ -143,8 +143,8 @@ watch(selectedQRCodeIcon, () => {
 })
 
 useSeoMeta({
-  title: 'Batch Create QR Codes',
-  ogTitle: 'Batch Create QR Codes'
+  title: 'Batch Create Book QR Codes',
+  ogTitle: 'Batch Create Book QR Codes'
 })
 
 onMounted(() => {

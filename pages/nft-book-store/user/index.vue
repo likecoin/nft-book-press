@@ -28,7 +28,7 @@
       >
         <template #header>
           <h1 class="text-center font-bold font-mono">
-            Book Affiliation Program
+            Book Sales Affiliation Program
           </h1>
           <UTooltip
             text="Refresh Liker ID"
@@ -77,7 +77,7 @@
       >
         <template #header>
           <h1 class="text-center font-bold font-mono">
-            Stripe Connect Status
+            Stripe Connect Payout Account Status
           </h1>
 
           <UTooltip

@@ -20,7 +20,7 @@
     <UCard :ui="{ header: { base: 'flex justify-between items-center gap-4' } }">
       <template #header>
         <h2 class="text-xl font-bold font-mono">
-          NFT Book Listing
+          Liker Land Book Listing
         </h2>
 
         <UButton

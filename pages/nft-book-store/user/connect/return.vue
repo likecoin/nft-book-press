@@ -4,7 +4,7 @@
     <UCard v-if="isLoading">
       <template #header>
         <h2 class="text-sm font-bold font-mono">
-          Refreshing Stripe Connect Account Status
+          Refreshing Stripe Connect Payout Account Status
         </h2>
       </template>
 

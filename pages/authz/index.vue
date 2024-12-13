@@ -1,6 +1,6 @@
 <template>
   <PageContainer>
-    <PageHeader title=" Send NFT Authz Grants Management Page" />
+    <PageHeader title="NFT Book Authz Grants Management Page" />
 
     <AuthRequiredView>
       <PageBody class="grow space-y-4">

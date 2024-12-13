@@ -21,7 +21,7 @@
       <UCard :ui="{ body: { base: 'space-y-4' } }">
         <template #header>
           <h2 class="font-bold font-mono">
-            Collection Info
+            New Book Collection Info
           </h2>
         </template>
         <UFormGroup label="Books in Collection">

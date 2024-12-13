@@ -20,7 +20,7 @@
     <UCard :ui="{ header: { base: 'flex justify-between items-center gap-4' } }">
       <template #header>
         <h2 class="text-xl font-bold font-mono">
-          NFT Book Collections
+          Liker Land Book Collections
         </h2>
 
         <UButton icon="i-heroicons-plus-circle" label="New Collection" :to="{ name: 'nft-book-store-collection-new' }" />

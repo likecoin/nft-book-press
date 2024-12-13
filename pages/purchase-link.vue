@@ -430,7 +430,7 @@ const isSharingMode = computed({
 })
 
 const pageTitle = computed(() => {
-  return isSharingMode.value ? 'Purchase Links' : 'Purchase Link Generator'
+  return isSharingMode.value ? 'Book Purchase Links' : 'Book Purchase Link Generator'
 })
 
 useSeoMeta({

@@ -72,13 +72,13 @@ const items = [
         exact: true
       },
       {
-        label: 'Manage Book',
+        label: 'Manage Book Listings',
         icon: 'i-heroicons-rectangle-stack',
         to: { name: 'nft-book-store' },
         exact: true
       },
       {
-        label: 'Manage Collection',
+        label: 'Manage Collections',
         icon: 'i-heroicons-rectangle-stack',
         to: { name: 'nft-book-store-collection' },
         exact: true
@@ -89,7 +89,7 @@ const items = [
     label: 'Authors & Affiliates',
     links: [
       {
-        label: 'User Setting',
+        label: 'User Settings',
         icon: 'i-heroicons-user-group',
         to: { name: 'nft-book-store-user' },
         exact: true

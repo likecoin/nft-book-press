@@ -49,7 +49,7 @@
       <UCard :ui="{ body: { padding: '' } }">
         <template #header>
           <h3 class="font-bold font-mono">
-            Status
+            Book Listing Status
           </h3>
         </template>
 
