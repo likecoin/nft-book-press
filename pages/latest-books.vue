@@ -29,38 +29,30 @@
         ?from={{ channelId }}
       </UKbd> in any bookstore page to earn commission from book sales.
     </UCard>
-    <UCard
-      :ui="{
-        header: { base: 'flex justify-between items-center' },
-        body: { padding: '' },
-        footer: { base: 'text-center' },
-      }"
-    >
-      <UTable
-        :columns="tableColumns"
-        :rows="tableRows"
-        @select="selectTableRow"
-      >
-        <template #image-data="{ row }">
-          <img
-            v-if="row.image"
-            :src="row.image"
-            :alt="row.className"
-            class="w-12 h-12 object-cover rounded-lg"
-          >
-        </template>
-        <template #className-data="{ row }">
-          <div class="max-w-[20vw] whitespace-normal" v-text="row.className" />
-        </template>
-        <template #url-data="{ row }">
-          <UButton
-            label="Copy"
-            :disabled="!isAffiliationReady"
-            @click="handleCopyButtonClick($event, row.url)"
-          />
-        </template>
-      </UTable>
-    </UCard>
+    <UTabs v-model="selectedTabItemIndex" class="w-full" :items="tabItems">
+      <template #item="{ item }">
+        <UCard
+          :key="item.key"
+          :ui="{
+            header: { base: 'flex justify-between items-center' },
+            body: { padding: '' },
+            footer: { base: 'text-center' },
+          }"
+        >
+          <UTable :columns="tableColumns" :rows="tableRows" @select="selectTableRow">
+            <template #image-data="{ row }">
+              <img v-if="row.image" :src="row.image" :alt="row.className" class="w-12 h-12 object-cover rounded-lg">
+            </template>
+            <template #className-data="{ row }">
+              <div class="max-w-[20vw] whitespace-normal" v-text="row.className" />
+            </template>
+            <template #url-data="{ row }">
+              <UButton label="Copy" :disabled="!isAffiliationReady" @click="handleCopyButtonClick($event, row.url)" />
+            </template>
+          </UTable>
+        </UCard>
+      </template>
+    </UTabs>
   </PageBody>
 </template>
 
@@ -84,9 +76,16 @@ const { wallet } = storeToRefs(walletStore)
 const { userLikerInfo } = storeToRefs(userStore)
 const { isAuthenticated } = storeToRefs(bookStoreApiStore)
 
+const tabItems = [
+  { label: 'Latest Releases', key: 'latest' },
+  { label: 'Best Sellers', key: 'bestselling' }
+]
+
 const error = ref('')
 const isStripeConnectReady = ref(false)
-const bookList = ref([])
+const latestBookList = ref([])
+const bestSellerBookList = ref([] as any[])
+const selectedTabItemIndex = ref(0)
 
 const channelId = computed(() => {
   if (userLikerInfo.value?.user) {
@@ -124,13 +123,18 @@ const tableColumns = computed(() => [
   }
 ])
 
-const tableRows = computed(() => bookList.value.map((b: any) => ({
-  className: b.name,
-  image: b.thumbnailUrl ? getImageResizeURL(parseImageURLFromMetadata(b.thumbnailUrl), { width: 96 }) : undefined,
-  author: b.author,
-  priceInUSD: `US$${b.prices[0].price}`,
-  url: `${LIKER_LAND_URL}/nft/class/${b.classId}?from=${channelId.value}`
-})))
+const bookList = computed(() => tabItems[selectedTabItemIndex.value].key === 'latest' ? latestBookList.value : bestSellerBookList.value)
+const tableRows = computed(() => bookList.value.map((b: any) => {
+  const className = b.name || b.title
+  const image = b.thumbnailUrl || b.imageUrl
+  return {
+    className,
+    image: image ? getImageResizeURL(parseImageURLFromMetadata(image)) : undefined,
+    author: b.author,
+    priceInUSD: `US$${b.minPrice || b.prices?.[0]?.price || 0}`,
+    url: `${LIKER_LAND_URL}/nft/class/${b.classId}?from=${channelId.value}`
+  }
+}))
 
 useSeoMeta({
   title: 'Latest Books',
@@ -139,7 +143,14 @@ useSeoMeta({
 
 onMounted(() => {
   nextTick(async () => {
-    await fetchBookList()
+    await Promise.all([
+      fetchBookList().catch((e) => {
+        error.value = e
+      }),
+      fetchBestSellersList().catch((e) => {
+        error.value = e
+      })
+    ])
     if (isAuthenticated.value) {
       await fetchUserStripeInfo()
     }
@@ -151,7 +162,15 @@ async function fetchBookList () {
   if (error.value) {
     throw error.value
   }
-  bookList.value = (data.value as any)?.list || []
+  latestBookList.value = (data.value as any)?.list || []
+}
+
+async function fetchBestSellersList () {
+  const { data, error } = await useFetch(`${LIKER_LAND_URL}/api/bookstore/products?tag=bestselling`)
+  if (error.value) {
+    throw error.value
+  }
+  bestSellerBookList.value = (data.value as any)?.records || []
 }
 
 async function fetchUserStripeInfo () {
