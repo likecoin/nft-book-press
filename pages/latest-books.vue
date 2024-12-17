@@ -164,15 +164,18 @@ async function fetchUserStripeInfo () {
 }
 
 function handleAffiliationSetupButtonClick () {
+  useTrackEvent('latest_books_click_affiliation_setup')
   router.push({ name: 'nft-book-store-user' })
 }
 
 function selectTableRow (row: any) {
+  useTrackEvent('latest_books_click_table_row')
   window.open(row.url, '_blank')
 }
 
 function handleCopyButtonClick (e: MouseEvent, text: string) {
   e.stopPropagation()
+  useTrackEvent('latest_books_click_copy_button')
   copyToClipboard(text)
 }
 

@@ -523,10 +523,12 @@ const validate = (state: any): FormError[] => {
 }
 
 function onClickHelpEn () {
+  useTrackEvent('mint_nft_click_help_en')
   window.open('https://docs.like.co/depub/nft-book-press', '_blank')
 }
 
 function onClickHelpZh () {
+  useTrackEvent('mint_nft_click_help_zh')
   window.open('https://docs.like.co/zh/depub/nft-book-press', '_blank')
 }
 

@@ -16,6 +16,7 @@
               size="xl"
               :to="link.to"
               color="white"
+              @click="link.click"
             />
           </li>
         </ul>
@@ -47,7 +48,8 @@ const props = defineProps({
 
 const emit = defineEmits(['click-link'])
 
-function handleLinkClick () {
+function handleLinkClick ({ label }: { label?: string }) {
+  useTrackEvent(`click-link_${label}`)
   emit('click-link')
 }
 
@@ -166,7 +168,7 @@ const items = [
   ...item,
   links: item.links.map(link => ({
     ...link,
-    click: handleLinkClick
+    click: handleLinkClick({ label: link.label })
   }))
 }))
 </script>

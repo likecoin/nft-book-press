@@ -105,6 +105,9 @@ export const useWalletStore = defineStore('wallet', () => {
     if (!connection) { return }
     accounts.value = connection.accounts
     signer.value = connection.offlineSigner as (OfflineAminoSigner & OfflineDirectSigner)
+    useTrackEvent('login', {
+      method: connection.method
+    })
   }
 
   async function handleConnectorRedirect (
