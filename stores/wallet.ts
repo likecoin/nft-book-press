@@ -105,9 +105,13 @@ export const useWalletStore = defineStore('wallet', () => {
     if (!connection) { return }
     accounts.value = connection.accounts
     signer.value = connection.offlineSigner as (OfflineAminoSigner & OfflineDirectSigner)
-    useTrackEvent('login', {
-      method: connection.method
-    })
+    const method = connection.method
+    useTrackEvent('login', { method })
+    if (window.$crisp) {
+      const wallet = accounts.value[0]?.address
+      window.$crisp.push(['set', 'session:data', [[['like_wallet', wallet]]]])
+      window.$crisp.push(['set', 'session:data', [[['login_method', method]]]])
+    }
   }
 
   async function handleConnectorRedirect (
