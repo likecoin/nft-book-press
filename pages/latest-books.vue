@@ -123,7 +123,8 @@ const tableColumns = computed(() => [
   }
 ])
 
-const bookList = computed(() => tabItems[selectedTabItemIndex.value].key === 'latest' ? latestBookList.value : bestSellerBookList.value)
+const selectedTabItemKey = computed(() => tabItems[selectedTabItemIndex.value].key)
+const bookList = computed(() => selectedTabItemKey.value === 'latest' ? latestBookList.value : bestSellerBookList.value)
 const tableRows = computed(() => bookList.value.map((b: any) => {
   const className = b.name || b.title
   const image = b.thumbnailUrl || b.imageUrl
@@ -132,7 +133,7 @@ const tableRows = computed(() => bookList.value.map((b: any) => {
     image: image ? getImageResizeURL(parseImageURLFromMetadata(image)) : undefined,
     author: b.author,
     priceInUSD: `US$${b.minPrice || b.prices?.[0]?.price || 0}`,
-    url: `${LIKER_LAND_URL}/nft/class/${b.classId}?from=${channelId.value}`
+    url: `${LIKER_LAND_URL}/nft/class/${b.classId}?from=${channelId.value}&utm_source=bookpress&utm_medium=list_${selectedTabItemKey.value}`
   }
 }))
 
