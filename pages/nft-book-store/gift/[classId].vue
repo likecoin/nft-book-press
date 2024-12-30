@@ -184,9 +184,7 @@ function downloadTemplateCSV () {
   )
 }
 
-function onReceiverFileChange (event: Event) {
-  if (!event?.target) { return }
-  const files = (event.target as HTMLInputElement)?.files
+function onReceiverFileChange (files: FileList) {
   if (!files) { return }
   const [file] = files
   const reader = new FileReader()

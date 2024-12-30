@@ -208,16 +208,8 @@ async function drawQRCodes () {
   })
 }
 
-function handleFileChange (event: Event) {
-  if (!event?.target) {
-    return
-  }
-
-  const files = (event.target as HTMLInputElement)?.files
-  if (!files) {
-    return
-  }
-
+function handleFileChange (files: FileList) {
+  if (!files) { return }
   const [file] = files
   const reader = new FileReader()
   reader.onload = (e) => {
