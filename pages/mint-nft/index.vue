@@ -588,9 +588,7 @@ async function onISCNFileInput () {
   }
 }
 
-function onISCNFileChange (event: Event) {
-  if (!event?.target) { return }
-  const files = (event.target as HTMLInputElement)?.files
+function onISCNFileChange (files: FileList) {
   if (!files) { return }
   const [file] = files
   const reader = new FileReader()
@@ -732,9 +730,7 @@ async function onClassFileInput () {
   }
 }
 
-function onClassFileChange (event: Event) {
-  if (!event?.target) { return }
-  const files = (event.target as HTMLInputElement)?.files
+function onClassFileChange (files: FileList) {
   if (!files) { return }
   const [file] = files
   const reader = new FileReader()
@@ -813,9 +809,7 @@ async function onMintNFTStart () {
   }
 }
 
-function onMintNFTDefaultFileChange (event: Event) {
-  if (!event?.target) { return }
-  const files = (event.target as HTMLInputElement)?.files
+function onMintNFTDefaultFileChange (files: FileList) {
   if (!files) { return }
   const [file] = files
   const reader = new FileReader()
@@ -834,9 +828,7 @@ function onMintNFTDefaultFileChange (event: Event) {
   reader.readAsText(file)
 }
 
-function onMintNFTFileChange (event: Event) {
-  if (!event?.target) { return }
-  const files = (event.target as HTMLInputElement)?.files
+function onMintNFTFileChange (files: FileList) {
   if (!files) { return }
   const [file] = files
   const reader = new FileReader()
