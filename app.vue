@@ -112,7 +112,6 @@ onMounted(async () => {
         title: 'text-red-400 dark:text-red-400'
       }
     })
-    disconnect()
     clearSession()
   }
 

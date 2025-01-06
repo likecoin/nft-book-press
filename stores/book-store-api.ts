@@ -32,7 +32,7 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
     clearAuthSession()
   }
 
-  async function restoreAuthSession () {
+  function restoreAuthSession () {
     try {
       isRestoringSession.value = true
       const session = loadAuthSession()
@@ -46,10 +46,6 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
 
       token.value = sessionToken
       sessionWallet.value = wallet
-
-      if (wallet) {
-        await walletStore.restoreSession()
-      }
     } finally {
       isRestoringSession.value = false
     }
