@@ -720,6 +720,7 @@ const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
+const connectedWallets = ref<any>({})
 const mustClaimToView = ref(true)
 const hideDownload = ref(false)
 const enableCustomMessagePage = ref(true)
@@ -1061,6 +1062,7 @@ onMounted(async () => {
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
     isStripeConnectChecked.value = !!(classConnectedWallets && Object.keys(classConnectedWallets).length)
+    connectedWallets.value = classConnectedWallets
 
     const classStripeWallet = classConnectedWallets && Object.keys(classConnectedWallets)[0]
     if (classStripeWallet) {
@@ -1182,12 +1184,13 @@ function addNotificationEmail () {
 }
 
 async function handleSaveStripeConnectWallet (wallet: any) {
+  connectedWallets.value = {
+    [wallet]: 100
+  }
   stripeConnectWallet.value = wallet
   try {
     await updateBookListingSetting(classId.value as string, {
-      connectedWallets: {
-        [stripeConnectWallet.value]: 100
-      }
+      connectedWallets: connectedWallets.value
     })
   } catch (err) {
     const errorData = (err as any).data || err
@@ -1207,15 +1210,13 @@ async function updateSettings () {
     }
     isLoading.value = true
 
-    const connectedWallets = (isStripeConnectChecked.value && stripeConnectWallet.value)
-      ? {
-          [stripeConnectWallet.value]: 100
-        }
+    const newConnectedWallets = (isStripeConnectChecked.value && stripeConnectWallet.value)
+      ? connectedWallets.value
       : null
     await updateBookListingSetting(classId.value as string, {
       moderatorWallets,
       notificationEmails,
-      connectedWallets,
+      connectedWallets: newConnectedWallets,
       hideDownload,
       mustClaimToView,
       tableOfContents,
