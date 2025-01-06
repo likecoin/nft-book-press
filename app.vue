@@ -42,16 +42,13 @@ import { storeToRefs } from 'pinia'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useCollectionStore } from '~/stores/collection'
 import { useUIStore } from '~/stores/ui'
-import { useWalletStore } from '~/stores/wallet'
 
-const walletStore = useWalletStore()
 const { SITE_URL } = useRuntimeConfig().public
 const bookStoreApiStore = useBookStoreApiStore()
 const collectionStore = useCollectionStore()
 
 const { restoreAuthSession, fetchBookListing, clearSession } = bookStoreApiStore
 const { listNFTBookCollections } = collectionStore
-const { disconnect } = walletStore
 const { isRestoringSession, isAuthenticated } = storeToRefs(bookStoreApiStore)
 const uiStore = useUIStore()
 const toast = useToast()
@@ -113,7 +110,6 @@ onMounted(async () => {
         title: 'text-red-400 dark:text-red-400'
       }
     })
-    disconnect()
     clearSession()
   }
 

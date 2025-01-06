@@ -8,25 +8,24 @@ export function useAuth () {
   const bookStoreApiStore = useBookStoreApiStore()
   const collectionStore = useCollectionStore()
   const store = useWalletStore()
-  const { wallet, signer } = storeToRefs(store)
-  const { disconnect, signMessageMemo, openConnectWalletModal, initWallet } = store
+  const { wallet, signer, isConnected } = storeToRefs(store)
+  const { connect, disconnect, signMessageMemo } = store
   const { authenticate, clearSession, fetchBookListing } = bookStoreApiStore
   const { listNFTBookCollections } = collectionStore
   const toast = useToast()
 
   const isAuthenticating = ref(false)
 
-  async function onAuthenticate () {
+  const onAuthenticate = async () => {
     try {
       isAuthenticating.value = true
       setupPostAuthRedirect()
 
       if (!wallet.value || !signer.value) {
-        const connection = await openConnectWalletModal()
-        if (!connection) {
-          throw new Error('WALLET_NOT_INITED')
-        }
-        await initWallet(connection)
+        await connect()
+      }
+      if (!wallet.value || !signer.value) {
+        return
       }
 
       const signature = await signMessageMemo(
@@ -49,8 +48,10 @@ export function useAuth () {
         console.error(err)
       }
     } catch (err) {
-      disconnect()
       clearSession()
+      if (isConnected.value) {
+        await disconnect()
+      }
       // eslint-disable-next-line no-console
       console.error(err)
       toast.add({

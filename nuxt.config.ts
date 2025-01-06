@@ -2,8 +2,6 @@ import path from 'path'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { replaceCodePlugin } from 'vite-plugin-replace'
 
-const LikeCoinWalletConnectorCSSPath = '@likecoin/wallet-connector/dist/style.css'
-
 const {
   SENTRY_ORG,
   SENTRY_PROJECT,
@@ -14,7 +12,6 @@ const {
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   css: [
-    LikeCoinWalletConnectorCSSPath,
     '@/assets/styles/global.css'
   ],
 
@@ -165,7 +162,6 @@ exports.randomFillSync = randomFillSync`
   },
 
   tailwindcss: {
-    injectPosition: { after: LikeCoinWalletConnectorCSSPath },
     cssPath: '~/assets/css/tailwind.css'
   },
 
