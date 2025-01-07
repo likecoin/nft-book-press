@@ -55,7 +55,6 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
     const data = await $fetch(`${LIKE_CO_API}/wallet/authorize`, {
       method: 'POST',
       body: {
-        expiresIn: '7d',
         ...signature
       }
     })

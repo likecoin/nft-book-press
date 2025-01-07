@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import stringify from 'fast-json-stable-stringify'
 import { useAccount, useConnect, useDisconnect, useSignMessage } from '@wagmi/vue'
 import { optimism, optimismSepolia } from '@wagmi/vue/chains'
 
@@ -32,20 +31,19 @@ export const useWalletStore = defineStore('wallet', () => {
       throw new Error('WALLET_NOT_INITED')
     }
     const ts = Date.now()
-    console.log(wallet.value)
     const payload = JSON.stringify({
       action,
       permissions,
-      likeWallet: wallet.value,
+      evmWallet: wallet.value,
       ts
     })
     const signed = await signMessageAsync({ message: payload })
     return {
       signature: signed,
-      message: stringify(signed),
+      message: payload,
       wallet: wallet.value,
-      signMethod: 'hex',
-      expiresIn: '1d'
+      signMethod: 'personal_sign',
+      expiresIn: '7d'
     }
   }
 
