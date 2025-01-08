@@ -444,6 +444,7 @@
 </template>
 
 <script setup lang="ts">
+import { useWriteContract } from '@wagmi/vue'
 import { storeToRefs } from 'pinia'
 import { v4 as uuidv4 } from 'uuid'
 import { parse } from 'csv-parse/sync'
@@ -453,10 +454,14 @@ import type { FormError } from '#ui/types'
 import { useWalletStore } from '~/stores/wallet'
 import { downloadFile, convertArrayOfObjectsToCSV, sleep } from '~/utils'
 import { NFT_DEFAULT_MINT_AMOUNT, PUBLISHING_NOTICE_URL_EN, PUBLISHING_NOTICE_URL_ZH } from '~/constant'
+import { LIKE_NFT_ABI, LIKE_NFT_CONTRACT_ADDRESS } from '~/contracts/likeNFT'
+import { waitForTransactionReceipt } from '@wagmi/vue/actions'
+import { config } from '~/utils/wagmi/config'
 
 const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } = useRuntimeConfig().public
 const router = useRouter()
 const route = useRoute()
+const { writeContractAsync, data: hash } = useWriteContract()
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
@@ -492,7 +497,7 @@ const nftCSVData = ref('')
 const existingNftCount = ref(0)
 
 const iscnId = computed(() => iscnData.value?.['@id'])
-const classId = computed(() => classData.value?.id)
+const classId = ref('')
 const isCreatingClass = computed(() => !classId.value && step.value === 2)
 // HACK: set max supply to 50 to avoid authcore max int issue
 const mintMaxCount = computed(() => Math.min(classMaxSupply.value || NFT_DEFAULT_MINT_AMOUNT))
@@ -672,17 +677,20 @@ async function onClickMintByInputting () {
     description: contentMetadata.description,
     symbol: 'BOOK',
     uri: uri.value || '',
+    uri_hash: '',
     metadata: {
       name: contentMetadata.name,
       image: imageUrl.value,
       external_url: externalUrl.value,
       nft_meta_collection_id: 'nft_book',
       nft_meta_collection_name: 'NFT Book',
-      nft_meta_collection_description: 'NFT Book by Liker Land'
+      nft_meta_collection_description: 'NFT Book by Liker Land',
+      recordTimestamp: new Date().toISOString()
     }
   }
   const nftsDefaultData = {
     uri: uri.value || '',
+    uri_hash: '',
     metadata: {
       name: contentMetadata.name,
       image: imageUrl.value,
@@ -748,11 +756,46 @@ async function onClassFileInput () {
     }
     if (!wallet.value || !signer.value) { return }
     if (!classCreateData.value) { throw new Error('NO_CLASS_DATA') }
-    const newClassId = await signCreateNFTClass(classCreateData.value, iscnId.value, signer.value, wallet.value, { nftMaxSupply: classMaxSupply.value })
-    await signCreateRoyltyConfig(newClassId, iscnData.value, iscnOwner.value, false, signer.value, wallet.value)
-    const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${encodeURIComponent(newClassId)}`)
-    if (!data) { throw new Error('INVALID_NFT_CLASS_ID') }
-    classData.value = (data as any).class
+    classId.value = uuidv4()
+    const {
+      name,
+      symbol,
+      description,
+      uri,
+      uri_hash: uriHash,
+      ...metadata
+    } = classCreateData.value
+    const res = await writeContractAsync({
+      address: LIKE_NFT_CONTRACT_ADDRESS,
+      abi: LIKE_NFT_ABI,
+      functionName: 'newClass',
+      args: [{
+        creator: wallet.value,
+        parent: {
+          type_: 1,
+          iscn_id_prefix: iscnId
+        },
+        input: {
+          name,
+          symbol,
+          description,
+          uri,
+          uri_hash: uriHash,
+          metadata: JSON.stringify(metadata),
+          config: {
+            burnable: true,
+            max_supply: classMaxSupply.value || 0,
+            blind_box_config: {
+              mint_periods: [],
+              reveal_time: 0
+            }
+          }
+        }
+      }, classId.value]
+    })
+    const receipt = await waitForTransactionReceipt(config, { hash: res })
+    console.log(receipt)
+    if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
     step.value = 3
   } catch (err) {
     console.error(err)
@@ -796,7 +839,6 @@ async function onMintNFTStart () {
     const defaultMetadata = nftMintDefaultData.value.metadata
     const nfts = [...Array(nftMintCount.value).keys()].map((i) => {
       const {
-        nftId,
         uri: dataUri,
         image: dataImage,
         metadata: dataMetadataString,
@@ -814,24 +856,48 @@ async function onMintNFTStart () {
           }
         }
       })
-      const id = nftId || `nft-${uuidv4()}`
       let uri = dataUri || defaultURI || ''
       const isUriHttp = uri && uri.startsWith('https://')
       if (isUriHttp) { uri = addParamToUrl(uri, { class_id: classId.value, nft_id: id }) }
       return {
-        id,
         uri,
         metadata: data
       }
     })
+    for (let i = 0; i < nfts.length; i++) {
+      const nft = nfts[i]
+      const res = await writeContractAsync({
+        address: LIKE_NFT_CONTRACT_ADDRESS,
+        abi: LIKE_NFT_ABI,
+        functionName: 'mintNFT',
+        args: [{
+          creator: wallet.value,
+          class_id: classId.value,
+          input: {
+            uri: nft.uri,
+            uri_hash: '',
+            metadata: JSON.stringify({
+              image: nft.metadata.image,
+              image_data: '',
+              external_url: nft.metadata.external_url || '',
+              description: nft.metadata.description || '',
+              name: nft.metadata.name || '',
+              attributes: [],
+              background_color: '',
+              animation_url: '',
+              youtube_url: ''
+            })
+          }
+        }]
+      })
+      const receipt = await waitForTransactionReceipt(config, { hash: res })
+      console.log(receipt)
+      if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
+      if (receipt.logs[0].topics[3] === undefined) { throw new Error('INVALID_NFT_ID') }
+      const nftId = hexToNumber(receipt.logs[0].topics[3])
+      nfts[i].id = nftId
+    }
     nftCSVData.value = stringify(nfts, { header: true })
-    const res = await signMintNFT(
-      nfts,
-      classId.value,
-      signer.value,
-      wallet.value
-    )
-    nftData.value = res
     step.value = 4
   } catch (err) {
     console.error(err)
