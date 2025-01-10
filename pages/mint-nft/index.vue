@@ -134,7 +134,7 @@
           </h2>
         </template>
 
-        <UFormGroup label="ISCN ID">
+        <UFormGroup v-if="iscnId" label="ISCN ID">
           <UButton
             class="font-mono"
             :label="iscnId"
@@ -145,10 +145,30 @@
           />
         </UFormGroup>
 
-        <UFormGroup label="ISCN Title">
+        <UFormGroup label="Owner">
+          <UButton
+            :label="iscnOwner"
+            :to="`${likerLandURL}/${encodeURIComponent(iscnOwner)}`"
+            target="_blank"
+            variant="link"
+            :padded="false"
+          />
+        </UFormGroup>
+
+        <UFormGroup label="Title">
           <UInput
+            v-model="className"
             :value="iscnData?.contentMetadata?.name"
-            :readonly="true"
+            :readonly="isCreatingClass"
+            variant="none"
+            :padded="false"
+          />
+        </UFormGroup>
+        <UFormGroup label="Description">
+          <UInput
+            v-model="classDescription"
+            :value="iscnData?.contentMetadata?.description"
+            :readonly="isCreatingClass"
             variant="none"
             :padded="false"
           />
@@ -355,6 +375,15 @@
           <h3>NFT Class Information</h3>
         </template>
 
+        <UFormGroup label="NFT Class Contract Address">
+          <UButton
+            :label="contractAddress"
+            :to="`${likerLandURL}/nft/class/${encodeURIComponent(classId)}`"
+            target="_blank"
+            variant="link"
+            :padded="false"
+          />
+        </UFormGroup>
         <UFormGroup label="NFT Class ID">
           <UButton
             :label="classId"
@@ -439,14 +468,14 @@ import { storeToRefs } from 'pinia'
 import { v4 as uuidv4 } from 'uuid'
 import { parse } from 'csv-parse/sync'
 import { stringify } from 'csv-stringify/sync'
-import { waitForTransactionReceipt } from '@wagmi/vue/actions'
+import { waitForTransactionReceipt, readContract } from '@wagmi/vue/actions'
 import { hexToNumber } from 'viem'
 import type { FormError } from '#ui/types'
 
 import { useWalletStore } from '~/stores/wallet'
 import { downloadFile, convertArrayOfObjectsToCSV } from '~/utils'
 import { NFT_DEFAULT_MINT_AMOUNT, PUBLISHING_NOTICE_URL_EN, PUBLISHING_NOTICE_URL_ZH } from '~/constant'
-import { LIKE_NFT_ABI, LIKE_NFT_CONTRACT_ADDRESS } from '~/contracts/likeNFT'
+import { LIKE_NFT_ABI, LIKE_NFT_CLASS_ABI, LIKE_NFT_CONTRACT_ADDRESS } from '~/contracts/likeNFT'
 import { config } from '~/utils/wagmi/config'
 
 const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } = useRuntimeConfig().public
@@ -465,6 +494,7 @@ const error = ref('')
 const isLoading = ref(false)
 
 const iscnIdInput = ref('')
+const iscnOwner = ref('')
 
 const iscnCreateData = ref<any>(null)
 const iscnData = ref<any>(null)
@@ -486,7 +516,10 @@ const nftCSVData = ref('')
 
 const iscnId = computed(() => iscnData.value?.['@id'])
 const classId = ref('')
-const isCreatingClass = computed(() => !classId.value && step.value === 2)
+const contractAddress = ref('')
+const isCreatingClass = computed(() => !contractAddress.value && step.value === 2)
+const className = ref('')
+const classDescription = ref('')
 // HACK: set max supply to 50 to avoid authcore max int issue
 const mintMaxCount = computed(() => Math.min(classMaxSupply.value || NFT_DEFAULT_MINT_AMOUNT))
 
@@ -501,6 +534,12 @@ watch(iscnId, (newIscnId) => {
 watch(classId, (newClassId) => {
   if (newClassId) {
     router.replace({ query: { ...route.query, class_id: newClassId } })
+  }
+})
+
+watch(contractAddress, (newContractAddress) => {
+  if (newContractAddress) {
+    router.replace({ query: { ...route.query, contract_address: newContractAddress } })
   }
 })
 
@@ -521,7 +560,8 @@ useSeoMeta({
 
 onMounted(() => {
   // HACK: mitigate disable state stuck issue when iscnIdInput is inited as qs in data
-  iscnIdInput.value = route.query.class_id as string || route.query.iscn_id as string || ''
+  iscnIdInput.value = route.query.contract_address as string || route.query.iscn_id as string || ''
+  classId.value = route.query.class_id as string || ''
 })
 
 const validate = (state: any): FormError[] => {
@@ -561,11 +601,37 @@ async function onISCNIDInput () {
     isLoading.value = true
     if (iscnIdInput.value.startsWith('iscn://')) {
       const data = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(iscnIdInput.value)}`)
-      const { records } = data as any
+      const { records, owner } = data as any
       iscnData.value = records[0].data
+      iscnOwner.value = owner
       step.value = 2
-    } else if (iscnIdInput.value.startsWith('likenft')) {
-      classId.value = iscnIdInput.value
+    } else if (iscnIdInput.value.startsWith('0x')) {
+      const [dataString, tokenId, owner] = await Promise.all([
+        readContract(config, {
+          abi: LIKE_NFT_CLASS_ABI,
+          address: iscnIdInput.value as any,
+          functionName: 'contractURI'
+        }),
+        readContract(config, {
+          abi: LIKE_NFT_CLASS_ABI,
+          address: iscnIdInput.value as any,
+          functionName: 'tokenId'
+        }),
+        readContract(config, {
+          abi: LIKE_NFT_CLASS_ABI,
+          address: iscnIdInput.value as any,
+          functionName: 'owner'
+        })
+      ])
+      console.log(dataString)
+      if (!(dataString as string)?.startsWith('data:application/json')) {
+        throw new Error('Invalid NFT Class ID')
+      }
+      const data = JSON.parse((dataString as string).replace('data:application/json;utf8,', ''))
+      if (!data?.metadata) { throw new Error('Invalid NFT Class ID') }
+      iscnData.value = { '@id': tokenId, contentMetadata: data.metadata }
+      iscnOwner.value = owner as string
+      contractAddress.value = iscnIdInput.value
       step.value = 3
     } else {
       throw new Error('Invalid ISCN ID or NFT Class ID')
@@ -716,7 +782,6 @@ async function onClassFileInput () {
     }
     if (!wallet.value || !signer.value) { return }
     if (!classCreateData.value) { throw new Error('NO_CLASS_DATA') }
-    classId.value = uuidv4()
     const {
       name,
       symbol,
@@ -725,6 +790,7 @@ async function onClassFileInput () {
       uri_hash: uriHash,
       ...metadata
     } = classCreateData.value
+    classId.value = uuidv4()
     const res = await writeContractAsync({
       address: LIKE_NFT_CONTRACT_ADDRESS,
       abi: LIKE_NFT_ABI,
@@ -756,6 +822,7 @@ async function onClassFileInput () {
     const receipt = await waitForTransactionReceipt(config, { hash: res })
     console.log(receipt)
     if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
+    contractAddress.value = receipt.logs[0].address
     step.value = 3
   } catch (err) {
     console.error(err)
