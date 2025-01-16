@@ -818,7 +818,10 @@ async function hardSetStatusToCompleted (purchase: any) {
   const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/sent/${purchase.id}`,
     {
       method: 'POST',
-      body: { txHash: null },
+      body: {
+        txHash: null,
+        quantity: purchase.quantity || 1
+      },
       headers: {
         authorization: `Bearer ${token.value}`
       }
