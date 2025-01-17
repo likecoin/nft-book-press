@@ -880,6 +880,16 @@ function getOrdersTableActionItems (purchaseListItem: any) {
     }])
   }
 
+  if (purchaseListItem.status === 'paid') {
+    actionItems.push([{
+      label: 'Send Reminder Email',
+      icon: 'i-heroicons-envelope',
+      click: () => {
+        sendReminderEmail(purchaseListItem)
+      }
+    }])
+  }
+
   if (['pendingNFT', 'paid'].includes(purchaseListItem.status)) {
     actionItems.push([{
       label: 'Mark Complete',
@@ -1138,6 +1148,32 @@ async function handlePriceReorder ({
   } finally {
     isUpdatingPricesOrder.value = false
   }
+}
+
+async function sendReminderEmail (purchase: any) {
+  const orderData = ordersData.value?.orders?.find((p: any) => p.id === purchase.id)
+  if (!orderData) {
+    throw new Error('ORDER_NOT_FOUND')
+  }
+
+  const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/status/${purchase.id}/remind`,
+    {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${token.value}`
+      }
+    })
+
+  if (fetchError.value) {
+    throw fetchError.value
+  }
+
+  toast.add({
+    icon: 'i-heroicons-check-circle',
+    title: 'Reminder email sent',
+    timeout: 2000,
+    color: 'green'
+  })
 }
 
 async function hardSetStatusToCompleted (purchase: any) {
