@@ -282,12 +282,12 @@
                   Mint NFT by filling required information
                 </h3>
               </template>
-              <UForm :validate="validate" :state="state">
-                <UFormGroup label="NFT ID Prefix:" name="prefix" required>
+              <UForm :validate="validate" :state="state" class="flex flex-col gap-[12px]">
+                <UFormGroup label="NFT ID Prefix / 前綴（書本編號）" name="prefix" required>
                   <UInput v-model="state.nftIdPrefix" placeholder="English only ex.MoneyVerse" />
                 </UFormGroup>
 
-                <UFormGroup label="Number of NFT to mint:" required>
+                <UFormGroup label="Number of NFT to mint / 鑄造數量（此批）" required>
                   <UInput
                     v-model="nftMintCount"
                     placeholder="0-100"
@@ -297,19 +297,19 @@
                   />
                 </UFormGroup>
 
-                <UFormGroup label="Image URL:" required>
+                <UFormGroup label="Image URL / 封面網址" required>
                   <UInput v-model="imageUrl" placeholder="ipfs:// ... or ar://...." />
                 </UFormGroup>
 
-                <UFormGroup label="External URL (optional):">
+                <UFormGroup label="External URL (optional) / 外部網址（選填）">
                   <UInput v-model="externalUrl" placeholder="https://" />
                 </UFormGroup>
 
-                <UFormGroup label="URI (optional):">
+                <UFormGroup label="URI (optional) / 資料網址（選填）">
                   <UInput v-model="uri" placeholder="https://" />
                 </UFormGroup>
 
-                <UFormGroup v-if="isCreatingClass" label="Max number of supply for this NFT Class (optional):">
+                <UFormGroup v-if="isCreatingClass" label="Max number of supply for this NFT Class (optional) / 最大供應量（選填）">
                   <template
                     v-if="classMaxSupply && classMaxSupply < nftMintCount"
                     #help
@@ -405,11 +405,14 @@
             target="_blank"
             :to="`${likerLandURL}/nft/class/${encodeURIComponent(classId)}`"
           />
-          <UButton
-            :to="{ name: 'nft-book-store-new', query: { class_id: classId, count: nftMintCount } }"
-            label="Continue to publish NFT Book"
-            variant="solid"
-          />
+          <div class="p-[4px] border-[2px] border-[#f59e0b] rounded-[0.375rem]">
+            <UButton
+              :to="{ name: 'nft-book-store-new', query: { class_id: classId, count: nftMintCount } }"
+              label="Continue to publish NFT Book / 上架價格設定"
+              variant="solid"
+              color="orange"
+            />
+          </div>
         </template>
       </UCard>
 

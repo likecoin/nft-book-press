@@ -39,7 +39,7 @@
           <UInput v-else :value="classId" :readonly="true" />
         </UFormGroup>
 
-        <UFormGroup label="Table Of Content">
+        <UFormGroup label="Table Of Content / 章節目錄">
           <UTextarea v-model="tableOfContents" />
         </UFormGroup>
       </UCard>
@@ -73,7 +73,7 @@
                 </h3>
               </template>
               <UFormGroup
-                :label="`Unit Price in USD (Minimum ${MINIMAL_PRICE}, or 0 for free)`"
+                :label="`Unit Price in USD (Minimum ${MINIMAL_PRICE}, or 0 for free) / 版本定價（美金）`"
               >
                 <UInput
                   :value="p.price"
@@ -84,25 +84,26 @@
                 />
               </UFormGroup>
               <UFormGroup
-                :label="`Total number of NFT ${hasMultiplePrices ? 'edition' : 'ebook'} for sale`"
+                :label="`Total number of NFT ${hasMultiplePrices ? 'edition' : 'ebook'} for sale / 此定價的銷售數量`"
               >
                 <UInput
                   :value="p.stock"
                   type="number"
                   step="1"
                   :min="0"
+                  :max="Number(route.query.count) || undefined"
                   @input="(e) => updatePrice(e, 'stock', index)"
                 />
               </UFormGroup>
               <URadioGroup
                 v-model="p.deliveryMethod"
                 :disabled="p.isPhysicalOnly"
-                :legend="`Delivery method of this ${priceItemLabel}`"
+                :legend="`Delivery method of this ${priceItemLabel} / 自動或手動發書`"
                 :options="deliverMethodOptions"
               />
               <UFormGroup v-if="p.deliveryMethod === 'auto'">
                 <template #label>
-                  {{ `Memo of this ${priceItemLabel}` }}
+                  {{ `Memo of this ${priceItemLabel} / 自動發書留言` }}
                   <ToolTips>
                     <template #image>
                       <img
@@ -121,7 +122,7 @@
               </UFormGroup>
               <UFormGroup
                 v-else
-                label="Is Physical only good"
+                label="Is Physical only good / 是否為實體書"
               >
                 <UCheckbox
                   v-model="p.isPhysicalOnly"
@@ -132,7 +133,7 @@
 
               <UFormGroup>
                 <template #label>
-                  Allow custom price
+                  Allow custom price / 開啟打賞功能
                   <ToolTips :image-style="{ width: '300px' }">
                     <template #image>
                       <img
@@ -150,7 +151,7 @@
                   label="Allow user to pay more than defined price"
                 />
               </UFormGroup>
-              <UFormGroup label="Unlist Edition">
+              <UFormGroup label="Unlist Edition / 暫時下架">
                 <UCheckbox
                   v-model="p.isUnlisted"
                   name="isUnlisted"
@@ -174,7 +175,7 @@
               </template>
               <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
                 <template #label>
-                  Product Name
+                  Product Name  / 產品名稱（英文）
                   <ToolTips :image-style="{ width: '250px' }">
                     <template #image>
                       <img
@@ -191,7 +192,7 @@
                   :value="p.nameEn"
                   @input="(e) => updatePrice(e, 'nameEn', index)"
                 />
-                <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional)</span>
+                <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional) / 描述 （選填）</span>
                 <md-editor
                   v-model="p.descriptionEn"
                   language="en-US"
@@ -204,7 +205,7 @@
               </UFormGroup>
               <UFormGroup :ui="{ container: 'space-y-2 my-[20px]' }">
                 <template #label>
-                  產品名稱
+                  產品名稱 （中文）
                   <ToolTips :image-style="{ width: '250px' }">
                     <template #image>
                       <img
@@ -280,7 +281,7 @@
       >
         <template #header>
           <h4 class="text-sm font-bold font-mono">
-            Email to receive sales notifications
+            Email to receive sales notifications / 欲收到銷售通知的 email
           </h4>
 
           <div class="flex gap-2">
@@ -372,7 +373,7 @@
             >
               <template #header>
                 <h4 class="text-sm font-bold font-mono">
-                  Share sales data to wallets
+                  Share sales data to wallets / 分享銷售數據給特定地址
                 </h4>
                 <div class="flex gap-2">
                   <UInput
@@ -428,7 +429,7 @@
             <UCard :ui="{ body: { base: 'space-y-8' } }">
               <template #header>
                 <h3 class="font-bold font-mono">
-                  DRM Options
+                  DRM Options / 數位版權管理選項
                 </h3>
               </template>
 

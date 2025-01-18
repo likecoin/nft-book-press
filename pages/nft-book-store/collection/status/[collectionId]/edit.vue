@@ -63,23 +63,23 @@
               Pricing and Availability
             </h3>
           </template>
-          <UFormGroup :label="`Price(USD) of this collection (Minimal ${MINIMAL_PRICE} or $0 (free))`">
+          <UFormGroup :label="`Price(USD) of this collection (Minimal ${MINIMAL_PRICE} or $0 (free)) / 版本定價（美金）`">
             <UInput v-model="price" type="number" step="0.01" :min="MINIMAL_PRICE" />
           </UFormGroup>
-          <UFormGroup :label="`Total number of NFT for sale of this collection`">
+          <UFormGroup :label="`Total number of NFT for sale of this collection / 此定價上架的數量`">
             <UInput v-model="stock" type="number" step="1" :min="minStock" />
           </UFormGroup>
 
           <URadioGroup
             v-model="deliveryMethod"
             :disabled="oldIsAutoDeliver || isPhysicalOnly"
-            legend="Delivery method of this collection"
+            legend="Delivery method of this collection / 自動或手動發書"
             :options="deliverMethodOptions"
           />
 
           <UFormGroup v-if="isAutoDeliver">
             <template #label>
-              Memo of this collection
+              Memo of this collection / 自動發書留言
               <ToolTips>
                 <template #image>
                   <img
@@ -97,7 +97,7 @@
           </UFormGroup>
           <UFormGroup
             v-else
-            label="Is Physical only good"
+            label="Is Physical only good / 是否為實體書"
             :ui="{ label: { base: 'font-mono font-bold' } }"
           >
             <UCheckbox
@@ -108,7 +108,7 @@
           </UFormGroup>
           <UFormGroup>
             <template #label>
-              Allow custom price
+              Allow custom price / 開啟打賞功能
               <ToolTips :image-style="{ width: '300px' }">
                 <template #image>
                   <img
@@ -126,7 +126,7 @@
               label="Allow user to pay more than defined price"
             />
           </UFormGroup>
-          <UFormGroup label="Unlist Edition">
+          <UFormGroup label="Unlist Edition / 暫時下架">
             <UCheckbox
               v-model="isUnlisted"
               name="isUnlisted"
@@ -151,7 +151,7 @@
           </template>
           <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
             <template #label>
-              Product Name
+              Product Name / 產品名稱（英文）
               <ToolTips :image-style="{ width: '250px' }">
                 <template #image>
                   <img
@@ -164,7 +164,7 @@
               </ToolTips>
             </template>
             <UInput v-model="nameEn" placeholder="Product name in English" />
-            <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional)</span>
+            <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional) / 描述 （選填）</span>
             <md-editor
               v-model="descriptionEn"
               language="en-US"
@@ -177,7 +177,7 @@
           </UFormGroup>
           <UFormGroup :ui="{ container: 'space-y-2 my-[20px]' }">
             <template #label>
-              產品名稱
+              產品名稱（中文）
               <ToolTips :image-style="{ width: '250px' }">
                 <template #image>
                   <img

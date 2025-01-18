@@ -10,7 +10,7 @@
   >
     <template #header>
       <h3 class="font-bold font-mono">
-        Connect to a Stripe Account
+        Connect to a Stripe Account / 連接 Stripe 帳戶
       </h3>
       <UToggle
         v-model="isStripeConnectChecked"

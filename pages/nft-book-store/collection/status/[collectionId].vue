@@ -188,7 +188,7 @@
       >
         <template #header>
           <h4 class="text-sm font-bold font-mono">
-            Email to receive sales notifications
+            Email to receive sales notifications / 欲收到銷售通知的 email
           </h4>
 
           <div class="flex gap-2">
@@ -236,7 +236,7 @@
       <UCard :ui="{ body: { padding: '' } }">
         <template #header>
           <h3 class="font-bold font-mono">
-            Sales Channel Summary
+            Sales Channel Summary / 銷售渠道摘要
           </h3>
         </template>
 
@@ -307,7 +307,7 @@
             >
               <template #header>
                 <h4 class="text-sm font-bold font-mono">
-                  Share sales data to wallets
+                  Share sales data to wallets / 分享銷售數據給特定地址
                 </h4>
                 <div class="flex gap-2">
                   <UInput
@@ -369,7 +369,7 @@
             >
               <template #header>
                 <h3 class="font-bold font-mono">
-                  Copy Purchase Link
+                  Copy Purchase Link / 複製購買連結
                 </h3>
               </template>
 
