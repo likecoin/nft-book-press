@@ -100,6 +100,7 @@
                 :disabled="p.isPhysicalOnly"
                 :legend="`Delivery method of this ${priceItemLabel} / 自動或手動發書`"
                 :options="deliverMethodOptions"
+                @change="handleDeliveryMethodChange"
               />
               <UFormGroup v-if="p.deliveryMethod === 'auto'">
                 <template #label>
@@ -909,6 +910,13 @@ async function submitEditedClass () {
 function onSubmit () {
   return isEditMode.value ? submitEditedClass() : submitNewClass()
 }
+
+function handleDeliveryMethodChange (value: string) {
+  if (value === 'manual') {
+    enableCustomMessagePage.value = true
+  }
+}
+
 </script>
 <style scoped>
 .classIdInput {
