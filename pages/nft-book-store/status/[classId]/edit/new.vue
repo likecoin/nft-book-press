@@ -97,7 +97,7 @@
           </UFormGroup>
           <UFormGroup
             v-else
-            label="Is Physical only good / 是否只含實體書"
+            label="Is Physical only good / 只含實體書"
           >
             <UCheckbox
               v-model="isPhysicalOnly"

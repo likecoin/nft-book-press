@@ -305,7 +305,7 @@
                   <UInput v-model="externalUrl" placeholder="https://" />
                 </UFormGroup>
 
-                <UFormGroup label="URI (optional) / 資料網址（選填）">
+                <UFormGroup label="URI (optional) / 元資料網址（選填）">
                   <UInput v-model="uri" placeholder="https://" />
                 </UFormGroup>
 
