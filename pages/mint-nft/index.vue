@@ -408,7 +408,7 @@
           <div class="p-[4px] border-[2px] border-[#f59e0b] rounded-[0.375rem]">
             <UButton
               :to="{ name: 'nft-book-store-new', query: { class_id: classId, count: nftMintCount } }"
-              label="Continue to publish NFT Book / 上架價格設定"
+              label="Continue to publish NFT Book / 繼續上架"
               variant="solid"
               color="orange"
             />

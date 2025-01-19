@@ -97,7 +97,7 @@
           </UFormGroup>
           <UFormGroup
             v-else
-            label="Is Physical only good / 是否為實體書"
+            label="Is Physical only good / 是否只含實體書"
             :ui="{ label: { base: 'font-mono font-bold' } }"
           >
             <UCheckbox
@@ -164,7 +164,7 @@
               </ToolTips>
             </template>
             <UInput v-model="nameEn" placeholder="Product name in English" />
-            <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional) / 描述 （選填）</span>
+            <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional) / 描述（選填）</span>
             <md-editor
               v-model="descriptionEn"
               language="en-US"

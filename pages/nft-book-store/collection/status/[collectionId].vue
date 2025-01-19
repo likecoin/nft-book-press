@@ -188,7 +188,7 @@
       >
         <template #header>
           <h4 class="text-sm font-bold font-mono">
-            Email to receive sales notifications / 欲收到銷售通知的 email
+            Email to receive sales notifications / 欲收到銷售通知的電郵
           </h4>
 
           <div class="flex gap-2">
