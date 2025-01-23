@@ -128,7 +128,7 @@
           <UButton
             class="font-mono"
             :label="iscnId"
-            :to="`${appLikeCoURL}/iscn/${encodeURIComponent(iscnId)}`"
+            :to="`${appLikeCoURL}/view/${encodeURIComponent(iscnId)}`"
             target="_blank"
             variant="link"
             :padded="false"
