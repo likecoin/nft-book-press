@@ -80,25 +80,59 @@ export const useWalletStore = defineStore('wallet', () => {
     return con
   }
 
-  async function connect () {
+  async function initWallet (connection: LikeCoinWalletConnectorConnectionResult) {
     if (!connector.value) {
       connector.value = await initConnector()
     }
-    const session = connector.value.restoreSession()
-    let connection: LikeCoinWalletConnectorConnectionResult | null = null
-    if (session) {
-      try {
-        const result = await connector.value.initIfNecessary()
-        if (result) { connection = result }
-      } catch (e) {
-        console.error(e)
+    connector.value.once('account_change', async (currentMethod) => {
+      const latestConnection = await connector.value?.init(currentMethod)
+      if (latestConnection) { await initWallet(latestConnection) }
+    })
+    await handleConnection(connection)
+  }
+
+  async function initIfNecessary () {
+    if (!connector.value) {
+      connector.value = await initConnector()
+    }
+    const connection = await connector.value.initIfNecessary()
+    if (connection) {
+      await initWallet(connection)
+    }
+  }
+
+  async function openConnectWalletModal () {
+    connector.value = await initConnector()
+    const connection = await connector.value.openConnectionMethodSelectionDialog()
+    return connection
+  }
+
+  async function restoreSession () {
+    let hasSession = false
+    try {
+      if (window.localStorage) {
+        hasSession = !!window.localStorage.getItem(
+          'likecoin_wallet_connector_session'
+        )
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err)
+    }
+    if (hasSession) {
+      if (!connector.value) {
+        connector.value = await initConnector()
+      }
+      const session = connector.value.restoreSession()
+      if (session) {
+        try {
+          const connection = await connector.value.initIfNecessary()
+          if (connection) { await initWallet(connection) }
+        } catch (e) {
+          console.error(e)
+        }
       }
     }
-    if (!connection) {
-      const result = await connector.value.openConnectionMethodSelectionDialog()
-      if (result) { connection = result }
-    }
-    if (connection) { await handleConnection(connection) }
   }
 
   function handleConnection (connection: LikeCoinWalletConnectorConnectionResult) {
@@ -126,7 +160,7 @@ export const useWalletStore = defineStore('wallet', () => {
 
   async function signMessageMemo (action: string, permissions?: string[]) {
     if (!signer.value || !wallet.value) {
-      await connect()
+      await initIfNecessary()
     }
     if (!signer.value || !wallet.value) {
       throw new Error('WALLET_NOT_INITED')
@@ -177,9 +211,14 @@ export const useWalletStore = defineStore('wallet', () => {
     signer,
     wallet,
     isConnected,
-    connect,
     disconnect,
     handleConnectorRedirect,
-    signMessageMemo
+    signMessageMemo,
+    initConnector,
+
+    initWallet,
+    initIfNecessary,
+    openConnectWalletModal,
+    restoreSession
   }
 })
