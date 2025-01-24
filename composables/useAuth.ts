@@ -7,7 +7,7 @@ export function useAuth () {
   const bookStoreApiStore = useBookStoreApiStore()
   const store = useWalletStore()
   const { wallet, signer } = storeToRefs(store)
-  const { connect, disconnect, signMessageMemo } = store
+  const { disconnect, signMessageMemo, openConnectWalletModal, initWallet } = store
   const { authenticate, clearSession } = bookStoreApiStore
   const toast = useToast()
 
@@ -19,10 +19,11 @@ export function useAuth () {
       setupPostAuthRedirect()
 
       if (!wallet.value || !signer.value) {
-        await connect()
-      }
-      if (!wallet.value || !signer.value) {
-        return
+        const connection = await openConnectWalletModal()
+        if (!connection) {
+          throw new Error('WALLET_NOT_INITED')
+        }
+        await initWallet(connection)
       }
 
       const signature = await signMessageMemo(
