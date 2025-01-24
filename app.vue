@@ -43,7 +43,8 @@ import { useUIStore } from '~/stores/ui'
 
 const { SITE_URL } = useRuntimeConfig().public
 const bookStoreApiStore = useBookStoreApiStore()
-const { restoreSession } = bookStoreApiStore
+
+const { restoreAuthSession } = bookStoreApiStore
 const { isRestoringSession } = storeToRefs(bookStoreApiStore)
 const uiStore = useUIStore()
 
@@ -91,7 +92,7 @@ useSeoMeta({
 })
 
 onMounted(async () => {
-  await restoreSession()
+  await restoreAuthSession()
 })
 
 </script>
