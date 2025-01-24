@@ -502,7 +502,7 @@ const { LCD_URL } = useRuntimeConfig().public
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const stripeStore = useStripeStore()
-const { connect } = walletStore
+const { initIfNecessary } = walletStore
 const { wallet, signer } = storeToRefs(walletStore)
 const { newBookListing, updateEditionPrice } = bookStoreApiStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
@@ -823,7 +823,7 @@ async function submitNewClass () {
     let autoDeliverNFTsTxHash
     if (autoDeliverCount > 0) {
       if (!wallet.value || !signer.value) {
-        await connect()
+        await initIfNecessary()
       }
       if (!wallet.value || !signer.value) {
         throw new Error('Unable to connect to wallet')

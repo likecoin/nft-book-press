@@ -180,7 +180,7 @@ const { LIKE_CO_API, LCD_URL } = useRuntimeConfig().public
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
-const { connect } = store
+const { initIfNecessary } = store
 
 const bookStoreApiStore = useBookStoreApiStore()
 const { token } = storeToRefs(bookStoreApiStore)
@@ -293,7 +293,7 @@ async function fetchNextNFTId (count = 1) {
     nftIdError.value = ''
     isAutoFetchingNFTId.value = true
     if (!wallet.value || !signer.value) {
-      await connect()
+      await initIfNecessary()
     }
     if (!ownerWallet.value) { return }
     const { nfts } = await getNFTs({
@@ -320,7 +320,7 @@ async function onSendNFTStart () {
   try {
     isLoading.value = true
     if (!wallet.value || !signer.value) {
-      await connect()
+      await initIfNecessary()
     }
     if (!wallet.value || !signer.value) { return }
     if (nftId.value) {

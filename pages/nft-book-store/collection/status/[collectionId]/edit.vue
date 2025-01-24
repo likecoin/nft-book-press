@@ -248,7 +248,7 @@ import { deliverMethodOptions } from '~/utils'
 const collectionStore = useCollectionStore()
 const nftStore = useNftStore()
 const walletStore = useWalletStore()
-const { connect } = walletStore
+const { initIfNecessary } = walletStore
 const { wallet, signer } = storeToRefs(walletStore)
 
 const router = useRouter()
@@ -463,7 +463,7 @@ async function handleSubmit () {
     let autoDeliverNFTsTxHash
     if (newAutoDeliverNFTsCount > 0) {
       if (!wallet.value || !signer.value) {
-        await connect()
+        await initIfNecessary()
       }
       if (!wallet.value || !signer.value) {
         throw new Error('Unable to connect to wallet')

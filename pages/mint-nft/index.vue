@@ -442,7 +442,7 @@ const route = useRoute()
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
-const { connect } = store
+const { initIfNecessary } = store
 
 const appLikeCoURL = APP_LIKE_CO_URL
 const likerLandURL = LIKER_LAND_URL
@@ -570,7 +570,7 @@ async function onISCNFileInput () {
   try {
     isLoading.value = true
     if (!wallet.value || !signer.value) {
-      await connect()
+      await initIfNecessary()
     }
     if (!wallet.value || !signer.value) { throw new Error('NO_WALLET') }
     if (!iscnCreateData.value) { throw new Error('NO_ISCN_DATA') }
@@ -715,7 +715,7 @@ async function onClassFileInput () {
   try {
     isLoading.value = true
     if (!wallet.value || !signer.value) {
-      await connect()
+      await initIfNecessary()
     }
     if (!wallet.value || !signer.value) { return }
     if (!classCreateData.value) { throw new Error('NO_CLASS_DATA') }
@@ -756,7 +756,7 @@ async function onMintNFTStart () {
   try {
     isLoading.value = true
     if (!wallet.value || !signer.value) {
-      await connect()
+      await initIfNecessary()
     }
     if (!wallet.value || !signer.value) { return }
     if (!nftMintDefaultData.value) { throw new Error('NO_MINT_DATA') }

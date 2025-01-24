@@ -447,7 +447,7 @@ const collectionStore = useCollectionStore()
 const nftStore = useNftStore()
 const stripeStore = useStripeStore()
 const { wallet, signer } = storeToRefs(walletStore)
-const { connect } = walletStore
+const { initIfNecessary } = walletStore
 const { newNFTBookCollection } = collectionStore
 const { getClassMetadataById, lazyFetchClassMetadataById } = nftStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
@@ -701,7 +701,7 @@ async function submitNewCollection () {
 
       if (formattedPrice.stock > 0) {
         if (!wallet.value || !signer.value) {
-          await connect()
+          await initIfNecessary()
         }
         if (!wallet.value || !signer.value) {
           throw new Error('Unable to connect to wallet')
