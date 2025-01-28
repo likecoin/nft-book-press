@@ -206,6 +206,12 @@ async function onSendGift () {
   if (!isAllFieldsFilled.value) { return }
   try {
     isLoading.value = true
+
+    const price = prices.value[priceIndex.value]
+    if (price.stock <= receiverCount.value) {
+      throw new Error('NOT_ENOUGH_STOCK')
+    }
+
     const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/class/${classId.value}/price/${priceIndex.value}/gift`,
       {
         method: 'POST',
