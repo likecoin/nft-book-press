@@ -22,7 +22,7 @@
     "@likecoin/wallet-connector": "^0.27.1",
     "@nuxt/ui": "2.17.0",
     "@pinia/nuxt": "^0.4.8",
-    "@sentry/nuxt": "^8.27.0",
+    "@sentry/nuxt": "^8.49.0",
     "bignumber.js": "^9.1.0",
     "buffer": "^6.0.3",
     "cosmjs-types": "^0.8.0",
