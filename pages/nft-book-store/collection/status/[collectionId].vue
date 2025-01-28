@@ -866,7 +866,10 @@ async function hardSetStatusToCompleted (purchase: any) {
     orderData.status = previousStatus
     throw fetchError.value
   }
-  collectionListingInfo.value.pendingNFTCount -= 1
+
+  if (previousStatus === 'pendingNFT') {
+    collectionListingInfo.value.pendingNFTCount -= 1
+  }
 }
 
 function addModeratorWallet () {
