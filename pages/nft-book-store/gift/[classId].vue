@@ -8,16 +8,6 @@
       <USelect v-model="priceIndex" :options="priceIndexOptions" />
     </UFormGroup>
 
-    <UAlert
-      v-if="error"
-      icon="i-heroicons-exclamation-triangle"
-      color="red"
-      variant="soft"
-      :title="`${error}`"
-      :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'red', variant: 'link', padded: false }"
-      @close="error = ''"
-    />
-
     <UProgress v-if="isLoading" animation="carousel">
       <template #indicator>
         Loading...
@@ -91,6 +81,7 @@ import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 
 const { LIKE_CO_API } = useRuntimeConfig().public
+const toast = useToast()
 
 const bookStoreApiStore = useBookStoreApiStore()
 const { token } = storeToRefs(bookStoreApiStore)
@@ -170,6 +161,20 @@ onMounted(async () => {
     error.value = (err as Error).toString()
   } finally {
     isLoading.value = false
+  }
+})
+
+watch(error, (newError) => {
+  if (newError) {
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: newError,
+      timeout: 0,
+      color: 'red',
+      ui: {
+        title: 'text-red-400 dark:text-red-400'
+      }
+    })
   }
 })
 
