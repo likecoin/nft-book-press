@@ -445,7 +445,7 @@ const collectionStore = useCollectionStore()
 const stripeStore = useStripeStore()
 const { token } = storeToRefs(bookStoreApiStore)
 const { wallet } = storeToRefs(store)
-const { updateNFTBookCollectionById } = collectionStore
+const { updateNFTBookCollectionById, reduceListingPendingNFTCountById } = collectionStore
 const { getClassMetadataById, lazyFetchClassMetadataById } = nftStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
 
@@ -868,7 +868,8 @@ async function hardSetStatusToCompleted (purchase: any) {
   }
 
   if (previousStatus === 'pendingNFT') {
-    collectionListingInfo.value.pendingNFTCount -= 1
+    collectionListingInfo.value.pendingNFTCount -= 11
+    reduceListingPendingNFTCountById(collectionId.value, 1)
   }
 }
 

@@ -37,7 +37,15 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useCollectionStore } from '~/stores/collection'
+
 const { ISCN_TOOLS_URL } = useRuntimeConfig().public
+const bookStoreApiStore = useBookStoreApiStore()
+const collectionStore = useCollectionStore()
+const { getTotalPendingNFTCount } = storeToRefs(bookStoreApiStore)
+const { getTotalPendingNFTCount: getCollectionTotalPendingNFTCount } = storeToRefs(collectionStore)
 
 const props = defineProps({
   isLarge: {
@@ -53,7 +61,7 @@ function handleLinkClick ({ label }: { label?: string }) {
   emit('click-link')
 }
 
-const items = [
+const items = computed(() => [
   {
     label: 'Publish NFT Book',
     links: [
@@ -77,13 +85,15 @@ const items = [
         label: 'Manage Book Listings',
         icon: 'i-heroicons-rectangle-stack',
         to: { name: 'nft-book-store' },
-        exact: true
+        exact: true,
+        badge: getTotalPendingNFTCount.value
       },
       {
         label: 'Manage Collections',
         icon: 'i-heroicons-rectangle-stack',
         to: { name: 'nft-book-store-collection' },
-        exact: true
+        exact: true,
+        badge: getCollectionTotalPendingNFTCount.value
       }
     ]
   },
@@ -170,5 +180,5 @@ const items = [
     ...link,
     click: () => handleLinkClick({ label: link.label })
   }))
-}))
+})))
 </script>

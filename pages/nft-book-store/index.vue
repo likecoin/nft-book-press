@@ -158,23 +158,18 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
-import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 
-const { LIKE_CO_API } = useRuntimeConfig().public
 const route = useRoute()
 const router = useRouter()
-const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const nftStore = useNftStore()
-const { wallet } = storeToRefs(walletStore)
-const { token } = storeToRefs(bookStoreApiStore)
+const { listingList: bookList, moderatedBookList, token } = storeToRefs(bookStoreApiStore)
 const { lazyFetchClassMetadataById } = nftStore
+const { fetchBookListing, fetchModeratedBookList } = bookStoreApiStore
 
 const error = ref('')
 const isLoading = ref(false)
-const bookList = ref<any[]>([])
-const moderatedBookList = ref<any[]>([])
 
 // Tabs
 const tabItems = [
@@ -294,53 +289,8 @@ watch(tableRowsPerPage, () => {
   tablePage.value = 1
 })
 
-async function fetchBookList (params: { key?: number, limit?: number } = {}) {
-  const qsPayload: any = {
-    wallet: wallet.value,
-    limit: params.limit || 100
-  }
-  if (params.key) {
-    qsPayload.key = params.key
-  }
-  const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/list?${Object.entries(qsPayload).map(([key, value]) => `${key}=${value}`).join('&')}`,
-    {
-      headers: {
-        authorization: token.value ? `Bearer ${token.value}` : ''
-      }
-    })
-
-  if (fetchError.value) {
-    error.value = fetchError.value.toString()
-  }
-
-  const { nextKey, list = [] } = (data.value as any) || {}
-  if (params) {
-    bookList.value.push(...list)
-  } else {
-    bookList.value = list
-  }
-
-  if (nextKey) {
-    return fetchBookList({ key: nextKey })
-  }
-}
-
-async function fetchModeratedBookList () {
-  const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/list/moderated?wallet=${wallet.value}`,
-    {
-      headers: {
-        authorization: `Bearer ${token.value}`
-      }
-    }
-  )
-  if (fetchError.value) {
-    error.value = fetchError.value.toString()
-  }
-  moderatedBookList.value = (data.value as any)?.list || []
-}
-
 onMounted(async () => {
-  const promises = [fetchBookList()]
+  const promises = [fetchBookListing()]
   if (token.value) {
     promises.push(fetchModeratedBookList())
   }

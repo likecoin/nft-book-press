@@ -2,13 +2,16 @@ import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useCollectionStore } from '~/stores/collection'
 
 export function useAuth () {
   const bookStoreApiStore = useBookStoreApiStore()
+  const collectionStore = useCollectionStore()
   const store = useWalletStore()
   const { wallet, signer } = storeToRefs(store)
   const { disconnect, signMessageMemo, openConnectWalletModal, initWallet } = store
-  const { authenticate, clearSession } = bookStoreApiStore
+  const { authenticate, clearSession, fetchBookListing } = bookStoreApiStore
+  const { listNFTBookCollections } = collectionStore
   const toast = useToast()
 
   const isAuthenticating = ref(false)
@@ -36,6 +39,10 @@ export function useAuth () {
       }
 
       await authenticate(wallet.value, signature)
+      await Promise.all([
+        fetchBookListing(),
+        listNFTBookCollections()
+      ])
     } catch (err) {
       disconnect()
       clearSession()
