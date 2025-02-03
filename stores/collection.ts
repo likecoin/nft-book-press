@@ -6,9 +6,11 @@ export const useCollectionStore = defineStore('collection', () => {
   const bookStoreApiStore = useBookStoreApiStore()
   const { token, wallet: sessionWallet } = storeToRefs(bookStoreApiStore)
 
+  const collectionList = ref([] as any[])
   const collectionByIdMap = ref({} as Record<string, any>)
 
   const getCollectionById = computed(() => (collectionId: string) => collectionByIdMap.value[collectionId])
+  const getTotalPendingNFTCount = computed(() => collectionList.value.reduce((acc, item) => acc + (item.typePayload?.pendingNFTCount || 0), 0))
 
   async function fetchCollectionById (collectionId: string) {
     const data = await getNFTBookCollectionById(collectionId)
@@ -36,6 +38,7 @@ export const useCollectionStore = defineStore('collection', () => {
     if (error.value) {
       throw error.value
     }
+    collectionList.value = (data?.value as any)?.list
     return data
   }
 
@@ -69,6 +72,15 @@ export const useCollectionStore = defineStore('collection', () => {
       throw error.value
     }
     return data
+  }
+
+  function reduceListingPendingNFTCountById (collectionId: string, count: number) {
+    const targetIndex = collectionList.value.findIndex(item => item.id === collectionId)
+    if (targetIndex === -1) {
+      return
+    }
+    const targetItem = collectionList.value[targetIndex]
+    targetItem.pendingNFTCount -= count
   }
 
   async function newNFTBookCollection (payload: any) {
@@ -113,12 +125,15 @@ export const useCollectionStore = defineStore('collection', () => {
   }
 
   return {
+    collectionList,
     collectionByIdMap,
     getCollectionById,
     fetchCollectionById,
     lazyFetchCollectionById,
     listNFTBookCollections,
     listModeratedNFTBookCollections,
+    getTotalPendingNFTCount,
+    reduceListingPendingNFTCountById,
     getNFTBookCollectionById,
     newNFTBookCollection,
     updateNFTBookCollectionById,

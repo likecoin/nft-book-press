@@ -10,6 +10,10 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
   const sessionWallet = ref('')
   const isRestoringSession = ref(false)
 
+  const listingList = ref([] as any[])
+  const moderatedBookList = ref([] as any[])
+  const getTotalPendingNFTCount = computed(() => listingList.value.reduce((acc, item) => acc + (item.pendingNFTCount || 0), 0))
+
   const isAuthenticated = computed(() => {
     const isWalletMatch = storeWallet.value === sessionWallet.value
     const tokenExists = !!token.value
@@ -57,6 +61,60 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
     token.value = (data.value as any).token
     sessionWallet.value = inputWallet
     saveAuthSession({ wallet: inputWallet, token: token.value })
+  }
+
+  async function fetchBookListing (params: { key?: number, limit?: number } = {}) {
+    const qsPayload: any = {
+      wallet: sessionWallet.value,
+      limit: params.limit || 100
+    }
+    if (params.key) {
+      qsPayload.key = params.key
+    }
+    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/list?${Object.entries(qsPayload).map(([key, value]) => `${key}=${value}`).join('&')}`,
+      {
+        headers: {
+          authorization: token.value ? `Bearer ${token.value}` : ''
+        }
+      })
+
+    if (fetchError.value) {
+      throw fetchError.value
+    }
+
+    const { nextKey, list = [] } = (data.value as any) || {}
+    if (params) {
+      listingList.value.push(...list)
+    } else {
+      listingList.value = list
+    }
+
+    if (nextKey) {
+      return fetchBookListing({ key: nextKey })
+    }
+  }
+
+  async function fetchModeratedBookList () {
+    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/list/moderated?wallet=${sessionWallet.value}`,
+      {
+        headers: {
+          authorization: `Bearer ${token.value}`
+        }
+      }
+    )
+    if (fetchError.value) {
+      throw fetchError.value
+    }
+    moderatedBookList.value = (data.value as any)?.list || []
+  }
+
+  function reduceListingPendingNFTCountById (classId: string, count: number) {
+    const targetIndex = listingList.value.findIndex(item => item.classId === classId)
+    if (targetIndex === -1) {
+      return
+    }
+    const targetItem = listingList.value[targetIndex]
+    targetItem.pendingNFTCount -= count
   }
 
   async function newBookListing (classId: string, payload: any) {
@@ -118,11 +176,17 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
   return {
     token,
     wallet: sessionWallet,
+    listingList,
+    moderatedBookList,
+    getTotalPendingNFTCount,
     isAuthenticated,
     isRestoringSession,
     clearSession,
     restoreAuthSession,
     authenticate,
+    fetchBookListing,
+    fetchModeratedBookList,
+    reduceListingPendingNFTCountById,
     newBookListing,
     updateBookListingSetting,
     updateEditionPrice,
