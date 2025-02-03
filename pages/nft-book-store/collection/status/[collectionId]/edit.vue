@@ -470,6 +470,7 @@ async function handleSubmit () {
       }
       autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
         classIds.value,
+        [],
         newAutoDeliverNFTsCount,
         signer.value,
         wallet.value

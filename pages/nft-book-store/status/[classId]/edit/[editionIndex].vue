@@ -211,6 +211,19 @@
           @update-shipping-rates="updateShippingRates"
         />
 
+        <!-- Auto deliver NFT ID -->
+        <UFormGroup
+          v-if="isAutoDeliver"
+          label="Auto deliver NFT start ID (optional)"
+          :ui="{ label: { base: 'font-mono font-bold' } }"
+        >
+          <UInput
+            v-model="autoDeliverNftIdInput"
+            class="font-mono"
+            placeholder="like1..."
+          />
+        </UFormGroup>
+
         <template #footer>
           <UButton
             label="Save Changes"
@@ -261,6 +274,7 @@ const hasMultiplePrices = computed(() => classData?.value?.prices?.length > 1)
 const price = ref(DEFAULT_PRICE)
 const stock = ref(1)
 const deliveryMethod = ref('auto')
+const autoDeliverNftIdInput = ref('')
 const autoMemo = ref('Thanks for purchasing this NFT ebook.')
 const nameEn = ref('Standard Edition')
 const nameZh = ref('標準版')
@@ -497,6 +511,7 @@ async function handleSubmit () {
       }
       autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
         [classId.value as string],
+        [autoDeliverNftIdInput.value as string],
         newAutoDeliverNFTsCount,
         signer.value,
         wallet.value

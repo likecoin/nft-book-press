@@ -365,6 +365,19 @@
               @update-shipping-rates="updateShippingRate"
             />
 
+            <!-- Auto deliver NFT ID -->
+            <UFormGroup
+              v-if="hasAutoDeliverNFT"
+              label="Auto deliver NFT start ID (optional)"
+              :ui="{ label: { base: 'font-mono font-bold' } }"
+            >
+              <UInput
+                v-model="autoDeliverNftIdInput"
+                class="font-mono"
+                placeholder="like1..."
+              />
+            </UFormGroup>
+
             <!-- Share sales data -->
             <UCard
               :ui="{
@@ -531,6 +544,7 @@ const tableOfContents = ref('')
 const mustClaimToView = ref(true)
 const enableCustomMessagePage = ref(false)
 const hideDownload = ref(false)
+const autoDeliverNftIdInput = ref('')
 const prices = ref<any[]>([
   {
     price: DEFAULT_PRICE,
@@ -620,6 +634,10 @@ const notificationEmailsTableRows = computed(() =>
     index,
     email
   }))
+)
+
+const hasAutoDeliverNFT = computed(() =>
+  prices.value.some(price => price.deliveryMethod === 'auto' && price.stock > 0)
 )
 
 config({
@@ -830,6 +848,7 @@ async function submitNewClass () {
       }
       autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
         [classIdInput.value as string],
+        [autoDeliverNftIdInput.value as string],
         autoDeliverCount,
         signer.value,
         wallet.value

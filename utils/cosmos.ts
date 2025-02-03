@@ -102,13 +102,13 @@ export async function getNFTAuthzGrants (granter: string, grantee: string) {
   return grants[0]
 }
 
-export async function getNFTs ({ classId = '', owner = '', needCount = 0 }) {
-  const needPages = Math.ceil(needCount / 100)
+export async function getNFTs ({ classId = '', owner = '', nftId = '', needCount = 0 }) {
   const c = (await getSigningClient()).getISCNQueryClient()
   const client = await c.getQueryClient()
   let nfts = []
   let next: Uint8Array | undefined = new Uint8Array([0x00])
-  let pageCounts = 0
+  let nftCounts = 0
+  let isNftIdFound = !nftId
   do {
     const res = await client.nft.NFTs(
       classId,
@@ -116,9 +116,18 @@ export async function getNFTs ({ classId = '', owner = '', needCount = 0 }) {
       PageRequest.fromPartial({ key: next })
     );
     (next = res.pagination?.nextKey)
-    nfts.push(...res.nfts)
-    if (needPages && pageCounts > needPages) { break }
-    pageCounts += 1
+    if (!isNftIdFound) {
+      const foundIndex = res.nfts.findIndex(nft => nft.id >= nftId)
+      if (foundIndex >= 0) {
+        isNftIdFound = true
+        res.nfts = res.nfts.slice(foundIndex)
+      }
+    }
+    if (isNftIdFound) {
+      nfts.push(...res.nfts)
+      nftCounts += res.nfts.length
+      if (needCount && nftCounts > needCount) { break }
+    }
   } while (next && next.length)
   if (needCount && nfts.length > needCount) {
     nfts = nfts.slice(0, needCount)
@@ -347,6 +356,7 @@ export function shortenWalletAddress (address: string) {
 
 export async function sendNFTsToAPIWallet (
   classIds: string[],
+  nftIds: string[],
   nftCount: number,
   signer: OfflineSigner,
   ownerAddress: string
@@ -361,8 +371,9 @@ export async function sendNFTsToAPIWallet (
     throw new Error('Missing signer')
   }
 
-  const results = await Promise.all(classIds.map(classId => getNFTs({
+  const results = await Promise.all(classIds.map((classId, index) => getNFTs({
     classId,
+    nftId: nftIds[index],
     owner: ownerAddress,
     needCount: nftCount
   })))
