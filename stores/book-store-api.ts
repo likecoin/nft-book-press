@@ -83,7 +83,7 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
     }
 
     const { nextKey, list = [] } = (data.value as any) || {}
-    if (params) {
+    if (params.key) {
       listingList.value.push(...list)
     } else {
       listingList.value = list
