@@ -314,7 +314,7 @@ async function fetchBookList (params: { key?: number, limit?: number } = {}) {
   }
 
   const { nextKey, list = [] } = (data.value as any) || {}
-  if (params) {
+  if (params.key) {
     bookList.value.push(...list)
   } else {
     bookList.value = list
