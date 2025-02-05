@@ -48,7 +48,7 @@ const collectionStore = useCollectionStore()
 
 const { restoreAuthSession, fetchBookListing } = bookStoreApiStore
 const { listNFTBookCollections } = collectionStore
-const { isRestoringSession } = storeToRefs(bookStoreApiStore)
+const { isRestoringSession, isAuthenticated } = storeToRefs(bookStoreApiStore)
 const uiStore = useUIStore()
 
 const isMobileMenuOpen = computed({
@@ -96,10 +96,12 @@ useSeoMeta({
 
 onMounted(async () => {
   await restoreAuthSession()
-  await Promise.all([
-    fetchBookListing(),
-    listNFTBookCollections()
-  ])
+  if (isAuthenticated.value) {
+    await Promise.all([
+      fetchBookListing(),
+      listNFTBookCollections()
+    ])
+  }
 })
 
 </script>
