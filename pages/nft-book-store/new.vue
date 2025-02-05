@@ -374,7 +374,7 @@
               <UInput
                 v-model="autoDeliverNftIdInput"
                 class="font-mono"
-                placeholder="like1..."
+                placeholder="MY-NFT-PREFIX-000"
               />
             </UFormGroup>
 
