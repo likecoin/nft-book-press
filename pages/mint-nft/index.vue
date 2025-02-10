@@ -153,6 +153,14 @@
             :padded="false"
           />
         </UFormGroup>
+        <UFormGroup label="ISCN Description">
+          <UInput
+            :value="iscnData?.contentMetadata?.description"
+            :readonly="true"
+            variant="none"
+            :padded="false"
+          />
+        </UFormGroup>
       </UCard>
 
       <UCard
