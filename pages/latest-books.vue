@@ -128,10 +128,11 @@ const bookList = computed(() => selectedTabItemKey.value === 'latest' ? latestBo
 const tableRows = computed(() => bookList.value.map((b: any) => {
   const className = b.name || b.title
   const image = b.thumbnailUrl || b.imageUrl
+  const author = b.author?.name || b.author
   return {
     className,
     image: image ? getImageResizeURL(parseImageURLFromMetadata(image)) : undefined,
-    author: b.author,
+    author,
     priceInUSD: `US$${b.minPrice || b.prices?.[0]?.price || 0}`,
     url: `${LIKER_LAND_URL}/nft/class/${b.classId}?from=${channelId.value}&utm_source=bookpress&utm_medium=list_${selectedTabItemKey.value}`
   }
