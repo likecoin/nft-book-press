@@ -375,15 +375,6 @@
           <h3>NFT Class Information</h3>
         </template>
 
-        <UFormGroup label="NFT Class Contract Address">
-          <UButton
-            :label="contractAddress"
-            :to="`${likerLandURL}/nft/class/${encodeURIComponent(classId)}`"
-            target="_blank"
-            variant="link"
-            :padded="false"
-          />
-        </UFormGroup>
         <UFormGroup label="NFT Class ID">
           <UButton
             :label="classId"
@@ -516,8 +507,7 @@ const nftCSVData = ref('')
 
 const iscnId = computed(() => iscnData.value?.['@id'])
 const classId = ref('')
-const contractAddress = ref('')
-const isCreatingClass = computed(() => !contractAddress.value && step.value === 2)
+const isCreatingClass = computed(() => !classId.value && step.value === 2)
 const className = ref('')
 const classDescription = ref('')
 // HACK: set max supply to 50 to avoid authcore max int issue
@@ -534,12 +524,6 @@ watch(iscnId, (newIscnId) => {
 watch(classId, (newClassId) => {
   if (newClassId) {
     router.replace({ query: { ...route.query, class_id: newClassId } })
-  }
-})
-
-watch(contractAddress, (newContractAddress) => {
-  if (newContractAddress) {
-    router.replace({ query: { ...route.query, contract_address: newContractAddress } })
   }
 })
 
@@ -560,7 +544,7 @@ useSeoMeta({
 
 onMounted(() => {
   // HACK: mitigate disable state stuck issue when iscnIdInput is inited as qs in data
-  iscnIdInput.value = route.query.contract_address as string || route.query.iscn_id as string || ''
+  iscnIdInput.value = route.query.class_id as string || route.query.iscn_id as string || ''
   classId.value = route.query.class_id as string || ''
 })
 
@@ -606,7 +590,7 @@ async function onISCNIDInput () {
       iscnOwner.value = owner
       step.value = 2
     } else if (iscnIdInput.value.startsWith('0x')) {
-      const [dataString, tokenId, owner] = await Promise.all([
+      const [dataString, owner] = await Promise.all([
         readContract(config, {
           abi: LIKE_NFT_CLASS_ABI,
           address: iscnIdInput.value as any,
@@ -615,23 +599,17 @@ async function onISCNIDInput () {
         readContract(config, {
           abi: LIKE_NFT_CLASS_ABI,
           address: iscnIdInput.value as any,
-          functionName: 'tokenId'
-        }),
-        readContract(config, {
-          abi: LIKE_NFT_CLASS_ABI,
-          address: iscnIdInput.value as any,
           functionName: 'owner'
         })
       ])
-      console.log(dataString)
       if (!(dataString as string)?.startsWith('data:application/json')) {
         throw new Error('Invalid NFT Class ID')
       }
       const data = JSON.parse((dataString as string).replace('data:application/json;utf8,', ''))
       if (!data?.metadata) { throw new Error('Invalid NFT Class ID') }
-      iscnData.value = { '@id': tokenId, contentMetadata: data.metadata }
+      iscnData.value = { contentMetadata: data.metadata }
       iscnOwner.value = owner as string
-      contractAddress.value = iscnIdInput.value
+      classId.value = iscnIdInput.value
       step.value = 3
     } else {
       throw new Error('Invalid ISCN ID or NFT Class ID')
@@ -704,14 +682,21 @@ async function onClickMintByInputting () {
   isLoading.value = true
   const { contentMetadata } = iscnData.value
 
+  const {
+    name,
+    description
+  } = contentMetadata
   const nftClassData = {
-    name: contentMetadata.name,
-    description: contentMetadata.description,
+    name,
+    description,
     symbol: 'BOOK',
     uri: uri.value || '',
     uri_hash: '',
     metadata: {
-      name: contentMetadata.name,
+      name,
+      description,
+      symbol: 'BOOK',
+      ...contentMetadata,
       image: imageUrl.value,
       external_url: externalUrl.value,
       nft_meta_collection_id: 'nft_book',
@@ -724,7 +709,10 @@ async function onClickMintByInputting () {
     uri: uri.value || '',
     uri_hash: '',
     metadata: {
-      name: contentMetadata.name,
+      name,
+      description,
+      symbol: 'BOOK',
+      ...contentMetadata,
       image: imageUrl.value,
       external_url: externalUrl.value
     }
@@ -784,12 +772,9 @@ async function onClassFileInput () {
     if (!classCreateData.value) { throw new Error('NO_CLASS_DATA') }
     const {
       name,
-      symbol,
-      description,
-      uri,
-      uri_hash: uriHash,
-      ...metadata
+      symbol
     } = classCreateData.value
+    const metadata = classCreateData.value
     classId.value = uuidv4()
     const res = await writeContractAsync({
       address: LIKE_NFT_CONTRACT_ADDRESS,
@@ -797,24 +782,12 @@ async function onClassFileInput () {
       functionName: 'newClass',
       args: [{
         creator: wallet.value,
-        parent: {
-          type_: 1,
-          iscn_id_prefix: iscnId
-        },
         input: {
           name,
           symbol,
-          description,
-          uri,
-          uri_hash: uriHash,
           metadata: JSON.stringify(metadata),
           config: {
-            burnable: true,
-            max_supply: classMaxSupply.value || 0,
-            blind_box_config: {
-              mint_periods: [],
-              reveal_time: 0
-            }
+            max_supply: classMaxSupply.value || 0
           }
         }
       }, classId.value]
@@ -822,7 +795,8 @@ async function onClassFileInput () {
     const receipt = await waitForTransactionReceipt(config, { hash: res })
     console.log(receipt)
     if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
-    contractAddress.value = receipt.logs[0].address
+    if (!receipt.logs[0].address) { throw new Error('INVALID_CLASS_ID') }
+    classId.value = receipt.logs[0].address
     step.value = 3
   } catch (err) {
     console.error(err)
@@ -901,8 +875,6 @@ async function onMintNFTStart () {
           creator: wallet.value,
           class_id: classId.value,
           input: {
-            uri: nft.uri,
-            uri_hash: '',
             metadata: JSON.stringify({
               image: nft.metadata.image,
               image_data: '',
