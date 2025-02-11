@@ -155,22 +155,38 @@
           />
         </UFormGroup>
 
-        <UFormGroup label="Title">
-          <UInput
-            v-model="className"
-            :value="iscnData?.contentMetadata?.name"
-            :readonly="isCreatingClass"
-            variant="none"
+        <template v-if="!isEditingClassData">
+          <UFormGroup label="Title">
+            <UInput
+              :value="contentMetadata?.name"
+              readonly="true"
+              variant="none"
+              :padded="false"
+            />
+          </UFormGroup>
+          <UFormGroup label="Description">
+            <UInput
+              :value="contentMetadata?.description"
+              readonly="true"
+              variant="none"
+              :padded="false"
+            />
+            <UButton
+              label="Edit"
+              @click="isEditingClassData = true"
+            />
+          </UFormGroup>
+        </template>
+        <UFormGroup v-else>
+          <UTextarea
+            v-model="contentMetadataString"
+            label="Class Data"
             :padded="false"
           />
-        </UFormGroup>
-        <UFormGroup label="Description">
-          <UInput
-            v-model="classDescription"
-            :value="iscnData?.contentMetadata?.description"
-            :readonly="isCreatingClass"
-            variant="none"
-            :padded="false"
+          <UButton
+            v-if="!isLoading"
+            label="Save"
+            @click="onClickSaveContentMetadata"
           />
         </UFormGroup>
         <UFormGroup label="ISCN Description">
@@ -477,6 +493,17 @@ const iscnOwner = ref('')
 
 const iscnCreateData = ref<any>(null)
 const iscnData = ref<any>(null)
+const contentMetadata = ref<any>({})
+const contentMetadataString = computed({
+  get: () => JSON.stringify(contentMetadata.value, null, 2),
+  set: (value) => {
+    try {
+      contentMetadata.value = JSON.parse(value)
+    } catch (err) {
+      console.error('Invalid JSON:', err)
+    }
+  }
+})
 const hasError = ref(false)
 const imageUrl = ref('')
 const externalUrl = ref('')
@@ -492,8 +519,7 @@ const nftCSVData = ref('')
 const iscnId = computed(() => iscnData.value?.['@id'])
 const classId = ref('')
 const isCreatingClass = computed(() => !classId.value && step.value === 2)
-const className = ref('')
-const classDescription = ref('')
+const isEditingClassData = ref(false)
 // HACK: set max supply to 50 to avoid authcore max int issue
 const mintMaxCount = computed(() => Math.min(classMaxSupply.value || NFT_DEFAULT_MINT_AMOUNT))
 
@@ -517,7 +543,11 @@ watch(isLoading, (newIsLoading) => {
 
 watch(iscnData, (recordData) => {
   if (recordData) {
-    imageUrl.value = recordData.contentMetadata?.thumbnailUrl || ''
+    contentMetadata.value = {
+      contentFingerprints: recordData.contentFingerprints,
+      ...(recordData.contentMetadata || {})
+    }
+    imageUrl.value = contentMetadata.value?.thumbnailUrl || ''
   }
 })
 
@@ -649,12 +679,11 @@ function generateNFTMintListCSVData ({
 
 async function onClickMintByInputting () {
   isLoading.value = true
-  const { contentMetadata } = iscnData.value
 
   const {
     name,
     description
-  } = contentMetadata
+  } = contentMetadata.value
   const nftClassData = {
     name,
     symbol: 'BOOK',
@@ -662,7 +691,7 @@ async function onClickMintByInputting () {
       name,
       description,
       symbol: 'BOOK',
-      ...contentMetadata,
+      ...contentMetadata.value,
       image: imageUrl.value,
       external_url: externalUrl.value,
       nft_meta_collection_id: 'nft_book',
@@ -676,7 +705,7 @@ async function onClickMintByInputting () {
       name,
       description,
       symbol: 'BOOK',
-      ...contentMetadata,
+      ...contentMetadata.value,
       image: imageUrl.value,
       external_url: externalUrl.value
     }
@@ -788,6 +817,42 @@ function onClassFileChange (files: FileList) {
     }
   }
   reader.readAsText(file)
+}
+
+async function onClickSaveContentMetadata () {
+  if (!isCreatingClass.value) {
+    isLoading.value = true
+    try {
+      const {
+        name,
+        symbol
+      } = contentMetadata.value
+      const res = await writeContractAsync({
+        address: LIKE_NFT_CONTRACT_ADDRESS,
+        abi: LIKE_NFT_ABI,
+        functionName: 'updateClass',
+        args: [{
+          creator: wallet.value,
+          class_id: classId.value,
+          input: {
+            name,
+            symbol,
+            metadata: JSON.stringify(contentMetadata.value),
+            config: {
+              max_supply: classMaxSupply.value || 0
+            }
+          }
+        }]
+      })
+      const receipt = await waitForTransactionReceipt(config, { hash: res })
+      // eslint-disable-next-line no-console
+      console.log(receipt)
+      if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
+    } finally {
+      isLoading.value = false
+    }
+  }
+  isEditingClassData.value = false
 }
 
 async function onMintNFTStart () {
