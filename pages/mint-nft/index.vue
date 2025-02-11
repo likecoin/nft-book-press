@@ -809,8 +809,27 @@ async function onMintNFTStart () {
         ...otherData
       } = nftMintListData?.value?.[i] || {}
       const dataMetadata = JSON.parse(dataMetadataString || '{}')
-      const data = { ...defaultMetadata, ...dataMetadata }
+      const data = { attributes: [], ...defaultMetadata, ...dataMetadata }
       if (dataImage) { data.image = dataImage }
+      if (data.author) {
+        data.attributes.push({
+          trait_type: 'Author',
+          value: data.author
+        })
+      }
+      if (data.publisher) {
+        data.attributes.push({
+          trait_type: 'Publisher',
+          value: data.publisher
+        })
+      }
+      if (data.datePublished) {
+        data.attributes.push({
+          trait_type: 'Publish Date',
+          display_type: 'date',
+          value: (new Date(data.datePublished)).getTime() || 0
+        })
+      }
       Object.entries(otherData).forEach(([key, value]) => {
         if (value) {
           try {
@@ -841,7 +860,7 @@ async function onMintNFTStart () {
               external_url: nft.metadata.external_url || '',
               description: nft.metadata.description || '',
               name: nft.metadata.name || '',
-              attributes: [],
+              attributes: nft.metadata.attributes || [],
               background_color: '',
               animation_url: '',
               youtube_url: ''
