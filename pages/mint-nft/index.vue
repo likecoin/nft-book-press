@@ -578,8 +578,8 @@ async function onISCNIDInput () {
         throw new Error('Invalid NFT Class ID')
       }
       const data = JSON.parse((dataString as string).replace('data:application/json;utf8,', ''))
-      if (!data?.metadata) { throw new Error('Invalid NFT Class ID') }
-      iscnData.value = { contentMetadata: data.metadata }
+      if (!data) { throw new Error('Invalid NFT Class ID') }
+      iscnData.value = { contentMetadata: data }
       iscnOwner.value = owner as string
       classId.value = iscnIdInput.value
       step.value = 3
@@ -737,9 +737,9 @@ async function onClassFileInput () {
     if (!classCreateData.value) { throw new Error('NO_CLASS_DATA') }
     const {
       name,
-      symbol
+      symbol,
+      metadata
     } = classCreateData.value
-    const metadata = classCreateData.value
     const res = await writeContractAsync({
       address: LIKE_NFT_CONTRACT_ADDRESS,
       abi: LIKE_NFT_ABI,
