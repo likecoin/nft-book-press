@@ -131,6 +131,7 @@ import {
 
 const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
+const { initIfNecessary } = walletStore
 const route = useRoute()
 
 const error = ref('')
@@ -172,7 +173,12 @@ async function onNewGrant (grantee = newGrantee.value) {
   try {
     error.value = ''
     isLoading.value = true
-    if (!wallet.value || !signer.value) { throw new Error('NO_WALLET') }
+    if (!signer.value || !wallet.value) {
+      await initIfNecessary()
+    }
+    if (!signer.value || !wallet.value) {
+      throw new Error('WALLET_NOT_INITED')
+    }
     if (!grantee) { throw new Error('WALLET_INPUT_EMPTY') }
     const res = await signGrantNFTSendAuthz(grantee, signer.value, wallet.value)
     console.log(res)
@@ -192,7 +198,12 @@ async function onClickRevokeGrant (grantee) {
   try {
     error.value = ''
     isLoading.value = true
-    if (!wallet.value || !signer.value) { throw new Error('NO_WALLET') }
+    if (!signer.value || !wallet.value) {
+      await initIfNecessary()
+    }
+    if (!signer.value || !wallet.value) {
+      throw new Error('WALLET_NOT_INITED')
+    }
     if (!grantee) { throw new Error('WALLET_INPUT_EMPTY') }
     const res = await signRevokeNFTSendAuthz(grantee, signer.value, wallet.value)
     console.log(res)
