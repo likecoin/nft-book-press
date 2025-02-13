@@ -494,18 +494,16 @@ import { storeToRefs } from 'pinia'
 import { MdEditor, config as editorConfig } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
-import { readContract } from '@wagmi/vue/actions'
 import { v4 as uuidv4 } from 'uuid'
 
 import { DEFAULT_PRICE, MINIMAL_PRICE } from '~/constant'
-import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL, deliverMethodOptions } from '~/utils'
 import { sendNFTsToAPIWallet } from '~/utils/cosmos'
-import { config } from '~/utils/wagmi/config'
 
+const { getClassOwner, getClassMetadata } = useNFTContractReader()
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const stripeStore = useStripeStore()
@@ -756,27 +754,15 @@ async function submitNewClass () {
     }
 
     isLoading.value = true
-    const [dataString, owner] = await Promise.all([
-      readContract(config, {
-        abi: LIKE_NFT_CLASS_ABI,
-        address: classIdInput.value as any,
-        functionName: 'contractURI'
-      }),
-      readContract(config, {
-        abi: LIKE_NFT_CLASS_ABI,
-        address: classIdInput.value as any,
-        functionName: 'owner'
-      })
+    const [data, owner] = await Promise.all([
+      getClassMetadata(classIdInput.value as string),
+      getClassOwner(classIdInput.value as string)
     ])
     if (owner !== wallet.value) {
       // why owner doesn't return the correct value?
       console.log(owner, wallet.value)
       throw new Error('You are not the owner of this NFT Class')
     }
-    if (!(dataString as string)?.startsWith('data:application/json')) {
-      throw new Error('Invalid NFT Class ID')
-    }
-    const data = JSON.parse((dataString as string).replace('data:application/json;utf8,', ''))
     if (!data) { throw new Error('Invalid NFT Class ID') }
     const collectionId = data.nft_meta_collection_id || ''
     if (

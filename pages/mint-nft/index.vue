@@ -464,15 +464,16 @@ import { useWriteContract } from '@wagmi/vue'
 import { storeToRefs } from 'pinia'
 import { parse } from 'csv-parse/sync'
 import { stringify } from 'csv-stringify/sync'
-import { waitForTransactionReceipt, readContract } from '@wagmi/vue/actions'
+import { waitForTransactionReceipt } from '@wagmi/vue/actions'
 import { hexToNumber } from 'viem'
 
 import { useWalletStore } from '~/stores/wallet'
 import { downloadFile, convertArrayOfObjectsToCSV } from '~/utils'
 import { NFT_DEFAULT_MINT_AMOUNT, PUBLISHING_NOTICE_URL_EN, PUBLISHING_NOTICE_URL_ZH } from '~/constant'
-import { LIKE_NFT_ABI, LIKE_NFT_CLASS_ABI, LIKE_NFT_CONTRACT_ADDRESS } from '~/contracts/likeNFT'
+import { LIKE_NFT_ABI, LIKE_NFT_CONTRACT_ADDRESS } from '~/contracts/likeNFT'
 import { config } from '~/utils/wagmi/config'
 
+const { getClassOwner, getClassMetadata } = useNFTContractReader()
 const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } = useRuntimeConfig().public
 const router = useRouter()
 const route = useRoute()
@@ -592,22 +593,10 @@ async function onISCNIDInput () {
       iscnOwner.value = owner
       step.value = 2
     } else if (iscnIdInput.value.startsWith('0x')) {
-      const [dataString, owner] = await Promise.all([
-        readContract(config, {
-          abi: LIKE_NFT_CLASS_ABI,
-          address: iscnIdInput.value as any,
-          functionName: 'contractURI'
-        }),
-        readContract(config, {
-          abi: LIKE_NFT_CLASS_ABI,
-          address: iscnIdInput.value as any,
-          functionName: 'owner'
-        })
+      const [data, owner] = await Promise.all([
+        getClassMetadata(iscnIdInput.value),
+        getClassOwner(iscnIdInput.value)
       ])
-      if (!(dataString as string)?.startsWith('data:application/json')) {
-        throw new Error('Invalid NFT Class ID')
-      }
-      const data = JSON.parse((dataString as string).replace('data:application/json;utf8,', ''))
       if (!data) { throw new Error('Invalid NFT Class ID') }
       iscnData.value = { contentMetadata: data }
       iscnOwner.value = owner as string
