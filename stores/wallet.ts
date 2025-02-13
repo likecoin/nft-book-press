@@ -130,29 +130,26 @@ export const useWalletStore = defineStore('wallet', () => {
     }
   }
 
-  function handleConnection (connection: LikeCoinWalletConnectorConnectionResult | { accounts?: any[], offlineSigner?: OfflineAminoSigner & OfflineDirectSigner, method?: string }) {
-    const accountsValue = connection?.accounts || []
+  function handleConnection (connection: LikeCoinWalletConnectorConnectionResult | { accounts: any[], offlineSigner?: OfflineAminoSigner & OfflineDirectSigner, method: string }) {
+    const accountsValue = connection.accounts
     const signerValue = connection?.offlineSigner || undefined
-    const methodValue = connection?.method || undefined
+    const methodValue = connection.method
 
-    if (accountsValue && accountsValue.length > 0) {
-      accounts.value = accountsValue
+    if (accountsValue.length === 0 || !methodValue) {
+      throw new Error("'accounts' or 'method' cannot be empty.")
     }
+
+    accounts.value = accountsValue
+    useTrackEvent('login', { method: methodValue })
+
     if (signerValue) {
       signer.value = signerValue as (OfflineAminoSigner & OfflineDirectSigner)
-    }
-    if (methodValue) {
-      useTrackEvent('login', { method: methodValue })
     }
 
     if (window.$crisp) {
       const wallet = accounts.value?.[0]?.address
-      if (wallet) {
-        window.$crisp.push(['set', 'session:data', [[['like_wallet', wallet]]]])
-      }
-      if (methodValue) {
-        window.$crisp.push(['set', 'session:data', [[['login_method', methodValue]]]])
-      }
+      window.$crisp.push(['set', 'session:data', [[['like_wallet', wallet]]]])
+      window.$crisp.push(['set', 'session:data', [[['login_method', methodValue]]]])
     }
   }
 
