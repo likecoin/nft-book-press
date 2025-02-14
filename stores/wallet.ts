@@ -135,7 +135,7 @@ export const useWalletStore = defineStore('wallet', () => {
     const signerValue = connection?.offlineSigner || undefined
     const methodValue = connection.method
 
-    if (accountsValue.length === 0 || !methodValue) {
+    if (!accountsValue?.length) {
       return
     }
 
