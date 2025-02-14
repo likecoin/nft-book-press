@@ -136,7 +136,7 @@ export const useWalletStore = defineStore('wallet', () => {
     const methodValue = connection.method
 
     if (accountsValue.length === 0 || !methodValue) {
-      throw new Error("'accounts' or 'method' cannot be empty.")
+      return
     }
 
     accounts.value = accountsValue
