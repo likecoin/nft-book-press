@@ -39,7 +39,10 @@
             footer: { base: 'text-center' },
           }"
         >
-          <UTable :columns="tableColumns" :rows="tableRows" @select="selectTableRow">
+          <div class="flex px-3 py-3.5 border-b border-gray-200">
+            <UInput v-model="q" placeholder="Filter book name" />
+          </div>
+          <UTable :columns="tableColumns" :rows="filteredRows" @select="selectTableRow">
             <template #image-data="{ row }">
               <img v-if="row.image" :src="row.image" :alt="row.className" class="w-12 h-12 object-cover rounded-lg">
             </template>
@@ -86,6 +89,7 @@ const isStripeConnectReady = ref(false)
 const latestBookList = ref([])
 const bestSellerBookList = ref([] as any[])
 const selectedTabItemIndex = ref(0)
+const q = ref('')
 
 const channelId = computed(() => {
   if (userLikerInfo.value?.user) {
@@ -138,6 +142,16 @@ const tableRows = computed(() => bookList.value.map((b: any) => {
   }
 }))
 
+const filteredRows = computed(() => {
+  if (!q.value) {
+    return tableRows.value
+  }
+  return tableRows.value.filter((row: any) => {
+    return [row.className, row.author].some((value) => {
+      return value && String(value).toLowerCase().includes(q.value.toLowerCase())
+    })
+  })
+})
 useSeoMeta({
   title: 'Latest Books',
   ogTitle: 'Latest Books'
