@@ -74,6 +74,7 @@ const bookStoreApiStore = useBookStoreApiStore()
 const walletStore = useWalletStore()
 
 const router = useRouter()
+const route = useRoute()
 
 const { wallet } = storeToRefs(walletStore)
 const { userLikerInfo } = storeToRefs(userStore)
@@ -89,7 +90,7 @@ const isStripeConnectReady = ref(false)
 const latestBookList = ref([])
 const bestSellerBookList = ref([] as any[])
 const selectedTabItemIndex = ref(0)
-const q = ref('')
+const q = ref(route.query.q || '')
 
 const channelId = computed(() => {
   if (userLikerInfo.value?.user) {
@@ -126,7 +127,6 @@ const tableColumns = computed(() => [
     sortable: false
   }
 ])
-
 const selectedTabItemKey = computed(() => tabItems[selectedTabItemIndex.value].key)
 const bookList = computed(() => selectedTabItemKey.value === 'latest' ? latestBookList.value : bestSellerBookList.value)
 const tableRows = computed(() => bookList.value.map((b: any) => {
