@@ -40,7 +40,7 @@
           }"
         >
           <div class="flex px-3 py-3.5 border-b border-gray-200">
-            <UInput v-model="q" placeholder="Filter book name" />
+            <UInput v-model="q" placeholder="Filter books by name or author" />
           </div>
           <UTable :columns="tableColumns" :rows="filteredRows" @select="selectTableRow">
             <template #image-data="{ row }">
@@ -146,12 +146,14 @@ const filteredRows = computed(() => {
   if (!q.value) {
     return tableRows.value
   }
+  const query = q.value.toLowerCase()
   return tableRows.value.filter((row: any) => {
     return [row.className, row.author].some((value) => {
-      return value && String(value).toLowerCase().includes(q.value.toLowerCase())
+      return value && value.toLowerCase().includes(query)
     })
   })
 })
+
 useSeoMeta({
   title: 'Latest Books',
   ogTitle: 'Latest Books'
