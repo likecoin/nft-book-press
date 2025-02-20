@@ -152,13 +152,13 @@ const items = computed(() => [
         target: '_blank'
       },
       {
-        label: 'Publishing Notice',
+        label: 'Listing Disclaimer',
         icon: 'i-heroicons-shield-exclamation',
         to: PUBLISHING_NOTICE_URL_EN,
         target: '_blank'
       },
       {
-        label: '出版須知',
+        label: '上架須知和收費',
         icon: 'i-heroicons-shield-exclamation',
         to: PUBLISHING_NOTICE_URL_ZH,
         target: '_blank'

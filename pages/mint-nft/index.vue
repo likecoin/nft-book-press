@@ -30,12 +30,12 @@
           variant: 'outline',
           click: onClickHelpZh,
         },{
-          label: 'Publishing Notice',
+          label: 'Listing Disclaimer',
           color: 'green',
           variant: 'outline',
           click: onClickDisclaimerEn,
         },{
-          label: '出版須知',
+          label: '上架須知和收費',
           color: 'green',
           variant: 'outline',
           click: onClickDisclaimerZh,
