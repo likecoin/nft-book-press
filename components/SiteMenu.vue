@@ -40,6 +40,7 @@
 import { storeToRefs } from 'pinia'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useCollectionStore } from '~/stores/collection'
+import { PUBLISHING_NOTICE_URL_EN, PUBLISHING_NOTICE_URL_ZH } from '~/constant'
 
 const { ISCN_TOOLS_URL } = useRuntimeConfig().public
 const bookStoreApiStore = useBookStoreApiStore()
@@ -148,6 +149,18 @@ const items = computed(() => [
         label: '出版教學',
         icon: 'i-heroicons-document-text',
         to: 'https://docs.like.co/zh/depub/nft-book-press',
+        target: '_blank'
+      },
+      {
+        label: 'Publishing Notice',
+        icon: 'i-heroicons-shield-exclamation',
+        to: PUBLISHING_NOTICE_URL_EN,
+        target: '_blank'
+      },
+      {
+        label: '出版須知',
+        icon: 'i-heroicons-shield-exclamation',
+        to: PUBLISHING_NOTICE_URL_ZH,
         target: '_blank'
       },
       {

@@ -29,6 +29,16 @@
           color: 'green',
           variant: 'outline',
           click: onClickHelpZh,
+        },{
+          label: 'Publishing Notice',
+          color: 'green',
+          variant: 'outline',
+          click: onClickDisclaimerEn,
+        },{
+          label: '出版須知',
+          color: 'green',
+          variant: 'outline',
+          click: onClickDisclaimerZh,
         }]"
       />
       <UDivider :label="`Steps ${step} / 4`" />
@@ -442,7 +452,7 @@ import type { FormError } from '#ui/types'
 
 import { useWalletStore } from '~/stores/wallet'
 import { downloadFile, convertArrayOfObjectsToCSV, sleep } from '~/utils'
-import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
+import { NFT_DEFAULT_MINT_AMOUNT, PUBLISHING_NOTICE_URL_EN, PUBLISHING_NOTICE_URL_ZH } from '~/constant'
 
 const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } = useRuntimeConfig().public
 const router = useRouter()
@@ -541,6 +551,16 @@ function onClickHelpEn () {
 function onClickHelpZh () {
   useTrackEvent('mint_nft_click_help_zh')
   window.open('https://docs.like.co/zh/depub/nft-book-press', '_blank')
+}
+
+function onClickDisclaimerEn () {
+  useTrackEvent('mint_nft_click_disclaimer_en')
+  window.open(PUBLISHING_NOTICE_URL_EN, '_blank')
+}
+
+function onClickDisclaimerZh () {
+  useTrackEvent('mint_nft_click_disclaimer_zh')
+  window.open(PUBLISHING_NOTICE_URL_ZH, '_blank')
 }
 
 async function onISCNIDInput () {
