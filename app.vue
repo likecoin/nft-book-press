@@ -95,7 +95,7 @@ useSeoMeta({
 })
 
 onMounted(async () => {
-  await restoreAuthSession()
+  restoreAuthSession()
   if (isAuthenticated.value) {
     await Promise.all([
       fetchBookListing(),
