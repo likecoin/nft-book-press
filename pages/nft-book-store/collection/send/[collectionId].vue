@@ -161,14 +161,13 @@
 </template>
 
 <script setup lang="ts">
-import { DeliverTxResponse } from '@cosmjs/stargate'
 import { storeToRefs } from 'pinia'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'
 import { parseImageURLFromMetadata } from '~/utils'
-import { getNFTs, getNFTOwner, signExecNFTSendAuthz, signSendNFTs } from '~/utils/cosmos'
+import { getNFTs, getNFTOwner, signSendNFTs } from '~/utils/cosmos'
 import { useMessageCharCount } from '~/composables/useMessageCharCount'
 import { AUTHOR_MESSAGE_LIMIT } from '~/constant'
 
@@ -207,7 +206,6 @@ const nftIdInputRef = ref<any>(undefined)
 const orderInfo = ref<any>({})
 const nftImages = ref<string[]>([])
 
-const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
 const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || isAutoFetchingNFTId.value || !!nftIdError.value || isLimitReached.value)
 
 const collectionName = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.name)
@@ -346,33 +344,19 @@ async function onSendNFTStart () {
     const client = signingClient.getSigningStargateClient()
     if (!client) { throw new Error('Signing client not exists') }
 
-    let res: DeliverTxResponse | undefined
-
     const flattenClassIds = classIds.value.map((classId: string) => {
       return new Array(orderInfo.value.quantity).fill(classId)
     }).flat()
     const flattenNftNestedIds = nftNestedIds.value.flat()
 
-    if (userIsOwner.value) {
-      res = await signSendNFTs(
-        orderInfo.value.wallet,
-        flattenClassIds,
-        flattenNftNestedIds,
-        signer.value,
-        wallet.value,
-        memo.value
-      )
-    } else {
-      res = await signExecNFTSendAuthz(
-        orderInfo.value.wallet,
-        ownerWallet.value,
-        flattenClassIds,
-        flattenNftNestedIds,
-        signer.value,
-        wallet.value,
-        memo.value
-      )
-    }
+    const res = await signSendNFTs(
+      orderInfo.value.wallet,
+      flattenClassIds,
+      flattenNftNestedIds,
+      signer.value,
+      wallet.value,
+      memo.value
+    )
 
     if (res.transactionHash && res.code === 0) {
       const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/sent/${paymentId.value}`,

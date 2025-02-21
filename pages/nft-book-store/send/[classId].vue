@@ -166,13 +166,12 @@
 </template>
 
 <script setup lang="ts">
-import { DeliverTxResponse } from '@cosmjs/stargate'
 import { storeToRefs } from 'pinia'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { parseImageURLFromMetadata } from '~/utils'
-import { signExecNFTSendAuthz, signSendNFTs } from '~/utils/cosmos'
+import { signSendNFTs } from '~/utils/cosmos'
 import { useMessageCharCount } from '~/composables/useMessageCharCount'
 import { AUTHOR_MESSAGE_LIMIT } from '~/constant'
 
@@ -210,7 +209,6 @@ const nftIdInputRef = ref<any>(undefined)
 const orderInfo = ref<any>({})
 const nftImage = ref('')
 
-const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
 const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || isAutoFetchingNFTId.value || !!nftIdError.value || isLimitReached.value)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
@@ -336,27 +334,14 @@ async function onSendNFTStart () {
     const client = signingClient.getSigningStargateClient()
     if (!client) { throw new Error('Signing client not exists') }
 
-    let res: DeliverTxResponse | undefined
-    if (userIsOwner.value) {
-      res = await signSendNFTs(
-        orderInfo.value.wallet,
-        Array(nftIds.value.length).fill(classId.value),
-        nftIds.value,
-        signer.value,
-        wallet.value,
-        memo.value
-      )
-    } else {
-      res = await signExecNFTSendAuthz(
-        orderInfo.value.wallet,
-        ownerWallet.value,
-        Array(nftIds.value.length).fill(classId.value),
-        nftIds.value,
-        signer.value,
-        wallet.value,
-        memo.value
-      )
-    }
+    const res = await signSendNFTs(
+      orderInfo.value.wallet,
+      Array(nftIds.value.length).fill(classId.value),
+      nftIds.value,
+      signer.value,
+      wallet.value,
+      memo.value
+    )
 
     if (res.transactionHash && res.code === 0) {
       const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/sent/${paymentId.value}`,

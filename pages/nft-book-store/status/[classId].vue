@@ -432,14 +432,6 @@
                     />
                   </UTooltip>
                 </template>
-                <template #authz-data="{ row }">
-                  <UButton
-                    :label="row.grantLabel"
-                    :to="row.grantRoute"
-                    :variant="row.isGranted ? 'outline' : 'solid'"
-                    color="green"
-                  />
-                </template>
                 <template #remove-data="{ row }">
                   <div class="flex justify-end items-center">
                     <UButton
@@ -679,7 +671,7 @@ import { useNftStore } from '~/stores/nft'
 import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL, downloadFile, convertArrayOfObjectsToCSV, getPurchaseLink, formatShippingAddress } from '~/utils'
-import { getNFTAuthzGrants, shortenWalletAddress } from '~/utils/cosmos'
+import { shortenWalletAddress } from '~/utils/cosmos'
 
 const { CHAIN_EXPLORER_URL, LIKE_CO_API, LIKER_LAND_URL } = useRuntimeConfig().public
 const store = useWalletStore()
@@ -714,7 +706,6 @@ const searchInput = ref('')
 const tableOfContents = ref('')
 
 const moderatorWallets = ref<string[]>([])
-const moderatorWalletsGrants = ref<any>({})
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
@@ -732,7 +723,7 @@ const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value 
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
 const orderHasShipping = computed(() => purchaseList.value.find((p: any) => !!p.shippingStatus))
 const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
-const userCanSendNFT = computed(() => userIsOwner.value || (wallet.value && moderatorWalletsGrants.value[wallet.value]))
+const userCanSendNFT = computed(() => userIsOwner.value)
 const purchaseLinks = computed(() =>
   fromChannelInput.value
     .split(',')
@@ -978,7 +969,6 @@ const moderatorWalletsTableColumns = computed(() => {
 
   if (userIsOwner.value) {
     columns.push(
-      { key: 'authz', label: 'Send NFT Grant', sortable: false },
       { key: 'remove', label: '', sortable: false }
     )
   }
@@ -987,20 +977,11 @@ const moderatorWalletsTableColumns = computed(() => {
 })
 
 const moderatorWalletsTableRows = computed(() => moderatorWallets.value.map((wallet, index) => {
-  const isGranted = !!moderatorWalletsGrants.value[wallet]
   return {
     index,
     wallet,
     shortenWallet: shortenWalletAddress(wallet),
-    walletLink: getPortfolioURL(wallet),
-    isGranted,
-    grantLabel: isGranted ? 'Granted' : 'Grant',
-    grantRoute: {
-      name: 'authz',
-      query: {
-        grantee: wallet
-      }
-    }
+    walletLink: getPortfolioURL(wallet)
   }
 }))
 
@@ -1034,16 +1015,6 @@ const priceIndexOptions = computed(() => classListingInfo.value.prices?.map((p: 
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
-})
-
-watch(moderatorWallets, (newModeratorWallets) => {
-  newModeratorWallets?.forEach(async (m) => {
-    if (!moderatorWalletsGrants.value[m]) {
-      try {
-        moderatorWalletsGrants.value[m] = await getNFTAuthzGrants(ownerWallet.value, m)
-      } catch {}
-    }
-  })
 })
 
 onMounted(async () => {

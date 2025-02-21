@@ -64,7 +64,7 @@
             </h3>
           </template>
           <UFormGroup :label="`Price(USD) of this collection (Minimal ${MINIMAL_PRICE} or $0 (free)) / 版本定價（美金）`">
-            <UInput v-model="price" type="number" step="0.01" :min="MINIMAL_PRICE" @input="onPriceInput"/>
+            <UInput v-model="price" type="number" step="0.01" :min="MINIMAL_PRICE" @input="onPriceInput" />
           </UFormGroup>
           <UFormGroup :label="`Total number of NFT for sale of this collection / 此定價上架的數量`">
             <UInput v-model="stock" type="number" step="1" :min="minStock" />

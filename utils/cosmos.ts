@@ -2,11 +2,9 @@ import { BigNumber } from 'bignumber.js'
 import { OfflineSigner } from '@cosmjs/proto-signing'
 import { ISCNSigningClient, ISCNRecordData } from '@likecoin/iscn-js'
 import { parseAndCalculateStakeholderRewards } from '@likecoin/iscn-js/dist/iscn/parsing'
-import { MsgSend } from 'cosmjs-types/cosmos/nft/v1beta1/tx'
 import { DeliverTxResponse } from '@cosmjs/stargate'
 import { PageRequest } from 'cosmjs-types/cosmos/base/query/v1beta1/pagination'
-import { parseAuthzGrant, parseTxInfoFromIndexedTx } from '@likecoin/iscn-js/dist/messages/parsing'
-import { GenericAuthorization } from 'cosmjs-types/cosmos/authz/v1beta1/authz'
+import { parseTxInfoFromIndexedTx } from '@likecoin/iscn-js/dist/messages/parsing'
 import { formatMsgSend } from '@likecoin/iscn-js/dist/messages/likenft'
 import { addParamToUrl } from '.'
 
@@ -82,24 +80,6 @@ export async function getNFTOwner (classId: string, nftId: string) {
     nftId
   )
   return { owner: res.owner }
-}
-
-export async function getNFTAuthzGranterGrants (granter: string) {
-  const c = (await getSigningClient()).getISCNQueryClient()
-  const client = await c.getQueryClient()
-  const g = await client.authz.granterGrants(granter)
-  if (!g?.grants) { return [] }
-  const grants = g.grants.map(parseAuthzGrant).filter(g => (g?.authorization?.value as GenericAuthorization)?.msg === '/cosmos.nft.v1beta1.MsgSend')
-  return grants
-}
-
-export async function getNFTAuthzGrants (granter: string, grantee: string) {
-  const c = (await getSigningClient()).getISCNQueryClient()
-  const client = await c.getQueryClient()
-  const g = await client.authz.grants(granter, grantee, '/cosmos.nft.v1beta1.MsgSend')
-  if (!g?.grants) { return null }
-  const grants = g.grants.map(parseAuthzGrant)
-  return grants[0]
 }
 
 export async function getNFTs ({ classId = '', owner = '', nftId = '', needCount = 0 }) {
@@ -282,70 +262,6 @@ export async function signSendNFTs (
     messages,
     { memo }
   ) as DeliverTxResponse
-  return res
-}
-
-export async function signGrantNFTSendAuthz (
-  grantee: string,
-  signer: OfflineSigner,
-  address: string,
-  memo?: string
-) {
-  const { RPC_URL } = useRuntimeConfig().public
-  const signingClient = await getSigningClient()
-  await signingClient.connectWithSigner(RPC_URL, signer)
-  const expirationInMs = Date.now() + 1000 * 5184000 // 60 days
-  const res = await signingClient.createGenericGrant(address, grantee, '/cosmos.nft.v1beta1.MsgSend', expirationInMs, { memo })
-  return res
-}
-
-export async function signExecNFTSendAuthz (
-  targetAddress: string,
-  ownerAddress: string,
-  classIds: string[],
-  nftIds: string[],
-  signer: OfflineSigner,
-  address: string,
-  memo?: string
-) {
-  const { RPC_URL } = useRuntimeConfig().public
-  const signingClient = await getSigningClient()
-  await signingClient.connectWithSigner(RPC_URL, signer)
-  const messages = [{
-    typeUrl: '/cosmos.authz.v1beta1.MsgExec',
-    value: {
-      grantee: address,
-      msgs: classIds.map((classId, index) => ({
-        typeUrl: '/cosmos.nft.v1beta1.MsgSend',
-        value: MsgSend.encode(
-          MsgSend.fromPartial({
-            sender: ownerAddress,
-            receiver: targetAddress,
-            classId,
-            id: nftIds[index]
-          })
-        ).finish()
-      }))
-    }
-  }]
-  const res = await signingClient.sendMessages(
-    address,
-    messages,
-    { memo }
-  ) as DeliverTxResponse
-  return res
-}
-
-export async function signRevokeNFTSendAuthz (
-  grantee: string,
-  signer: OfflineSigner,
-  address: string,
-  memo?: string
-) {
-  const { RPC_URL } = useRuntimeConfig().public
-  const signingClient = await getSigningClient()
-  await signingClient.connectWithSigner(RPC_URL, signer)
-  const res = await signingClient.revokeGenericGrant(address, grantee, '/cosmos.nft.v1beta1.MsgSend', { memo })
   return res
 }
 
