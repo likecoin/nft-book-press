@@ -1,2 +1,0 @@
-import{_ as t,o,c as s,a2 as c}from"./C-EBYX2v.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},n=new Error().stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="ba271fa4-cc66-43d3-8ca2-2f51609e8024",e._sentryDebugIdIdentifier="sentry-dbid-ba271fa4-cc66-43d3-8ca2-2f51609e8024")}catch{}})();const r={},a={class:"flex flex-col"};function d(e,n){return o(),s("main",a,[c(e.$slots,"default")])}const l=t(r,[["render",d]]);export{l as _};
-//# sourceMappingURL=DQNAuic-.js.map
