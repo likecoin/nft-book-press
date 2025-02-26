@@ -1315,7 +1315,7 @@ function shortenAllLinks () {
   try {
     sessionStorage.setItem(
       'nft_book_press_batch_shorten_url',
-      convertArrayOfObjectsToCSV(purchaseLinks.value.map(({ channel, ...link }) => ({ key: channel, ...link })))
+      convertArrayOfObjectsToCSV(purchaseLinks.value.map(({ channel, url }) => ({ key: channel, url })))
     )
     router.push({ name: 'batch-short-links', query: { print: 1 } })
   } catch (error) {
