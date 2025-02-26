@@ -20,7 +20,12 @@ export const AFFILIATION_CHANNELS = [
   { id: '@hunterbookstore', name: '獵人書店' },
   { id: '@kubrick_hk', name: 'Kubrick' },
   { id: '@nowherebooks', name: '飛地書店' },
-  { id: '@samkeebook', name: '森記圖書公司' }
+  { id: '@samkeebook', name: '森記圖書公司' },
+  { id: '@donothingbookshop', name: '無所事事小書店' },
+  { id: '@reveriebookstore', name: '長夢書店' },
+  { id: '@dionysus_books', name: '神話書店' },
+  { id: '@knockknockbookstore', name: 'knock knock 覺閣' },
+  { id: '@tobylai1221', name: '藝跡文化' }
 ]
 
 export const AUTHOR_MESSAGE_LIMIT = 98
