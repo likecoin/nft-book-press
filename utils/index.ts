@@ -215,3 +215,18 @@ export function getImageResizeURL (url: string, { width = 300 }: { width?: numbe
   const { LIKE_CO_STATIC_ENDPOINT } = useRuntimeConfig().public
   return `${LIKE_CO_STATIC_ENDPOINT}/thumbnail/?url=${encodeURIComponent(url)}&width=${width}`
 }
+
+export function fileToArrayBuffer (file: Blob): Promise<string | ArrayBuffer | null> {
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result)
+    reader.readAsArrayBuffer(file)
+  })
+}
+
+export async function digestFileSHA256 (buffer: ArrayBuffer) {
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  return hashHex
+}
