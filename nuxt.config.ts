@@ -76,6 +76,9 @@ export default defineNuxtConfig({
     process: path.resolve(__dirname, 'node_modules/unenv/runtime/node/process')
   },
   vite: {
+    ssr: {
+      noExternal: ['ipfs-only-hash']
+    },
     define: {
       global: 'globalThis'
     },
@@ -110,6 +113,9 @@ exports.randomFillSync = randomFillSync`
         defineModel: true,
         propsDestructure: true
       }
+    },
+    optimizeDeps: {
+      exclude: ['ipfs-only-hash']
     }
   },
 

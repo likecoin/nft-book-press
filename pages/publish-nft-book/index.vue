@@ -9,7 +9,7 @@
           <div v-for="(s, index) in steps" :key="index" class="flex items-center space-x-2 bg-white p-2 rounded-lg">
             <UAvatar
               :size="index === step ? 'lg' : 'md'"
-              :text="index + 1"
+              :text="(index + 1).toString()"
               :ui="{
                 background: index === step ? 'bg-primary-100' : 'bg-gray-200',
               }"
@@ -21,13 +21,10 @@
         </div>
 
         <!-- Step Content -->
-        <div class="mt-6 p-4 border rounded-lg bg-gray-100 text-center">
-          <p class="text-lg font-semibold">
-            {{ steps[step].title }}
-          </p>
-          <p class="text-gray-600">
-            {{ steps[step].description }}
-          </p>
+        <div class="mt-6 p-4 border rounded-lg bg-gray-100 text-center flex flex-col gap-[24px]">
+          <div v-if="step === 0">
+            <UploadForm @submit="handleUploadSubmit" />
+          </div>
         </div>
 
         <!-- Navigation Buttons -->
@@ -86,5 +83,10 @@ const nextStep = () => {
 
 const prevStep = () => {
   if (step.value > 0) { step.value-- }
+}
+
+const handleUploadSubmit = (data: any) => {
+  console.log('Upload data:', data)
+  nextStep()
 }
 </script>
