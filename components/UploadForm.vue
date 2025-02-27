@@ -26,18 +26,15 @@
       <table class="w-full">
         <tbody class="w-full">
           <tr
-            v-for="({
-              isFileImage,
-              fileData,
-              fileName,
-              fileSize
-            }, index) of fileRecords"
+            v-for="(
+              { fileData, fileName, fileSize, fileType }, index
+            ) of fileRecords"
             :key="fileName"
             class="flex justify-between items-center border-b-shade-gray border-b-[1px] text-dark-gray hover:bg-light-gray transition-colors w-full"
           >
             <td class="py-[4px]">
               <ImgPreviewer
-                :is-image="isFileImage"
+                :file-type="fileType"
                 :file-data="fileData"
                 size="small"
               />
@@ -68,17 +65,18 @@
 
 <script setup lang="ts">
 import exifr from 'exifr'
-import { BigNumber } from 'bignumber.js'
+import ePub from 'epubjs'
+// import { BigNumber } from 'bignumber.js'
 import { fileToArrayBuffer, digestFileSHA256 } from '~/utils/index'
+import { useFileUpload } from '~/composables/useFileUpload'
 
 const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024
 
+const { getFileType } = useFileUpload()
 const fileRecords = ref([])
 const isSizeExceeded = ref(false)
 const isDragging = ref(false)
-const modifiedEbookMap = ref({})
-const uploadStatus = ref('')
-const arweaveFee = ref(new BigNumber(0))
+const epubMetadataList = ref([])
 
 const computedFormClasses = computed(() => [
   'block',
@@ -102,24 +100,26 @@ const computedFormClasses = computed(() => [
   'hover:bg-gray-200'
 ])
 
-const modifiedFileRecords = computed(() =>
-  fileRecords.value.map((record: any) => {
-    if (['application/epub+zip', 'application/pdf'].includes(record.fileType)) {
-      const modifiedEpubRecord = modifiedEbookMap[record.ipfsHash]
-      if (modifiedEpubRecord) {
-        return modifiedEpubRecord
-      }
+const formatLanguage = (language: string) => {
+  let formattedLanguage = ''
+  if (language) {
+    if (language.toLowerCase().startsWith('en')) {
+      formattedLanguage = 'en'
+    } else if (language.toLowerCase().startsWith('zh')) {
+      formattedLanguage = 'zh'
+    } else {
+      formattedLanguage = language
     }
-    return record
-  })
-)
+  }
+  return formattedLanguage
+}
 
 const getFileInfo = async (file: Blob) => {
   const fileBytes = (await fileToArrayBuffer(file)) as ArrayBuffer
   if (!fileBytes) {
     return null
   }
-  const isImage = file.type.startsWith('image/')
+  const fileType = getFileType(file.type)
   const [fileSHA256, ipfsHash] = await Promise.all([
     digestFileSHA256(fileBytes),
     process.server
@@ -131,9 +131,9 @@ const getFileInfo = async (file: Blob) => {
   ])
 
   return {
+    fileType,
     fileBytes,
     fileSHA256,
-    imageType: isImage,
     ipfsHash
   }
 }
@@ -163,20 +163,19 @@ const onFileUpload = async (event: DragEvent) => {
 
         const info = await getFileInfo(file)
         if (info) {
-          const { fileSHA256, imageType, ipfsHash } = info
+          const { fileBytes, fileSHA256, ipfsHash, fileType } = info
           fileRecord = {
             ...fileRecord,
             fileName: file.name,
             fileSize: file.size,
-            fileType: file.type,
+            fileType,
             ipfsHash,
             fileSHA256,
-            isFileImage: !!imageType,
             fileBlob: file,
-            exifInfo: null // default value, to be potentially updated below
+            exifInfo: null
           }
 
-          if (imageType) {
+          if (fileType === 'image') {
             try {
               const exif = await exifr.parse(file)
               if (exif) {
@@ -187,17 +186,102 @@ const onFileUpload = async (event: DragEvent) => {
               console.error(err)
             }
           }
-          // if (file.type === 'application/epub+zip') {
-          //   await this.processEPub({ ipfsHash, buffer: fileBytes, file })
-          // } else if (file.type === 'application/pdf') {
-          //   await this.processPdf({ ipfsHash, buffer: fileBytes, file })
-          // }
+          if (fileType === 'epub') {
+            await processEPub({ ipfsHash, buffer: fileBytes, file })
+          }
         }
       } else {
         isSizeExceeded.value = true
       }
       fileRecords.value.push(fileRecord)
     }
+  }
+}
+
+const processEPub = async ({ ipfsHash, buffer, file }: { ipfsHash: string, buffer: ArrayBuffer; file: File }) => {
+  try {
+    const book = ePub(buffer)
+    await book.ready
+
+    const epubMetadata: any = {}
+
+    // Get metadata
+    const { metadata } = book.packaging
+    if (metadata) {
+      epubMetadata.epubFileName = file.name
+      epubMetadata.title = metadata.title
+      epubMetadata.author = metadata.creator
+      epubMetadata.language = formatLanguage(metadata.language)
+      epubMetadata.description = metadata.description
+    }
+
+    // Get tags
+    const opfFilePath = await (book.path as any).path
+    const opfContent = await book.archive.getText(opfFilePath)
+    const parser = new DOMParser()
+    const opfDocument = parser.parseFromString(opfContent, 'application/xml')
+    const dcSubjectElements = opfDocument.querySelectorAll(
+      'dc\\:subject, subject'
+    )
+    const subjects: string[] = []
+    dcSubjectElements.forEach((element) => {
+      const subject = element.textContent
+      if (subject) {
+        subjects.push(subject)
+      }
+    })
+    epubMetadata.tags = subjects
+
+    // Get cover file
+    const coverUrl = await book.coverUrl()
+    if (coverUrl) {
+      const response = await fetch(coverUrl)
+      const blobData = await response.blob()
+      if (blobData) {
+        const coverFile = new File(
+          [blobData],
+          `${metadata.title}_cover.jpeg`,
+          {
+            type: 'image/jpeg'
+          }
+        )
+
+        const coverInfo = await getFileInfo(coverFile)
+        if (coverInfo) {
+          const {
+            fileSHA256,
+            ipfsHash: ipfsThumbnailHash,
+            fileType
+          } = coverInfo
+
+          epubMetadata.thumbnailIpfsHash = ipfsThumbnailHash
+
+          const coverFileRecord: any = {
+            fileName: coverFile.name,
+            fileSize: coverFile.size,
+            fileType,
+            fileBlob: coverFile,
+            ipfsHash: ipfsThumbnailHash,
+            fileSHA256
+          }
+          const coverReader = new FileReader()
+          coverReader.onload = (e) => {
+            if (!e.target) { return }
+            coverFileRecord.fileData = e.target.result as string
+            fileRecords.value.push(coverFileRecord)
+            epubMetadata.coverData = e.target.result as string
+            epubMetadataList.value.push(epubMetadata)
+            sessionStorage.setItem('epubMetadataList', JSON.stringify(epubMetadataList.value))
+          }
+          coverReader.readAsDataURL(coverFile)
+          return
+        }
+      }
+    }
+    epubMetadataList.value.push(epubMetadata)
+    sessionStorage.setItem('epubMetadataList', JSON.stringify(epubMetadataList.value))
+  } catch (err) {
+    console.error(err)
   }
 }
 
