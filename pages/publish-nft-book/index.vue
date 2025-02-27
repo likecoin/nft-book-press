@@ -64,16 +64,12 @@ const steps = [
     description: 'Upload your book file'
   },
   {
-    title: '編輯資料',
-    description: 'Edit your book information'
+    title: '註冊 ISCN',
+    description: 'Register ISCN'
   },
   {
-    title: '行銷定價',
-    description: 'Marketing and pricing'
-  },
-  {
-    title: '確認上架',
-    description: 'Review and publish'
+    title: '鑄造區塊鏈書',
+    description: 'Mint NFT'
   }
 ]
 
