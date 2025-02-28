@@ -642,12 +642,18 @@ const onSubmit = async () => {
     }
   })
 
-  emit('submit', {
+  const uploadFileData = {
     fileRecords: fileRecords.value,
     arweaveIds: uploadArweaveIdList,
     epubMetadata: epubMetadataList.value[0],
     arweaveLinks: uploadArweaveLinkList
-  })
+  }
+
+  sessionStorage.setItem(
+    'uploadFileData',
+    JSON.stringify(uploadFileData)
+  )
+  emit('submit', uploadFileData)
 }
 
 defineExpose({
