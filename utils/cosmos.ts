@@ -7,6 +7,7 @@ import { PageRequest } from 'cosmjs-types/cosmos/base/query/v1beta1/pagination'
 import { parseTxInfoFromIndexedTx } from '@likecoin/iscn-js/dist/messages/parsing'
 import { formatMsgSend } from '@likecoin/iscn-js/dist/messages/likenft'
 import { addParamToUrl } from '.'
+import { TRANSFER_GAS } from '~/constant'
 
 const DEFAULT_GAS_AMOUNT = 200000
 const DEFAULT_GAS_PRICE = 10000
@@ -331,4 +332,59 @@ export async function sendNFTsToAPIWallet (
   }
 
   return transactionHash
+}
+
+export function amountToLIKE (likecoin: any, denom: string) {
+  if (!likecoin) { return -1 }
+  if (likecoin.denom === denom) {
+    return (new BigNumber(likecoin.amount)).dividedBy(1e9).toFixed()
+  }
+  console.error(`${likecoin.denom} is not supported denom`)
+  return -1
+}
+
+export async function getAccountBalance (address: string) {
+  const { CHAIN_MINIMAL_DENOM } = useRuntimeConfig().public
+  const c = (await getSigningClient()).getISCNQueryClient()
+  const client = await c.getQueryClient()
+  const balance = await client.bank.balance(address, CHAIN_MINIMAL_DENOM)
+  return new BigNumber(amountToLIKE(balance, CHAIN_MINIMAL_DENOM))
+}
+
+let cosmLib: any = null
+
+async function getCosmLib () {
+  if (!cosmLib) {
+    cosmLib = await import(/* webpackChunkName: "cosmjs" */ '@cosmjs/stargate')
+  }
+  return cosmLib
+}
+
+// Modify sendLIKE to get config from runtime
+export async function sendLIKE (
+  fromAddress: string,
+  toAddress: string,
+  amount: string,
+  signer: OfflineSigner,
+  memo: string
+) {
+  const network = getNetworkConfig()
+  const { CHAIN_MINIMAL_DENOM } = useRuntimeConfig().public
+  const DEFAULT_TRANSFER_FEE = {
+    gas: TRANSFER_GAS.toString(),
+    amount: [{
+      amount: new BigNumber(TRANSFER_GAS).multipliedBy(DEFAULT_GAS_PRICE).toFixed(0, 0),
+      denom: CHAIN_MINIMAL_DENOM
+    }]
+  }
+
+  const cosm = await getCosmLib()
+  const client = await cosm.SigningStargateClient.connectWithSigner(network.rpc, signer)
+  const coins = [{
+    amount: new BigNumber(amount).shiftedBy(9).toFixed(0, 0),
+    denom: CHAIN_MINIMAL_DENOM
+  }]
+  const res = await client.sendTokens(fromAddress, toAddress, coins, DEFAULT_TRANSFER_FEE, memo)
+  cosm.assertIsDeliverTxSuccess(res)
+  return res
 }
