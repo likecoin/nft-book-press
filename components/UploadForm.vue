@@ -1,82 +1,130 @@
 <template>
-  <div class="flex gap-3">
-    <form
-      :class="[computedFormClasses, isDragging ? 'bg-white' : '']"
-      @drop.prevent="onFileUpload"
-      @dragover.prevent="isDragging = true"
-      @dragleave.prevent="isDragging = false"
-      @click="$refs.imageFile.click()"
-    >
-      <UIcon name="i-heroicons-folder-arrow-down" class="w-5 h-5" />
-      <p class="text-gray-600 my-[16px]" v-text="`把檔案拖到此處上傳或`" />
-      <UButton type="button" variant="ghost" @click="$refs.imageFile.click()">
-        選擇檔案
-      </UButton>
-      <p class="text-xs text-gray-500 mt-2" v-text="`建議檔案大小: < 20 MB`" />
-      <input
-        ref="imageFile"
-        type="file"
-        multiple
-        class="hidden"
-        @change="onFileUpload"
+  <div class="flex flex-col gap-4">
+    <div class="flex gap-3">
+      <form
+        :class="[computedFormClasses, isDragging ? 'bg-white' : '']"
+        @drop.prevent="onFileUpload"
+        @dragover.prevent="isDragging = true"
+        @dragleave.prevent="isDragging = false"
+        @click="$refs.imageFile.click()"
       >
-    </form>
+        <UIcon name="i-heroicons-folder-arrow-down" class="w-5 h-5" />
+        <p class="text-gray-600 my-[16px]" v-text="`把檔案拖到此處上傳或`" />
+        <UButton type="button" variant="ghost" @click="$refs.imageFile.click()">
+          選擇檔案
+        </UButton>
+        <p class="text-xs text-gray-500 mt-2" v-text="`建議檔案大小: < 20 MB`" />
+        <input
+          ref="imageFile"
+          type="file"
+          multiple
+          class="hidden"
+          @change="onFileUpload"
+        >
+      </form>
 
-    <div v-if="fileRecords.length" class="flex flex-col w-full">
-      <table class="w-full">
-        <tbody class="w-full">
-          <tr
-            v-for="(
-              { fileData, fileName, fileSize, fileType }, index
-            ) of fileRecords"
-            :key="fileName"
-            class="flex justify-between items-center border-b-shade-gray border-b-[1px] text-dark-gray hover:bg-light-gray transition-colors w-full"
-          >
-            <td class="py-[4px]">
-              <ImgPreviewer
-                :file-type="fileType"
-                :file-data="fileData"
-                size="small"
-              />
-            </td>
-            <td>
-              <div class="flex flex-col">
-                <p class="font-semibold text-gray-700">
-                  {{ fileName }}
-                </p>
-                <p class="text-gray-500 text-sm">
-                  {{ Math.round(fileSize * 0.001) }} KB
-                </p>
-              </div>
-            </td>
-            <td>
-              <UIcon
-                name="i-heroicons-trash"
-                class="cursor-pointer text-red-500"
-                @click="handleDeleteFile(index)"
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div v-if="fileRecords.length" class="flex flex-col w-full">
+        <table class="w-full">
+          <tbody class="w-full">
+            <tr
+              v-for="(
+                { fileData, fileName, fileSize, fileType }, index
+              ) of fileRecords"
+              :key="fileName"
+              class="flex justify-between items-center border-b-shade-gray border-b-[1px] text-dark-gray hover:bg-light-gray transition-colors w-full"
+            >
+              <td class="py-[4px]">
+                <ImgPreviewer
+                  :file-type="fileType"
+                  :file-data="fileData"
+                  size="small"
+                />
+              </td>
+              <td>
+                <div class="flex flex-col">
+                  <p class="font-semibold text-gray-700">
+                    {{ fileName }}
+                  </p>
+                  <p class="text-gray-500 text-sm">
+                    {{ Math.round(fileSize * 0.001) }} KB
+                  </p>
+                </div>
+              </td>
+              <td>
+                <UIcon
+                  name="i-heroicons-trash"
+                  class="cursor-pointer text-red-500"
+                  @click="handleDeleteFile(index)"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div v-if="uploadStatus" class="w-full">
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <UBadge color="primary" variant="subtle">
+            Uploading
+          </UBadge>
+          <span class="text-xs font-medium text-gray-500">
+            {{ Math.round((signProgress / numberOfSignNeeded) * 100) }}%
+          </span>
+        </div>
+        <UProgress
+          :value="(signProgress / numberOfSignNeeded) * 100"
+          color="primary"
+          class="w-full"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import exifr from 'exifr'
 import ePub from 'epubjs'
-// import { BigNumber } from 'bignumber.js'
+import { BigNumber } from 'bignumber.js'
 import { fileToArrayBuffer, digestFileSHA256 } from '~/utils/index'
 import { useFileUpload } from '~/composables/useFileUpload'
+import {
+  estimateBundlrFilePrice,
+  uploadSingleFileToBundlr
+} from '~/utils/arweave'
+import { sendLIKE } from '~/utils/cosmos' // You'll need to implement this
+import { useWalletStore } from '~/stores/wallet'
+import { useBookStoreApiStore } from '~/stores/book-store-api'
 
 const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024
+const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+
+const store = useWalletStore()
+const { wallet, signer } = storeToRefs(store)
+const { initIfNecessary } = store
+const bookStoreApiStore = useBookStoreApiStore()
+const { token } = storeToRefs(bookStoreApiStore)
 
 const { getFileType } = useFileUpload()
 const fileRecords = ref([])
 const isSizeExceeded = ref(false)
 const isDragging = ref(false)
 const epubMetadataList = ref([])
+
+const arweaveFee = ref(new BigNumber(0))
+const uploadStatus = ref('')
+const arweaveFeeMap = ref({})
+const arweaveFeeTargetAddress = ref('')
+const sentArweaveTransactionInfo = ref(new Map())
+const isOpenWarningSnackbar = ref(false)
+const error = ref('')
+const balance = ref(new BigNumber(0))
+const signDialogError = ref('')
+const numberOfSignNeeded = ref(0)
+const signProgress = ref(0)
+
+const emit = defineEmits(['arweaveUploaded', 'submit'])
 
 const computedFormClasses = computed(() => [
   'block',
@@ -100,6 +148,16 @@ const computedFormClasses = computed(() => [
   'hover:bg-gray-200'
 ])
 
+watch(fileRecords, async (newFileRecords) => {
+  if (newFileRecords.length) {
+    uploadStatus.value = 'loading'
+    await estimateArweaveFee()
+    uploadStatus.value = ''
+  } else {
+    arweaveFee.value = new BigNumber(0)
+  }
+}, { deep: true })
+
 const formatLanguage = (language: string) => {
   let formattedLanguage = ''
   if (language) {
@@ -122,7 +180,7 @@ const getFileInfo = async (file: Blob) => {
   const fileType = getFileType(file.type)
   const [fileSHA256, ipfsHash] = await Promise.all([
     digestFileSHA256(fileBytes),
-    process.server
+    process.sever
       ? (async () => {
           const Hash = (await import('ipfs-only-hash')) as any
           return await Hash.of(new Uint8Array(fileBytes))
@@ -139,6 +197,7 @@ const getFileInfo = async (file: Blob) => {
 }
 
 const onFileUpload = async (event: DragEvent) => {
+  uploadStatus.value = 'loading'
   isSizeExceeded.value = false
   const files =
     event.dataTransfer?.files || (event.target as HTMLInputElement)?.files
@@ -194,6 +253,7 @@ const onFileUpload = async (event: DragEvent) => {
         isSizeExceeded.value = true
       }
       fileRecords.value.push(fileRecord)
+      uploadStatus.value = ''
     }
   }
 }
@@ -266,12 +326,17 @@ const processEPub = async ({ ipfsHash, buffer, file }: { ipfsHash: string, buffe
           }
           const coverReader = new FileReader()
           coverReader.onload = (e) => {
-            if (!e.target) { return }
+            if (!e.target) {
+              return
+            }
             coverFileRecord.fileData = e.target.result as string
             fileRecords.value.push(coverFileRecord)
             epubMetadata.coverData = e.target.result as string
             epubMetadataList.value.push(epubMetadata)
-            sessionStorage.setItem('epubMetadataList', JSON.stringify(epubMetadataList.value))
+            sessionStorage.setItem(
+              'epubMetadataList',
+              JSON.stringify(epubMetadataList.value)
+            )
           }
           coverReader.readAsDataURL(coverFile)
           return
@@ -279,7 +344,10 @@ const processEPub = async ({ ipfsHash, buffer, file }: { ipfsHash: string, buffe
       }
     }
     epubMetadataList.value.push(epubMetadata)
-    sessionStorage.setItem('epubMetadataList', JSON.stringify(epubMetadataList.value))
+    sessionStorage.setItem(
+      'epubMetadataList',
+      JSON.stringify(epubMetadataList.value)
+    )
   } catch (err) {
     console.error(err)
   }
@@ -289,7 +357,306 @@ const handleDeleteFile = (index: number) => {
   fileRecords.value.splice(index, 1)
 }
 
-const onSubmit = () => {
-  console.log('提交表單')
+const estimateArweaveFee = async (): Promise<void> => {
+  uploadStatus.value = 'loading'
+  try {
+    const results = await Promise.all(
+      fileRecords.value.map(async (record) => {
+        const priceResult = await estimateBundlrFilePrice({
+          fileSize: record.fileBlob?.size || 0,
+          ipfsHash: record.ipfsHash
+        })
+        return {
+          ...priceResult,
+          ipfsHash: record.ipfsHash
+        }
+      })
+    )
+
+    let totalFee = new BigNumber(0)
+    results.forEach((result) => {
+      const { wallet, arweaveId, LIKE, ipfsHash } = result
+      if (LIKE) {
+        totalFee = totalFee.plus(new BigNumber(LIKE))
+        arweaveFeeMap.value[ipfsHash] = LIKE
+      }
+      if (arweaveId) {
+        sentArweaveTransactionInfo.value.set(ipfsHash, {
+          transactionHash: '',
+          arweaveId
+        })
+        const metadata = epubMetadataList.value.find(
+          (data: any) => data.thumbnailIpfsHash === ipfsHash
+        )
+        if (metadata) {
+          metadata.thumbnailArweaveId = arweaveId
+        }
+      }
+      if (!arweaveFeeTargetAddress.value) {
+        arweaveFeeTargetAddress.value = wallet
+      }
+    })
+
+    arweaveFee.value = totalFee
+  } catch (err) {
+    console.error(err)
+  }
+  uploadStatus.value = ''
 }
+
+const submitToArweave = async (record: any): Promise<void> => {
+  const existingData =
+    sentArweaveTransactionInfo.value.get(record.ipfsHash) || {}
+  const { transactionHash, arweaveId: uploadArweaveId } = existingData
+  if (uploadArweaveId) {
+    return
+  }
+
+  if (!record.fileBlob) {
+    return
+  }
+  // open sign dialog
+  let txHash = transactionHash
+  if (!txHash) {
+    txHash = await sendArweaveFeeTx(record)
+    if (!txHash) {
+      throw new Error('TRANSACTION_NOT_SENT')
+    }
+  }
+
+  try {
+    const arrayBuffer = await record.fileBlob.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+    const { arweaveId, arweaveLink } = await uploadSingleFileToBundlr(buffer, {
+      fileSize: record.fileBlob?.size || 0,
+      ipfsHash: record.ipfsHash,
+      fileType: record.fileType as string,
+      txHash,
+      token: token.value
+    })
+
+    if (arweaveId) {
+      const uploadedData =
+        sentArweaveTransactionInfo.value.get(record.ipfsHash) || {}
+      sentArweaveTransactionInfo.value.set(record.ipfsHash, {
+        ...uploadedData,
+        arweaveId,
+        arweaveLink
+      })
+      if (record.fileName.includes('cover.jpeg')) {
+        const metadata = epubMetadataList.value.find(
+          (file: any) => file.thumbnailIpfsHash === record.ipfsHash
+        )
+        if (metadata) {
+          metadata.thumbnailArweaveId = arweaveId
+        }
+      }
+      emit('arweaveUploaded', { arweaveId, arweaveLink })
+      // close sign dialog
+    } else {
+      isOpenWarningSnackbar.value = true
+      error.value = 'IscnRegisterForm.error.arweave'
+      throw new Error(error.value)
+    }
+  } catch (err) {
+    throw new Error(err as string)
+  }
+}
+
+const sendArweaveFeeTx = async (record: any): Promise<string> => {
+  if (sentArweaveTransactionInfo.value.has(record.ipfsHash)) {
+    const transactionInfo = sentArweaveTransactionInfo.value.get(
+      record.ipfsHash
+    )
+    if (transactionInfo && transactionInfo.transactionHash) {
+      return transactionInfo.transactionHash
+    }
+  }
+  await initIfNecessary()
+  if (!signer.value) {
+    throw new Error('SIGNER_NOT_INITED')
+  }
+  if (!arweaveFeeTargetAddress.value) {
+    throw new Error('TARGET_ADDRESS_NOT_SET')
+  }
+  if (!arweaveFeeMap.value[record.ipfsHash]) {
+    throw new Error('ARWEAVE_FEE_NOT_SET')
+  }
+  uploadStatus.value = 'signing'
+  const memo = JSON.stringify({
+    ipfs: record.ipfsHash,
+    fileSize: record.fileBlob?.size || 0
+  })
+  try {
+    const { transactionHash } = await sendLIKE(
+      wallet.value,
+      arweaveFeeTargetAddress.value,
+      arweaveFeeMap.value[record.ipfsHash],
+      signer.value,
+      memo
+    )
+    if (transactionHash) {
+      const existingData =
+        sentArweaveTransactionInfo.value.get(record.ipfsHash) || {}
+      sentArweaveTransactionInfo.value.set(record.ipfsHash, {
+        ...existingData,
+        transactionHash
+      })
+      return transactionHash
+    }
+  } catch (err) {
+    signDialogError.value = (err as Error).toString()
+    console.error(err)
+  } finally {
+    uploadStatus.value = 'uploading'
+  }
+
+  return ''
+}
+
+const uploadFileAndGetArweaveId = async (file: any, txHash: string) => {
+  const arrayBuffer = await file.fileBlob.arrayBuffer()
+  const buffer = Buffer.from(arrayBuffer)
+  const { arweaveId, arweaveLink } = await uploadSingleFileToBundlr(buffer, {
+    fileSize: file.fileBlob?.size || 0,
+    ipfsHash: file.ipfsHash,
+    fileType: file.fileType,
+    txHash,
+    token: token.value
+  })
+  return { arweaveId, arweaveLink }
+}
+
+const setEbookCoverFromImages = async () => {
+  if (epubMetadataList.value?.find(epubMetadata => epubMetadata.thumbnailArweaveId)) {
+    return
+  }
+
+  for (let i = 0; i < fileRecords.value.length; i += 1) {
+    const file = fileRecords.value[i]
+    if (IMAGE_MIME_TYPES.includes(file.fileType)) {
+      const existingData = sentArweaveTransactionInfo.value.get(file.ipfsHash) || {}
+      if (existingData.arweaveId) {
+        epubMetadataList.value.push({
+          thumbnailIpfsHash: file.ipfsHash,
+          thumbnailArweaveId: existingData.arweaveId
+        })
+        break
+      }
+      let { transactionHash } = existingData
+      if (!transactionHash) {
+        transactionHash = await sendArweaveFeeTx(file)
+      }
+      const { arweaveId, arweaveLink } = await uploadFileAndGetArweaveId(
+        file,
+        transactionHash
+      )
+
+      if (arweaveId) {
+        epubMetadataList.value.push({
+          thumbnailIpfsHash: file.ipfsHash,
+          thumbnailArweaveId: arweaveId
+        })
+        sentArweaveTransactionInfo.value.set(file.ipfsHash, {
+          transactionHash,
+          arweaveId,
+          arweaveLink
+        })
+        break
+      }
+    }
+  }
+}
+
+const onSubmit = async () => {
+  if (!signer.value) {
+    await initIfNecessary()
+  }
+  if (!signer.value) {
+    throw new Error('SIGNER_NOT_INITED')
+  }
+  uploadStatus.value = 'uploading'
+  error.value = ''
+  signDialogError.value = ''
+
+  const currentBalance = await getAccountBalance(wallet.value)
+  balance.value = currentBalance
+
+  if (currentBalance.lt(arweaveFee.value)) {
+    error.value = 'INSUFFICIENT_BALANCE'
+    isOpenWarningSnackbar.value = true
+    uploadStatus.value = ''
+    return
+  }
+
+  if (!fileRecords.value.some(file => file.fileBlob)) {
+    error.value = 'NO_FILE_TO_UPLOAD'
+    isOpenWarningSnackbar.value = true
+    uploadStatus.value = ''
+    return
+  }
+
+  try {
+    uploadStatus.value = 'uploading'
+
+    if (
+      fileRecords.value.find(file => file.fileType === 'application/pdf') &&
+      !fileRecords.value.find(
+        file => file.fileType === 'application/epub+zip'
+      )
+    ) {
+      await setEbookCoverFromImages()
+    }
+
+    numberOfSignNeeded.value = fileRecords.value.length
+    signProgress.value = 0
+
+    for (let i = 0; i < fileRecords.value.length; i += 1) {
+      const record = fileRecords.value[i]
+      signProgress.value = i + 1
+      await submitToArweave(record)
+    }
+  } catch (error) {
+    console.error(error)
+    isOpenWarningSnackbar.value = true
+    error.value = (error as Error).toString()
+    uploadStatus.value = ''
+    return
+  } finally {
+    uploadStatus.value = ''
+  }
+
+  const uploadArweaveIdList = Array.from(
+    sentArweaveTransactionInfo.value.values()
+  ).map(entry => entry.arweaveId)
+  const uploadArweaveLinkList = Array.from(
+    sentArweaveTransactionInfo.value.values()
+  ).map(entry => entry.arweaveLink)
+
+  fileRecords.value.forEach((record: any, index: number) => {
+    if (sentArweaveTransactionInfo.value.has(record.ipfsHash)) {
+      const info = sentArweaveTransactionInfo.value.get(record.ipfsHash)
+      if (info) {
+        const { arweaveId, arweaveLink } = info
+        if (arweaveId) {
+          fileRecords.value[index].arweaveId = arweaveId
+        }
+        if (arweaveLink) {
+          fileRecords.value[index].arweaveLink = arweaveLink
+        }
+      }
+    }
+  })
+
+  emit('submit', {
+    fileRecords: fileRecords.value,
+    arweaveIds: uploadArweaveIdList,
+    epubMetadata: epubMetadataList.value[0],
+    arweaveLinks: uploadArweaveLinkList
+  })
+}
+
+defineExpose({
+  onSubmit
+})
 </script>

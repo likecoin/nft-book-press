@@ -23,7 +23,10 @@
         <!-- Step Content -->
         <div class="mt-6 p-4 border rounded-lg bg-gray-100 text-center flex flex-col gap-[24px]">
           <div v-if="step === 0">
-            <UploadForm @submit="handleUploadSubmit" />
+            <UploadForm
+              ref="uploadFormRef"
+              @submit="handleUploadSubmit"
+            />
           </div>
         </div>
 
@@ -55,8 +58,8 @@
 <script setup lang="ts">
 
 const route = useRoute()
-
 const step = ref(0)
+const uploadFormRef = ref()
 
 const steps = [
   {
@@ -73,8 +76,18 @@ const steps = [
   }
 ]
 
-const nextStep = () => {
-  if (step.value < steps.length - 1) { step.value++ }
+const nextStep = async () => {
+  try {
+    if (step.value === 0 && uploadFormRef.value) {
+      await uploadFormRef.value.onSubmit()
+      return
+    }
+    if (step.value < steps.length - 1) {
+      step.value++
+    }
+  } catch (error) {
+    console.error('Error during form submission:', error)
+  }
 }
 
 const prevStep = () => {
