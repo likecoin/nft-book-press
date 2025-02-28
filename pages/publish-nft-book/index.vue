@@ -31,23 +31,13 @@
         </div>
 
         <!-- Navigation Buttons -->
-        <div class="flex gap-2 justify-between mt-4">
+        <div class="flex gap-2 justify-center mt-4">
           <UButton
-            v-if="step > 0"
-            leading-icon="i-heroicons-arrow-left"
-            :disabled="step === 0"
-            @click="prevStep"
-          >
-            Prev
-          </UButton>
-
-          <UButton
-            trailing-icon="i-heroicons-arrow-right"
-            :class="{ 'ml-auto': step === 0 }"
-            :disabled="step === steps.length - 1"
+            v-if="hasFiles"
+            :disabled="step === steps.length - 1 || shouldDisableNext"
             @click="nextStep"
           >
-            Next
+            {{ nextText }}
           </UButton>
         </div>
       </div>
@@ -60,6 +50,29 @@
 const route = useRoute()
 const step = ref(0)
 const uploadFormRef = ref()
+const nextText = computed(() => {
+  switch (step.value) {
+    case 0:
+      return 'Start Upload'
+    case 1:
+      return 'Register ISCN'
+    case 2:
+      return 'Mint NFT'
+    default:
+      return 'Next'
+  }
+})
+
+const hasFiles = computed(() => {
+  return uploadFormRef.value?.fileRecords?.length > 0
+})
+
+const shouldDisableNext = computed(() => {
+  if (step.value === 0) {
+    return uploadFormRef.value?.uploadStatus !== ''
+  }
+  return false
+})
 
 const steps = [
   {
@@ -88,10 +101,6 @@ const nextStep = async () => {
   } catch (error) {
     console.error('Error during form submission:', error)
   }
-}
-
-const prevStep = () => {
-  if (step.value > 0) { step.value-- }
 }
 
 const handleUploadSubmit = (data: any) => {

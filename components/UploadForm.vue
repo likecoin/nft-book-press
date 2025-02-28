@@ -65,15 +65,15 @@
     <div v-if="uploadStatus" class="w-full">
       <div class="space-y-3">
         <div class="flex justify-between items-center">
-          <UBadge color="primary" variant="subtle">
-            Uploading
+          <UBadge color="Badge" variant="soft">
+            {{ uploadStatus }}
           </UBadge>
-          <span class="text-xs font-medium text-gray-500">
-            {{ Math.round((signProgress / numberOfSignNeeded) * 100) }}%
-          </span>
+          <p class="text-xs text-gray-500">
+            請勿關閉此視窗，直到上傳完成。
+          </p>
         </div>
         <UProgress
-          :value="(signProgress / numberOfSignNeeded) * 100"
+          animation="carousel"
           color="primary"
           class="w-full"
         />
@@ -192,64 +192,68 @@ const getFileInfo = async (file: Blob) => {
 }
 
 const onFileUpload = async (event: DragEvent) => {
-  uploadStatus.value = 'loading'
-  isSizeExceeded.value = false
-  const files =
-    event.dataTransfer?.files || (event.target as HTMLInputElement)?.files
+  try {
+    uploadStatus.value = 'loading'
+    isSizeExceeded.value = false
+    const files =
+      event.dataTransfer?.files || (event.target as HTMLInputElement)?.files
 
-  if (event.currentTarget instanceof HTMLElement) {
-    event.currentTarget.classList.remove('bg-gray-200')
-  }
+    if (event.currentTarget instanceof HTMLElement) {
+      event.currentTarget.classList.remove('bg-gray-100')
+    }
 
-  if (files?.length) {
-    for (const file of files) {
-      const reader = new FileReader()
-      let fileRecord: any = {}
+    if (files?.length) {
+      for (const file of files) {
+        const reader = new FileReader()
+        let fileRecord: any = {}
 
-      if (file.size < UPLOAD_FILESIZE_MAX) {
-        reader.onload = (e) => {
-          if (!e.target) {
-            return
+        if (file.size < UPLOAD_FILESIZE_MAX) {
+          reader.onload = (e) => {
+            if (!e.target) {
+              return
+            }
+            fileRecord.fileData = e.target.result as string
           }
-          fileRecord.fileData = e.target.result as string
-        }
-        reader.readAsDataURL(file)
+          reader.readAsDataURL(file)
 
-        const info = await getFileInfo(file)
-        if (info) {
-          const { fileBytes, fileSHA256, ipfsHash, fileType } = info
-          fileRecord = {
-            ...fileRecord,
-            fileName: file.name,
-            fileSize: file.size,
-            fileType,
-            ipfsHash,
-            fileSHA256,
-            fileBlob: file,
-            exifInfo: null
-          }
+          const info = await getFileInfo(file)
+          if (info) {
+            const { fileBytes, fileSHA256, ipfsHash, fileType } = info
+            fileRecord = {
+              ...fileRecord,
+              fileName: file.name,
+              fileSize: file.size,
+              fileType,
+              ipfsHash,
+              fileSHA256,
+              fileBlob: file,
+              exifInfo: null
+            }
 
-          if (fileType === 'image') {
-            try {
-              const exif = await exifr.parse(file)
-              if (exif) {
-                fileRecord.exifInfo = exif
+            if (fileType === 'image') {
+              try {
+                const exif = await exifr.parse(file)
+                if (exif) {
+                  fileRecord.exifInfo = exif
+                }
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.error(err)
               }
-            } catch (err) {
-              // eslint-disable-next-line no-console
-              console.error(err)
+            }
+            if (fileType === 'epub') {
+              await processEPub({ ipfsHash, buffer: fileBytes, file })
             }
           }
-          if (fileType === 'epub') {
-            await processEPub({ ipfsHash, buffer: fileBytes, file })
-          }
+        } else {
+          isSizeExceeded.value = true
         }
-      } else {
-        isSizeExceeded.value = true
+        fileRecords.value.push(fileRecord)
+        uploadStatus.value = ''
       }
-      fileRecords.value.push(fileRecord)
-      uploadStatus.value = ''
     }
+  } finally {
+    uploadStatus.value = ''
   }
 }
 
@@ -353,20 +357,22 @@ const handleDeleteFile = (index: number) => {
 }
 
 const estimateArweaveFee = async (): Promise<void> => {
-  uploadStatus.value = 'loading'
   try {
-    const results = await Promise.all(
-      fileRecords.value.map(async (record) => {
-        const priceResult = await estimateBundlrFilePrice({
-          fileSize: record.fileBlob?.size || 0,
-          ipfsHash: record.ipfsHash
-        })
-        return {
-          ...priceResult,
-          ipfsHash: record.ipfsHash
-        }
+    uploadStatus.value = 'loading'
+    const results = []
+    for (const record of fileRecords.value) {
+      await new Promise(resolve => setTimeout(resolve, 100))
+
+      const priceResult = await estimateBundlrFilePrice({
+        fileSize: record.fileBlob?.size || 0,
+        ipfsHash: record.ipfsHash
       })
-    )
+      results.push({
+        ...priceResult,
+        ipfsHash: record.ipfsHash
+      })
+    }
+
     let totalFee = new BigNumber(0)
     results.forEach((result) => {
       const { address, arweaveId, LIKE, ipfsHash } = result
@@ -394,8 +400,9 @@ const estimateArweaveFee = async (): Promise<void> => {
     arweaveFee.value = totalFee
   } catch (err) {
     console.error(err)
+  } finally {
+    uploadStatus.value = ''
   }
-  uploadStatus.value = ''
 }
 
 const submitToArweave = async (record: any): Promise<void> => {
@@ -657,6 +664,8 @@ const onSubmit = async () => {
 }
 
 defineExpose({
-  onSubmit
+  onSubmit,
+  fileRecords,
+  uploadStatus
 })
 </script>
