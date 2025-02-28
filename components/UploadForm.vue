@@ -242,7 +242,7 @@ const onFileUpload = async (event: DragEvent) => {
               }
             }
             if (fileType === 'epub') {
-              await processEPub({ ipfsHash, buffer: fileBytes, file })
+              await processEPub({ buffer: fileBytes, file })
             }
           }
         } else {
@@ -257,7 +257,7 @@ const onFileUpload = async (event: DragEvent) => {
   }
 }
 
-const processEPub = async ({ ipfsHash, buffer, file }: { ipfsHash: string, buffer: ArrayBuffer; file: File }) => {
+const processEPub = async ({ buffer, file }: { buffer: ArrayBuffer; file: File }) => {
   try {
     const book = ePub(buffer)
     await book.ready
