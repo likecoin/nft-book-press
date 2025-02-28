@@ -22,23 +22,27 @@
 
         <!-- Step Content -->
         <div class="mt-6 p-4 border rounded-lg bg-gray-100 text-center flex flex-col gap-[24px]">
+          <!-- <RegisterISCN /> -->
           <div v-if="step === 0">
             <UploadForm
               ref="uploadFormRef"
               @submit="handleUploadSubmit"
             />
           </div>
-        </div>
+          <div v-else-if="step === 1">
+            <RegisterISCN />
+          </div>
 
-        <!-- Navigation Buttons -->
-        <div class="flex gap-2 justify-center mt-4">
-          <UButton
-            v-if="hasFiles"
-            :disabled="step === steps.length - 1 || shouldDisableNext"
-            @click="nextStep"
-          >
-            {{ nextText }}
-          </UButton>
+          <!-- Navigation Buttons -->
+          <div class="flex gap-2 justify-center mt-4">
+            <UButton
+              v-if="hasFiles"
+              :disabled="step === steps.length - 1 || shouldDisableNext"
+              @click="nextStep"
+            >
+              {{ nextText }}
+            </UButton>
+          </div>
         </div>
       </div>
     </PageBody>
