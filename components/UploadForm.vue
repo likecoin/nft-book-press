@@ -87,7 +87,7 @@ import { storeToRefs } from 'pinia'
 import exifr from 'exifr'
 import ePub from 'epubjs'
 import { BigNumber } from 'bignumber.js'
-import { fileToArrayBuffer, digestFileSHA256 } from '~/utils/index'
+import { fileToArrayBuffer, digestFileSHA256, calculateIPFSHash } from '~/utils/index'
 import { useFileUpload } from '~/composables/useFileUpload'
 import {
   estimateBundlrFilePrice,
@@ -180,12 +180,7 @@ const getFileInfo = async (file: Blob) => {
   const fileType = getFileType(file.type)
   const [fileSHA256, ipfsHash] = await Promise.all([
     digestFileSHA256(fileBytes),
-    process.sever
-      ? (async () => {
-          const Hash = (await import('ipfs-only-hash')) as any
-          return await Hash.of(new Uint8Array(fileBytes))
-        })()
-      : null
+    calculateIPFSHash(fileBytes)
   ])
 
   return {
@@ -372,10 +367,9 @@ const estimateArweaveFee = async (): Promise<void> => {
         }
       })
     )
-
     let totalFee = new BigNumber(0)
     results.forEach((result) => {
-      const { wallet, arweaveId, LIKE, ipfsHash } = result
+      const { address, arweaveId, LIKE, ipfsHash } = result
       if (LIKE) {
         totalFee = totalFee.plus(new BigNumber(LIKE))
         arweaveFeeMap.value[ipfsHash] = LIKE
@@ -393,7 +387,7 @@ const estimateArweaveFee = async (): Promise<void> => {
         }
       }
       if (!arweaveFeeTargetAddress.value) {
-        arweaveFeeTargetAddress.value = wallet
+        arweaveFeeTargetAddress.value = address
       }
     })
 

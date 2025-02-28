@@ -76,9 +76,6 @@ export default defineNuxtConfig({
     process: path.resolve(__dirname, 'node_modules/unenv/runtime/node/process')
   },
   vite: {
-    ssr: {
-      noExternal: ['ipfs-only-hash']
-    },
     define: {
       global: 'globalThis'
     },
@@ -113,9 +110,6 @@ exports.randomFillSync = randomFillSync`
         defineModel: true,
         propsDestructure: true
       }
-    },
-    optimizeDeps: {
-      exclude: ['ipfs-only-hash']
     }
   },
 
@@ -150,7 +144,8 @@ exports.randomFillSync = randomFillSync`
       APP_LIKE_CO_URL: process.env.APP_LIKE_CO_URL,
       NFT_MARKETPLACE_URL: process.env.NFT_MARKETPLACE_URL,
       ISCN_TOOLS_URL: process.env.ISCN_TOOLS_URL,
-      ARWEAVE_ENDPOINT: process.env.ARWEAVE_ENDPOINT
+      ARWEAVE_ENDPOINT: process.env.ARWEAVE_ENDPOINT,
+      IRYS_URL: process.env.IRYS_URL
     }
   },
 

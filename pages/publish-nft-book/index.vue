@@ -96,6 +96,6 @@ const prevStep = () => {
 
 const handleUploadSubmit = (data: any) => {
   console.log('Upload data:', data)
-  nextStep()
+  step.value = 1
 }
 </script>

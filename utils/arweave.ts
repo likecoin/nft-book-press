@@ -125,9 +125,9 @@ async function getBundler ({
     WebBundlr = (await import('@bundlr-network/client')).default
   }
   const p = await getProvider({ fileSize, ipfsHash, txHash, token })
-  const { ARWEAVE_ENDPOINT } = useRuntimeConfig().public
+  const { IRYS_URL } = useRuntimeConfig().public
   const bundlr = new WebBundlr(
-    ARWEAVE_ENDPOINT,
+    IRYS_URL,
     'matic',
     p
   )
