@@ -64,7 +64,7 @@ class Provider {
         'base64'
       )
       const apiEndpoints = getApiEndpoints()
-      const { data } = await useFetch(apiEndpoints.API_POST_ARWEAVE_V2_SIGN, {
+      const res = await useFetch(apiEndpoints.API_POST_ARWEAVE_V2_SIGN, {
         method: 'POST',
         body: {
           signatureData: convertedMsg,
@@ -74,7 +74,7 @@ class Provider {
         },
         headers: { Authorization: this.token ? `Bearer ${this.token}` : '' }
       })
-      const { signature } = data.value as { signature: string }
+      const { signature } = res.data.value
       const bSig = Buffer.from(signature, 'base64')
       // pad & convert so it's in the format the signer expects to have to convert from.
       const pad = Buffer.concat([
@@ -148,6 +148,11 @@ export async function estimateBundlrFilePrice ({
     body: {
       fileSize,
       ipfsHash
+    },
+    key: `estimate-${ipfsHash}-${Date.now()}`,
+    headers: {
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache'
     }
   })
   return data.value
