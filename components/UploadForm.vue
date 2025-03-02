@@ -332,10 +332,6 @@ const processEPub = async ({ buffer, file }: { buffer: ArrayBuffer; file: File }
             fileRecords.value.push(coverFileRecord)
             epubMetadata.coverData = e.target.result as string
             epubMetadataList.value.push(epubMetadata)
-            sessionStorage.setItem(
-              'epubMetadataList',
-              JSON.stringify(epubMetadataList.value)
-            )
           }
           coverReader.readAsDataURL(coverFile)
           return
@@ -343,10 +339,6 @@ const processEPub = async ({ buffer, file }: { buffer: ArrayBuffer; file: File }
       }
     }
     epubMetadataList.value.push(epubMetadata)
-    sessionStorage.setItem(
-      'epubMetadataList',
-      JSON.stringify(epubMetadataList.value)
-    )
   } catch (err) {
     console.error(err)
   }
@@ -650,10 +642,14 @@ const onSubmit = async () => {
   })
 
   const uploadFileData = {
-    fileRecords: fileRecords.value,
-    arweaveIds: uploadArweaveIdList,
-    epubMetadata: epubMetadataList.value[0],
-    arweaveLinks: uploadArweaveLinkList
+    fileRecords: fileRecords.value.map(record => ({
+      fileType: record.fileType,
+      fileName: record.fileName,
+      arweaveId: record.arweaveId,
+      arweaveLink: record.arweaveLink,
+      ipfsHash: record.ipfsHash
+    })),
+    epubMetadata: epubMetadataList.value[0]
   }
 
   sessionStorage.setItem(
