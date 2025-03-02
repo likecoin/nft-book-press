@@ -9,6 +9,10 @@
       <UInput v-model="iscnData.title" placeholder="Enter ISCN title" />
     </UFormGroup>
 
+    <UFormGroup label="Description" class="flex-1" required>
+      <UTextarea v-model="iscnData.description" placeholder="Enter ISCN description" autoresize />
+    </UFormGroup>
+
     <div class="grid grid-cols-3 gap-4">
       <UFormGroup label="ISBN">
         <UInput v-model="iscnData.isbn" placeholder="Enter ISBN" />
@@ -25,11 +29,15 @@
           placeholder="Select date"
         />
       </UFormGroup>
-    </div>
 
-    <UFormGroup label="Description" class="flex-1">
-      <UTextarea v-model="iscnData.description" placeholder="Enter ISCN description" />
-    </UFormGroup>
+      <UFormGroup label="Language">
+        <USelect
+          v-model="iscnData.language"
+          :options="languageOptions"
+          placeholder="Select language"
+        />
+      </UFormGroup>
+    </div>
 
     <!-- Author Info -->
     <div class="grid grid-cols-2 gap-4">
@@ -38,7 +46,7 @@
       </UFormGroup>
 
       <UFormGroup label="Author Description">
-        <UInput v-model="iscnData.author.description" placeholder="Enter author description" />
+        <UTextarea v-model="iscnData.author.description" placeholder="Enter author description" autoresize />
       </UFormGroup>
     </div>
 
@@ -47,7 +55,7 @@
     </UFormGroup>
 
     <UFormGroup label="License" class="flex-1">
-      <UInput v-model="iscnData.license" placeholder="License" :disabled="true" />
+      <UInput v-model="iscnData.license" placeholder="License" />
     </UFormGroup>
 
     <!-- Content Fingerprints -->
@@ -58,9 +66,9 @@
         </h3>
       </div>
       <div v-for="(fingerprint, index) in iscnData.contentFingerprints" :key="index" class="flex gap-4 items-end">
-        <div class="grid grid-cols-2 gap-4 flex-1">
-          <UFormGroup :label="`URL #${index + 1}`">
-            <UInput v-model="fingerprint.url" placeholder="Enter fingerprint URL" />
+        <div class="flex justify-between items-end w-full gap-[8px]">
+          <UFormGroup class="w-full" :label="`URL #${index + 1}`">
+            <UInput v-model="fingerprint.url" class="w-full" placeholder="Enter fingerprint URL" />
           </UFormGroup>
           <UButton
             v-if="iscnData.contentFingerprints.length > 1"
@@ -120,9 +128,10 @@
 </template>
 
 <script setup lang="ts">
+import { useFileUpload } from '~/composables/useFileUpload'
+const { stripHtmlTags, formatLanguage } = useFileUpload()
+
 interface UploadFileData {
-  arweaveIds: string[]
-  arweaveLinks: string[]
   epubMetadata?: {
     epubFileName: string
     title: string
@@ -135,7 +144,6 @@ interface UploadFileData {
   thumbnailIpfsHash?: string
   fileRecords: Array<{
     fileName: string
-    fileSize: number
     fileType: string
     arweaveId: string
     arweaveLink: string
@@ -143,80 +151,11 @@ interface UploadFileData {
   }>
 }
 
-const stripHtmlTags = (html: string) => {
-  if (!html) { return '' }
-  return html.replace(/<[^>]*>/g, '').trim()
-}
+const languageOptions = ref([
+  { label: 'English', value: 'en' },
+  { label: '中文', value: 'zh' }
+])
 
-const initializeFromSessionStorage = () => {
-  if (process.server) { return null }
-
-  try {
-    const storedData = window.sessionStorage.getItem('uploadFileData')
-    if (!storedData) { return null }
-
-    const data: UploadFileData = JSON.parse(storedData)
-
-    // Initialize base data
-    const baseData = {
-      type: 'book',
-      title: data.epubMetadata?.title || '',
-      description: stripHtmlTags(data.epubMetadata?.description || ''),
-      isbn: '',
-      publisher: '',
-      publicationDate: '',
-      author: {
-        name: data.epubMetadata?.author || '',
-        description: '',
-        url: ''
-      },
-      license: 'All rights reserved',
-      contentFingerprints: [] as Array<{ url: string }>,
-      downloadableUrls: [] as Array<{ url: string, type: string, fileName: string }>
-    }
-
-    if (data.arweaveLinks?.length) {
-      baseData.contentFingerprints = data.arweaveLinks.map(link => ({
-        url: link
-      }))
-    }
-
-    const downloadableFiles = data.fileRecords.filter(
-      record => record.fileType === 'epub' || record.fileType === 'application/pdf'
-    )
-
-    if (downloadableFiles.length) {
-      baseData.downloadableUrls = downloadableFiles.map(file => ({
-        url: file.arweaveLink,
-        type: file.fileType,
-        fileName: file.fileName
-      }))
-    }
-
-    // Ensure at least one empty entry for each array
-    if (baseData.contentFingerprints.length === 0) {
-      baseData.contentFingerprints = [{ url: '' }]
-    }
-    if (baseData.downloadableUrls.length === 0) {
-      baseData.downloadableUrls = [{ url: '', type: '', fileName: '' }]
-    }
-
-    return baseData
-  } catch (error) {
-    console.error('Error reading from sessionStorage:', error)
-    return null
-  }
-}
-
-// When using onMounted to ensure client-side execution
-onMounted(() => {
-  const initialData = initializeFromSessionStorage()
-  if (initialData) {
-    iscnData.value = initialData
-  }
-})
-
-// Initialize with default values first
 const iscnData = ref({
   type: 'book',
   title: '',
@@ -237,18 +176,83 @@ const iscnData = ref({
     url: '',
     type: '',
     fileName: ''
-  }]
+  }],
+  language: ''
 })
+
+onMounted(() => {
+  const initialData = initializeFromSessionStorage()
+  if (initialData) {
+    iscnData.value = initialData
+  }
+})
+
+const initializeFromSessionStorage = () => {
+  if (process.server) { return null }
+
+  try {
+    const storedData = window.sessionStorage.getItem('uploadFileData')
+    if (!storedData) { return null }
+
+    const data: UploadFileData = JSON.parse(storedData)
+
+    const baseData = {
+      type: 'book',
+      title: data.epubMetadata?.title || '',
+      description: stripHtmlTags(data.epubMetadata?.description || ''),
+      isbn: '',
+      publisher: '',
+      publicationDate: '',
+      author: {
+        name: data.epubMetadata?.author || '',
+        description: '',
+        url: ''
+      },
+      license: 'All rights reserved',
+      contentFingerprints: [] as Array<{ url: string }>,
+      downloadableUrls: [] as Array<{ url: string, type: string, fileName: string }>,
+      language: formatLanguage(data.epubMetadata?.language || '')
+    }
+
+    const downloadableFiles = data.fileRecords.filter(
+      record => record.fileType === 'epub' || record.fileType === 'pdf'
+    )
+
+    if (downloadableFiles.length) {
+      baseData.downloadableUrls = downloadableFiles.map(file => ({
+        url: file.arweaveLink,
+        type: file.fileType,
+        fileName: file.fileName
+      }))
+      baseData.contentFingerprints = [
+        ...new Set(
+          data.fileRecords.flatMap(record => [record.arweaveLink, `ipfs://${record.ipfsHash}`].filter(Boolean))
+        )
+      ].map(url => ({ url }))
+    }
+
+    if (baseData.contentFingerprints.length === 0) {
+      baseData.contentFingerprints = [{ url: '' }]
+    }
+    if (baseData.downloadableUrls.length === 0) {
+      baseData.downloadableUrls = [{ url: '', type: '', fileName: '' }]
+    }
+
+    return baseData
+  } catch (error) {
+    console.error('Error reading from sessionStorage:', error)
+    return null
+  }
+}
 
 const addContentFingerprint = () => {
   iscnData.value.contentFingerprints.push({
-    type: '',
     url: ''
   })
 }
 
 const removeContentFingerprint = (index: number) => {
-  if (iscnData.value.contentFingerprints.length > 1) { // Prevent removing last item
+  if (iscnData.value.contentFingerprints.length > 1) {
     iscnData.value.contentFingerprints.splice(index, 1)
   }
 }
@@ -262,7 +266,7 @@ const addDownloadableUrl = () => {
 }
 
 const removeDownloadableUrl = (index: number) => {
-  if (iscnData.value.downloadableUrls.length > 1) { // Prevent removing last item
+  if (iscnData.value.downloadableUrls.length > 1) {
     iscnData.value.downloadableUrls.splice(index, 1)
   }
 }
