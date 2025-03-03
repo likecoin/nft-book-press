@@ -474,7 +474,12 @@ import { LIKE_NFT_ABI, LIKE_NFT_CONTRACT_ADDRESS } from '~/contracts/likeNFT'
 import { config } from '~/utils/wagmi/config'
 
 const { getClassOwner, getClassMetadata } = useNFTContractReader()
-const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } = useRuntimeConfig().public
+const {
+  LCD_URL,
+  APP_LIKE_CO_URL,
+  LIKER_LAND_URL,
+  LIKE_EVM_NFT_TARGET_ADDRESS
+} = useRuntimeConfig().public
 const router = useRouter()
 const route = useRoute()
 const { writeContractAsync } = useWriteContract()
@@ -764,6 +769,8 @@ async function onClassFileInput () {
       functionName: 'newClass',
       args: [{
         creator: wallet.value,
+        updaters: [wallet.value, LIKE_EVM_NFT_TARGET_ADDRESS],
+        minters: [wallet.value, LIKE_EVM_NFT_TARGET_ADDRESS],
         input: {
           name,
           symbol,
@@ -898,38 +905,39 @@ async function onMintNFTStart () {
         metadata: data
       }
     })
-    for (let i = 0; i < nfts.length; i++) {
-      const nft = nfts[i]
-      const res = await writeContractAsync({
-        address: LIKE_NFT_CONTRACT_ADDRESS,
-        abi: LIKE_NFT_ABI,
-        functionName: 'mintNFT',
-        args: [{
-          creator: wallet.value,
-          class_id: classId.value,
-          input: {
-            metadata: JSON.stringify({
-              image: nft.metadata.image,
-              image_data: '',
-              external_url: nft.metadata.external_url || '',
-              description: nft.metadata.description || '',
-              name: nft.metadata.name || '',
-              attributes: nft.metadata.attributes || [],
-              background_color: '',
-              animation_url: '',
-              youtube_url: ''
-            })
-          }
-        }]
-      })
-      const receipt = await waitForTransactionReceipt(config, { hash: res })
-      // eslint-disable-next-line no-console
-      console.log(receipt)
-      if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
-      if (receipt.logs[0].topics[3] === undefined) { throw new Error('INVALID_NFT_ID') }
-      const nftId = hexToNumber(receipt.logs[0].topics[3])
-      nfts[i].id = nftId
-    }
+    const res = await writeContractAsync({
+      address: LIKE_NFT_CONTRACT_ADDRESS,
+      abi: LIKE_NFT_ABI,
+      functionName: 'mintNFTs',
+      args: [{
+        to: wallet.value,
+        classId: classId.value,
+        inputs: nfts.map(nft => ({
+          metadata: JSON.stringify({
+            image: nft.metadata.image,
+            image_data: '',
+            external_url: nft.metadata.external_url || '',
+            description: nft.metadata.description || '',
+            name: nft.metadata.name || '',
+            attributes: nft.metadata.attributes || [],
+            background_color: '',
+            animation_url: '',
+            youtube_url: ''
+          })
+        }))
+      }]
+    })
+    const receipt = await waitForTransactionReceipt(config, { hash: res })
+    // eslint-disable-next-line no-console
+    console.log(receipt)
+    if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
+    if (receipt.logs[0].topics[3] === undefined) { throw new Error('INVALID_NFT_ID') }
+    receipt.logs.forEach((log) => {
+      if (log.topics[3] !== undefined) {
+        const nftId = hexToNumber(log.topics[3])
+        nfts[nftId].id = nftId
+      }
+    })
     nftCSVData.value = stringify(nfts, { header: true })
     step.value = 4
   } catch (err) {

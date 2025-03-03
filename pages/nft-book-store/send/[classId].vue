@@ -203,6 +203,7 @@ const route = useRoute()
 const router = useRouter()
 
 const { writeContractAsync } = useWriteContract()
+const { getBalanceOf, getTokenIdByOwnerIndex } = useNFTContractReader()
 
 const error = ref('')
 const isLoading = ref(false)
@@ -305,8 +306,15 @@ async function fetchNextNFTId (_count = 1) {
       await initIfNecessary()
     }
     if (!ownerWallet.value) { return }
-    // TODO fetch nftIds
-    nftIds.value = ['0']
+    const balance = await getBalanceOf(classId.value, ownerWallet.value) as number
+    if (balance < _count) {
+      throw new Error(`Insufficient balance of NFT classId: ${classId.value} for wallet: ${ownerWallet.value}`)
+    }
+
+    for (let i = 0; i < _count; i++) {
+      const nextNftId = await getTokenIdByOwnerIndex(classId.value, ownerWallet.value, i)
+      nftIds.value.push(nextNftId as string)
+    }
   } catch (err) {
     error.value = (err as Error).toString()
   } finally {
@@ -338,20 +346,22 @@ async function onSendNFTStart () {
       await fetchNextNFTId(orderInfo.value.quantity)
     }
 
-    // TODO: support multiple nfts
-    const txHash = await writeContractAsync({
-      address: classId.value as any,
-      abi: LIKE_NFT_CLASS_ABI,
-      functionName: 'transferWithMemo',
-      args: [
-        wallet.value,
-        orderInfo.value.wallet,
-        nftId.value,
-        memo.value
-      ]
-    })
-    const receipt = await waitForTransactionReceipt(config, { hash: txHash })
-
+    let receipt
+    let txHash
+    for (const nftId of nftIds.value) {
+      txHash = await writeContractAsync({
+        address: classId.value as any,
+        abi: LIKE_NFT_CLASS_ABI,
+        functionName: 'transferWithMemo',
+        args: [
+          wallet.value,
+          orderInfo.value.wallet,
+          nftId,
+          memo.value
+        ]
+      })
+      receipt = await waitForTransactionReceipt(config, { hash: txHash })
+    }
     if (receipt?.status === 'success') {
       await $fetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/sent/${paymentId.value}`,
         {

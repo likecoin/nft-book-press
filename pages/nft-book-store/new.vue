@@ -759,8 +759,6 @@ async function submitNewClass () {
       getClassOwner(classIdInput.value as string)
     ])
     if (owner !== wallet.value) {
-      // why owner doesn't return the correct value?
-      console.log(owner, wallet.value)
       throw new Error('You are not the owner of this NFT Class')
     }
     if (!data) { throw new Error('Invalid NFT Class ID') }
