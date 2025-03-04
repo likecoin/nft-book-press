@@ -226,10 +226,8 @@ export function fileToArrayBuffer (file: Blob): Promise<string | ArrayBuffer | n
   })
 }
 
-export async function digestFileSHA256 (buffer: ArrayBuffer) {
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+export function digestFileSHA256 (buffer: ArrayBuffer) {
+  const hashHex = Buffer.from(buffer).toString('hex')
   return hashHex
 }
 
