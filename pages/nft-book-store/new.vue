@@ -365,19 +365,6 @@
               @update-shipping-rates="updateShippingRate"
             />
 
-            <!-- Auto deliver NFT ID -->
-            <UFormGroup
-              v-if="hasAutoDeliverNFT"
-              label="Auto deliver NFT start ID (optional)"
-              :ui="{ label: { base: 'font-mono font-bold' } }"
-            >
-              <UInput
-                v-model="autoDeliverNftIdInput"
-                class="font-mono"
-                placeholder="MY-NFT-PREFIX-000"
-              />
-            </UFormGroup>
-
             <!-- Share sales data -->
             <UCard
               :ui="{
@@ -501,14 +488,12 @@ import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL, deliverMethodOptions } from '~/utils'
-import { sendNFTsToAPIWallet } from '~/utils/cosmos'
 
 const { getClassOwner, getClassMetadata } = useNFTContractReader()
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const stripeStore = useStripeStore()
-const { initIfNecessary } = walletStore
-const { wallet, signer } = storeToRefs(walletStore)
+const { wallet } = storeToRefs(walletStore)
 const { newBookListing, updateEditionPrice } = bookStoreApiStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
 const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
@@ -536,7 +521,6 @@ const tableOfContents = ref('')
 const mustClaimToView = ref(true)
 const enableCustomMessagePage = ref(false)
 const hideDownload = ref(false)
-const autoDeliverNftIdInput = ref('')
 const prices = ref<any[]>([
   {
     price: DEFAULT_PRICE,
@@ -615,10 +599,6 @@ const notificationEmailsTableRows = computed(() =>
     index,
     email
   }))
-)
-
-const hasAutoDeliverNFT = computed(() =>
-  prices.value.some(price => price.deliveryMethod === 'auto' && price.stock > 0)
 )
 
 editorConfig({
@@ -802,26 +782,6 @@ async function submitNewClass () {
       }
     }
 
-    const autoDeliverCount = p
-      .filter(price => price.isAutoDeliver)
-      .reduce((acc, price) => acc + price.stock, 0)
-
-    let autoDeliverNFTsTxHash
-    if (autoDeliverCount > 0) {
-      if (!wallet.value || !signer.value) {
-        await initIfNecessary()
-      }
-      if (!wallet.value || !signer.value) {
-        throw new Error('Unable to connect to wallet')
-      }
-      autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
-        [classIdInput.value as string],
-        [autoDeliverNftIdInput.value as string],
-        autoDeliverCount,
-        signer.value,
-        wallet.value
-      )
-    }
     await newBookListing(classIdInput.value as string, {
       tableOfContents: tableOfContents.value,
       defaultPaymentCurrency: 'USD',
@@ -833,7 +793,6 @@ async function submitNewClass () {
       mustClaimToView: mustClaimToView.value,
       enableCustomMessagePage: enableCustomMessagePage.value,
       hideDownload: hideDownload.value,
-      autoDeliverNFTsTxHash
     })
     router.push({ name: 'nft-book-store' })
   } catch (err) {

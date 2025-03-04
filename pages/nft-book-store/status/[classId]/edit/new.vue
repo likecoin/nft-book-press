@@ -217,19 +217,6 @@
           @update-shipping-rates="updateShippingRates"
         />
 
-        <!-- Auto deliver NFT ID -->
-        <UFormGroup
-          v-if="deliveryMethod === 'auto'"
-          label="Auto deliver NFT start ID (optional)"
-          :ui="{ label: { base: 'font-mono font-bold' } }"
-        >
-          <UInput
-            v-model="autoDeliverNftIdInput"
-            class="font-mono"
-            placeholder="MY-NFT-PREFIX-000"
-          />
-        </UFormGroup>
-
         <template #footer>
           <UButton
             label="Add Edition"
@@ -255,14 +242,12 @@ import { DEFAULT_PRICE, MINIMAL_PRICE } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { deliverMethodOptions } from '~/utils'
-import { sendNFTsToAPIWallet } from '~/utils/cosmos'
 
 const { LIKE_CO_API } = useRuntimeConfig().public
 
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
-const { initIfNecessary } = walletStore
-const { wallet, signer } = storeToRefs(walletStore)
+const { wallet } = storeToRefs(walletStore)
 const { token } = storeToRefs(bookStoreApiStore)
 const { updateBookListingSetting } = bookStoreApiStore
 
@@ -281,7 +266,6 @@ const hasMultiplePrices = computed(() => classData?.value?.prices?.length > 1)
 const price = ref(DEFAULT_PRICE)
 const stock = ref(1)
 const deliveryMethod = ref('auto')
-const autoDeliverNftIdInput = ref('')
 const autoMemo = ref('Thanks for purchasing this NFT ebook.')
 const nameEn = ref('Standard Edition')
 const nameZh = ref('標準版')
@@ -464,26 +448,8 @@ async function handleSubmit () {
 
     isLoading.value = true
 
-    let autoDeliverNFTsTxHash
-    if (editedPrice.isAutoDeliver && editedPrice.stock > 0) {
-      if (!wallet.value || !signer.value) {
-        await initIfNecessary()
-      }
-      if (!wallet.value || !signer.value) {
-        throw new Error('Unable to connect to wallet')
-      }
-      autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
-        [classId.value as string],
-        [autoDeliverNftIdInput.value as string],
-        editedPrice.stock,
-        signer.value,
-        wallet.value
-      )
-    }
-
     await bookStoreApiStore.addEditionPrice(classId.value as string, priceIndex.value, {
       price: editedPrice,
-      autoDeliverNFTsTxHash
     })
 
     router.push({
