@@ -42,7 +42,7 @@ onMounted(async () => {
 
       const signature = await signMessageMemo(
         'authorize',
-        ['read:nftbook', 'write:nftbook', 'read:nftcollection', 'write:nftcollection', 'write:iscn']
+        ['read:nftbook', 'write:nftbook', 'read:nftcollection', 'write:nftcollection', 'write:iscn', 'read:iscn']
       )
       if (!signature) {
         throw new Error('Failed to authenticate: no signature')
