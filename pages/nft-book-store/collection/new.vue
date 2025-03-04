@@ -431,7 +431,6 @@ import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL, deliverMethodOptions } from '~/utils'
 import { useCollectionStore } from '~/stores/collection'
 
-const { LCD_URL } = useRuntimeConfig().public
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const collectionStore = useCollectionStore()
@@ -629,9 +628,12 @@ async function submitNewCollection () {
     isLoading.value = true
 
     await Promise.all(classIds.value.map(async (classId) => {
-      const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${classId}`)
-      const collectionId = (data as any)?.class?.data?.metadata?.nft_meta_collection_id || ''
-      if (!collectionId.includes('nft_book') && !collectionId.includes('book_nft')) {
+      const data = await lazyFetchClassMetadataById(classId as string)
+      const collectionId = data.nft_meta_collection_id || ''
+      if (
+        !collectionId.includes('nft_book') &&
+        !collectionId.includes('book_nft')
+      ) {
         throw new Error('NFT Class not in NFT BOOK meta collection')
       }
     }))
