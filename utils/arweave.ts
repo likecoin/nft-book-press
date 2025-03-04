@@ -170,9 +170,9 @@ export async function uploadSingleFileToBundlr (
 ) {
   const bundler = await getBundler({ fileSize, ipfsHash, txHash, token })
   const tags = [
-    { name: 'App-Name', value: 'app.like.co' },
+    { name: 'App-Name', value: 'publish.liker.land' },
     { name: 'App-Version', value: '2.0' },
-    { name: 'User-Agent', value: 'app.like.co' },
+    { name: 'User-Agent', value: 'publish.liker.land' },
     { name: 'IPFS-Add', value: ipfsHash },
     { name: 'standard', value: 'v0.1' }
   ]
