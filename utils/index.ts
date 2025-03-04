@@ -2,7 +2,6 @@ import { stringify as csvStringify } from 'csv-stringify/sync'
 import { useClipboard } from '@vueuse/core'
 import { CID } from 'multiformats/cid'
 import { sha256 } from 'multiformats/hashes/sha2'
-import * as raw from 'multiformats/codecs/raw'
 
 export function getIsTestnet () {
   const { IS_TESTNET } = useRuntimeConfig().public
@@ -237,7 +236,7 @@ export async function digestFileSHA256 (buffer: ArrayBuffer) {
 export async function calculateIPFSHash (fileBytes: ArrayBuffer) {
   try {
     const hash = await sha256.digest(new Uint8Array(fileBytes))
-    const cid = CID.createV1(raw.code, hash)
+    const cid = CID.createV0(hash)
     return cid.toString()
   } catch (error) {
     console.error('Error calculating IPFS hash:', error)
