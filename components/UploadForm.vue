@@ -611,20 +611,11 @@ const onSubmit = async () => {
     }
   } catch (error) {
     console.error(error)
-    isOpenWarningSnackbar.value = true
     error.value = (error as Error).toString()
     uploadStatus.value = ''
-    return
   } finally {
     uploadStatus.value = ''
   }
-
-  const uploadArweaveIdList = Array.from(
-    sentArweaveTransactionInfo.value.values()
-  ).map(entry => entry.arweaveId)
-  const uploadArweaveLinkList = Array.from(
-    sentArweaveTransactionInfo.value.values()
-  ).map(entry => entry.arweaveLink)
 
   fileRecords.value.forEach((record: any, index: number) => {
     if (sentArweaveTransactionInfo.value.has(record.ipfsHash)) {
