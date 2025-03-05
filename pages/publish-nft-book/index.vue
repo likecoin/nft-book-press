@@ -103,8 +103,7 @@ const nextStep = async () => {
   }
 }
 
-const handleUploadSubmit = (data: any) => {
-  console.log('Upload data:', data)
+const handleUploadSubmit = () => {
   step.value = 1
 }
 </script>
