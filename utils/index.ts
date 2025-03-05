@@ -1,8 +1,6 @@
 import { stringify as csvStringify } from 'csv-stringify/sync'
 import { useClipboard } from '@vueuse/core'
-import { CID } from 'multiformats/cid'
-import { sha256 } from 'multiformats/hashes/sha2'
-import * as raw from 'multiformats/codecs/raw'
+import { importer } from 'ipfs-unixfs-importer'
 
 export function getIsTestnet () {
   const { IS_TESTNET } = useRuntimeConfig().public
@@ -219,26 +217,61 @@ export function getImageResizeURL (url: string, { width = 300 }: { width?: numbe
   return `${LIKE_CO_STATIC_ENDPOINT}/thumbnail/?url=${encodeURIComponent(url)}&width=${width}`
 }
 
-export function fileToArrayBuffer (file: Blob): Promise<string | ArrayBuffer | null> {
-  return new Promise((resolve) => {
+export function fileToArrayBuffer (file: Blob): Promise<ArrayBuffer> {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload = () => resolve(reader.result)
+
+    reader.onload = () => {
+      const result = reader.result
+      if (!result) {
+        reject(new Error('Failed to read file: Empty result'))
+        return
+      }
+      if (!(result instanceof ArrayBuffer)) {
+        reject(new Error('Failed to read file: Expected ArrayBuffer'))
+        return
+      }
+      resolve(result)
+    }
+
+    reader.onerror = () => {
+      reject(new Error('Failed to read file: ' + reader.error?.message))
+    }
+
     reader.readAsArrayBuffer(file)
   })
 }
 
-export async function digestFileSHA256 (buffer: ArrayBuffer) {
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+export function digestFileSHA256 (buffer: ArrayBuffer) {
+  const hashHex = Buffer.from(buffer).toString('hex')
   return hashHex
 }
 
-export async function calculateIPFSHash (fileBytes: ArrayBuffer) {
+export async function calculateIPFSHash (fileBytes: any, options?: any) {
   try {
-    const hash = await sha256.digest(new Uint8Array(fileBytes))
-    const cid = CID.createV1(raw.code, hash)
-    return cid.toString()
+    options = options || {}
+
+    const block = {
+      get: (cid: any) => { throw new Error(`unexpected block API get for ${cid}`) },
+      put: (_: any) => { }
+    }
+
+    let lastCid
+    for await (const { cid } of importer([{
+      content: fileBytes
+    }], block, {
+      ...options,
+      cidVersion: 0,
+      reduceSingleLeafToSelf: false,
+      onlyHash: true
+    })) {
+      lastCid = cid
+    }
+
+    if (lastCid) {
+      return lastCid.toString()
+    }
+    return null
   } catch (error) {
     console.error('Error calculating IPFS hash:', error)
     return null

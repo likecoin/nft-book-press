@@ -125,9 +125,9 @@ async function getBundler ({
     WebBundlr = (await import('@bundlr-network/client')).default
   }
   const p = await getProvider({ fileSize, ipfsHash, txHash, token })
-  const { IRYS_URL } = useRuntimeConfig().public
+  const { IRYS_NODE_URL } = useRuntimeConfig().public
   const bundlr = new WebBundlr(
-    IRYS_URL,
+    IRYS_NODE_URL,
     'matic',
     p
   )
@@ -148,11 +148,6 @@ export async function estimateBundlrFilePrice ({
     body: {
       fileSize,
       ipfsHash
-    },
-    key: `estimate-${ipfsHash}-${Date.now()}`,
-    headers: {
-      'Cache-Control': 'no-cache',
-      Pragma: 'no-cache'
     }
   })
   return data.value
@@ -170,9 +165,9 @@ export async function uploadSingleFileToBundlr (
 ) {
   const bundler = await getBundler({ fileSize, ipfsHash, txHash, token })
   const tags = [
-    { name: 'App-Name', value: 'app.like.co' },
+    { name: 'App-Name', value: 'publish.liker.land' },
     { name: 'App-Version', value: '2.0' },
-    { name: 'User-Agent', value: 'app.like.co' },
+    { name: 'User-Agent', value: 'publish.liker.land' },
     { name: 'IPFS-Add', value: ipfsHash },
     { name: 'standard', value: 'v0.1' }
   ]

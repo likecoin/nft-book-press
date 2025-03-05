@@ -44,7 +44,14 @@ const props = defineProps({
 })
 
 const computedFileType = computed(() => {
+  // If formatted fileType is provided as a prop, use it directly
   if (props.fileType) { return props.fileType }
-  return getFileType(props.fileData?.split(';')[0].split(':')[1] || '')
+
+  // Extract MIME type from data URL
+  const dataUrl = props.fileData || ''
+  const mimeType = dataUrl.split(';')[0].split(':')[1] || ''
+
+  // Use getFileType function to determine the file type based on MIME type
+  return getFileType(mimeType)
 })
 </script>

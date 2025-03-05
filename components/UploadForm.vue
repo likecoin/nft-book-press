@@ -87,13 +87,13 @@ import { storeToRefs } from 'pinia'
 import exifr from 'exifr'
 import ePub from 'epubjs'
 import { BigNumber } from 'bignumber.js'
-import { fileToArrayBuffer, digestFileSHA256, calculateIPFSHash } from '~/utils/index'
+import { fileToArrayBuffer, digestFileSHA256, calculateIPFSHash, sleep } from '~/utils/index'
 import { useFileUpload } from '~/composables/useFileUpload'
 import {
   estimateBundlrFilePrice,
   uploadSingleFileToBundlr
 } from '~/utils/arweave'
-import { sendLIKE } from '~/utils/cosmos' // You'll need to implement this
+import { sendLIKE } from '~/utils/cosmos'
 import { useWalletStore } from '~/stores/wallet'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 
@@ -148,16 +148,6 @@ const computedFormClasses = computed(() => [
   'hover:bg-gray-200'
 ])
 
-watch(fileRecords, async (newFileRecords) => {
-  if (newFileRecords.length) {
-    uploadStatus.value = 'loading'
-    await estimateArweaveFee()
-    uploadStatus.value = ''
-  } else {
-    arweaveFee.value = new BigNumber(0)
-  }
-}, { deep: true })
-
 const formatLanguage = (language: string) => {
   let formattedLanguage = ''
   if (language) {
@@ -180,9 +170,8 @@ const getFileInfo = async (file: Blob) => {
   const fileType = getFileType(file.type)
   const [fileSHA256, ipfsHash] = await Promise.all([
     digestFileSHA256(fileBytes),
-    calculateIPFSHash(fileBytes)
+    calculateIPFSHash(Buffer.from(fileBytes))
   ])
-
   return {
     fileType,
     fileBytes,
@@ -253,6 +242,7 @@ const onFileUpload = async (event: DragEvent) => {
       }
     }
   } finally {
+    await estimateArweaveFee()
     uploadStatus.value = ''
   }
 }
@@ -353,7 +343,8 @@ const estimateArweaveFee = async (): Promise<void> => {
     uploadStatus.value = 'loading'
     const results = []
     for (const record of fileRecords.value) {
-      await new Promise(resolve => setTimeout(resolve, 100))
+      console.log('Estimating price for', record.fileName)
+      await sleep(100)
 
       const priceResult = await estimateBundlrFilePrice({
         fileSize: record.fileBlob?.size || 0,
@@ -428,29 +419,27 @@ const submitToArweave = async (record: any): Promise<void> => {
       token: token.value
     })
 
-    if (arweaveId) {
-      const uploadedData =
-        sentArweaveTransactionInfo.value.get(record.ipfsHash) || {}
-      sentArweaveTransactionInfo.value.set(record.ipfsHash, {
-        ...uploadedData,
-        arweaveId,
-        arweaveLink
-      })
-      if (record.fileName.includes('cover.jpeg')) {
-        const metadata = epubMetadataList.value.find(
-          (file: any) => file.thumbnailIpfsHash === record.ipfsHash
-        )
-        if (metadata) {
-          metadata.thumbnailArweaveId = arweaveId
-        }
-      }
-      emit('arweaveUploaded', { arweaveId, arweaveLink })
-      // close sign dialog
-    } else {
-      isOpenWarningSnackbar.value = true
+    if (!arweaveId) {
       error.value = 'IscnRegisterForm.error.arweave'
       throw new Error(error.value)
     }
+
+    const uploadedData =
+    sentArweaveTransactionInfo.value.get(record.ipfsHash) || {}
+    sentArweaveTransactionInfo.value.set(record.ipfsHash, {
+      ...uploadedData,
+      arweaveId,
+      arweaveLink
+    })
+    if (record.fileName.includes('cover.jpeg')) {
+      const metadata = epubMetadataList.value.find(
+        (file: any) => file.thumbnailIpfsHash === record.ipfsHash
+      )
+      if (metadata) {
+        metadata.thumbnailArweaveId = arweaveId
+      }
+    }
+    emit('arweaveUploaded', { arweaveId, arweaveLink })
   } catch (err) {
     throw new Error(err as string)
   }
@@ -611,20 +600,11 @@ const onSubmit = async () => {
     }
   } catch (error) {
     console.error(error)
-    isOpenWarningSnackbar.value = true
     error.value = (error as Error).toString()
     uploadStatus.value = ''
-    return
   } finally {
     uploadStatus.value = ''
   }
-
-  const uploadArweaveIdList = Array.from(
-    sentArweaveTransactionInfo.value.values()
-  ).map(entry => entry.arweaveId)
-  const uploadArweaveLinkList = Array.from(
-    sentArweaveTransactionInfo.value.values()
-  ).map(entry => entry.arweaveLink)
 
   fileRecords.value.forEach((record: any, index: number) => {
     if (sentArweaveTransactionInfo.value.has(record.ipfsHash)) {

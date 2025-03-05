@@ -337,7 +337,7 @@ export async function sendNFTsToAPIWallet (
 export function amountToLIKE (likecoin: any, denom: string) {
   if (!likecoin) { return -1 }
   if (likecoin.denom === denom) {
-    return (new BigNumber(likecoin.amount)).dividedBy(1e9).toFixed()
+    return (new BigNumber(likecoin.amount)).shiftedBy(-9).toFixed()
   }
   console.error(`${likecoin.denom} is not supported denom`)
   return -1
