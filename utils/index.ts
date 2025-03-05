@@ -262,7 +262,7 @@ export async function calculateIPFSHash (fileBytes: any, options?: any) {
     }], block, {
       ...options,
       cidVersion: 0,
-      reduceSingleLeafToSelf: false,
+      rawLeaves: false,
       onlyHash: true
     })) {
       lastCid = cid
