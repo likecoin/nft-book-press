@@ -93,7 +93,7 @@ import {
   estimateBundlrFilePrice,
   uploadSingleFileToBundlr
 } from '~/utils/arweave'
-import { sendLIKE } from '~/utils/cosmos' // You'll need to implement this
+import { sendLIKE } from '~/utils/cosmos'
 import { useWalletStore } from '~/stores/wallet'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 
@@ -150,9 +150,14 @@ const computedFormClasses = computed(() => [
 
 watch(fileRecords, async (newFileRecords) => {
   if (newFileRecords.length) {
-    uploadStatus.value = 'loading'
-    await estimateArweaveFee()
-    uploadStatus.value = ''
+    try {
+      uploadStatus.value = 'loading'
+      await estimateArweaveFee()
+    } catch (error) {
+      console.error(error)
+    } finally {
+      uploadStatus.value = ''
+    }
   } else {
     arweaveFee.value = new BigNumber(0)
   }
