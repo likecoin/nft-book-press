@@ -433,29 +433,27 @@ const submitToArweave = async (record: any): Promise<void> => {
       token: token.value
     })
 
-    if (arweaveId) {
-      const uploadedData =
-        sentArweaveTransactionInfo.value.get(record.ipfsHash) || {}
-      sentArweaveTransactionInfo.value.set(record.ipfsHash, {
-        ...uploadedData,
-        arweaveId,
-        arweaveLink
-      })
-      if (record.fileName.includes('cover.jpeg')) {
-        const metadata = epubMetadataList.value.find(
-          (file: any) => file.thumbnailIpfsHash === record.ipfsHash
-        )
-        if (metadata) {
-          metadata.thumbnailArweaveId = arweaveId
-        }
-      }
-      emit('arweaveUploaded', { arweaveId, arweaveLink })
-      // close sign dialog
-    } else {
-      isOpenWarningSnackbar.value = true
+    if (!arweaveId) {
       error.value = 'IscnRegisterForm.error.arweave'
       throw new Error(error.value)
     }
+
+    const uploadedData =
+    sentArweaveTransactionInfo.value.get(record.ipfsHash) || {}
+    sentArweaveTransactionInfo.value.set(record.ipfsHash, {
+      ...uploadedData,
+      arweaveId,
+      arweaveLink
+    })
+    if (record.fileName.includes('cover.jpeg')) {
+      const metadata = epubMetadataList.value.find(
+        (file: any) => file.thumbnailIpfsHash === record.ipfsHash
+      )
+      if (metadata) {
+        metadata.thumbnailArweaveId = arweaveId
+      }
+    }
+    emit('arweaveUploaded', { arweaveId, arweaveLink })
   } catch (err) {
     throw new Error(err as string)
   }
