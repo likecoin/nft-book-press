@@ -87,7 +87,7 @@ import { storeToRefs } from 'pinia'
 import exifr from 'exifr'
 import ePub from 'epubjs'
 import { BigNumber } from 'bignumber.js'
-import { fileToArrayBuffer, digestFileSHA256, calculateIPFSHash } from '~/utils/index'
+import { fileToArrayBuffer, digestFileSHA256, calculateIPFSHash, sleep } from '~/utils/index'
 import { useFileUpload } from '~/composables/useFileUpload'
 import {
   estimateBundlrFilePrice,
@@ -358,7 +358,7 @@ const estimateArweaveFee = async (): Promise<void> => {
     uploadStatus.value = 'loading'
     const results = []
     for (const record of fileRecords.value) {
-      await new Promise(resolve => setTimeout(resolve, 100))
+      sleep(100)
 
       const priceResult = await estimateBundlrFilePrice({
         fileSize: record.fileBlob?.size || 0,
