@@ -242,7 +242,11 @@ const onFileUpload = async (event: DragEvent) => {
       }
     }
   } finally {
-    await estimateArweaveFee()
+    try {
+      await estimateArweaveFee()
+    } catch (error) {
+      console.error(error)
+    }
     uploadStatus.value = ''
   }
 }
