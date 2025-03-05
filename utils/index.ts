@@ -218,10 +218,27 @@ export function getImageResizeURL (url: string, { width = 300 }: { width?: numbe
   return `${LIKE_CO_STATIC_ENDPOINT}/thumbnail/?url=${encodeURIComponent(url)}&width=${width}`
 }
 
-export function fileToArrayBuffer (file: Blob): Promise<string | ArrayBuffer | null> {
-  return new Promise((resolve) => {
+export function fileToArrayBuffer (file: Blob): Promise<ArrayBuffer> {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload = () => resolve(reader.result)
+
+    reader.onload = () => {
+      const result = reader.result
+      if (!result) {
+        reject(new Error('Failed to read file: Empty result'))
+        return
+      }
+      if (!(result instanceof ArrayBuffer)) {
+        reject(new Error('Failed to read file: Expected ArrayBuffer'))
+        return
+      }
+      resolve(result)
+    }
+
+    reader.onerror = () => {
+      reject(new Error('Failed to read file: ' + reader.error?.message))
+    }
+
     reader.readAsArrayBuffer(file)
   })
 }
