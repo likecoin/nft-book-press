@@ -148,21 +148,6 @@ const computedFormClasses = computed(() => [
   'hover:bg-gray-200'
 ])
 
-watch(fileRecords, async (newFileRecords) => {
-  if (newFileRecords.length) {
-    try {
-      uploadStatus.value = 'loading'
-      await estimateArweaveFee()
-    } catch (error) {
-      console.error(error)
-    } finally {
-      uploadStatus.value = ''
-    }
-  } else {
-    arweaveFee.value = new BigNumber(0)
-  }
-}, { deep: true })
-
 const formatLanguage = (language: string) => {
   let formattedLanguage = ''
   if (language) {
@@ -258,6 +243,7 @@ const onFileUpload = async (event: DragEvent) => {
       }
     }
   } finally {
+    await estimateArweaveFee()
     uploadStatus.value = ''
   }
 }
@@ -358,7 +344,8 @@ const estimateArweaveFee = async (): Promise<void> => {
     uploadStatus.value = 'loading'
     const results = []
     for (const record of fileRecords.value) {
-      sleep(100)
+      console.log('Estimating price for', record.fileName)
+      await sleep(100)
 
       const priceResult = await estimateBundlrFilePrice({
         fileSize: record.fileBlob?.size || 0,

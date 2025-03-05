@@ -148,11 +148,6 @@ export async function estimateBundlrFilePrice ({
     body: {
       fileSize,
       ipfsHash
-    },
-    key: `estimate-${ipfsHash}-${Date.now()}`,
-    headers: {
-      'Cache-Control': 'no-cache',
-      Pragma: 'no-cache'
     }
   })
   return data.value
