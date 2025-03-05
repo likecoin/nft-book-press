@@ -1,7 +1,6 @@
 import { stringify as csvStringify } from 'csv-stringify/sync'
 import { useClipboard } from '@vueuse/core'
-import { CID } from 'multiformats/cid'
-import { sha256 } from 'multiformats/hashes/sha2'
+import { importer } from 'ipfs-unixfs-importer'
 
 export function getIsTestnet () {
   const { IS_TESTNET } = useRuntimeConfig().public
@@ -248,11 +247,31 @@ export function digestFileSHA256 (buffer: ArrayBuffer) {
   return hashHex
 }
 
-export async function calculateIPFSHash (fileBytes: ArrayBuffer) {
+export async function calculateIPFSHash (fileBytes: any, options?: any) {
   try {
-    const hash = await sha256.digest(new Uint8Array(fileBytes))
-    const cid = CID.createV0(hash)
-    return cid.toString()
+    options = options || {}
+
+    const block = {
+      get: (cid: any) => { throw new Error(`unexpected block API get for ${cid}`) },
+      put: (_: any) => { }
+    }
+
+    let lastCid
+    for await (const { cid } of importer([{
+      content: fileBytes
+    }], block, {
+      ...options,
+      cidVersion: 0,
+      reduceSingleLeafToSelf: false,
+      onlyHash: true
+    })) {
+      lastCid = cid
+    }
+
+    if (lastCid) {
+      return lastCid.toString()
+    }
+    return null
   } catch (error) {
     console.error('Error calculating IPFS hash:', error)
     return null

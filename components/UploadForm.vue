@@ -170,9 +170,8 @@ const getFileInfo = async (file: Blob) => {
   const fileType = getFileType(file.type)
   const [fileSHA256, ipfsHash] = await Promise.all([
     digestFileSHA256(fileBytes),
-    calculateIPFSHash(fileBytes)
+    calculateIPFSHash(Buffer.from(fileBytes))
   ])
-
   return {
     fileType,
     fileBytes,
