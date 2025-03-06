@@ -66,11 +66,11 @@ const items = computed(() => [
   {
     label: 'Publish NFT Book',
     links: [
-      {
-        label: '我要出版',
-        icon: 'i-heroicons-sparkles',
-        to: { name: 'publish-nft-book' }
-      },
+      // {
+      //   label: '我要出版',
+      //   icon: 'i-heroicons-sparkles',
+      //   to: { name: 'publish-nft-book' }
+      // },
       {
         label: 'Print New Books',
         icon: 'i-heroicons-sparkles',
