@@ -1,3 +1,5 @@
+import { jwtDecode } from 'jwt-decode'
+
 const AUTH_SESSION_KEY = 'likecoin_nft_book_press_token'
 const POST_AUTH_REDIRECT_ROUTE_KEY = 'likecoin_nft_book_press_post_auth_redirect'
 
@@ -61,4 +63,28 @@ export function clearPostAuthRedirect () {
 
     window.sessionStorage.removeItem(POST_AUTH_REDIRECT_ROUTE_KEY)
   } catch {}
+}
+
+const SIGN_AUTHORIZATION_PERMISSIONS = [
+  'read:nftbook',
+  'write:nftbook',
+  'read:nftcollection',
+  'write:nftcollection',
+  'write:iscn',
+  'read:iscn'
+] as const
+
+export function checkJwtTokenValidity (token: string) {
+  const decoded = jwtDecode(token)
+  if (!decoded) {
+    return false
+  }
+  const isExpired = decoded.exp && decoded.exp * 1000 < Date.now()
+  const isMatchPermissions =
+      Array.isArray((decoded as any).permissions) &&
+      (decoded as any).permissions.length === SIGN_AUTHORIZATION_PERMISSIONS.length &&
+      (decoded as any).permissions.every((perm: string) =>
+        SIGN_AUTHORIZATION_PERMISSIONS.includes(perm)
+      )
+  return !isExpired && isMatchPermissions
 }

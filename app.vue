@@ -41,15 +41,19 @@ import { storeToRefs } from 'pinia'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useCollectionStore } from '~/stores/collection'
 import { useUIStore } from '~/stores/ui'
+import { useWalletStore } from '~/stores/wallet'
 
+const walletStore = useWalletStore()
 const { SITE_URL } = useRuntimeConfig().public
 const bookStoreApiStore = useBookStoreApiStore()
 const collectionStore = useCollectionStore()
 
-const { restoreAuthSession, fetchBookListing } = bookStoreApiStore
+const { restoreAuthSession, fetchBookListing, clearSession } = bookStoreApiStore
 const { listNFTBookCollections } = collectionStore
+const { disconnect } = walletStore
 const { isRestoringSession, isAuthenticated } = storeToRefs(bookStoreApiStore)
 const uiStore = useUIStore()
+const toast = useToast()
 
 const isMobileMenuOpen = computed({
   get: () => uiStore.isSiteMenuOpen,
@@ -95,7 +99,23 @@ useSeoMeta({
 })
 
 onMounted(async () => {
-  await restoreAuthSession()
+  try {
+    await restoreAuthSession()
+  } catch (error) {
+    console.error(error)
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: `${(error as Error).toString()}, please re-login`,
+      timeout: 0,
+      color: 'red',
+      ui: {
+        title: 'text-red-400 dark:text-red-400'
+      }
+    })
+    disconnect()
+    clearSession()
+  }
+
   if (isAuthenticated.value) {
     await Promise.all([
       fetchBookListing(),

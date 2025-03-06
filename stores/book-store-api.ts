@@ -36,12 +36,19 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
     try {
       isRestoringSession.value = true
       const session = loadAuthSession()
-      if (session) {
-        token.value = session.token
-        sessionWallet.value = session.wallet
-        if (session.wallet) {
-          await walletStore.restoreSession()
-        }
+      if (!session) { return }
+
+      const { token: sessionToken, wallet } = session
+
+      if (!checkJwtTokenValidity(sessionToken)) {
+        throw new Error('INVALID_TOKEN')
+      }
+
+      token.value = sessionToken
+      sessionWallet.value = wallet
+
+      if (wallet) {
+        await walletStore.restoreSession()
       }
     } finally {
       isRestoringSession.value = false
