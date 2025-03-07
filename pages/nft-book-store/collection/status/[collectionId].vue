@@ -602,6 +602,9 @@ function getStatusLabel (purchaseListItem: any) {
       return 'Pending NFT'
 
     case 'completed':
+      if (purchaseListItem.shippingStatus === 'pending') {
+        return 'Pending Shipping'
+      }
       return 'Completed'
 
     default:
@@ -618,6 +621,9 @@ function getStatusLabelColor (purchaseListItem: any) {
       return 'amber'
 
     case 'completed':
+      if (purchaseListItem.shippingStatus === 'pending') {
+        return 'amber'
+      }
       return 'green'
 
     default:
