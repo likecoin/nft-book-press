@@ -1026,16 +1026,13 @@ watch(isLoading, (newIsLoading) => {
 onMounted(async () => {
   isLoading.value = true
   try {
-    const { data: classData, error: classFetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`,
+    const classData = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`,
       {
         headers: {
           authorization: `Bearer ${token.value}`
         }
       })
-    if (classFetchError.value) {
-      throw classFetchError.value
-    }
-    classListingInfo.value = classData.value
+    classListingInfo.value = classData
     prices.value = classListingInfo.value.prices
     const {
       moderatorWallets: classModeratorWallets,
@@ -1045,7 +1042,7 @@ onMounted(async () => {
       tableOfContents: classTableOfContent,
       enableCustomMessagePage: classEnableCustomMessagePage,
       hideDownload: classHideDownload
-    } = classData.value as any
+    } = classData as any
     moderatorWallets.value = classModeratorWallets
     notificationEmails.value = classNotificationEmails
     isStripeConnectChecked.value = !!(classConnectedWallets && Object.keys(classConnectedWallets).length)
@@ -1063,21 +1060,14 @@ onMounted(async () => {
     hideDownload.value = classHideDownload
     enableCustomMessagePage.value = classEnableCustomMessagePage
     tableOfContents.value = classTableOfContent
-    const { data: orders, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
+    const orders = await $fetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
       {
         headers: {
           authorization: `Bearer ${token.value}`
         }
       })
-    if (fetchOrdersError.value) {
-      if (fetchOrdersError.value.statusCode === 403) {
-        throw new Error('NOT_OWNER_OF_NFT_CLASS')
-      } else {
-        throw fetchOrdersError.value
-      }
-    }
 
-    ordersData.value = orders.value
+    ordersData.value = orders
 
     await fetchStripeConnectStatusByWallet(wallet.value)
     lazyFetchClassMetadataById(classId.value as string)
@@ -1099,7 +1089,7 @@ async function handlePriceReorder ({
   try {
     isUpdatingPricesOrder.value = true
     const priceIndex = prices.value[newOrder].index
-    const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}/price/${priceIndex}/order`, {
+    await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}/price/${priceIndex}/order`, {
       method: 'PUT',
       headers: {
         authorization: `Bearer ${token.value}`
@@ -1108,9 +1098,6 @@ async function handlePriceReorder ({
         order: newOrder
       }
     })
-    if (fetchError.value && fetchError.value?.statusCode !== 200) {
-      throw new Error(`${fetchError.value.data} ${fetchError.value.toString()}`)
-    }
     prices.value = prices.value.map((p, order) => ({ ...p, order }))
     classListingInfo.value.prices = prices.value
     toast.add({
@@ -1133,17 +1120,13 @@ async function sendReminderEmail (purchase: any) {
     throw new Error('ORDER_NOT_FOUND')
   }
 
-  const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/status/${purchase.id}/remind`,
+  await $fetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/status/${purchase.id}/remind`,
     {
       method: 'POST',
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
-
-  if (fetchError.value) {
-    throw fetchError.value
-  }
 
   toast.add({
     icon: 'i-heroicons-check-circle',
@@ -1167,21 +1150,21 @@ async function hardSetStatusToCompleted (purchase: any) {
   const previousStatus = orderData.status
   orderData.status = 'completed'
 
-  const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/sent/${purchase.id}`,
-    {
-      method: 'POST',
-      body: {
-        txHash: null,
-        quantity: purchase.quantity || 1
-      },
-      headers: {
-        authorization: `Bearer ${token.value}`
-      }
-    })
-
-  if (fetchError.value) {
+  try {
+    await $fetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/sent/${purchase.id}`,
+      {
+        method: 'POST',
+        body: {
+          txHash: null,
+          quantity: purchase.quantity || 1
+        },
+        headers: {
+          authorization: `Bearer ${token.value}`
+        }
+      })
+  } catch (err) {
     orderData.status = previousStatus
-    throw fetchError.value
+    throw err
   }
 
   if (previousStatus === 'pendingNFT') {
@@ -1260,7 +1243,7 @@ async function updateShippingRates (value: any) {
     await updateBookListingSetting(classId.value as string, {
       shippingRates: value
     })
-    const { data: classData } = await useFetch(
+    const classData = await $fetch(
       `${LIKE_CO_API}/likernft/book/store/${classId.value}`,
       {
         headers: {
@@ -1268,7 +1251,7 @@ async function updateShippingRates (value: any) {
         }
       }
     )
-    classListingInfo.value = classData.value
+    classListingInfo.value = classData
   } catch (err) {
     const errorData = (err as any).data || err
     error.value = errorData

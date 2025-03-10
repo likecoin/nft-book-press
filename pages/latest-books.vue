@@ -176,19 +176,13 @@ onMounted(() => {
 })
 
 async function fetchBookList () {
-  const { data, error } = await useFetch(`${LIKE_CO_API}/likernft/book/store/list?limit=100`)
-  if (error.value) {
-    throw error.value
-  }
-  latestBookList.value = (data.value as any)?.list || []
+  const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/list?limit=100`)
+  latestBookList.value = (data as any)?.list || []
 }
 
 async function fetchBestSellersList () {
-  const { data, error } = await useFetch(`${LIKER_LAND_URL}/api/bookstore/products?tag=bestselling`)
-  if (error.value) {
-    throw error.value
-  }
-  bestSellerBookList.value = (data.value as any)?.records || []
+  const data = await $fetch(`${LIKER_LAND_URL}/api/bookstore/products?tag=bestselling`)
+  bestSellerBookList.value = (data as any)?.records || []
 }
 
 async function fetchUserStripeInfo () {

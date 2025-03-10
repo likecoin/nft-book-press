@@ -10,9 +10,8 @@ export const useNftStore = defineStore('nft', () => {
   const getClassListingInfoById = computed(() => (classId: string) => classListingInfoByIdMap.value[classId])
 
   async function fetchClassMetadataById (classId: string) {
-    const { error, data } = await useFetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${classId}`)
-    if (error.value) { throw error.value }
-    const { class: classData } = data.value as any
+    const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${classId}`)
+    const { class: classData } = data as any
     classMetadataByIdMap.value[classId] = classData
     return classData
   }
@@ -23,9 +22,8 @@ export const useNftStore = defineStore('nft', () => {
   }
 
   async function fetchClassListingInfoById (classId: string) {
-    const { error, data } = await useFetch(`${LIKE_CO_API}/likernft/book/store/${classId}`)
-    if (error.value) { throw error.value }
-    const listingInfo = data.value as any
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId}`)
+    const listingInfo = data as any
     classListingInfoByIdMap.value[classId] = listingInfo
     return listingInfo
   }

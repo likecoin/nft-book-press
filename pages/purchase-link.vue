@@ -824,13 +824,10 @@ async function fetchProductData (id: string) {
       data
     }
   } else {
-    const { data: classData, error: classFetchError } = await useFetch<any>(`${LIKE_CO_API}/likernft/book/store/${id}`)
-    if (classFetchError.value) {
-      throw new Error('Cannot fetch class data.')
-    }
+    const classData = await $fetch<any>(`${LIKE_CO_API}/likernft/book/store/${id}`)
     return {
       id,
-      data: classData.value
+      data: classData
     }
   }
 }
