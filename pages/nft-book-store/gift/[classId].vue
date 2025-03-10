@@ -144,16 +144,13 @@ const tableColumns = [
 onMounted(async () => {
   isLoading.value = true
   try {
-    const { data: classData, error: classFetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`,
+    const classData = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`,
       {
         headers: {
           authorization: `Bearer ${token.value}`
         }
       })
-    if (classFetchError.value) {
-      throw classFetchError.value
-    }
-    classListingInfo.value = classData.value
+    classListingInfo.value = classData
     prices.value = classListingInfo.value.prices
     lazyFetchClassMetadataById(classId.value as string)
   } catch (err) {
@@ -217,7 +214,7 @@ async function onSendGift () {
       throw new Error('NOT_ENOUGH_STOCK')
     }
 
-    const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/class/${classId.value}/price/${priceIndex.value}/gift`,
+    await $fetch(`${LIKE_CO_API}/likernft/book/store/class/${classId.value}/price/${priceIndex.value}/gift`,
       {
         method: 'POST',
         body: {
@@ -232,9 +229,7 @@ async function onSendGift () {
           authorization: `Bearer ${token.value}`
         }
       })
-    if (fetchError.value) {
-      throw fetchError.value
-    }
+
     router.push({
       name: 'nft-book-store-status-classId',
       params: {
