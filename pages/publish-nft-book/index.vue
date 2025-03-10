@@ -28,17 +28,20 @@
               @submit="handleUploadSubmit"
             />
           </div>
-        </div>
+          <div v-else-if="step === 1">
+            <RegisterISCN ref="registerISCN" @submit="handleIscnSubmit" />
+          </div>
 
-        <!-- Navigation Buttons -->
-        <div class="flex gap-2 justify-center mt-4">
-          <UButton
-            v-if="hasFiles"
-            :disabled="step === steps.length - 1 || shouldDisableNext"
-            @click="nextStep"
-          >
-            {{ nextText }}
-          </UButton>
+          <!-- Navigation Buttons -->
+          <div class="flex gap-2 justify-center mt-4">
+            <UButton
+              v-if="step > 0 || step === 0 && hasFiles"
+              :disabled="step === steps.length - 1 || shouldDisableNext"
+              @click="nextStep"
+            >
+              {{ nextText }}
+            </UButton>
+          </div>
         </div>
       </div>
     </PageBody>
@@ -50,6 +53,8 @@
 const route = useRoute()
 const step = ref(0)
 const uploadFormRef = ref()
+const registerISCN = ref()
+const router = useRouter()
 const nextText = computed(() => {
   switch (step.value) {
     case 0:
@@ -70,6 +75,8 @@ const hasFiles = computed(() => {
 const shouldDisableNext = computed(() => {
   if (step.value === 0) {
     return uploadFormRef.value?.uploadStatus !== ''
+  } else if (step.value === 1) {
+    return registerISCN.value?.isFormValid !== true
   }
   return false
 })
@@ -95,6 +102,9 @@ const nextStep = async () => {
       await uploadFormRef.value.onSubmit()
       return
     }
+    if (step.value === 1) {
+      await registerISCN.value.onSubmit()
+    }
     if (step.value < steps.length - 1) {
       step.value++
     }
@@ -106,4 +116,13 @@ const nextStep = async () => {
 const handleUploadSubmit = () => {
   step.value = 1
 }
+
+const handleIscnSubmit = (res: { iscnId: string, txHash: string }) => {
+  const { iscnId } = res
+  router.push({
+    path: '/mint-nft',
+    query: { iscn_id: iscnId }
+  })
+}
+
 </script>
