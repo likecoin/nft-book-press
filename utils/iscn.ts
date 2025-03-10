@@ -207,7 +207,7 @@ export async function signISCN (
   await signingClient.connectWithSigner(network.rpc, signer)
   const signingPromise = isUpdate
     ? signingClient.updateISCNRecord(address, iscnId as string, tx, {
-      memo: memo || 'app.like.co',
+      memo: memo || 'publish.liker.land',
       fee: {
         gas,
         amount: [{
@@ -217,7 +217,7 @@ export async function signISCN (
       }
     })
     : signingClient.createISCNRecord(address, tx, {
-      memo: memo || 'app.like.co',
+      memo: memo || 'publish.liker.land',
       fee: {
         gas,
         amount: [{
@@ -228,4 +228,20 @@ export async function signISCN (
     })
   const res = await signingPromise
   return res as DeliverTxResponse
+}
+
+export async function signISCNTx (
+  tx: ISCNSignPayload,
+  signer: OfflineSigner,
+  address: string,
+  { iscnId, memo, gas }: { iscnId?: string, memo?: string, gas?: string } = {}
+) {
+  const signingClient = await getSigningClient()
+  const client = signingClient.getISCNQueryClient()
+  const res = await signISCN(tx, signer, address, { memo, iscnId, gas })
+  const [newIscnId] = await client.queryISCNIdsByTx(res.transactionHash)
+  return {
+    iscnId: newIscnId,
+    txHash: res.transactionHash
+  }
 }
