@@ -228,21 +228,13 @@ watch(isEditingNFTId, (isEditing) => {
 })
 
 onMounted(async () => {
-  const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/status/${paymentId.value}`,
+  const data = await $fetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/status/${paymentId.value}`,
     {
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
-  if (fetchError.value) {
-    if (fetchError.value.statusCode === 403) {
-      error.value = 'NOT_OWNER_OF_NFT_CLASS'
-    } else {
-      error.value = fetchError.value.toString()
-    }
-  } else {
-    orderInfo.value = (data.value as any)
-  }
+  orderInfo.value = (data as any)
   await lazyFetchCollectionById(collectionId.value as string)
   await Promise.all(classIds.value.map(classId => lazyFetchClassMetadataById(classId)))
   fetchNextNFTId(orderInfo.value.quantity)
@@ -265,16 +257,8 @@ function handleClickEditNFTId () {
 async function fetchNFTMetadataImage (classId, nftId) {
   try {
     isVerifyingNFTId.value = true
-    const { data, error: fetchError } = await useFetch(`${LCD_URL}/cosmos/nft/v1beta1/nfts/${classId}/${nftId}`)
-    if (fetchError.value) {
-      if (fetchError.value.data.code === 2) {
-        nftIdError.value = 'NFT not found'
-      } else {
-        nftIdError.value = fetchError.value.toString()
-      }
-      return ''
-    }
-    const image = (data.value as any)?.nft?.data?.metadata?.image || ''
+    const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/nfts/${classId}/${nftId}`)
+    const image = (data as any)?.nft?.data?.metadata?.image || ''
     return parseImageURLFromMetadata(image)
   } catch (err) {
     error.value = (err as Error).toString()
@@ -359,7 +343,7 @@ async function onSendNFTStart () {
     )
 
     if (res.transactionHash && res.code === 0) {
-      const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/sent/${paymentId.value}`,
+      await $fetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/sent/${paymentId.value}`,
         {
           method: 'POST',
           body: {
@@ -370,9 +354,6 @@ async function onSendNFTStart () {
             authorization: `Bearer ${token.value}`
           }
         })
-      if (fetchError.value) {
-        throw fetchError.value
-      }
       router.push({
         name: 'nft-book-store-collection-status-collectionId',
         params: {

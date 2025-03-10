@@ -170,23 +170,15 @@ const payoutItemRows = computed(() => {
 onMounted(async () => {
   try {
     isLoading.value = true
-    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/payouts/${payoutId.value}`,
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/user/payouts/${payoutId.value}`,
       {
         headers: {
           authorization: `Bearer ${token.value}`
         }
       })
-    if (fetchError.value) {
-      if (fetchError.value.statusCode === 403) {
-        error.value = 'NOT_OWNER_OF_NFT_CLASS'
-      } else {
-        error.value = fetchError.value.toString()
-      }
-    } else {
-      payoutData.value = (data.value as any)
-      if (payoutData.value.items) {
-        payoutItemDetails.value = payoutData.value.items
-      }
+    payoutData.value = (data as any)
+    if (payoutData.value.items) {
+      payoutItemDetails.value = payoutData.value.items
     }
   } finally {
     isLoading.value = false

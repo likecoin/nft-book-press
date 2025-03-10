@@ -521,7 +521,7 @@ onMounted(() => {
   } catch (e) {
     console.error(e)
   }
-  // useFetch fails on mount...
+  // $fetch fails on mount...
   nextTick(() => {
     saleItemList.value.forEach((item) => {
       if (item.classId) {

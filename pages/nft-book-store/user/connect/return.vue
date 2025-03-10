@@ -88,7 +88,7 @@ watch(isLoading, (newIsLoading) => {
 onMounted(async () => {
   try {
     isLoading.value = true
-    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/refresh`,
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/user/connect/refresh`,
       {
         method: 'POST',
         headers: {
@@ -96,10 +96,7 @@ onMounted(async () => {
         }
       }
     )
-    if (fetchError.value) {
-      throw new Error(fetchError.value.toString())
-    }
-    isDone.value = (data.value as any).isReady || false
+    isDone.value = (data as any).isReady || false
 
     setTimeout(() => {
       router.replace({ name: 'nft-book-store-user' })

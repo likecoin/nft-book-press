@@ -34,7 +34,7 @@ export const useStripeStore = defineStore('stripe-connect', () => {
     if (!stripeConnectStatusWalletMap.value[wallet]) {
       stripeConnectStatusWalletMap.value[wallet] = getStripeConnectStatusDefault()
     }
-    const { data, error } = await useFetch<StripeConnectStatus>(`${LIKE_CO_API}/likernft/book/user/connect/status`, {
+    const data = await $fetch<StripeConnectStatus>(`${LIKE_CO_API}/likernft/book/user/connect/status`, {
       headers: {
         authorization: `Bearer ${token.value}`
       },
@@ -42,14 +42,11 @@ export const useStripeStore = defineStore('stripe-connect', () => {
         wallet
       }
     })
-    if (error.value && error.value.statusCode !== 404) {
-      throw new Error(error.value?.data.toString())
-    }
-    if (!data.value) {
+    if (!data) {
       return stripeConnectStatusWalletMap.value[wallet]
     }
-    stripeConnectStatusWalletMap.value[wallet] = data?.value
-    return data.value
+    stripeConnectStatusWalletMap.value[wallet] = data
+    return data
   }
 
   return {

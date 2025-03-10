@@ -200,7 +200,7 @@ onMounted(() => {
 
 async function shortenURLWithBitly ({ url, key }: { url: string, key: string }) {
   try {
-    const { data, error } = await useFetch<{ link: string }>('https://api-ssl.bitly.com/v4/bitlinks', {
+    const data = await $fetch<{ link: string }>('https://api-ssl.bitly.com/v4/bitlinks', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey.value}`
@@ -214,13 +214,10 @@ async function shortenURLWithBitly ({ url, key }: { url: string, key: string }) 
         ]
       }
     })
-    if (error.value) {
-      throw error.value
-    }
-    if (!data.value) {
+    if (!data) {
       throw new Error('No data returned from Bitly')
     }
-    return data.value.link
+    return data.link
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)
@@ -239,7 +236,7 @@ async function shortenURLWithBitly ({ url, key }: { url: string, key: string }) 
 
 async function shortenURLWithShortIO ({ url, key }: { url: string, key: string }) {
   try {
-    const { data, error } = await useFetch<{ shortURL: string }>('https://api.short.io/links/public', {
+    const data = await $fetch<{ shortURL: string }>('https://api.short.io/links/public', {
       method: 'POST',
       headers: {
         Authorization: apiKey.value
@@ -254,13 +251,10 @@ async function shortenURLWithShortIO ({ url, key }: { url: string, key: string }
         ]
       }
     })
-    if (error.value) {
-      throw error.value
-    }
-    if (!data.value) {
+    if (!data) {
       throw new Error('No data returned from Short.io')
     }
-    return data.value.shortURL
+    return data.shortURL
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)

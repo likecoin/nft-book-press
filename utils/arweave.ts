@@ -64,7 +64,7 @@ class Provider {
         'base64'
       )
       const apiEndpoints = getApiEndpoints()
-      const res = await useFetch(apiEndpoints.API_POST_ARWEAVE_V2_SIGN, {
+      const res = await $fetch(apiEndpoints.API_POST_ARWEAVE_V2_SIGN, {
         method: 'POST',
         body: {
           signatureData: convertedMsg,
@@ -74,7 +74,7 @@ class Provider {
         },
         headers: { Authorization: this.token ? `Bearer ${this.token}` : '' }
       })
-      const { signature } = res.data.value
+      const { signature } = res as any
       const bSig = Buffer.from(signature, 'base64')
       // pad & convert so it's in the format the signer expects to have to convert from.
       const pad = Buffer.concat([
@@ -104,8 +104,8 @@ async function getProvider ({
   token: string
 }) {
   const apiEndpoints = getApiEndpoints()
-  const { data } = await useFetch(apiEndpoints.API_GET_ARWEAVE_V2_PUBLIC_KEY)
-  const { publicKey } = data.value as { publicKey: string }
+  const data = await $fetch(apiEndpoints.API_GET_ARWEAVE_V2_PUBLIC_KEY)
+  const { publicKey } = data as { publicKey: string }
   const provider = new Provider({ publicKey, fileSize, ipfsHash, txHash, token })
   return provider
 }
@@ -143,14 +143,14 @@ export async function estimateBundlrFilePrice ({
   ipfsHash: string
 }) {
   const apiEndpoints = getApiEndpoints()
-  const { data } = await useFetch(apiEndpoints.API_POST_ARWEAVE_V2_ESTIMATE, {
+  const data = await $fetch(apiEndpoints.API_POST_ARWEAVE_V2_ESTIMATE, {
     method: 'POST',
     body: {
       fileSize,
       ipfsHash
     }
   })
-  return data.value
+  return data
 }
 
 export async function uploadSingleFileToBundlr (
@@ -178,7 +178,7 @@ export async function uploadSingleFileToBundlr (
   let arweaveLink = `${ARWEAVE_ENDPOINT}/${arweaveId}`
   if (arweaveId) {
     const apiEndpoints = getApiEndpoints()
-    const { data } = await useFetch(apiEndpoints.API_POST_ARWEAVE_V2_REGISTER, {
+    const data = await $fetch(apiEndpoints.API_POST_ARWEAVE_V2_REGISTER, {
       method: 'POST',
       body: {
         fileSize,
@@ -188,7 +188,7 @@ export async function uploadSingleFileToBundlr (
       },
       headers: { Authorization: token ? `Bearer ${token}` : '' }
     })
-    const result = data.value as { link?: string }
+    const result = data as { link?: string }
     if (result?.link) {
       arweaveLink = result.link
     }

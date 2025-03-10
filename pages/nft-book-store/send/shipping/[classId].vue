@@ -191,23 +191,15 @@ watch(isLoading, (newIsLoading) => {
 })
 
 onMounted(async () => {
-  const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/status/${paymentId.value}`,
+  const data = await $fetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/status/${paymentId.value}`,
     {
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
-  if (fetchError.value) {
-    if (fetchError.value.statusCode === 403) {
-      error.value = 'NOT_OWNER_OF_NFT_CLASS'
-    } else {
-      error.value = fetchError.value.toString()
-    }
-  } else {
-    orderInfo.value = (data.value as any)
-    if (orderInfo.value.shippingMessage) {
-      message.value = orderInfo.value.shippingMessage
-    }
+  orderInfo.value = (data as any)
+  if (orderInfo.value.shippingMessage) {
+    message.value = orderInfo.value.shippingMessage
   }
   lazyFetchClassMetadataById(classId.value as string)
 })
@@ -217,7 +209,7 @@ async function onSetShipped () {
   try {
     isLoading.value = true
 
-    const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/shipping/sent/${paymentId.value}`,
+    await $fetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/shipping/sent/${paymentId.value}`,
       {
         method: 'POST',
         body: { message: message.value },
@@ -225,9 +217,7 @@ async function onSetShipped () {
           authorization: `Bearer ${token.value}`
         }
       })
-    if (fetchError.value) {
-      throw fetchError.value
-    }
+
     router.push({
       name: 'nft-book-store-status-classId',
       params: {

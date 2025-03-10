@@ -346,7 +346,7 @@ onMounted(async () => {
   try {
     isLoading.value = true
 
-    const classRes = await useFetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`, {
+    const classRes = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`, {
       headers: {
         authorization: `Bearer ${token.value}`
       }
@@ -422,7 +422,7 @@ async function updateShippingRates (value: any) {
     await updateBookListingSetting(classId.value as string, {
       shippingRates: value
     })
-    const { data: classData } = await useFetch(
+    const classData = await $fetch(
       `${LIKE_CO_API}/likernft/book/store/${classId.value}`,
       {
         headers: {
@@ -430,7 +430,7 @@ async function updateShippingRates (value: any) {
         }
       }
     )
-    shippingRates.value = classData.value?.shippingRates || []
+    shippingRates.value = (classData as any)?.shippingRates || []
   } catch (err) {
     const errorData = (err as any).data || err
     // eslint-disable-next-line no-console

@@ -24,7 +24,7 @@ export const useCollectionStore = defineStore('collection', () => {
   }
 
   async function listNFTBookCollections () {
-    const { error, data } = await useFetch(`${LIKE_CO_API}/likernft/collection`, {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/collection`, {
       query: {
         wallet: sessionWallet.value,
         type: 'book'
@@ -35,15 +35,12 @@ export const useCollectionStore = defineStore('collection', () => {
           }
         : undefined
     })
-    if (error.value) {
-      throw error.value
-    }
-    collectionList.value = (data?.value as any)?.list
+    collectionList.value = (data as any)?.list
     return data
   }
 
   async function listModeratedNFTBookCollections () {
-    const { error, data } = await useFetch(`${LIKE_CO_API}/likernft/book/collection/store/list/moderated`, {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/collection/store/list/moderated`, {
       query: {
         wallet: sessionWallet.value,
         type: 'book'
@@ -54,23 +51,17 @@ export const useCollectionStore = defineStore('collection', () => {
           }
         : undefined
     })
-    if (error.value) {
-      throw error.value
-    }
     return data
   }
 
   async function getNFTBookCollectionById (collectionId: string) {
-    const { error, data } = await useFetch(`${LIKE_CO_API}/likernft/collection/${collectionId}`, {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/collection/${collectionId}`, {
       headers: token.value
         ? {
             authorization: `Bearer ${token.value}`
           }
         : undefined
     })
-    if (error.value) {
-      throw error.value
-    }
     return data
   }
 
@@ -84,43 +75,34 @@ export const useCollectionStore = defineStore('collection', () => {
   }
 
   async function newNFTBookCollection (payload: any) {
-    const { error, data } = await useFetch(`${LIKE_CO_API}/likernft/collection`, {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/collection`, {
       method: 'POST',
       body: { type: 'book', ...payload },
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
-    if (error.value) {
-      throw error.value
-    }
     return data
   }
 
   async function updateNFTBookCollectionById (collectionId: string, payload: any) {
-    const { error, data } = await useFetch(`${LIKE_CO_API}/likernft/collection/${collectionId}`, {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/collection/${collectionId}`, {
       method: 'PATCH',
       body: payload,
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
-    if (error.value) {
-      throw error.value
-    }
     return data
   }
 
   async function deleteNFTBookCollectionById (collectionId: string) {
-    const { error, data } = await useFetch(`${LIKE_CO_API}/likernft/collection/${collectionId}`, {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/collection/${collectionId}`, {
       method: 'DELETE',
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
-    if (error.value) {
-      throw error.value
-    }
     return data
   }
 
