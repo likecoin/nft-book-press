@@ -346,13 +346,12 @@ onMounted(async () => {
   try {
     isLoading.value = true
 
-    const classRes = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`, {
+    const classResData: any = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`, {
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
 
-    const classResData: any = classRes?.data?.value
     if (classResData) {
       shippingRates.value = classResData?.shippingRates || []
       if (classResData?.ownerWallet !== wallet.value) {
