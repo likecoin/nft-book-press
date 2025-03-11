@@ -103,14 +103,17 @@ import {
 import { sendLIKE } from '~/utils/cosmos'
 import { useWalletStore } from '~/stores/wallet'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useUploadStore } from '~/stores/upload'
 
 const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024
 const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
 const store = useWalletStore()
+const uploadStore = useUploadStore()
 const { wallet, signer } = storeToRefs(store)
 const { initIfNecessary } = store
 const bookStoreApiStore = useBookStoreApiStore()
+const { setUploadFileData } = uploadStore
 const { token } = storeToRefs(bookStoreApiStore)
 
 const { getFileType } = useFileUpload()
@@ -627,12 +630,6 @@ const onSubmit = async () => {
     uploadStatus.value = ''
   }
 
-  const uploadArweaveInfoList = Array.from(sentArweaveTransactionInfo.value.values())
-    .map((entry) => {
-      const { arweaveId, arweaveLink, arweaveKey } = entry
-      return { id: arweaveId, link: arweaveLink, key: arweaveKey }
-    })
-
   fileRecords.value.forEach((record: any, index: number) => {
     if (sentArweaveTransactionInfo.value.has(record.ipfsHash)) {
       const info = sentArweaveTransactionInfo.value.get(record.ipfsHash)
@@ -660,14 +657,10 @@ const onSubmit = async () => {
       arweaveKey: record.arweaveKey,
       ipfsHash: record.ipfsHash
     })),
-    uploadArweaveInfoList,
     epubMetadata: epubMetadataList.value[0]
   }
 
-  sessionStorage.setItem(
-    'uploadFileData',
-    JSON.stringify(uploadFileData)
-  )
+  setUploadFileData(uploadFileData)
   emit('submit', uploadFileData)
 }
 

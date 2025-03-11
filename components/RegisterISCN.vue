@@ -188,38 +188,16 @@ import { estimateISCNTxGasAndFee, formatISCNTxPayload, signISCNTx } from '~/util
 import { useWalletStore } from '~/stores/wallet'
 import { getAccountBalance } from '~/utils/cosmos'
 import { ISCN_GAS_MULTIPLIER } from '~/constant/index'
+import { useUploadStore } from '~/stores/upload'
 
 const walletStore = useWalletStore()
+const uploadStore = useUploadStore()
+
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
-
+const { getUploadFileData, setUploadFileData } = uploadStore
 const { stripHtmlTags, formatLanguage } = useFileUpload()
 const toast = useToast()
-
-interface UploadFileData {
-  epubMetadata?: {
-    epubFileName: string;
-    title: string;
-    author: string;
-    language: string;
-    coverData: string;
-    description: string;
-    tags: string[];
-    thumbnailArweaveId: string;
-    thumbnailIpfsHash: string;
-  };
-  tags?: string[];
-  thumbnailIpfsHash?: string;
-  fileRecords: Array<{
-    fileName: string;
-    fileType: string;
-    arweaveId: string;
-    arweaveLink: string;
-    ipfsHash: string;
-    arweaveKey?: string;
-  }>;
-}
-
 const languageOptions = ref([
   { label: 'English', value: 'en' },
   { label: '中文', value: 'zh' }
@@ -316,18 +294,8 @@ onMounted(() => {
 })
 
 const initializeFromSessionStorage = () => {
-  if (process.server) { return null }
-
-  const storedData = window.sessionStorage.getItem('uploadFileData')
-  if (!storedData) { return null }
-
-  let data: UploadFileData
-  try {
-    data = JSON.parse(storedData)
-  } catch (error) {
-    console.error('Error parsing JSON from sessionStorage:', error)
-    return null
-  }
+  const data = getUploadFileData()
+  if (!data) { return null }
 
   const baseData = {
     type: 'book',
@@ -463,8 +431,6 @@ const submitToISCN = async (): Promise<void> => {
 
   try {
     uploadStatus.value = 'signing'
-    console.log('payload', payload.value)
-    console.log('formatISCNTxPayload', formatISCNTxPayload(payload.value))
     const res = await signISCNTx(
       formatISCNTxPayload(payload.value),
       signer.value,
@@ -472,7 +438,7 @@ const submitToISCN = async (): Promise<void> => {
       { gas: iscnGasFee.value }
     )
     uploadStatus.value = 'success'
-    window.sessionStorage.setItem('iscnResponse', JSON.stringify(res))
+    setUploadFileData({ iscnRecord: res })
     emit('submit', res)
   } catch (err) {
     console.error(err)
