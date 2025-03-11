@@ -321,7 +321,7 @@ onMounted(async () => {
   try {
     isLoading.value = true
 
-    collectionListingInfo.value = (await collectionStore.fetchCollectionById(collectionId.value as string)).value
+    collectionListingInfo.value = (await collectionStore.fetchCollectionById(collectionId.value as string))
     const typePayload = collectionListingInfo.value.typePayload
     if (typePayload) {
       collectionListingInfo.value = {
@@ -390,7 +390,7 @@ async function updateShippingRates (value: any) {
       shippingRates: value
     })
 
-    const updatedCollectionData = (await collectionStore.fetchCollectionById(collectionId.value as string)).value
+    const updatedCollectionData = (await collectionStore.fetchCollectionById(collectionId.value as string))
     shippingRates.value = updatedCollectionData?.typePayload?.shippingRates
   } catch (err) {
     const errorData = (err as any).data || err

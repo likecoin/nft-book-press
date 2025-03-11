@@ -736,7 +736,7 @@ watch(isLoading, (newIsLoading) => {
 onMounted(async () => {
   isLoading.value = true
   try {
-    collectionListingInfo.value = (await collectionStore.fetchCollectionById(collectionId.value as string)).value
+    collectionListingInfo.value = (await collectionStore.fetchCollectionById(collectionId.value as string))
     const typePayload = collectionListingInfo.value.typePayload
     if (typePayload) {
       collectionListingInfo.value = {
@@ -906,7 +906,7 @@ async function updateShippingRates (value: any) {
     await updateNFTBookCollectionById(collectionId.value as string, {
       shippingRates: value
     })
-    collectionListingInfo.value = (await collectionStore.fetchCollectionById(collectionId.value as string)).value
+    collectionListingInfo.value = (await collectionStore.fetchCollectionById(collectionId.value as string))
     const typePayload = collectionListingInfo.value.typePayload
     if (typePayload) {
       collectionListingInfo.value = {
