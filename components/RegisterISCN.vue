@@ -216,6 +216,7 @@ interface UploadFileData {
     arweaveId: string;
     arweaveLink: string;
     ipfsHash: string;
+    arweaveKey?: string;
   }>;
 }
 
@@ -246,8 +247,6 @@ const iscnData = ref({
   language: '',
   bookInfoUrl: '',
   tags: [],
-  ipfsHash: [],
-  arweaveId: [],
   coverUrl: ''
 })
 
@@ -256,7 +255,6 @@ const iscnFee = ref(new BigNumber(0))
 const iscnGasFee = ref('0')
 const uploadStatus = ref('')
 const error = ref('')
-const combinedArweaveIdList = computed(() => iscnData.value.arweaveId)
 const emit = defineEmits(['handleSubmit', 'submit'])
 
 const totalFee = computed(() => {
@@ -318,81 +316,58 @@ onMounted(() => {
 })
 
 const initializeFromSessionStorage = () => {
-  if (process.server) {
-    return null
-  }
+  if (process.server) { return null }
 
+  const storedData = window.sessionStorage.getItem('uploadFileData')
+  if (!storedData) { return null }
+
+  let data: UploadFileData
   try {
-    const storedData = window.sessionStorage.getItem('uploadFileData')
-    if (!storedData) {
-      return null
-    }
-
-    const data: UploadFileData = JSON.parse(storedData)
-
-    const baseData = {
-      type: 'book',
-      title: data.epubMetadata?.title || '',
-      description: stripHtmlTags(data.epubMetadata?.description || ''),
-      isbn: '',
-      publisher: '',
-      publicationDate: '',
-      author: {
-        name: data.epubMetadata?.author || '',
-        description: '',
-        url: ''
-      },
-      license: 'All rights reserved',
-      contentFingerprints: [] as Array<{ url: string }>,
-      downloadableUrls: [] as Array<{
-        url: string;
-        type: string;
-        fileName: string;
-      }>,
-      coverUrl: `ar://${data.epubMetadata?.thumbnailArweaveId}`,
-      language: formatLanguage(data.epubMetadata?.language || ''),
-      tags: data.epubMetadata?.tags || [],
-      ipfsHash: [
-        data.thumbnailIpfsHash,
-        ...data.fileRecords.map(record => record.ipfsHash)
-      ]
-        .filter(Boolean),
-      arweaveId: data.fileRecords
-        .map(record => record.arweaveLink || record.arweaveId)
-        .filter(Boolean)
-    }
-
-    const downloadableFiles = data.fileRecords.filter(
-      record => record.fileType === 'epub' || record.fileType === 'pdf'
-    )
-
-    if (downloadableFiles.length) {
-      baseData.downloadableUrls = downloadableFiles.map(file => ({
-        url: file.arweaveLink || `ar://${file.arweaveId}`,
-        type: file.fileType,
-        fileName: file.fileName
-      }))
-      baseData.contentFingerprints = [
-        ...new Set(
-          data.fileRecords.flatMap(record =>
-            [record.arweaveLink || `ar://${record.arweaveId}`, `ipfs://${record.ipfsHash}`].filter(Boolean)
-          )
-        )
-      ].map(url => ({ url }))
-    }
-
-    if (baseData.contentFingerprints.length === 0) {
-      baseData.contentFingerprints = [{ url: '' }]
-    }
-    if (baseData.downloadableUrls.length === 0) {
-      baseData.downloadableUrls = [{ url: '', type: '', fileName: '' }]
-    }
-
-    return baseData
+    data = JSON.parse(storedData)
   } catch (error) {
-    console.error('Error reading from sessionStorage:', error)
+    console.error('Error parsing JSON from sessionStorage:', error)
     return null
   }
+
+  const baseData = {
+    type: 'book',
+    title: data.epubMetadata?.title || '',
+    description: stripHtmlTags(data.epubMetadata?.description || ''),
+    isbn: '',
+    publisher: '',
+    publicationDate: '',
+    author: {
+      name: data.epubMetadata?.author || '',
+      description: '',
+      url: ''
+    },
+    license: 'All rights reserved',
+    contentFingerprints: [],
+    downloadableUrls: [],
+    coverUrl: data.epubMetadata?.thumbnailArweaveId
+      ? `ar://${data.epubMetadata.thumbnailArweaveId}`
+      : '',
+    language: formatLanguage(data.epubMetadata?.language || ''),
+    tags: data.epubMetadata?.tags || []
+  }
+
+  baseData.downloadableUrls = data.fileRecords
+    .filter(r => r.fileType === 'epub' || r.fileType === 'pdf')
+    .map(file => ({
+      url: file.arweaveKey ? file.arweaveLink : `ar://${file.arweaveId}`,
+      type: file.fileType,
+      fileName: file.fileName
+    }))
+
+  baseData.contentFingerprints = [
+    ...new Set(
+      data.fileRecords
+        .map(r => (r.fileType === 'epub' || r.fileType === 'pdf' ? (r.arweaveKey ? r.arweaveLink : `ar://${r.arweaveId}`) : `ar://${r.arweaveId}`))
+        .filter(Boolean)
+    )
+  ].map(url => ({ url }))
+
+  return baseData
 }
 
 const calculateISCNFee = async () => {
@@ -470,7 +445,7 @@ const onSubmit = async (): Promise<void> => {
     return
   }
   if (
-    combinedArweaveIdList.value.length
+    iscnData.value.contentFingerprints.length
   ) {
     await submitToISCN()
   }
@@ -488,6 +463,8 @@ const submitToISCN = async (): Promise<void> => {
 
   try {
     uploadStatus.value = 'signing'
+    console.log('payload', payload.value)
+    console.log('formatISCNTxPayload', formatISCNTxPayload(payload.value))
     const res = await signISCNTx(
       formatISCNTxPayload(payload.value),
       signer.value,
