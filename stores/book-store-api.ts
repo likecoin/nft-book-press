@@ -56,16 +56,15 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
   }
 
   async function authenticate (inputWallet: string, signature: any) {
-    const { error, data } = await useFetch(`${LIKE_CO_API}/wallet/authorize`, {
+    const data = await $fetch(`${LIKE_CO_API}/wallet/authorize`, {
       method: 'POST',
       body: {
         expiresIn: '7d',
         ...signature
       }
     })
-    if (error.value) { throw error.value }
-    if ((!data?.value as any)?.token) { throw new Error('INVALID_SIGNATURE') }
-    token.value = (data.value as any).token
+    if ((!data as any)?.token) { throw new Error('INVALID_SIGNATURE') }
+    token.value = (data as any).token
     sessionWallet.value = inputWallet
     saveAuthSession({ wallet: inputWallet, token: token.value })
   }
@@ -78,18 +77,14 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
     if (params.key) {
       qsPayload.key = params.key
     }
-    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/list?${Object.entries(qsPayload).map(([key, value]) => `${key}=${value}`).join('&')}`,
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/list?${Object.entries(qsPayload).map(([key, value]) => `${key}=${value}`).join('&')}`,
       {
         headers: {
           authorization: token.value ? `Bearer ${token.value}` : ''
         }
       })
 
-    if (fetchError.value) {
-      throw fetchError.value
-    }
-
-    const { nextKey, list = [] } = (data.value as any) || {}
+    const { nextKey, list = [] } = (data as any) || {}
     if (params.key) {
       listingList.value.push(...list)
     } else {
@@ -102,17 +97,14 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
   }
 
   async function fetchModeratedBookList () {
-    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/store/list/moderated?wallet=${sessionWallet.value}`,
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/list/moderated?wallet=${sessionWallet.value}`,
       {
         headers: {
           authorization: `Bearer ${token.value}`
         }
       }
     )
-    if (fetchError.value) {
-      throw fetchError.value
-    }
-    moderatedBookList.value = (data.value as any)?.list || []
+    moderatedBookList.value = (data as any)?.list || []
   }
 
   function reduceListingPendingNFTCountById (classId: string, count: number) {
@@ -125,58 +117,46 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
   }
 
   async function newBookListing (classId: string, payload: any) {
-    const { error, data } = await useFetch(`${LIKE_CO_API}/likernft/book/store/${classId}/new`, {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId}/new`, {
       method: 'POST',
       body: payload,
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
-    if (error.value) {
-      throw error.value
-    }
     return data
   }
 
   async function updateBookListingSetting (classId: string, payload: any) {
-    const { error, data } = await useFetch(`${LIKE_CO_API}/likernft/book/store/${classId}/settings`, {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId}/settings`, {
       method: 'POST',
       body: payload,
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
-    if (error.value) {
-      throw error.value
-    }
     return data
   }
 
   async function updateEditionPrice (classId: string, priceIndex:any, payload: any) {
-    const { error, data } = await useFetch(`${LIKE_CO_API}/likernft/book/store/${classId}/price/${priceIndex}`, {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId}/price/${priceIndex}`, {
       method: 'PUT',
       body: payload,
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
-    if (error.value) {
-      throw error.value
-    }
     return data
   }
 
   async function addEditionPrice (classId: string, priceIndex: string, payload: any) {
-    const { error, data } = await useFetch(`${LIKE_CO_API}/likernft/book/store/${classId}/price/${priceIndex}`, {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId}/price/${priceIndex}`, {
       method: 'POST',
       body: payload,
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
-    if (error.value) {
-      throw error.value
-    }
     return data
   }
 

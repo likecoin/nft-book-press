@@ -28,10 +28,7 @@ export const useLikerStore = defineStore('liker', () => {
   async function fetchLikerInfoById (likerId: string) {
     try {
       const result = await useFetchLikerInfoById(likerId)
-      if (result.error.value) {
-        throw result.error.value
-      }
-      const likerInfo = result.data.value
+      const likerInfo = result
       if (!likerInfo) {
         throw new Error('Missing data in `fetchLikerInfoById`')
       }
@@ -54,10 +51,7 @@ export const useLikerStore = defineStore('liker', () => {
   async function fetchLikerInfoByWallet (wallet: string, { nocache = false } = {}) {
     try {
       const result = await useFetchLikerInfoByWallet(wallet, { nocache })
-      if (result.error.value) {
-        throw result.error.value
-      }
-      const likerInfo = result.data.value
+      const likerInfo = result
       if (!likerInfo) {
         throw new Error('Missing data in `fetchLikerInfoByWallet`')
       }

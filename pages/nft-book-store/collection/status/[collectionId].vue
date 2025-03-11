@@ -762,21 +762,14 @@ onMounted(async () => {
         await fetchStripeConnectStatusByWallet(classStripeWallet)
       }
     }
-    const { data: orders, error: fetchOrdersError } = await useFetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/orders`,
+    const orders = await $fetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/orders`,
       {
         headers: {
           authorization: `Bearer ${token.value}`
         }
       })
-    if (fetchOrdersError.value) {
-      if (fetchOrdersError.value.statusCode === 403) {
-        throw new Error('NOT_OWNER_OF_NFT_COLLECTION')
-      } else {
-        throw fetchOrdersError.value
-      }
-    }
 
-    ordersData.value = orders.value
+    ordersData.value = orders
 
     await fetchStripeConnectStatusByWallet(wallet.value)
     collectionListingInfo.value.classIds.forEach((classId: string) => lazyFetchClassMetadataById(classId))
@@ -794,17 +787,13 @@ async function sendReminderEmail (purchase: any) {
     throw new Error('ORDER_NOT_FOUND')
   }
 
-  const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/status/${purchase.id}/remind`,
+  await $fetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/status/${purchase.id}/remind`,
     {
       method: 'POST',
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
-
-  if (fetchError.value) {
-    throw fetchError.value
-  }
 
   toast.add({
     icon: 'i-heroicons-check-circle',
@@ -828,20 +817,21 @@ async function hardSetStatusToCompleted (purchase: any) {
   const previousStatus = orderData.status
   orderData.status = 'completed'
 
-  const { error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/sent/${purchase.id}`,
-    {
-      method: 'POST',
-      body: {
-        txHash: null,
-        quantity: purchase.quantity || 1
-      },
-      headers: {
-        authorization: `Bearer ${token.value}`
-      }
-    })
-  if (fetchError.value) {
+  try {
+    await $fetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/sent/${purchase.id}`,
+      {
+        method: 'POST',
+        body: {
+          txHash: null,
+          quantity: purchase.quantity || 1
+        },
+        headers: {
+          authorization: `Bearer ${token.value}`
+        }
+      })
+  } catch (err) {
     orderData.status = previousStatus
-    throw fetchError.value
+    throw err
   }
 
   if (previousStatus === 'pendingNFT') {

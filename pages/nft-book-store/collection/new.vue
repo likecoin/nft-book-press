@@ -631,11 +631,8 @@ async function submitNewCollection () {
     isLoading.value = true
 
     await Promise.all(classIds.value.map(async (classId) => {
-      const { data, error: fetchError } = await useFetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${classId}`)
-      if (fetchError.value && fetchError.value?.statusCode !== 404) {
-        throw new Error(fetchError.value.toString())
-      }
-      const collectionId = (data?.value as any)?.class?.data?.metadata?.nft_meta_collection_id || ''
+      const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${classId}`)
+      const collectionId = (data as any)?.class?.data?.metadata?.nft_meta_collection_id || ''
       if (!collectionId.includes('nft_book') && !collectionId.includes('book_nft')) {
         throw new Error('NFT Class not in NFT BOOK meta collection')
       }

@@ -435,15 +435,12 @@ const payoutHistoryRows = computed(() => {
 async function loadCommissionHistory () {
   try {
     isLoading.value = true
-    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/commissions/list`, {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/user/commissions/list`, {
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
-    if (fetchError.value && fetchError.value?.statusCode !== 404) {
-      throw new Error(fetchError.value.toString())
-    }
-    commissionHistory.value = (data.value as any)?.commissions || []
+    commissionHistory.value = (data as any)?.commissions || []
 
     const classIds = new Set<string>(commissionHistory.value
       .filter((row: any) => row.classId)
@@ -465,15 +462,12 @@ async function loadCommissionHistory () {
 async function loadPayoutHistory () {
   try {
     isLoading.value = true
-    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/payouts/list`, {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/user/payouts/list`, {
       headers: {
         authorization: `Bearer ${token.value}`
       }
     })
-    if (fetchError.value && fetchError.value?.statusCode !== 404) {
-      throw new Error(fetchError.value.toString())
-    }
-    payoutHistory.value = (data.value as any)?.payouts || []
+    payoutHistory.value = (data as any)?.payouts || []
   } catch (e) {
     console.error(e)
     error.value = (e as Error).toString()
@@ -497,7 +491,7 @@ async function refreshStripeConnectStatus () {
     await loadStripeConnectStatus()
 
     if (connectStatus.value?.hasAccount && !isStripeConnectReady.value) {
-      const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/refresh`,
+      const data = await $fetch(`${LIKE_CO_API}/likernft/book/user/connect/refresh`,
         {
           method: 'POST',
           headers: {
@@ -505,10 +499,7 @@ async function refreshStripeConnectStatus () {
           }
         }
       )
-      if (fetchError.value && fetchError.value?.statusCode !== 404) {
-        throw new Error(fetchError.value.toString())
-      }
-      if ((data.value as any).isReady) {
+      if ((data as any).isReady) {
         connectStatus.value.isReady = true
         await loadStripeConnectStatus()
       }
@@ -524,17 +515,14 @@ async function refreshStripeConnectStatus () {
 async function loadStripeConnectStatus () {
   try {
     isLoading.value = true
-    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${wallet.value}`,
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/user/connect/status?wallet=${wallet.value}`,
       {
         headers: {
           authorization: `Bearer ${token.value}`
         }
       }
     )
-    if (fetchError.value && fetchError.value?.statusCode !== 404) {
-      throw new Error(fetchError.value.toString())
-    }
-    connectStatus.value = (data.value as any) || {}
+    connectStatus.value = (data as any) || {}
   } catch (e) {
     console.error(e)
     error.value = (e as Error).toString()
@@ -546,7 +534,7 @@ async function loadStripeConnectStatus () {
 async function onLoginToStripe () {
   try {
     isLoading.value = true
-    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/login`,
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/user/connect/login`,
       {
         method: 'POST',
         headers: {
@@ -554,10 +542,7 @@ async function onLoginToStripe () {
         }
       }
     )
-    if (fetchError.value) {
-      throw new Error(fetchError.value.toString())
-    }
-    const url = (data.value as any).url
+    const url = (data as any).url
     if (url) {
       window.open(url)
     } else {
@@ -574,7 +559,7 @@ async function onLoginToStripe () {
 async function onSetupStripe () {
   try {
     isLoading.value = true
-    const { data, error: fetchError } = await useFetch(`${LIKE_CO_API}/likernft/book/user/connect/new`,
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/user/connect/new`,
       {
         method: 'POST',
         headers: {
@@ -582,10 +567,7 @@ async function onSetupStripe () {
         }
       }
     )
-    if (fetchError.value) {
-      throw new Error(fetchError.value.toString())
-    }
-    const url = (data.value as any).url
+    const url = (data as any).url
     if (url) {
       window.open(url)
     } else {
