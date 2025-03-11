@@ -44,6 +44,13 @@
           placeholder="Select language"
         />
       </UFormGroup>
+
+      <UFormGroup label="書訊">
+        <UInput
+          v-model="iscnData.bookInfoUrl"
+          placeholder="Enter book info URL"
+        />
+      </UFormGroup>
     </div>
 
     <!-- Author Info -->
@@ -181,37 +188,16 @@ import { estimateISCNTxGasAndFee, formatISCNTxPayload, signISCNTx } from '~/util
 import { useWalletStore } from '~/stores/wallet'
 import { getAccountBalance } from '~/utils/cosmos'
 import { ISCN_GAS_MULTIPLIER } from '~/constant/index'
+import { useUploadStore } from '~/stores/upload'
 
 const walletStore = useWalletStore()
+const uploadStore = useUploadStore()
+
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
-
+const { getUploadFileData, setUploadFileData } = uploadStore
 const { stripHtmlTags, formatLanguage } = useFileUpload()
 const toast = useToast()
-
-interface UploadFileData {
-  epubMetadata?: {
-    epubFileName: string;
-    title: string;
-    author: string;
-    language: string;
-    coverData: string;
-    description: string;
-    tags: string[];
-    thumbnailArweaveId: string;
-    thumbnailIpfsHash: string;
-  };
-  tags?: string[];
-  thumbnailIpfsHash?: string;
-  fileRecords: Array<{
-    fileName: string;
-    fileType: string;
-    arweaveId: string;
-    arweaveLink: string;
-    ipfsHash: string;
-  }>;
-}
-
 const languageOptions = ref([
   { label: 'English', value: 'en' },
   { label: '中文', value: 'zh' }
@@ -237,9 +223,8 @@ const iscnData = ref({
     fileName: ''
   }],
   language: '',
+  bookInfoUrl: '',
   tags: [],
-  ipfsHash: [],
-  arweaveId: [],
   coverUrl: ''
 })
 
@@ -248,7 +233,6 @@ const iscnFee = ref(new BigNumber(0))
 const iscnGasFee = ref('0')
 const uploadStatus = ref('')
 const error = ref('')
-const combinedArweaveIdList = computed(() => iscnData.value.arweaveId)
 const emit = defineEmits(['handleSubmit', 'submit'])
 
 const totalFee = computed(() => {
@@ -280,10 +264,8 @@ const payload = computed(() => ({
   datePublished: iscnData.value.publicationDate
     ? new Date(iscnData.value.publicationDate).toISOString()
     : undefined,
-  url: iscnData.value.contentFingerprints[0]?.url || '',
+  url: iscnData.value.bookInfoUrl,
   tagsString: iscnData.value.tags?.join(', ') || '',
-  ipfsHash: iscnData.value.ipfsHash,
-  arweaveId: iscnData.value.arweaveId,
   sameAs: formattedSameAsList.value,
   thumbnailUrl: iscnData.value.coverUrl
 }))
@@ -312,81 +294,48 @@ onMounted(() => {
 })
 
 const initializeFromSessionStorage = () => {
-  if (process.server) {
-    return null
+  const data = getUploadFileData()
+  if (!data) { return null }
+
+  const baseData = {
+    type: 'book',
+    title: data.epubMetadata?.title || '',
+    description: stripHtmlTags(data.epubMetadata?.description || ''),
+    isbn: '',
+    publisher: '',
+    publicationDate: '',
+    author: {
+      name: data.epubMetadata?.author || '',
+      description: '',
+      url: ''
+    },
+    license: 'All rights reserved',
+    contentFingerprints: [],
+    downloadableUrls: [],
+    coverUrl: data.epubMetadata?.thumbnailArweaveId
+      ? `ar://${data.epubMetadata.thumbnailArweaveId}`
+      : '',
+    language: formatLanguage(data.epubMetadata?.language || ''),
+    tags: data.epubMetadata?.tags || []
   }
 
-  try {
-    const storedData = window.sessionStorage.getItem('uploadFileData')
-    if (!storedData) {
-      return null
-    }
+  baseData.downloadableUrls = data.fileRecords
+    .filter(r => r.fileType === 'epub' || r.fileType === 'pdf')
+    .map(file => ({
+      url: file.arweaveKey ? file.arweaveLink : `ar://${file.arweaveId}`,
+      type: file.fileType,
+      fileName: file.fileName
+    }))
 
-    const data: UploadFileData = JSON.parse(storedData)
-
-    const baseData = {
-      type: 'book',
-      title: data.epubMetadata?.title || '',
-      description: stripHtmlTags(data.epubMetadata?.description || ''),
-      isbn: '',
-      publisher: '',
-      publicationDate: '',
-      author: {
-        name: data.epubMetadata?.author || '',
-        description: '',
-        url: ''
-      },
-      license: 'All rights reserved',
-      contentFingerprints: [] as Array<{ url: string }>,
-      downloadableUrls: [] as Array<{
-        url: string;
-        type: string;
-        fileName: string;
-      }>,
-      coverUrl: `ar://${data.epubMetadata?.thumbnailArweaveId}`,
-      language: formatLanguage(data.epubMetadata?.language || ''),
-      tags: data.epubMetadata?.tags || [],
-      ipfsHash: [
-        data.thumbnailIpfsHash,
-        ...data.fileRecords.map(record => record.ipfsHash)
-      ]
-        .filter(Boolean),
-      arweaveId: data.fileRecords
-        .map(record => record.arweaveLink || record.arweaveId)
+  baseData.contentFingerprints = [
+    ...new Set(
+      data.fileRecords
+        .map(r => (r.fileType === 'epub' || r.fileType === 'pdf' ? (r.arweaveKey ? r.arweaveLink : `ar://${r.arweaveId}`) : `ar://${r.arweaveId}`))
         .filter(Boolean)
-    }
-
-    const downloadableFiles = data.fileRecords.filter(
-      record => record.fileType === 'epub' || record.fileType === 'pdf'
     )
+  ].map(url => ({ url }))
 
-    if (downloadableFiles.length) {
-      baseData.downloadableUrls = downloadableFiles.map(file => ({
-        url: file.arweaveLink || `ar://${file.arweaveId}`,
-        type: file.fileType,
-        fileName: file.fileName
-      }))
-      baseData.contentFingerprints = [
-        ...new Set(
-          data.fileRecords.flatMap(record =>
-            [record.arweaveLink || `ar://${record.arweaveId}`, `ipfs://${record.ipfsHash}`].filter(Boolean)
-          )
-        )
-      ].map(url => ({ url }))
-    }
-
-    if (baseData.contentFingerprints.length === 0) {
-      baseData.contentFingerprints = [{ url: '' }]
-    }
-    if (baseData.downloadableUrls.length === 0) {
-      baseData.downloadableUrls = [{ url: '', type: '', fileName: '' }]
-    }
-
-    return baseData
-  } catch (error) {
-    console.error('Error reading from sessionStorage:', error)
-    return null
-  }
+  return baseData
 }
 
 const calculateISCNFee = async () => {
@@ -464,7 +413,7 @@ const onSubmit = async (): Promise<void> => {
     return
   }
   if (
-    combinedArweaveIdList.value.length
+    iscnData.value.contentFingerprints.length
   ) {
     await submitToISCN()
   }
@@ -489,7 +438,7 @@ const submitToISCN = async (): Promise<void> => {
       { gas: iscnGasFee.value }
     )
     uploadStatus.value = 'success'
-    window.sessionStorage.setItem('iscnResponse', JSON.stringify(res))
+    setUploadFileData({ iscnRecord: res })
     emit('submit', res)
   } catch (err) {
     console.error(err)
