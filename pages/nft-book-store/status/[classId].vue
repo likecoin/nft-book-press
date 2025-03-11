@@ -1216,13 +1216,13 @@ async function updateSettings () {
       ? connectedWallets.value
       : null
     await updateBookListingSetting(classId.value as string, {
-      moderatorWallets,
-      notificationEmails,
+      moderatorWallets: moderatorWallets.value,
+      notificationEmails: notificationEmails.value,
       connectedWallets: newConnectedWallets,
-      hideDownload,
-      mustClaimToView,
-      tableOfContents,
-      enableCustomMessagePage
+      hideDownload: hideDownload.value,
+      mustClaimToView: mustClaimToView.value,
+      tableOfContents: tableOfContents.value,
+      enableCustomMessagePage: enableCustomMessagePage.value
     })
     router.push({
       name: 'nft-book-store'
