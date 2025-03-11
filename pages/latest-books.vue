@@ -159,20 +159,18 @@ useSeoMeta({
   ogTitle: 'Latest Books'
 })
 
-onMounted(() => {
-  nextTick(async () => {
-    await Promise.all([
-      fetchBookList().catch((e) => {
-        error.value = e
-      }),
-      fetchBestSellersList().catch((e) => {
-        error.value = e
-      })
-    ])
-    if (isAuthenticated.value) {
-      await fetchUserStripeInfo()
-    }
-  })
+onMounted(async () => {
+  await Promise.all([
+    fetchBookList().catch((e) => {
+      error.value = e
+    }),
+    fetchBestSellersList().catch((e) => {
+      error.value = e
+    })
+  ])
+  if (isAuthenticated.value) {
+    await fetchUserStripeInfo()
+  }
 })
 
 async function fetchBookList () {

@@ -521,15 +521,12 @@ onMounted(() => {
   } catch (e) {
     console.error(e)
   }
-  // $fetch fails on mount...
-  nextTick(() => {
-    saleItemList.value.forEach((item) => {
-      if (item.classId) {
-        lazyFetchClassMetadataById(item.classId)
-        lazyFetchClassListingInfoById(item.classId)
-      }
-      if (item.collectionId) { lazyFetchCollectionById(item.collectionId) }
-    })
+  saleItemList.value.forEach((item) => {
+    if (item.classId) {
+      lazyFetchClassMetadataById(item.classId)
+      lazyFetchClassListingInfoById(item.classId)
+    }
+    if (item.collectionId) { lazyFetchCollectionById(item.collectionId) }
   })
 })
 
