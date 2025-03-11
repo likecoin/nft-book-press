@@ -139,11 +139,11 @@ onMounted(async () => {
     promises.push(listModeratedNFTBookCollections())
   }
   const [collectionData, moderatedData] = await Promise.all(promises)
-  collectionList.value = (collectionData?.value as any)?.list
+  collectionList.value = (collectionData as any)?.list
   collectionList.value.forEach((b :any) => {
     b.classIds.forEach((classId: string) => lazyFetchClassMetadataById(classId))
   })
-  moderatedCollectionList.value = (moderatedData?.value as any)?.list || []
+  moderatedCollectionList.value = (moderatedData as any)?.list || []
   moderatedCollectionList.value.forEach((b :any) => {
     b.classIds.forEach((classId: string) => lazyFetchClassMetadataById(classId))
   })
