@@ -57,112 +57,18 @@ export async function getSigningClient () {
 }
 
 export function formatISCNTxPayload (payload: ISCNRegisterPayload): ISCNSignPayload {
-  const { LIKERLAND_ISCN_PUBLISHER } = useRuntimeConfig().public
   const {
     tagsString = '',
     license,
-    ipfsHash,
-    arweaveId,
-    fileSHA256,
     author,
     authorDescription,
-    authorNames,
-    authorDescriptions,
-    authorUrls,
-    authorWallets,
-    likerIds,
-    likerIdsAddresses,
-    numbersProtocolAssetId,
     contentFingerprints: contentFingerprintsInput = [],
-    stakeholders: stakeholdersInput = [],
     recordNotes,
     publisher: publisherInput,
     ...data
   } = payload
 
   const contentFingerprints = [...contentFingerprintsInput]
-  const stakeholders = [...stakeholdersInput]
-  let publisher = publisherInput
-  if (!stakeholders.length && !publisher) {
-    publisher = LIKERLAND_ISCN_PUBLISHER
-  }
-  let rewardProportion = 1
-  if (publisher) {
-    const {
-      stakeholders: publisherStakeholders = [],
-      contentFingerprints: publisherContentFingerprints = []
-    } = getPublisherISCNPayload(publisher)
-    stakeholders.push(...publisherStakeholders)
-    contentFingerprints.push(...publisherContentFingerprints)
-    if (publisherStakeholders && publisherStakeholders.length) {
-      rewardProportion -= publisherStakeholders.reduce((acc, cur) => {
-        if (cur.rewardProportion) { return acc + cur.rewardProportion }
-        return acc
-      }, 0)
-      rewardProportion = Math.max(0, rewardProportion)
-    }
-  }
-
-  const pushContentFingerprint = (value: any, prefix:string) => {
-    if (Array.isArray(value)) {
-      value.forEach(item => contentFingerprints.push(`${prefix}${item}`))
-    } else if (typeof value === 'string' && value.length) {
-      contentFingerprints.push(`${prefix}${value}`)
-    }
-  }
-  pushContentFingerprint(fileSHA256, 'hash://sha256/')
-  pushContentFingerprint(ipfsHash, 'ipfs://')
-  pushContentFingerprint(arweaveId, 'ar://')
-  pushContentFingerprint(numbersProtocolAssetId, 'num://')
-
-  if (authorNames && authorNames.length) {
-    for (let i = 0; i < authorNames.length; i += 1) {
-      const authorName: string = authorNames[i]
-      const description = (authorDescriptions && authorDescriptions[i]) || ''
-      const url: string = (likerIds[i] && likerIdsAddresses[i])
-        ? `https://like.co/${likerIds[i]}`
-        : authorUrls[i][0]
-
-      const identifiers = (authorWallets && authorWallets[i].map((a: any) => ({
-        '@type': 'PropertyValue',
-        propertyID: 'LikeCoin Wallet',
-        value: a.address
-      }))) || []
-
-      const wallet = authorWallets[i][0]?.address || likerIdsAddresses[i]
-
-      const likerIdentifiers = {
-        '@type': 'PropertyValue',
-        propertyID: 'Liker ID',
-        value: `https://like.co/${likerIds[i]}`
-      }
-
-      if (likerIds[i] && likerIdsAddresses[i]) {
-        identifiers.push(likerIdentifiers)
-      }
-
-      const sameAsArray = authorUrls[i].filter(a => !!a)
-      const isNonEmpty = url || authorName || identifiers.length
-      if (isNonEmpty) {
-        stakeholders.push({
-          entity: {
-            '@id': wallet || url,
-            name: authorName,
-            url,
-            description,
-            sameAs: sameAsArray,
-            identifier: identifiers
-          },
-          rewardProportion:
-            rewardProportion === 1
-              ? rewardProportion
-              : Math.floor((rewardProportion / authorNames.length) * 10000) /
-                10000,
-          contributionType: 'http://schema.org/author'
-        })
-      }
-    }
-  }
 
   const authorEntity = (author && authorDescription)
     ? {
@@ -178,7 +84,6 @@ export function formatISCNTxPayload (payload: ISCNRegisterPayload): ISCNSignPayl
     keywords: tagsString.split(','),
     usageInfo: license,
     contentFingerprints: [...new Set(contentFingerprints)],
-    stakeholders,
     recordNotes
   }
 }

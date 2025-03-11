@@ -44,6 +44,13 @@
           placeholder="Select language"
         />
       </UFormGroup>
+
+      <UFormGroup label="書訊">
+        <UInput
+          v-model="iscnData.bookInfoUrl"
+          placeholder="Enter book info URL"
+        />
+      </UFormGroup>
     </div>
 
     <!-- Author Info -->
@@ -237,6 +244,7 @@ const iscnData = ref({
     fileName: ''
   }],
   language: '',
+  bookInfoUrl: '',
   tags: [],
   ipfsHash: [],
   arweaveId: [],
@@ -280,10 +288,8 @@ const payload = computed(() => ({
   datePublished: iscnData.value.publicationDate
     ? new Date(iscnData.value.publicationDate).toISOString()
     : undefined,
-  url: iscnData.value.contentFingerprints[0]?.url || '',
+  url: iscnData.value.bookInfoUrl,
   tagsString: iscnData.value.tags?.join(', ') || '',
-  ipfsHash: iscnData.value.ipfsHash,
-  arweaveId: iscnData.value.arweaveId,
   sameAs: formattedSameAsList.value,
   thumbnailUrl: iscnData.value.coverUrl
 }))
