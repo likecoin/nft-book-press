@@ -2,7 +2,11 @@
   <div class="flex flex-col gap-6">
     <!-- Basic Info -->
     <UFormGroup label="Type" class="flex-1">
-      <UInput v-model="iscnData.type" placeholder="Type" />
+      <USelect
+        v-model="iscnData.type"
+        :options="typeOptions"
+        placeholder="Select type"
+      />
     </UFormGroup>
 
     <UFormGroup label="Title" class="flex-1" required>
@@ -196,8 +200,15 @@ const languageOptions = ref([
   { label: '中文', value: 'zh' }
 ])
 
+const typeOptions = [
+  { label: 'Book', value: 'Book' },
+  { label: 'Photo', value: 'Photo' },
+  { label: 'Image', value: 'Image' },
+  { label: 'CreativeWork', value: 'CreativeWork' }
+]
+
 const iscnData = ref({
-  type: 'book',
+  type: 'Book',
   title: '',
   description: '',
   isbn: '',
