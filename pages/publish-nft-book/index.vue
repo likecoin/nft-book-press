@@ -28,17 +28,30 @@
               @submit="handleUploadSubmit"
             />
           </div>
-        </div>
+          <div v-else-if="step === 1">
+            <RegisterISCN ref="registerISCN" @submit="handleIscnSubmit" />
+          </div>
+          <div v-else-if="step === 2">
+            <MintNFT ref="mintNFT" @submit="handleMintNFTSubmit" />
+          </div>
+          <div v-else-if="step === 3">
+            <NewNFTBook
+              ref="newNFTBook"
+              class="p-0 flex flex-col text-left gap-[24px]"
+              @submit="handleNewBookSubmit"
+            />
+          </div>
 
-        <!-- Navigation Buttons -->
-        <div class="flex gap-2 justify-center mt-4">
-          <UButton
-            v-if="hasFiles"
-            :disabled="step === steps.length - 1 || shouldDisableNext"
-            @click="nextStep"
-          >
-            {{ nextText }}
-          </UButton>
+          <!-- Navigation Buttons -->
+          <div class="flex gap-2 justify-center mt-4">
+            <UButton
+              v-if="shouldShowActionButton"
+              :disabled="shouldDisableAction"
+              @click="nextStep"
+            >
+              {{ currentActionText }}
+            </UButton>
+          </div>
         </div>
       </div>
     </PageBody>
@@ -46,11 +59,26 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useWalletStore } from '~/stores/wallet'
+import { useUploadStore } from '~/stores/upload'
+import NewNFTBook from '~/pages/nft-book-store/new.vue'
+
+const walletStore = useWalletStore()
+const { wallet, signer } = storeToRefs(walletStore)
+const { initIfNecessary } = walletStore
+
+const uploadStore = useUploadStore()
+const { updateUploadFileData, clearUploadData } = uploadStore
 
 const route = useRoute()
 const step = ref(0)
 const uploadFormRef = ref()
-const nextText = computed(() => {
+const registerISCN = ref()
+const mintNFT = ref()
+const newNFTBook = ref()
+const toast = useToast()
+const currentActionText = computed(() => {
   switch (step.value) {
     case 0:
       return 'Start Upload'
@@ -67,9 +95,20 @@ const hasFiles = computed(() => {
   return uploadFormRef.value?.fileRecords?.length > 0
 })
 
-const shouldDisableNext = computed(() => {
+const shouldShowActionButton = computed(() => {
+  if (step.value === 0) {
+    return hasFiles.value
+  }
+  return step.value < 3
+})
+
+const shouldDisableAction = computed(() => {
   if (step.value === 0) {
     return uploadFormRef.value?.uploadStatus !== ''
+  } else if (step.value === 1) {
+    return !registerISCN.value?.isFormValid
+  } else if (step.value === 2) {
+    return !mintNFT.value?.isFormValid
   }
   return false
 })
@@ -86,13 +125,37 @@ const steps = [
   {
     title: '鑄造區塊鏈書',
     description: 'Mint NFT'
+  },
+  {
+    title: '設定上架資訊',
+    description: 'Set up listing information'
   }
 ]
 
 const nextStep = async () => {
+  if (!wallet.value || !signer.value) {
+    await initIfNecessary()
+  }
+  if (!wallet.value || !signer.value) {
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: 'Please login first',
+      timeout: 3000,
+      color: 'red'
+    })
+    return
+  }
   try {
     if (step.value === 0 && uploadFormRef.value) {
       await uploadFormRef.value.onSubmit()
+      return
+    }
+    if (step.value === 1) {
+      await registerISCN.value.onSubmit()
+      return
+    }
+    if (step.value === 2) {
+      await mintNFT.value.onClickMintByInputting()
       return
     }
     if (step.value < steps.length - 1) {
@@ -106,4 +169,26 @@ const nextStep = async () => {
 const handleUploadSubmit = () => {
   step.value = 1
 }
+
+const handleIscnSubmit = async (res: { iscnId: string, txHash: string }) => {
+  const { iscnId } = res
+  step.value = 2
+  await nextTick()
+  mintNFT.value?.onISCNIDInput(iscnId)
+}
+
+const handleMintNFTSubmit = async (res: any) => {
+  const { classId, nftMintCount } = res
+  updateUploadFileData({
+    classData: { classId, nftMintCount }
+  })
+  step.value = 3
+  await nextTick()
+  newNFTBook.value?.updateClassId({ classId, nftMintCount })
+}
+
+const handleNewBookSubmit = () => {
+  clearUploadData()
+}
+
 </script>
