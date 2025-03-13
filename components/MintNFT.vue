@@ -239,18 +239,6 @@ const emit = defineEmits(['submit'])
 const showEditISCNModal = ref(false)
 const editISCNRef = ref<any>(null)
 
-watch(iscnId, (newIscnId) => {
-  if (newIscnId) {
-    router.replace({ query: { ...route.query, iscn_id: newIscnId } })
-  }
-})
-
-watch(classId, (newClassId) => {
-  if (newClassId) {
-    router.replace({ query: { ...route.query, class_id: newClassId } })
-  }
-})
-
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
 })
@@ -264,14 +252,6 @@ watch(iscnData, (recordData) => {
 useSeoMeta({
   title: 'Mint Liker Land NFT Book',
   ogTitle: 'Mint Liker Land NFT Book'
-})
-
-onMounted(() => {
-  // HACK: mitigate disable state stuck issue when iscnIdInput is inited as qs in data
-  iscnIdInput.value = route.query.class_id as string || route.query.iscn_id as string || ''
-  if (iscnIdInput.value) {
-    onISCNIDInput()
-  }
 })
 
 const validate = (state: any): FormError[] => {
@@ -298,18 +278,6 @@ async function onISCNIDInput (iscnId?: string) {
       iscnData.value = records[0].data
       iscnOwner.value = owner
       step.value = 2
-    } else if (iscnIdInput.value.startsWith('likenft')) {
-      const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${encodeURIComponent(iscnIdInput.value)}`)
-      if (!data) { throw new Error('INVALID_NFT_CLASS_ID') }
-      classData.value = (data as any).class
-      const parentIscnId = classData.value?.data?.parent?.iscn_id_prefix
-      const resISCN = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(parentIscnId)}`)
-      const { records, owner } = resISCN as any
-      iscnData.value = records[0].data
-      iscnOwner.value = owner
-      step.value = 3
-    } else {
-      throw new Error('Invalid ISCN ID or NFT Class ID')
     }
   } catch (err) {
     console.error(err)
