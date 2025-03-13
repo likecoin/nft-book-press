@@ -8,36 +8,6 @@ import { ISCN_GAS_FEE, ISCN_GAS_MULTIPLIER } from '~/constant'
 let client: ISCNSigningClient | null = null
 let iscnLib: any = null
 
-export function getPublisherISCNPayload (publisher: string | any) {
-  const stakeholders = []
-  let contentFingerprints = []
-  if (!publisher) { return {} }
-  if (typeof publisher === 'object') {
-    const {
-      contentFingerprints: publisherContentFingerprints,
-      ...actualPublisher
-    } = publisher
-    contentFingerprints = publisherContentFingerprints
-    stakeholders.push({
-      rewardProportion: 0.025,
-      contributionType: 'http://schema.org/publisher',
-      ...actualPublisher
-    })
-  } else {
-    stakeholders.push({
-      entity: {
-        '@id': publisher
-      },
-      rewardProportion: 0,
-      contributionType: 'http://schema.org/publisher'
-    })
-  }
-  return {
-    stakeholders,
-    contentFingerprints: contentFingerprints || []
-  }
-}
-
 export async function getISCNLib () {
   if (!iscnLib) {
     iscnLib = await import(/* webpackChunkName: "iscn_js" */ '@likecoin/iscn-js')

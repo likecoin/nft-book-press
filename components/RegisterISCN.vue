@@ -2,7 +2,11 @@
   <div class="flex flex-col gap-6">
     <!-- Basic Info -->
     <UFormGroup label="Type" class="flex-1">
-      <UInput v-model="iscnData.type" placeholder="Type" />
+      <USelect
+        v-model="iscnData.type"
+        :options="typeOptions"
+        placeholder="Select type"
+      />
     </UFormGroup>
 
     <UFormGroup label="Title" class="flex-1" required>
@@ -70,13 +74,6 @@
         />
       </UFormGroup>
     </div>
-
-    <UFormGroup label="Author Avatar URL">
-      <UInput
-        v-model="iscnData.author.url"
-        placeholder="Enter author avatar URL"
-      />
-    </UFormGroup>
 
     <UFormGroup label="License" class="flex-1">
       <UInput v-model="iscnData.license" placeholder="License" />
@@ -195,7 +192,7 @@ const uploadStore = useUploadStore()
 
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
-const { getUploadFileData, setUploadFileData } = uploadStore
+const { getUploadFileData, updateUploadFileData } = uploadStore
 const { stripHtmlTags, formatLanguage } = useFileUpload()
 const toast = useToast()
 const languageOptions = ref([
@@ -203,8 +200,15 @@ const languageOptions = ref([
   { label: '中文', value: 'zh' }
 ])
 
+const typeOptions = [
+  { label: 'Book', value: 'Book' },
+  { label: 'Photo', value: 'Photo' },
+  { label: 'Image', value: 'Image' },
+  { label: 'CreativeWork', value: 'CreativeWork' }
+]
+
 const iscnData = ref({
-  type: 'book',
+  type: 'Book',
   title: '',
   description: '',
   isbn: '',
@@ -306,8 +310,7 @@ const initializeFromSessionStorage = () => {
     publicationDate: '',
     author: {
       name: data.epubMetadata?.author || '',
-      description: '',
-      url: ''
+      description: ''
     },
     license: 'All rights reserved',
     contentFingerprints: [],
@@ -329,9 +332,12 @@ const initializeFromSessionStorage = () => {
 
   baseData.contentFingerprints = [
     ...new Set(
-      data.fileRecords
-        .map(r => (r.fileType === 'epub' || r.fileType === 'pdf' ? (r.arweaveKey ? r.arweaveLink : `ar://${r.arweaveId}`) : `ar://${r.arweaveId}`))
-        .filter(Boolean)
+      data.fileRecords.map((r) => {
+        const arweaveUrl = r.arweaveKey ? r.arweaveLink : `ar://${r.arweaveId}`
+        return r.fileType === 'epub' || r.fileType === 'pdf'
+          ? arweaveUrl
+          : `ar://${r.arweaveId}`
+      })
     )
   ].map(url => ({ url }))
 
@@ -438,7 +444,7 @@ const submitToISCN = async (): Promise<void> => {
       { gas: iscnGasFee.value }
     )
     uploadStatus.value = 'success'
-    setUploadFileData({ iscnRecord: res })
+    updateUploadFileData({ iscnRecord: res })
     emit('submit', res)
   } catch (err) {
     console.error(err)

@@ -12,10 +12,6 @@ export interface ISCNRegisterPayload {
   fileSHA256?: string | string[];
   publisher?: string;
   authorDescription?: string;
-  authorNames?: string[];
-  authorUrls?: string[][];
-  authorWallets?: any[][];
-  authorDescriptions?: string[];
   contentFingerprints?: string[];
   recordNotes?: string;
   memo?: string;
