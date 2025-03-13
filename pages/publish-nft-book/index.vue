@@ -28,17 +28,20 @@
               @submit="handleUploadSubmit"
             />
           </div>
-        </div>
+          <div v-else-if="step === 1">
+            <RegisterISCN ref="registerISCN" @submit="handleIscnSubmit" />
+          </div>
 
-        <!-- Navigation Buttons -->
-        <div class="flex gap-2 justify-center mt-4">
-          <UButton
-            v-if="hasFiles"
-            :disabled="step === steps.length - 1 || shouldDisableNext"
-            @click="nextStep"
-          >
-            {{ nextText }}
-          </UButton>
+          <!-- Navigation Buttons -->
+          <div class="flex gap-2 justify-center mt-4">
+            <UButton
+              v-if="shouldShowActionButton"
+              :disabled="shouldDisableAction"
+              @click="nextStep"
+            >
+              {{ currentActionText }}
+            </UButton>
+          </div>
         </div>
       </div>
     </PageBody>
@@ -46,11 +49,20 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useWalletStore } from '~/stores/wallet'
+
+const walletStore = useWalletStore()
+const { wallet, signer } = storeToRefs(walletStore)
+const { initIfNecessary } = walletStore
 
 const route = useRoute()
 const step = ref(0)
 const uploadFormRef = ref()
-const nextText = computed(() => {
+const registerISCN = ref()
+const router = useRouter()
+const toast = useToast()
+const currentActionText = computed(() => {
   switch (step.value) {
     case 0:
       return 'Start Upload'
@@ -67,9 +79,18 @@ const hasFiles = computed(() => {
   return uploadFormRef.value?.fileRecords?.length > 0
 })
 
-const shouldDisableNext = computed(() => {
+const shouldShowActionButton = computed(() => {
+  if (step.value === 0) {
+    return hasFiles.value
+  }
+  return true
+})
+
+const shouldDisableAction = computed(() => {
   if (step.value === 0) {
     return uploadFormRef.value?.uploadStatus !== ''
+  } else if (step.value === 1) {
+    return !registerISCN.value?.isFormValid
   }
   return false
 })
@@ -90,10 +111,25 @@ const steps = [
 ]
 
 const nextStep = async () => {
+  if (!wallet.value || !signer.value) {
+    await initIfNecessary()
+  }
+  if (!wallet.value || !signer.value) {
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: 'Please login first',
+      timeout: 3000,
+      color: 'red'
+    })
+    return
+  }
   try {
     if (step.value === 0 && uploadFormRef.value) {
       await uploadFormRef.value.onSubmit()
       return
+    }
+    if (step.value === 1) {
+      await registerISCN.value.onSubmit()
     }
     if (step.value < steps.length - 1) {
       step.value++
@@ -106,4 +142,13 @@ const nextStep = async () => {
 const handleUploadSubmit = () => {
   step.value = 1
 }
+
+const handleIscnSubmit = (res: { iscnId: string, txHash: string }) => {
+  const { iscnId } = res
+  router.push({
+    path: '/mint-nft',
+    query: { iscn_id: iscnId }
+  })
+}
+
 </script>
