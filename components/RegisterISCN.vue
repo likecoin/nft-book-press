@@ -302,7 +302,7 @@ const initializeFromSessionStorage = () => {
   if (!data) { return null }
 
   const baseData = {
-    type: 'book',
+    type: 'Book',
     title: data.epubMetadata?.title || '',
     description: stripHtmlTags(data.epubMetadata?.description || ''),
     isbn: '',
