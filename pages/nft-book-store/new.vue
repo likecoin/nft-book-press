@@ -819,18 +819,17 @@ async function submitNewClass () {
         wallet.value
       )
     }
-
     await newBookListing(classIdInput.value as string, {
-      tableOfContents,
+      tableOfContents: tableOfContents.value,
       defaultPaymentCurrency: 'USD',
       connectedWallets,
-      moderatorWallets,
-      notificationEmails,
+      moderatorWallets: moderatorWallets.value,
+      notificationEmails: notificationEmails.value,
       prices: p,
       shippingRates: s,
-      mustClaimToView,
-      enableCustomMessagePage,
-      hideDownload,
+      mustClaimToView: mustClaimToView.value,
+      enableCustomMessagePage: enableCustomMessagePage.value,
+      hideDownload: hideDownload.value,
       autoDeliverNFTsTxHash
     })
     router.push({ name: 'nft-book-store' })

@@ -688,8 +688,8 @@ async function submitNewCollection () {
       classIds: classIds.value,
       defaultPaymentCurrency: 'USD',
       connectedWallets,
-      moderatorWallets,
-      notificationEmails,
+      moderatorWallets: moderatorWallets.value,
+      notificationEmails: notificationEmails.value,
       shippingRates: s,
       name: { en: nameEn.value, zh: nameZh.value },
       description: {
@@ -697,8 +697,8 @@ async function submitNewCollection () {
         zh: escapeHtml(descriptionZh.value)
       },
       image: image.value,
-      hideDownload,
-      mustClaimToView,
+      hideDownload: hideDownload.value,
+      mustClaimToView: mustClaimToView.value,
       autoDeliverNFTsTxHash,
       ...formattedPrice
     })
