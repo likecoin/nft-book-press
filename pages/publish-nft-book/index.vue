@@ -31,6 +31,9 @@
           <div v-else-if="step === 1">
             <RegisterISCN ref="registerISCN" @submit="handleIscnSubmit" />
           </div>
+          <div v-else-if="step === 2">
+            <MintNFT ref="mintNFT" @submit="handleMintNFTSubmit" />
+          </div>
 
           <!-- Navigation Buttons -->
           <div class="flex gap-2 justify-center mt-4">
@@ -51,16 +54,20 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
+import { useUploadStore } from '~/stores/upload'
 
 const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
 
+const uploadStore = useUploadStore()
+const { updateUploadFileData } = uploadStore
+
 const route = useRoute()
 const step = ref(0)
 const uploadFormRef = ref()
 const registerISCN = ref()
-const router = useRouter()
+const mintNFT = ref()
 const toast = useToast()
 const currentActionText = computed(() => {
   switch (step.value) {
@@ -91,6 +98,8 @@ const shouldDisableAction = computed(() => {
     return uploadFormRef.value?.uploadStatus !== ''
   } else if (step.value === 1) {
     return !registerISCN.value?.isFormValid
+  } else if (step.value === 2) {
+    return !mintNFT.value?.isFormValid
   }
   return false
 })
@@ -107,6 +116,10 @@ const steps = [
   {
     title: '鑄造區塊鏈書',
     description: 'Mint NFT'
+  },
+  {
+    title: '設定上架資訊',
+    description: 'Set up listing information'
   }
 ]
 
@@ -130,6 +143,11 @@ const nextStep = async () => {
     }
     if (step.value === 1) {
       await registerISCN.value.onSubmit()
+      return
+    }
+    if (step.value === 2) {
+      await mintNFT.value.onClickMintByInputting()
+      return
     }
     if (step.value < steps.length - 1) {
       step.value++
@@ -143,12 +161,19 @@ const handleUploadSubmit = () => {
   step.value = 1
 }
 
-const handleIscnSubmit = (res: { iscnId: string, txHash: string }) => {
+const handleIscnSubmit = async (res: { iscnId: string, txHash: string }) => {
   const { iscnId } = res
-  router.push({
-    path: '/mint-nft',
-    query: { iscn_id: iscnId }
+  step.value = 2
+  await nextTick()
+  mintNFT.value?.onISCNIDInput(iscnId)
+}
+
+const handleMintNFTSubmit = (res: any) => {
+  const { classId, nftMintCount } = res
+  updateUploadFileData({
+    classData: { classId, nftMintCount }
   })
+  step.value = 3
 }
 
 </script>
