@@ -71,13 +71,6 @@
       </UFormGroup>
     </div>
 
-    <UFormGroup label="Author Avatar URL">
-      <UInput
-        v-model="iscnData.author.url"
-        placeholder="Enter author avatar URL"
-      />
-    </UFormGroup>
-
     <UFormGroup label="License" class="flex-1">
       <UInput v-model="iscnData.license" placeholder="License" />
     </UFormGroup>
@@ -306,8 +299,7 @@ const initializeFromSessionStorage = () => {
     publicationDate: '',
     author: {
       name: data.epubMetadata?.author || '',
-      description: '',
-      url: ''
+      description: ''
     },
     license: 'All rights reserved',
     contentFingerprints: [],
