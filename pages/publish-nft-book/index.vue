@@ -35,11 +35,11 @@
           <!-- Navigation Buttons -->
           <div class="flex gap-2 justify-center mt-4">
             <UButton
-              v-if="step > 0 || step === 0 && hasFiles"
-              :disabled="step === steps.length - 1 || shouldDisableNext"
+              v-if="shouldShowActionButton"
+              :disabled="shouldDisableAction"
               @click="nextStep"
             >
-              {{ nextText }}
+              {{ currentActionText }}
             </UButton>
           </div>
         </div>
@@ -55,7 +55,7 @@ const step = ref(0)
 const uploadFormRef = ref()
 const registerISCN = ref()
 const router = useRouter()
-const nextText = computed(() => {
+const currentActionText = computed(() => {
   switch (step.value) {
     case 0:
       return 'Start Upload'
@@ -72,11 +72,18 @@ const hasFiles = computed(() => {
   return uploadFormRef.value?.fileRecords?.length > 0
 })
 
-const shouldDisableNext = computed(() => {
+const shouldShowActionButton = computed(() => {
+  if (step.value === 0) {
+    return hasFiles.value
+  }
+  return true
+})
+
+const shouldDisableAction = computed(() => {
   if (step.value === 0) {
     return uploadFormRef.value?.uploadStatus !== ''
   } else if (step.value === 1) {
-    return registerISCN.value?.isFormValid !== true
+    return !registerISCN.value?.isFormValid
   }
   return false
 })
