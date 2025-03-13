@@ -106,7 +106,6 @@ import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useUploadStore } from '~/stores/upload'
 
 const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024
-const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
 const store = useWalletStore()
 const uploadStore = useUploadStore()
@@ -542,7 +541,7 @@ const setEbookCoverFromImages = async () => {
 
   for (let i = 0; i < fileRecords.value.length; i += 1) {
     const file = fileRecords.value[i]
-    if (IMAGE_MIME_TYPES.includes(file.fileType)) {
+    if (file.fileType === 'image') {
       const existingData = sentArweaveTransactionInfo.value.get(file.ipfsHash) || {}
       if (existingData.arweaveId) {
         epubMetadataList.value.push({
