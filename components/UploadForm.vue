@@ -10,7 +10,7 @@
       >
         <UIcon name="i-heroicons-folder-arrow-down" class="w-5 h-5" />
         <p class="text-gray-600 my-[16px]" v-text="`把檔案拖到此處上傳或`" />
-        <UButton type="button" variant="ghost" @click="$refs.imageFile.click()">
+        <UButton type="button" variant="ghost" @click.stop="$refs.imageFile.click()">
           選擇檔案
         </UButton>
         <p class="text-xs text-gray-500 mt-2" v-text="`建議檔案大小: < 20 MB`" />
