@@ -49,12 +49,19 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useWalletStore } from '~/stores/wallet'
+
+const walletStore = useWalletStore()
+const { wallet, signer } = storeToRefs(walletStore)
+const { initIfNecessary } = walletStore
 
 const route = useRoute()
 const step = ref(0)
 const uploadFormRef = ref()
 const registerISCN = ref()
 const router = useRouter()
+const toast = useToast()
 const currentActionText = computed(() => {
   switch (step.value) {
     case 0:
@@ -104,6 +111,18 @@ const steps = [
 ]
 
 const nextStep = async () => {
+  if (!wallet.value || !signer.value) {
+    await initIfNecessary()
+  }
+  if (!wallet.value || !signer.value) {
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: 'Please login first',
+      timeout: 3000,
+      color: 'red'
+    })
+    return
+  }
   try {
     if (step.value === 0 && uploadFormRef.value) {
       await uploadFormRef.value.onSubmit()
