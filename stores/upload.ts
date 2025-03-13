@@ -29,11 +29,16 @@ export const useUploadStore = defineStore('upload', {
   }),
 
   actions: {
-    setUploadFileData (data: Partial<UploadFileData>) {
-      this.uploadFileData = {
-        ...this.uploadFileData,
-        ...data
-      }
+    setUploadFileData (data: Partial<UploadFileData>, options: { merge?: boolean } = {}) {
+      const { merge = false } = options
+
+      this.uploadFileData = merge && this.uploadFileData
+        ? {
+            ...this.uploadFileData,
+            ...data
+          }
+        : data as UploadFileData
+
       try {
         sessionStorage.setItem('uploadFileData', JSON.stringify(this.uploadFileData))
       } catch (error) {
@@ -41,21 +46,25 @@ export const useUploadStore = defineStore('upload', {
       }
     },
 
+    updateUploadFileData (data: Partial<UploadFileData>) {
+      return this.setUploadFileData(data, { merge: true })
+    },
+
     getUploadFileData (): UploadFileData | null {
       if (this.uploadFileData) {
         return this.uploadFileData
       }
-
-      if (process.client) {
-        try {
-          const stored = sessionStorage.getItem('uploadFileData')
-          if (stored) {
-            this.uploadFileData = JSON.parse(stored)
-            return this.uploadFileData
-          }
-        } catch (error) {
-          console.warn('Failed to read from sessionStorage:', error)
+      if (!process.client) {
+        return null
+      }
+      try {
+        const stored = sessionStorage.getItem('uploadFileData')
+        if (stored) {
+          this.uploadFileData = JSON.parse(stored)
+          return this.uploadFileData
         }
+      } catch (error) {
+        console.warn('Failed to read from sessionStorage:', error)
       }
       return null
     },

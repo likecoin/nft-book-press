@@ -188,7 +188,7 @@ const uploadStore = useUploadStore()
 
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
-const { getUploadFileData, setUploadFileData } = uploadStore
+const { getUploadFileData, updateUploadFileData } = uploadStore
 const { stripHtmlTags, formatLanguage } = useFileUpload()
 const toast = useToast()
 const languageOptions = ref([
@@ -430,7 +430,7 @@ const submitToISCN = async (): Promise<void> => {
       { gas: iscnGasFee.value }
     )
     uploadStatus.value = 'success'
-    setUploadFileData({ iscnRecord: res })
+    updateUploadFileData({ iscnRecord: res })
     emit('submit', res)
   } catch (err) {
     console.error(err)
