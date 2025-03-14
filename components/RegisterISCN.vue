@@ -346,12 +346,16 @@ const initializeFromSessionStorage = () => {
 
   baseData.contentFingerprints = [
     ...new Set(
-      data.fileRecords.map((r) => {
-        const arweaveUrl = r.arweaveKey ? r.arweaveLink : `ar://${r.arweaveId}`
-        return r.fileType === 'epub' || r.fileType === 'pdf'
-          ? arweaveUrl
-          : `ar://${r.arweaveId}`
-      })
+      data.fileRecords
+        .map((r) => {
+          const arweaveUrl = r.arweaveKey
+            ? r.arweaveLink
+            : `ar://${r.arweaveId}`
+          return r.fileType === 'epub' || r.fileType === 'pdf'
+            ? arweaveUrl
+            : `ar://${r.arweaveId}`
+        })
+        .filter(Boolean)
     )
   ].map(url => ({ url }))
 
