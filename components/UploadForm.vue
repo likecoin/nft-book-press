@@ -68,7 +68,13 @@
         <UIcon name="i-heroicons-information-circle" class="w-5 h-5 text-gray-500" />
       </UTooltip>
     </div>
-    <div v-if="uploadStatus" class="w-full">
+    <UModal
+      :model-value="!!uploadStatus"
+      :prevent-close="true"
+      :ui="{
+        base: 'p-4 gap-2'
+      }"
+    >
       <div class="space-y-3">
         <div class="flex justify-between items-center">
           <UBadge color="Badge" variant="soft">
@@ -84,7 +90,7 @@
           class="w-full"
         />
       </div>
-    </div>
+    </UModal>
   </div>
 </template>
 
