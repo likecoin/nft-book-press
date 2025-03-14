@@ -49,6 +49,14 @@
         />
       </UFormGroup>
 
+      <UFormGroup label="Cover Image">
+        <UInput
+          v-model="iscnData.coverUrl"
+          placeholder="ar://{arweave_id}"
+          class="font-mono"
+        />
+      </UFormGroup>
+
       <UFormGroup label="書訊">
         <UInput
           v-model="iscnData.bookInfoUrl"
@@ -266,7 +274,7 @@ const payload = computed(() => ({
   publisher: iscnData.value.publisher,
   isbn: iscnData.value.isbn,
   datePublished: iscnData.value.publicationDate
-    ? new Date(iscnData.value.publicationDate).toISOString()
+    ? new Date(iscnData.value.publicationDate).toISOString().split('T')[0]
     : undefined,
   url: iscnData.value.bookInfoUrl,
   tagsString: iscnData.value.tags?.join(', ') || '',
