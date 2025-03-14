@@ -432,7 +432,7 @@ const submitToArweave = async (record: any): Promise<void> => {
       } = await encryptDataWithAES({ data: arrayBuffer })
       buffer = Buffer.from(combinedArrayBuffer)
       key = rawEncryptedKeyAsBase64
-      ipfsHash = calculateIPFSHash(buffer)
+      ipfsHash = await calculateIPFSHash(buffer)
     }
     if (!txHash) {
       // HACK: override ipfsHash memo to match arweave tag later
