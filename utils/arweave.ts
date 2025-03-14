@@ -173,6 +173,7 @@ export async function uploadSingleFileToBundlr (
     { name: 'standard', value: 'v0.1' }
   ]
   if (fileType) { tags.push({ name: 'Content-Type', value: fileType }) }
+  if (key) { tags.push({ name: 'Content-Encoding', value: 'aes256gcm' }) }
   const response = await bundler.upload(file, { tags })
   const arweaveId = response.id
   const { ARWEAVE_ENDPOINT } = useRuntimeConfig().public
