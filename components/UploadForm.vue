@@ -158,6 +158,12 @@ const computedFormClasses = computed(() => [
   'hover:bg-gray-200'
 ])
 
+watch(isEncryptEBookData, async () => {
+  uploadStatus.value = 'loading'
+  await estimateArweaveFee()
+  uploadStatus.value = ''
+})
+
 const formatLanguage = (language: string) => {
   let formattedLanguage = ''
   if (language) {
@@ -358,10 +364,10 @@ const estimateArweaveFee = async (): Promise<void> => {
     const results = []
     for (const record of fileRecords.value) {
       await sleep(100)
-
+      const isEbook = ['epub', 'pdf'].includes(record.fileType)
       const priceResult = await estimateBundlrFilePrice({
         fileSize: record.fileBlob?.size || 0,
-        ipfsHash: record.ipfsHash
+        ipfsHash: (isEbook && isEncryptEBookData.value) ? undefined : record.ipfsHash
       })
       results.push({
         ...priceResult,
@@ -412,19 +418,13 @@ const submitToArweave = async (record: any): Promise<void> => {
   if (!record.fileBlob) {
     return
   }
-  // open sign dialog
-  let txHash = transactionHash
-  if (!txHash) {
-    txHash = await sendArweaveFeeTx(record)
-    if (!txHash) {
-      throw new Error('TRANSACTION_NOT_SENT')
-    }
-  }
 
+  let txHash = transactionHash
   try {
     let key
     const arrayBuffer = await record.fileBlob.arrayBuffer()
     let buffer = Buffer.from(arrayBuffer)
+    let { ipfsHash } = record
     if (['epub', 'pdf'].includes(record.fileType) && isEncryptEBookData.value) {
       const {
         rawEncryptedKeyAsBase64,
@@ -432,11 +432,19 @@ const submitToArweave = async (record: any): Promise<void> => {
       } = await encryptDataWithAES({ data: arrayBuffer })
       buffer = Buffer.from(combinedArrayBuffer)
       key = rawEncryptedKeyAsBase64
+      ipfsHash = calculateIPFSHash(buffer)
+    }
+    if (!txHash) {
+      // HACK: override ipfsHash memo to match arweave tag later
+      txHash = await sendArweaveFeeTx(record, ipfsHash)
+      if (!txHash) {
+        throw new Error('TRANSACTION_NOT_SENT')
+      }
     }
 
     const { arweaveId, arweaveLink } = await uploadSingleFileToBundlr(buffer, {
       fileSize: record.fileBlob?.size || 0,
-      ipfsHash: record.ipfsHash,
+      ipfsHash,
       fileType: record.fileType as string,
       txHash,
       token: token.value,
@@ -470,7 +478,7 @@ const submitToArweave = async (record: any): Promise<void> => {
   }
 }
 
-const sendArweaveFeeTx = async (record: any): Promise<string> => {
+const sendArweaveFeeTx = async (record: any, memoIpfsOveride?: string): Promise<string> => {
   if (sentArweaveTransactionInfo.value.has(record.ipfsHash)) {
     const transactionInfo = sentArweaveTransactionInfo.value.get(
       record.ipfsHash
@@ -491,7 +499,7 @@ const sendArweaveFeeTx = async (record: any): Promise<string> => {
   }
   uploadStatus.value = 'signing'
   const memo = JSON.stringify({
-    ipfs: record.ipfsHash,
+    ipfs: memoIpfsOveride || record.ipfsHash,
     fileSize: record.fileBlob?.size || 0
   })
   try {
