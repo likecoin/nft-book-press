@@ -109,16 +109,13 @@ import {
 import { sendLIKE } from '~/utils/cosmos'
 import { useWalletStore } from '~/stores/wallet'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
-import { useUploadStore } from '~/stores/upload'
 
 const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024
 
 const store = useWalletStore()
-const uploadStore = useUploadStore()
 const { wallet, signer } = storeToRefs(store)
 const { initIfNecessary } = store
 const bookStoreApiStore = useBookStoreApiStore()
-const { setUploadFileData } = uploadStore
 const { token } = storeToRefs(bookStoreApiStore)
 const toast = useToast()
 
@@ -126,7 +123,7 @@ const { getFileType } = useFileUpload()
 const fileRecords = ref([])
 const isSizeExceeded = ref(false)
 const isDragging = ref(false)
-const epubMetadataList = ref([])
+const epubMetadataList = ref<any[]>([])
 
 const arweaveFee = ref(new BigNumber(0))
 const uploadStatus = ref('')
@@ -681,7 +678,6 @@ const onSubmit = async () => {
     epubMetadata: epubMetadataList.value[0]
   }
 
-  setUploadFileData(uploadFileData)
   emit('submit', uploadFileData)
 }
 
