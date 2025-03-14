@@ -68,7 +68,13 @@
         <UIcon name="i-heroicons-information-circle" class="w-5 h-5 text-gray-500" />
       </UTooltip>
     </div>
-    <div v-if="uploadStatus" class="w-full">
+    <UModal
+      :model-value="!!uploadStatus"
+      :prevent-close="true"
+      :ui="{
+        base: 'p-4 gap-2'
+      }"
+    >
       <div class="space-y-3">
         <div class="flex justify-between items-center">
           <UBadge color="Badge" variant="soft">
@@ -84,7 +90,7 @@
           class="w-full"
         />
       </div>
-    </div>
+    </UModal>
   </div>
 </template>
 
@@ -157,6 +163,12 @@ const computedFormClasses = computed(() => [
   'bg-gray-100',
   'hover:bg-gray-200'
 ])
+
+watch(isEncryptEBookData, async () => {
+  uploadStatus.value = 'loading'
+  await estimateArweaveFee()
+  uploadStatus.value = ''
+})
 
 const formatLanguage = (language: string) => {
   let formattedLanguage = ''
@@ -358,10 +370,10 @@ const estimateArweaveFee = async (): Promise<void> => {
     const results = []
     for (const record of fileRecords.value) {
       await sleep(100)
-
+      const isEbook = ['epub', 'pdf'].includes(record.fileType)
       const priceResult = await estimateBundlrFilePrice({
         fileSize: record.fileBlob?.size || 0,
-        ipfsHash: record.ipfsHash
+        ipfsHash: (isEbook && isEncryptEBookData.value) ? undefined : record.ipfsHash
       })
       results.push({
         ...priceResult,
@@ -412,19 +424,13 @@ const submitToArweave = async (record: any): Promise<void> => {
   if (!record.fileBlob) {
     return
   }
-  // open sign dialog
-  let txHash = transactionHash
-  if (!txHash) {
-    txHash = await sendArweaveFeeTx(record)
-    if (!txHash) {
-      throw new Error('TRANSACTION_NOT_SENT')
-    }
-  }
 
+  let txHash = transactionHash
   try {
     let key
     const arrayBuffer = await record.fileBlob.arrayBuffer()
     let buffer = Buffer.from(arrayBuffer)
+    let { ipfsHash } = record
     if (['epub', 'pdf'].includes(record.fileType) && isEncryptEBookData.value) {
       const {
         rawEncryptedKeyAsBase64,
@@ -432,11 +438,19 @@ const submitToArweave = async (record: any): Promise<void> => {
       } = await encryptDataWithAES({ data: arrayBuffer })
       buffer = Buffer.from(combinedArrayBuffer)
       key = rawEncryptedKeyAsBase64
+      ipfsHash = await calculateIPFSHash(buffer)
+    }
+    if (!txHash) {
+      // HACK: override ipfsHash memo to match arweave tag later
+      txHash = await sendArweaveFeeTx(record, ipfsHash)
+      if (!txHash) {
+        throw new Error('TRANSACTION_NOT_SENT')
+      }
     }
 
     const { arweaveId, arweaveLink } = await uploadSingleFileToBundlr(buffer, {
       fileSize: record.fileBlob?.size || 0,
-      ipfsHash: record.ipfsHash,
+      ipfsHash,
       fileType: record.fileType as string,
       txHash,
       token: token.value,
@@ -470,7 +484,7 @@ const submitToArweave = async (record: any): Promise<void> => {
   }
 }
 
-const sendArweaveFeeTx = async (record: any): Promise<string> => {
+const sendArweaveFeeTx = async (record: any, memoIpfsOveride?: string): Promise<string> => {
   if (sentArweaveTransactionInfo.value.has(record.ipfsHash)) {
     const transactionInfo = sentArweaveTransactionInfo.value.get(
       record.ipfsHash
@@ -491,7 +505,7 @@ const sendArweaveFeeTx = async (record: any): Promise<string> => {
   }
   uploadStatus.value = 'signing'
   const memo = JSON.stringify({
-    ipfs: record.ipfsHash,
+    ipfs: memoIpfsOveride || record.ipfsHash,
     fileSize: record.fileBlob?.size || 0
   })
   try {

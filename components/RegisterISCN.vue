@@ -49,6 +49,14 @@
         />
       </UFormGroup>
 
+      <UFormGroup label="Cover Image">
+        <UInput
+          v-model="iscnData.coverUrl"
+          placeholder="ar://{arweave_id}"
+          class="font-mono"
+        />
+      </UFormGroup>
+
       <UFormGroup label="書訊">
         <UInput
           v-model="iscnData.bookInfoUrl"
@@ -157,14 +165,20 @@
         />
       </div>
     </div>
-    <div v-if="uploadStatus" class="w-full">
+    <UModal
+      :model-value="!!uploadStatus"
+      :prevent-close="true"
+      :ui="{
+        base: 'p-4 gap-2'
+      }"
+    >
       <div class="space-y-3">
         <div class="flex justify-between items-center">
           <UBadge color="Badge" variant="soft">
             {{ uploadStatus }}
           </UBadge>
           <p class="text-xs text-gray-500">
-            請勿關閉此視窗，直到ISCN註冊完成。
+            請勿關閉此視窗，直到 ISCN 註冊完成。
           </p>
         </div>
         <UProgress
@@ -173,7 +187,7 @@
           class="w-full"
         />
       </div>
-    </div>
+    </UModal>
   </div>
 </template>
 
@@ -266,7 +280,7 @@ const payload = computed(() => ({
   publisher: iscnData.value.publisher,
   isbn: iscnData.value.isbn,
   datePublished: iscnData.value.publicationDate
-    ? new Date(iscnData.value.publicationDate).toISOString()
+    ? new Date(iscnData.value.publicationDate).toISOString().split('T')[0]
     : undefined,
   url: iscnData.value.bookInfoUrl,
   tagsString: iscnData.value.tags?.join(', ') || '',
