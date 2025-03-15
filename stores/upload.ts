@@ -54,9 +54,6 @@ export const useUploadStore = defineStore('upload', {
       if (this.uploadFileData) {
         return this.uploadFileData
       }
-      if (!process.client) {
-        return null
-      }
       try {
         const stored = sessionStorage.getItem('uploadFileData')
         if (stored) {
