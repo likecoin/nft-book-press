@@ -160,8 +160,9 @@ export async function uploadSingleFileToBundlr (
     fileSize,
     ipfsHash,
     txHash,
-    token
-  }: { fileSize: number; fileType?: string, ipfsHash: string; txHash: string, token: string }
+    token,
+    key
+  }: { fileSize: number; fileType?: string, ipfsHash: string; txHash: string, token: string, key?: string }
 ) {
   const bundler = await getBundler({ fileSize, ipfsHash, txHash, token })
   const tags = [
@@ -172,6 +173,7 @@ export async function uploadSingleFileToBundlr (
     { name: 'standard', value: 'v0.1' }
   ]
   if (fileType) { tags.push({ name: 'Content-Type', value: fileType }) }
+  if (key) { tags.push({ name: 'Content-Encoding', value: 'aes256gcm' }) }
   const response = await bundler.upload(file, { tags })
   const arweaveId = response.id
   const { ARWEAVE_ENDPOINT } = useRuntimeConfig().public
@@ -184,7 +186,8 @@ export async function uploadSingleFileToBundlr (
         fileSize,
         ipfsHash,
         txHash,
-        arweaveId
+        arweaveId,
+        key
       },
       headers: { Authorization: token ? `Bearer ${token}` : '' }
     })
@@ -195,6 +198,7 @@ export async function uploadSingleFileToBundlr (
   }
   return {
     arweaveId,
-    arweaveLink
+    arweaveLink,
+    arweaveKey: key
   }
 }

@@ -34,3 +34,5 @@ export const PUBLISHING_NOTICE_URL_EN = 'https://link.liker.land/publishing-noti
 export const PUBLISHING_NOTICE_URL_ZH = 'https://link.liker.land/publishing-notice-zh'
 
 export const TRANSFER_GAS = 100000
+export const ISCN_GAS_FEE = 200000
+export const ISCN_GAS_MULTIPLIER = 1.3

@@ -10,7 +10,7 @@
       >
         <UIcon name="i-heroicons-folder-arrow-down" class="w-5 h-5" />
         <p class="text-gray-600 my-[16px]" v-text="`把檔案拖到此處上傳或`" />
-        <UButton type="button" variant="ghost" @click="$refs.imageFile.click()">
+        <UButton type="button" variant="ghost" @click.stop="$refs.imageFile.click()">
           選擇檔案
         </UButton>
         <p class="text-xs text-gray-500 mt-2" v-text="`建議檔案大小: < 20 MB`" />
@@ -62,7 +62,19 @@
         </table>
       </div>
     </div>
-    <div v-if="uploadStatus" class="w-full">
+    <div class="flex items-center gap-2 mt-4">
+      <UCheckbox v-model="isEncryptEBookData" label="儲存位置加密" />
+      <UTooltip text="加密後只有擁有NFT的用戶才能解密閱讀">
+        <UIcon name="i-heroicons-information-circle" class="w-5 h-5 text-gray-500" />
+      </UTooltip>
+    </div>
+    <UModal
+      :model-value="!!uploadStatus"
+      :prevent-close="true"
+      :ui="{
+        base: 'p-4 gap-2'
+      }"
+    >
       <div class="space-y-3">
         <div class="flex justify-between items-center">
           <UBadge color="Badge" variant="soft">
@@ -78,7 +90,7 @@
           class="w-full"
         />
       </div>
-    </div>
+    </UModal>
   </div>
 </template>
 
@@ -87,6 +99,7 @@ import { storeToRefs } from 'pinia'
 import exifr from 'exifr'
 import ePub from 'epubjs'
 import { BigNumber } from 'bignumber.js'
+import { encryptDataWithAES } from 'arweavekit/encryption'
 import { fileToArrayBuffer, digestFileSHA256, calculateIPFSHash, sleep } from '~/utils/index'
 import { useFileUpload } from '~/composables/useFileUpload'
 import {
@@ -96,14 +109,16 @@ import {
 import { sendLIKE } from '~/utils/cosmos'
 import { useWalletStore } from '~/stores/wallet'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useUploadStore } from '~/stores/upload'
 
 const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024
-const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
 const store = useWalletStore()
+const uploadStore = useUploadStore()
 const { wallet, signer } = storeToRefs(store)
 const { initIfNecessary } = store
 const bookStoreApiStore = useBookStoreApiStore()
+const { setUploadFileData } = uploadStore
 const { token } = storeToRefs(bookStoreApiStore)
 
 const { getFileType } = useFileUpload()
@@ -123,6 +138,7 @@ const balance = ref(new BigNumber(0))
 const signDialogError = ref('')
 const numberOfSignNeeded = ref(0)
 const signProgress = ref(0)
+const isEncryptEBookData = ref(true)
 
 const emit = defineEmits(['arweaveUploaded', 'submit'])
 
@@ -147,6 +163,12 @@ const computedFormClasses = computed(() => [
   'bg-gray-100',
   'hover:bg-gray-200'
 ])
+
+watch(isEncryptEBookData, async () => {
+  uploadStatus.value = 'loading'
+  await estimateArweaveFee()
+  uploadStatus.value = ''
+})
 
 const formatLanguage = (language: string) => {
   let formattedLanguage = ''
@@ -347,12 +369,11 @@ const estimateArweaveFee = async (): Promise<void> => {
     uploadStatus.value = 'loading'
     const results = []
     for (const record of fileRecords.value) {
-      console.log('Estimating price for', record.fileName)
       await sleep(100)
-
+      const isEbook = ['epub', 'pdf'].includes(record.fileType)
       const priceResult = await estimateBundlrFilePrice({
         fileSize: record.fileBlob?.size || 0,
-        ipfsHash: record.ipfsHash
+        ipfsHash: (isEbook && isEncryptEBookData.value) ? undefined : record.ipfsHash
       })
       results.push({
         ...priceResult,
@@ -403,24 +424,37 @@ const submitToArweave = async (record: any): Promise<void> => {
   if (!record.fileBlob) {
     return
   }
-  // open sign dialog
-  let txHash = transactionHash
-  if (!txHash) {
-    txHash = await sendArweaveFeeTx(record)
-    if (!txHash) {
-      throw new Error('TRANSACTION_NOT_SENT')
-    }
-  }
 
+  let txHash = transactionHash
   try {
+    let key
     const arrayBuffer = await record.fileBlob.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+    let buffer = Buffer.from(arrayBuffer)
+    let { ipfsHash } = record
+    if (['epub', 'pdf'].includes(record.fileType) && isEncryptEBookData.value) {
+      const {
+        rawEncryptedKeyAsBase64,
+        combinedArrayBuffer
+      } = await encryptDataWithAES({ data: arrayBuffer })
+      buffer = Buffer.from(combinedArrayBuffer)
+      key = rawEncryptedKeyAsBase64
+      ipfsHash = await calculateIPFSHash(buffer)
+    }
+    if (!txHash) {
+      // HACK: override ipfsHash memo to match arweave tag later
+      txHash = await sendArweaveFeeTx(record, ipfsHash)
+      if (!txHash) {
+        throw new Error('TRANSACTION_NOT_SENT')
+      }
+    }
+
     const { arweaveId, arweaveLink } = await uploadSingleFileToBundlr(buffer, {
       fileSize: record.fileBlob?.size || 0,
-      ipfsHash: record.ipfsHash,
+      ipfsHash,
       fileType: record.fileType as string,
       txHash,
-      token: token.value
+      token: token.value,
+      key
     })
 
     if (!arweaveId) {
@@ -433,7 +467,8 @@ const submitToArweave = async (record: any): Promise<void> => {
     sentArweaveTransactionInfo.value.set(record.ipfsHash, {
       ...uploadedData,
       arweaveId,
-      arweaveLink
+      arweaveLink,
+      arweaveKey: key
     })
     if (record.fileName.includes('cover.jpeg')) {
       const metadata = epubMetadataList.value.find(
@@ -449,7 +484,7 @@ const submitToArweave = async (record: any): Promise<void> => {
   }
 }
 
-const sendArweaveFeeTx = async (record: any): Promise<string> => {
+const sendArweaveFeeTx = async (record: any, memoIpfsOveride?: string): Promise<string> => {
   if (sentArweaveTransactionInfo.value.has(record.ipfsHash)) {
     const transactionInfo = sentArweaveTransactionInfo.value.get(
       record.ipfsHash
@@ -470,7 +505,7 @@ const sendArweaveFeeTx = async (record: any): Promise<string> => {
   }
   uploadStatus.value = 'signing'
   const memo = JSON.stringify({
-    ipfs: record.ipfsHash,
+    ipfs: memoIpfsOveride || record.ipfsHash,
     fileSize: record.fileBlob?.size || 0
   })
   try {
@@ -520,7 +555,7 @@ const setEbookCoverFromImages = async () => {
 
   for (let i = 0; i < fileRecords.value.length; i += 1) {
     const file = fileRecords.value[i]
-    if (IMAGE_MIME_TYPES.includes(file.fileType)) {
+    if (file.fileType === 'image') {
       const existingData = sentArweaveTransactionInfo.value.get(file.ipfsHash) || {}
       if (existingData.arweaveId) {
         epubMetadataList.value.push({
@@ -584,11 +619,10 @@ const onSubmit = async () => {
 
   try {
     uploadStatus.value = 'uploading'
-
     if (
-      fileRecords.value.find(file => file.fileType === 'application/pdf') &&
+      fileRecords.value.find(file => file.fileType === 'pdf') &&
       !fileRecords.value.find(
-        file => file.fileType === 'application/epub+zip'
+        file => file.fileType === 'epub'
       )
     ) {
       await setEbookCoverFromImages()
@@ -604,7 +638,6 @@ const onSubmit = async () => {
     }
   } catch (error) {
     console.error(error)
-    error.value = (error as Error).toString()
     uploadStatus.value = ''
   } finally {
     uploadStatus.value = ''
@@ -614,12 +647,15 @@ const onSubmit = async () => {
     if (sentArweaveTransactionInfo.value.has(record.ipfsHash)) {
       const info = sentArweaveTransactionInfo.value.get(record.ipfsHash)
       if (info) {
-        const { arweaveId, arweaveLink } = info
+        const { arweaveId, arweaveLink, arweaveKey } = info
         if (arweaveId) {
           fileRecords.value[index].arweaveId = arweaveId
         }
         if (arweaveLink) {
           fileRecords.value[index].arweaveLink = arweaveLink
+        }
+        if (arweaveKey) {
+          fileRecords.value[index].arweaveKey = arweaveKey
         }
       }
     }
@@ -631,15 +667,13 @@ const onSubmit = async () => {
       fileName: record.fileName,
       arweaveId: record.arweaveId,
       arweaveLink: record.arweaveLink,
+      arweaveKey: record.arweaveKey,
       ipfsHash: record.ipfsHash
     })),
     epubMetadata: epubMetadataList.value[0]
   }
 
-  sessionStorage.setItem(
-    'uploadFileData',
-    JSON.stringify(uploadFileData)
-  )
+  setUploadFileData(uploadFileData)
   emit('submit', uploadFileData)
 }
 
