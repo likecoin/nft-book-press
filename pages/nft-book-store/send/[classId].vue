@@ -319,9 +319,12 @@ async function onSendNFTStart () {
         throw new Error(`NFT classId: ${classId} nftId:${nftId} is not owned by sender!`)
       }
     } else {
-      await fetchNextNFTId(orderInfo.quantity)
+      await fetchNextNFTId(orderInfo.value.quantity)
     }
 
+    if (nftIds.value.length !== orderInfo.value.quantity) {
+      throw new Error(`NFT quantity mismatch! Expected ${orderInfo.value.quantity}, got ${nftIds.value.length}`)
+    }
     const signingClient = await getSigningClientWithSigner(signer.value)
     const client = signingClient.getSigningStargateClient()
     if (!client) { throw new Error('Signing client not exists') }
