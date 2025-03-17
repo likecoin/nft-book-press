@@ -232,17 +232,17 @@ const typeOptions = [
   { label: 'CreativeWork', value: 'CreativeWork' }
 ]
 
-const licenseOptions = [{
-  'Copyright. All rights reserved.': 'All Rights Reserved',
-  'CC BY-NC-ND': 'https://creativecommons.org/licenses/by-nc-nd/4.0/',
-  'CC BY-NC-SA': 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
-  'CC BY-NC': 'https://creativecommons.org/licenses/by-nc/4.0/',
-  'CC BY-ND': 'https://creativecommons.org/licenses/by-nd/4.0/',
-  'CC BY-SA': 'https://creativecommons.org/licenses/by-sa/4.0/',
-  'CC BY': 'https://creativecommons.org/licenses/by/4.0/',
-  'CC0 (Public Domain)': 'https://creativecommons.org/publicdomain/zero/1.0/',
-  Other: 'Other'
-}]
+const licenseOptions = [
+  { label: 'Copyright. All rights reserved.', value: 'All Rights Reserved' },
+  { label: 'CC BY-NC-ND', value: 'https://creativecommons.org/licenses/by-nc-nd/4.0/' },
+  { label: 'CC BY-NC-SA', value: 'https://creativecommons.org/licenses/by-nc-sa/4.0/' },
+  { label: 'CC BY-NC', value: 'https://creativecommons.org/licenses/by-nc/4.0/' },
+  { label: 'CC BY-ND', value: 'https://creativecommons.org/licenses/by-nd/4.0/' },
+  { label: 'CC BY-SA', value: 'https://creativecommons.org/licenses/by-sa/4.0/' },
+  { label: 'CC BY', value: 'https://creativecommons.org/licenses/by/4.0/' },
+  { label: 'CC0 (Public Domain)', value: 'https://creativecommons.org/publicdomain/zero/1.0/' },
+  { label: 'Other', value: 'Other' }
+]
 
 const customLicense = ref('')
 
