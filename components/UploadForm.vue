@@ -120,6 +120,7 @@ const { initIfNecessary } = store
 const bookStoreApiStore = useBookStoreApiStore()
 const { setUploadFileData } = uploadStore
 const { token } = storeToRefs(bookStoreApiStore)
+const toast = useToast()
 
 const { getFileType } = useFileUpload()
 const fileRecords = ref([])
@@ -639,6 +640,13 @@ const onSubmit = async () => {
   } catch (error) {
     console.error(error)
     uploadStatus.value = ''
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: 'Error during file upload',
+      timeout: 3000,
+      color: 'red'
+    })
+    return
   } finally {
     uploadStatus.value = ''
   }
