@@ -84,7 +84,18 @@
     </div>
 
     <UFormGroup label="License" class="flex-1">
-      <UInput v-model="iscnData.license" placeholder="License" />
+      <div class="space-y-2">
+        <USelect
+          v-model="iscnData.license"
+          :options="licenseOptions"
+          placeholder="Select license"
+        />
+        <UInput
+          v-if="iscnData.license === 'Other'"
+          v-model="customLicense"
+          placeholder="Enter custom license"
+        />
+      </div>
     </UFormGroup>
 
     <!-- Content Fingerprints -->
@@ -221,6 +232,20 @@ const typeOptions = [
   { label: 'CreativeWork', value: 'CreativeWork' }
 ]
 
+const licenseOptions = [{
+  'Copyright. All rights reserved.': 'All Rights Reserved',
+  'CC BY-NC-ND': 'https://creativecommons.org/licenses/by-nc-nd/4.0/',
+  'CC BY-NC-SA': 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+  'CC BY-NC': 'https://creativecommons.org/licenses/by-nc/4.0/',
+  'CC BY-ND': 'https://creativecommons.org/licenses/by-nd/4.0/',
+  'CC BY-SA': 'https://creativecommons.org/licenses/by-sa/4.0/',
+  'CC BY': 'https://creativecommons.org/licenses/by/4.0/',
+  'CC0 (Public Domain)': 'https://creativecommons.org/publicdomain/zero/1.0/',
+  Other: 'Other'
+}]
+
+const customLicense = ref('')
+
 const iscnData = ref({
   type: 'Book',
   title: '',
@@ -233,7 +258,7 @@ const iscnData = ref({
     description: '',
     url: ''
   },
-  license: 'All rights reserved',
+  license: 'All Rights Reserved',
   contentFingerprints: [{ url: '' }],
   downloadableUrls: [{
     url: '',
@@ -274,7 +299,7 @@ const payload = computed(() => ({
   description: iscnData.value.description,
   author: iscnData.value.author.name,
   authorDescription: iscnData.value.author.description,
-  license: iscnData.value.license,
+  license: iscnData.value.license === 'Other' ? customLicense.value : iscnData.value.license,
   contentFingerprints: iscnData.value.contentFingerprints.map(f => f.url),
   inLanguage: iscnData.value.language,
   publisher: iscnData.value.publisher,
@@ -326,7 +351,7 @@ const initializeFromSessionStorage = () => {
       name: data.epubMetadata?.author || '',
       description: ''
     },
-    license: 'All rights reserved',
+    license: 'All Rights Reserved',
     contentFingerprints: [],
     downloadableUrls: [],
     coverUrl: data.epubMetadata?.thumbnailArweaveId
