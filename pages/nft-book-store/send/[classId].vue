@@ -346,22 +346,18 @@ async function onSendNFTStart () {
       await fetchNextNFTId(orderInfo.value.quantity)
     }
 
-    let receipt
-    let txHash
-    for (const nftId of nftIds.value) {
-      txHash = await writeContractAsync({
-        address: classId.value as any,
-        abi: LIKE_NFT_CLASS_ABI,
-        functionName: 'transferWithMemo',
-        args: [
-          wallet.value,
-          orderInfo.value.wallet,
-          nftId,
-          memo.value
-        ]
-      })
-      receipt = await waitForTransactionReceipt(config, { hash: txHash })
-    }
+    const txHash = await writeContractAsync({
+      address: classId.value as any,
+      abi: LIKE_NFT_CLASS_ABI,
+      functionName: 'batchTransferWithMemo',
+      args: [
+        wallet.value,
+        Array(orderInfo.value.quantity).fill(orderInfo.value.wallet),
+        nftIds.value,
+        Array(orderInfo.value.quantity).fill(memo.value)
+      ]
+    })
+    const receipt = await waitForTransactionReceipt(config, { hash: txHash })
     if (receipt?.status === 'success') {
       await $fetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/sent/${paymentId.value}`,
         {

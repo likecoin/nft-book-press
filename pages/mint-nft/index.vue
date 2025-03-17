@@ -766,18 +766,16 @@ async function onClassFileInput () {
     const res = await writeContractAsync({
       address: LIKE_NFT_CONTRACT_ADDRESS,
       abi: LIKE_NFT_ABI,
-      functionName: 'newClass',
+      functionName: 'newBookNFT',
       args: [{
         creator: wallet.value,
         updaters: [wallet.value, LIKE_EVM_NFT_TARGET_ADDRESS],
         minters: [wallet.value, LIKE_EVM_NFT_TARGET_ADDRESS],
-        input: {
+        config: {
           name,
           symbol,
           metadata: JSON.stringify(metadata),
-          config: {
-            max_supply: classMaxSupply.value || 0
-          }
+          max_supply: classMaxSupply.value || 0
         }
       }]
     })
@@ -826,17 +824,14 @@ async function onClickSaveContentMetadata () {
       const res = await writeContractAsync({
         address: LIKE_NFT_CONTRACT_ADDRESS,
         abi: LIKE_NFT_ABI,
-        functionName: 'updateClass',
+        functionName: 'updateBookNFT',
         args: [{
-          creator: wallet.value,
-          class_id: classId.value,
-          input: {
+          classId: classId.value,
+          config: {
             name,
             symbol,
             metadata: JSON.stringify(contentMetadata.value),
-            config: {
-              max_supply: classMaxSupply.value || 0
-            }
+            max_supply: classMaxSupply.value || 0
           }
         }]
       })
