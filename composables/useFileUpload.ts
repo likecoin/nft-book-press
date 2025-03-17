@@ -14,5 +14,18 @@ export const useFileUpload = () => {
     }
   }
 
-  return { getFileType }
+  const stripHtmlTags = (html: string) => {
+    if (!html) { return '' }
+    return html.replace(/<[^>]*>/g, '').trim()
+  }
+
+  const formatLanguage = (language: string): string => {
+    if (!language) { return '' }
+    const normalizedLang = language.toLowerCase()
+    if (normalizedLang.startsWith('zh')) { return 'zh' }
+    if (normalizedLang.startsWith('en')) { return 'en' }
+    return normalizedLang
+  }
+
+  return { getFileType, stripHtmlTags, formatLanguage }
 }

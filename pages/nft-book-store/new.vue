@@ -1,5 +1,5 @@
 <template>
-  <PageBody class="pb-[40px]">
+  <component :is="wrapperComponent" class="pb-[40px]">
     <UAlert
       v-if="error"
       icon="i-heroicons-exclamation-triangle"
@@ -265,6 +265,7 @@
       </div>
 
       <StripeConnectCard
+        v-if="isStandalonePage"
         v-model:is-stripe-connect-checked="isStripeConnectChecked"
         v-model:is-using-default-account="isUsingDefaultAccount"
         :stripe-connect-wallet="stripeConnectWallet"
@@ -448,6 +449,7 @@
                     v-model="mustClaimToView"
                     name="mustClaimToView"
                     label="Must claim NFT to view"
+                    :disabled="isDrmLocked"
                   />
                 </UFormGroup>
 
@@ -459,6 +461,7 @@
                     v-model="hideDownload"
                     name="hideDownload"
                     label="Disable Download"
+                    :disabled="isDrmLocked"
                   />
                 </UFormGroup>
 
@@ -479,14 +482,24 @@
       </UCard>
 
       <UButton
+        v-if="isStandalonePage"
         :label="submitButtonText"
         :loading="isLoading"
         size="lg"
         :disabled="isLoading"
         @click="onSubmit"
       />
+      <div v-else class="w-full flex justify-center">
+        <UButton
+          :label="submitButtonText"
+          :loading="isLoading"
+          size="lg"
+          :disabled="isLoading"
+          @click="onSubmit"
+        />
+      </div>
     </template>
-  </PageBody>
+  </component>
 </template>
 
 <script setup lang="ts">
@@ -502,6 +515,8 @@ import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL, deliverMethodOptions } from '~/utils'
 import { sendNFTsToAPIWallet } from '~/utils/cosmos'
+import PageBody from '~/components/PageBody'
+import { useUploadStore } from '~/stores/upload'
 
 const { LCD_URL } = useRuntimeConfig().public
 const walletStore = useWalletStore()
@@ -513,10 +528,13 @@ const { newBookListing, updateEditionPrice } = bookStoreApiStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
 const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
 
+const emit = defineEmits(['submit'])
 const router = useRouter()
 const route = useRoute()
 // params.editingClassId and params.editionIndex is only available when editing an existing class
 // query.class_id is only available when creating a new class
+const uploadStore = useUploadStore()
+const { getUploadFileData } = uploadStore
 const classId = ref(
   route.params.editingClassId || (route.query.class_id as string)
 )
@@ -621,6 +639,20 @@ const hasAutoDeliverNFT = computed(() =>
   prices.value.some(price => price.deliveryMethod === 'auto' && price.stock > 0)
 )
 
+const isStandalonePage = computed(() => {
+  return route.name === 'nft-book-store-new'
+})
+
+const wrapperComponent = computed(() => {
+  return isStandalonePage.value ? PageBody : 'div'
+})
+
+const isDrmLocked = computed(() => {
+  if (isStandalonePage.value) { return false }
+  const uploadFileData = getUploadFileData()
+  return uploadFileData?.fileRecords?.some(record => record.arweaveKey)
+})
+
 config({
   markdownItConfig (mdit: any) {
     mdit.options.html = false
@@ -654,6 +686,13 @@ watch(isLoading, (newIsLoading) => {
     error.value = ''
   }
 })
+
+watch(isDrmLocked, (locked) => {
+  if (locked) {
+    mustClaimToView.value = true
+    hideDownload.value = true
+  }
+}, { immediate: true })
 
 function updatePrice (e: InputEvent, key: string, index: number) {
   prices.value[index][key] = (e.target as HTMLInputElement)?.value
@@ -832,6 +871,7 @@ async function submitNewClass () {
       hideDownload: hideDownload.value,
       autoDeliverNFTsTxHash
     })
+    emit('submit')
     router.push({ name: 'nft-book-store' })
   } catch (err) {
     const errorData = (err as any).data || err
@@ -899,6 +939,18 @@ function handleDeliveryMethodChange (value: string) {
     enableCustomMessagePage.value = true
   }
 }
+
+function updateClassId ({ classId: newClassId, nftMintCount }) {
+  if (!isStandalonePage.value) {
+    classId.value = newClassId
+    classIdInput.value = newClassId
+    prices.value[0].stock = nftMintCount
+  }
+}
+
+defineExpose({
+  updateClassId
+})
 
 </script>
 <style scoped>
