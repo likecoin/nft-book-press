@@ -53,7 +53,6 @@ const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
 
-const route = useRoute()
 const step = ref(0)
 const uploadFormRef = ref()
 const registerISCN = ref()
