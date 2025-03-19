@@ -169,7 +169,11 @@ onMounted(async () => {
     })
   ])
   if (isAuthenticated.value) {
-    await fetchUserStripeInfo()
+    try {
+      await fetchUserStripeInfo()
+    } catch (e) {
+      console.error(e)
+    }
   }
 })
 
