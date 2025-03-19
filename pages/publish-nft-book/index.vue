@@ -126,6 +126,7 @@ const nextStep = async () => {
     }
     if (step.value === 1) {
       await registerISCN.value.onSubmit()
+      return
     }
     if (step.value < steps.length - 1) {
       step.value++
