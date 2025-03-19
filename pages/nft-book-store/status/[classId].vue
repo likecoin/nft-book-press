@@ -46,6 +46,26 @@
     </UProgress>
 
     <template v-if="bookStoreApiStore.isAuthenticated">
+      <UCard
+        :ui="{
+          header: { base: 'flex justify-between items-center' },
+          body: { padding: '12px' },
+        }"
+      >
+        <div class="flex justify-between items-center w-full">
+          <h3 class="font-bold font-mono">
+            Book Details (Metadata)
+          </h3>
+          <UButton
+            label="View / Edit"
+            :to="{
+              name: 'nft-book-store-status-classId-metadata',
+              params: { classId }
+            }"
+          />
+        </div>
+      </UCard>
+
       <UCard :ui="{ body: { padding: '' } }">
         <template #header>
           <h3 class="font-bold font-mono">
@@ -699,6 +719,7 @@ const isUpdatingPricesOrder = ref(false)
 const ordersData = ref<any>({})
 const isUpdatingShippingRates = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
+const shouldShowBookDetails = ref<boolean>(false)
 
 // Search
 const searchInput = ref('')
