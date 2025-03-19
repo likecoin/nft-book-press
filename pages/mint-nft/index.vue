@@ -713,6 +713,7 @@ async function onClickMintByInputting () {
   try {
     if (step.value === 2) {
       await onClassFileInput() // step=3
+      if (!classId.value) { throw new Error('CLASS_CREATION_FAILED') }
     }
     await onMintNFTStart() // step=4
     shouldShowDownloadLink.value = true
@@ -728,6 +729,7 @@ async function onClickMintByUploading () {
   try {
     if (step.value === 2) {
       await onClassFileInput() // step=3
+      if (!classId.value) { throw new Error('CLASS_CREATION_FAILED') }
     }
     await onMintNFTStart() // step=4
     shouldShowDownloadLink.value = false
