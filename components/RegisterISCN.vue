@@ -25,11 +25,12 @@
 import { BigNumber } from 'bignumber.js'
 import { storeToRefs } from 'pinia'
 import { useFileUpload } from '~/composables/useFileUpload'
-import { estimateISCNTxGasAndFee, formatISCNTxPayload, signISCNTx } from '~/utils/iscn'
+import { estimateISCNTxGasAndFee, signISCNTx } from '~/utils/iscn'
 import { useWalletStore } from '~/stores/wallet'
 import { getAccountBalance } from '~/utils/cosmos'
 import { ISCN_GAS_MULTIPLIER } from '~/constant/index'
 import { useUploadStore } from '~/stores/upload'
+import { useISCN } from '~/composables/useISCN'
 
 const walletStore = useWalletStore()
 const uploadStore = useUploadStore()
@@ -49,8 +50,7 @@ const iscnData = ref({
   publicationDate: '',
   author: {
     name: '',
-    description: '',
-    url: ''
+    description: ''
   },
   license: 'All Rights Reserved',
   customLicense: '',
@@ -77,36 +77,7 @@ const totalFee = computed(() => {
   return iscnFee.value || new BigNumber(0)
 })
 
-const formattedSameAsList = computed(() => {
-  return iscnData.value.downloadableUrls
-    .filter((download: any) => download.fileName && download.url)
-    .map((download: any) => {
-      if (download.fileName && download.type) {
-        return `${download.url}?name=${download.fileName.replace(/\s+/g, '')}`
-      }
-      return ''
-    })
-    .filter(Boolean)
-})
-const payload = computed(() => ({
-  type: iscnData.value.type,
-  name: iscnData.value.title,
-  description: iscnData.value.description,
-  author: iscnData.value.author.name,
-  authorDescription: iscnData.value.author.description,
-  license: iscnData.value.license === 'Other' ? iscnData.value.customLicense : iscnData.value.license,
-  contentFingerprints: iscnData.value.contentFingerprints.map(f => f.url),
-  inLanguage: iscnData.value.language,
-  publisher: iscnData.value.publisher,
-  isbn: iscnData.value.isbn,
-  datePublished: iscnData.value.publicationDate
-    ? new Date(iscnData.value.publicationDate).toISOString().split('T')[0]
-    : undefined,
-  url: iscnData.value.bookInfoUrl,
-  tagsString: iscnData.value.tags?.join(', ') || '',
-  sameAs: formattedSameAsList.value,
-  thumbnailUrl: iscnData.value.coverUrl
-}))
+const { payload } = useISCN(iscnData)
 
 const isFormValid = computed(() => {
   const requiredFields = {

@@ -56,6 +56,7 @@ import { useIscnStore } from '~/stores/iscn'
 import { signISCNTx, formatISCNTxPayload } from '~/utils/iscn'
 import { useWalletStore } from '~/stores/wallet'
 import { ISCN_GAS_FEE, UPDATE_ISCN_GAS_MULTIPLIER } from '~/constant/index'
+import { useISCN } from '~/composables/useISCN'
 
 const route = useRoute()
 const iscnStore = useIscnStore()
@@ -87,8 +88,7 @@ const iscnData = ref({
   publicationDate: '',
   author: {
     name: '',
-    description: '',
-    url: ''
+    description: ''
   },
   license: 'All rights reserved',
   contentFingerprints: [{ url: '' }],
@@ -106,40 +106,7 @@ const iscnData = ref({
   coverUrl: ''
 })
 
-const payload = computed(() => ({
-  type: iscnData.value.type,
-  name: iscnData.value.title,
-  description: iscnData.value.description,
-  author: iscnData.value.author.name,
-  authorDescription: iscnData.value.author.description,
-  license:
-    iscnData.value.license === 'Other'
-      ? iscnData.value.customLicense
-      : iscnData.value.license,
-  contentFingerprints: iscnData.value.contentFingerprints.map(f => f.url),
-  inLanguage: iscnData.value.language,
-  publisher: iscnData.value.publisher,
-  isbn: iscnData.value.isbn,
-  datePublished: iscnData.value.publicationDate
-    ? new Date(iscnData.value.publicationDate).toISOString().split('T')[0]
-    : undefined,
-  url: iscnData.value.bookInfoUrl,
-  tagsString: iscnData.value.tags?.join(', ') || '',
-  sameAs: formattedSameAsList.value,
-  thumbnailUrl: iscnData.value.coverUrl
-}))
-
-const formattedSameAsList = computed(() => {
-  return iscnData.value.downloadableUrls
-    .filter((download: any) => download.fileName && download.url)
-    .map((download: any) => {
-      if (download.fileName && download.type) {
-        return `${download.url}?name=${download.fileName.replace(/\s+/g, '')}`
-      }
-      return ''
-    })
-    .filter(Boolean)
-})
+const { payload } = useISCN(iscnData)
 
 onMounted(async () => {
   try {
@@ -179,9 +146,8 @@ onMounted(async () => {
           publisher: metadata.publisher || '',
           publicationDate: metadata.datePublished || '',
           author: {
-            name: metadata.author || '',
-            description: metadata.authorDescription || '',
-            url: ''
+            name: metadata.author.name || metadata.author || '',
+            description: metadata.author.description || ''
           },
           license: metadata.usageInfo || 'All Rights Reserved',
           contentFingerprints: record.data.contentFingerprints.map(url => ({
