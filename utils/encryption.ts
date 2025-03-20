@@ -1,17 +1,11 @@
 // from https://github.com/labscommunity/arweavekit/blob/main/src/lib/encryption.ts
 
-async function getWebCrypto () {
+function getWebCrypto () {
   let webCrypto: Crypto
-
-  if (typeof window !== 'undefined' && typeof window.crypto !== 'undefined') {
+  if (typeof window !== 'undefined' && window.crypto) {
     webCrypto = window.crypto
   } else {
-    try {
-      const crypto = await import('crypto')
-      webCrypto = crypto.webcrypto as Crypto
-    } catch (e) {
-      throw new Error('Crypto API is not available.')
-    }
+    throw new Error('Crypto API is not available.')
   }
   return webCrypto
 }
@@ -31,7 +25,7 @@ function bufferToBase64 (buf: ArrayBuffer) {
 export async function encryptDataWithAES (
   params: { data: ArrayBuffer; }
 ) {
-  const webCrypto = await getWebCrypto()
+  const webCrypto = getWebCrypto()
 
   const encryptedDataAESKey = await webCrypto.subtle.generateKey(
     {
