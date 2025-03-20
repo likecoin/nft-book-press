@@ -3,19 +3,19 @@
     <!-- Basic Info -->
     <UFormGroup label="Type" class="flex-1">
       <USelect
-        v-model="modelValue.type"
+        v-model="formData.type"
         :options="typeOptions"
         placeholder="Select type"
       />
     </UFormGroup>
 
     <UFormGroup label="Title" class="flex-1" required>
-      <UInput v-model="modelValue.title" placeholder="Enter ISCN title" />
+      <UInput v-model="formData.title" placeholder="Enter ISCN title" />
     </UFormGroup>
 
     <UFormGroup label="Description" class="flex-1" required>
       <UTextarea
-        v-model="modelValue.description"
+        v-model="formData.description"
         placeholder="Enter ISCN description"
         autoresize
       />
@@ -23,27 +23,27 @@
 
     <div class="grid grid-cols-3 gap-4">
       <UFormGroup label="ISBN">
-        <UInput v-model="modelValue.isbn" placeholder="Enter ISBN" />
+        <UInput v-model="formData.isbn" placeholder="Enter ISBN" />
       </UFormGroup>
 
       <UFormGroup label="Publisher">
         <UInput
-          v-model="modelValue.publisher"
+          v-model="formData.publisher"
           placeholder="Enter publisher name"
         />
       </UFormGroup>
 
       <UFormGroup label="Publication Date">
         <UInput
-          v-model="modelValue.publicationDate"
+          v-model="formData.publicationDate"
           type="date"
           placeholder="Select date"
         />
       </UFormGroup>
 
-      <UFormGroup label="Language">
+      <UFormGroup label="Language" required>
         <USelect
-          v-model="modelValue.language"
+          v-model="formData.language"
           :options="languageOptions"
           placeholder="Select language"
         />
@@ -51,7 +51,7 @@
 
       <UFormGroup label="Cover Image">
         <UInput
-          v-model="modelValue.coverUrl"
+          v-model="formData.coverUrl"
           placeholder="ar://{arweave_id}"
           class="font-mono"
         />
@@ -59,7 +59,7 @@
 
       <UFormGroup label="書訊">
         <UInput
-          v-model="modelValue.bookInfoUrl"
+          v-model="formData.bookInfoUrl"
           placeholder="Enter book info URL"
         />
       </UFormGroup>
@@ -69,14 +69,14 @@
     <div class="grid grid-cols-2 gap-4">
       <UFormGroup label="Author Name" required>
         <UInput
-          v-model="modelValue.author.name"
+          v-model="formData.author.name"
           placeholder="Enter author name"
         />
       </UFormGroup>
 
       <UFormGroup label="Author Description">
         <UTextarea
-          v-model="modelValue.author.description"
+          v-model="formData.author.description"
           placeholder="Enter author description"
           autoresize
         />
@@ -86,13 +86,13 @@
     <UFormGroup label="License" class="flex-1">
       <div class="space-y-2">
         <USelect
-          v-model="modelValue.license"
+          v-model="formData.license"
           :options="licenseOptions"
           placeholder="Select license"
         />
         <UInput
           v-if="modelValue.license === 'Other'"
-          v-model="modelValue.customLicense"
+          v-model="formData.customLicense"
           placeholder="Enter custom license"
         />
       </div>
@@ -160,26 +160,26 @@
             <UInput v-model="download.fileName" placeholder="Enter filename" />
           </UFormGroup>
         </div>
-        <UButton
-          v-if="index === modelValue.downloadableUrls.length - 1"
-          variant="soft"
-          icon="i-heroicons-plus"
-          class="mb-[2px]"
-          @click="addDownloadableUrl"
-        />
-        <UButton
-          v-if="modelValue.downloadableUrls.length > 1"
-          color="red"
-          variant="soft"
-          icon="i-heroicons-trash"
-          @click="removeDownloadableUrl(index)"
-        />
-      </div>
+      </div><UButton
+        variant="soft"
+        icon="i-heroicons-plus"
+        class="mb-[2px]"
+        @click="addDownloadableUrl"
+      />
+      <UButton
+        v-if="modelValue.downloadableUrls.length > 1"
+        color="red"
+        variant="soft"
+        icon="i-heroicons-trash"
+        @click="removeDownloadableUrl(index)"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { typeOptions, licenseOptions, languageOptions } from '~/constant/index'
+
 interface ISCNFormData {
   type: string
   title: string
@@ -214,29 +214,23 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: ISCNFormData): void
 }>()
 
-const languageOptions = [
-  { label: 'English', value: 'en' },
-  { label: '中文', value: 'zh' }
-]
+const formData = computed({
+  get: () => props.modelValue,
+  set: (newValue) => {
+    emit('update:modelValue', newValue)
+  }
+})
 
-const typeOptions = [
-  { label: 'Book', value: 'Book' },
-  { label: 'Photo', value: 'Photo' },
-  { label: 'Image', value: 'Image' },
-  { label: 'CreativeWork', value: 'CreativeWork' }
-]
+const isFormValid = computed(() => {
+  const requiredFields = {
+    title: !!props.modelValue.title,
+    description: !!props.modelValue.description,
+    authorName: !!props.modelValue.author.name,
+    contentUrl: !!props.modelValue.contentFingerprints.some(f => !!f.url)
+  }
 
-const licenseOptions = [
-  { label: 'Copyright. All rights reserved.', value: 'All Rights Reserved' },
-  { label: 'CC BY-NC-ND', value: 'https://creativecommons.org/licenses/by-nc-nd/4.0/' },
-  { label: 'CC BY-NC-SA', value: 'https://creativecommons.org/licenses/by-nc-sa/4.0/' },
-  { label: 'CC BY-NC', value: 'https://creativecommons.org/licenses/by-nc/4.0/' },
-  { label: 'CC BY-ND', value: 'https://creativecommons.org/licenses/by-nd/4.0/' },
-  { label: 'CC BY-SA', value: 'https://creativecommons.org/licenses/by-sa/4.0/' },
-  { label: 'CC BY', value: 'https://creativecommons.org/licenses/by/4.0/' },
-  { label: 'CC0 (Public Domain)', value: 'https://creativecommons.org/publicdomain/zero/1.0/' },
-  { label: 'Other', value: 'Other' }
-]
+  return Object.values(requiredFields).every(Boolean)
+})
 
 const addContentFingerprint = () => {
   emit('update:modelValue', {
@@ -273,6 +267,11 @@ const removeDownloadableUrl = (index: number) => {
     })
   }
 }
+
+defineExpose({
+  isFormValid
+})
+
 </script>
 
 <style scoped>

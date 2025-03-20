@@ -152,7 +152,7 @@ const initializeFromSessionStorage = () => {
     coverUrl: data.epubMetadata?.thumbnailArweaveId
       ? `ar://${data.epubMetadata.thumbnailArweaveId}`
       : '',
-    language: formatLanguage(data.epubMetadata?.language || ''),
+    language: formatLanguage(data.epubMetadata?.language || 'zh'),
     tags: data.epubMetadata?.tags || []
   }
 

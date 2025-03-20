@@ -719,7 +719,6 @@ const isUpdatingPricesOrder = ref(false)
 const ordersData = ref<any>({})
 const isUpdatingShippingRates = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
-const shouldShowBookDetails = ref<boolean>(false)
 
 // Search
 const searchInput = ref('')
