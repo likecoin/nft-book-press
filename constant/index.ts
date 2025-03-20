@@ -36,3 +36,28 @@ export const PUBLISHING_NOTICE_URL_ZH = 'https://link.liker.land/publishing-noti
 export const TRANSFER_GAS = 100000
 export const ISCN_GAS_FEE = 200000
 export const ISCN_GAS_MULTIPLIER = 1.3
+export const UPDATE_ISCN_GAS_MULTIPLIER = 1.75
+
+export const languageOptions = [
+  { label: 'English', value: 'en' },
+  { label: '中文', value: 'zh' }
+]
+
+export const typeOptions = [
+  { label: 'Book', value: 'Book' },
+  { label: 'Photo', value: 'Photo' },
+  { label: 'Image', value: 'Image' },
+  { label: 'CreativeWork', value: 'CreativeWork' }
+]
+
+export const licenseOptions = [
+  { label: 'Copyright. All rights reserved.', value: 'All Rights Reserved' },
+  { label: 'CC BY-NC-ND', value: 'https://creativecommons.org/licenses/by-nc-nd/4.0/' },
+  { label: 'CC BY-NC-SA', value: 'https://creativecommons.org/licenses/by-nc-sa/4.0/' },
+  { label: 'CC BY-NC', value: 'https://creativecommons.org/licenses/by-nc/4.0/' },
+  { label: 'CC BY-ND', value: 'https://creativecommons.org/licenses/by-nd/4.0/' },
+  { label: 'CC BY-SA', value: 'https://creativecommons.org/licenses/by-sa/4.0/' },
+  { label: 'CC BY', value: 'https://creativecommons.org/licenses/by/4.0/' },
+  { label: 'CC0 (Public Domain)', value: 'https://creativecommons.org/publicdomain/zero/1.0/' },
+  { label: 'Other', value: 'Other' }
+]
