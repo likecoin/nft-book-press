@@ -56,7 +56,7 @@
     axios "1.7.4"
     got "^11.8.6"
 
-"@aptos-labs/ts-sdk@1.33.1", "@aptos-labs/ts-sdk@^1.26.0":
+"@aptos-labs/ts-sdk@^1.26.0":
   version "1.33.1"
   resolved "https://registry.yarnpkg.com/@aptos-labs/ts-sdk/-/ts-sdk-1.33.1.tgz#b6c6465250c8d9660b9ec755ea743677d8fb4a53"
   integrity sha512-d6nWtUI//fyEN8DeLjm3+ro87Ad6+IKwR9pCqfrs/Azahso1xR1Llxd/O6fj/m1DDsuDj/HAsCsy5TC/aKD6Eg==
@@ -751,9 +751,9 @@
     regenerator-runtime "^0.14.0"
 
 "@babel/runtime@^7.25.0":
-  version "7.26.9"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.26.9.tgz#aa4c6facc65b9cb3f87d75125ffd47781b475433"
-  integrity sha512-aA63XwOkcl4xxQa3HjPMqOP6LiK0ZDv3mUPYEFXkpHbaFjtGggE1A61FjFzJnB+p7/oy2gA8E+rcBNl/zC1tMg==
+  version "7.26.10"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.26.10.tgz#a07b4d8fa27af131a633d7b3524db803eb4764c2"
+  integrity sha512-2WJMeRQPHKSPemqk/awGrAiuFfzBmOIPXKizAsVhWH9YJqLZ0H+HS4c8loHGgW6utJ3E/ejXQUsiGaQy2NZ9Fw==
   dependencies:
     regenerator-runtime "^0.14.0"
 
