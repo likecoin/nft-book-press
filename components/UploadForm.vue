@@ -99,7 +99,7 @@ import { storeToRefs } from 'pinia'
 import exifr from 'exifr'
 import ePub from 'epubjs'
 import { BigNumber } from 'bignumber.js'
-import { encryptDataWithAES } from 'arweavekit/encryption'
+import { encryptDataWithAES } from '~/utils/encryption'
 import { fileToArrayBuffer, digestFileSHA256, calculateIPFSHash, sleep } from '~/utils/index'
 import { useFileUpload } from '~/composables/useFileUpload'
 import {
