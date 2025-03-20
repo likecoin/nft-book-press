@@ -363,7 +363,7 @@ const initializeFromSessionStorage = () => {
   }
 
   baseData.downloadableUrls = data.fileRecords
-    .filter(r => r.fileType.includes('epub') || r.fileType.includes('pdf'))
+    .filter(r => r.fileType === 'application/pdf' || r.fileType === 'application/epub+zip')
     .map(file => ({
       url: file.arweaveKey ? file.arweaveLink : `ar://${file.arweaveId}`,
       type: getFileType(file.fileType),
@@ -377,7 +377,7 @@ const initializeFromSessionStorage = () => {
           const arweaveUrl = r.arweaveKey
             ? r.arweaveLink
             : `ar://${r.arweaveId}`
-          return r.fileType.includes('epub') || r.fileType.includes('pdf')
+          return r.fileType === 'application/epub+zip' || r.fileType === 'application/pdf'
             ? arweaveUrl
             : `ar://${r.arweaveId}`
         })
