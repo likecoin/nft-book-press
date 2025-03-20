@@ -10,12 +10,12 @@
     ]"
   >
     <img
-      v-if="computedFileType === 'image'"
+      v-if="computedFileType.includes('image')"
       :class="['w-full', 'h-auto', 'object-contain', 'rounded-[8px]']"
       :src="props.fileData"
     >
     <UIcon
-      v-else-if="computedFileType === 'epub'"
+      v-else-if="computedFileType.includes('pdf') || computedFileType.includes('epub')"
       name="i-heroicons-book-open"
       class="text-dark-gray w-[40px] h-[40px]"
     />

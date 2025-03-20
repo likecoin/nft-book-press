@@ -214,6 +214,7 @@ import { useUploadStore } from '~/stores/upload'
 
 const walletStore = useWalletStore()
 const uploadStore = useUploadStore()
+const { getFileType } = useFileUpload()
 
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
@@ -362,10 +363,10 @@ const initializeFromSessionStorage = () => {
   }
 
   baseData.downloadableUrls = data.fileRecords
-    .filter(r => r.fileType === 'epub' || r.fileType === 'pdf')
+    .filter(r => r.fileType.includes('epub') || r.fileType.includes('pdf'))
     .map(file => ({
       url: file.arweaveKey ? file.arweaveLink : `ar://${file.arweaveId}`,
-      type: file.fileType,
+      type: getFileType(file.fileType),
       fileName: file.fileName
     }))
 
@@ -376,7 +377,7 @@ const initializeFromSessionStorage = () => {
           const arweaveUrl = r.arweaveKey
             ? r.arweaveLink
             : `ar://${r.arweaveId}`
-          return r.fileType === 'epub' || r.fileType === 'pdf'
+          return r.fileType.includes('epub') || r.fileType.includes('pdf')
             ? arweaveUrl
             : `ar://${r.arweaveId}`
         })
