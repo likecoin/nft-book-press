@@ -96,7 +96,6 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import exifr from 'exifr'
 import ePub from 'epubjs'
 import { BigNumber } from 'bignumber.js'
 import { encryptDataWithAES } from 'arweavekit/encryption'
@@ -238,20 +237,7 @@ const onFileUpload = async (event: DragEvent) => {
               fileType,
               ipfsHash,
               fileSHA256,
-              fileBlob: file,
-              exifInfo: null
-            }
-
-            if (fileType === 'image') {
-              try {
-                const exif = await exifr.parse(file)
-                if (exif) {
-                  fileRecord.exifInfo = exif
-                }
-              } catch (err) {
-                // eslint-disable-next-line no-console
-                console.error(err)
-              }
+              fileBlob: file
             }
             if (fileType === 'epub') {
               await processEPub({ buffer: fileBytes, file })
