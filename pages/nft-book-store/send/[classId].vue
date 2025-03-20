@@ -110,20 +110,29 @@
 
       <UFormGroup
         label="Specify NFT ID"
+        description="Leave empty to auto-fetch NFT ID"
         :error="nftIdError"
+        :ui="{ description: 'text-gray-400 dark:text-gray-600' }"
       >
-        <div class="flex flex-wrap items-center justify-center gap-2">
-          <UTextarea
-            ref="nftIdInputRef"
-            v-model="nftIdInput"
-            class="font-mono flex-grow"
-            :readonly="!isEditingNFTId"
-            :disabled="!isEditingNFTId"
-            placeholder="Enter one NFT ID per line. The number of lines should match the quantity."
-            :trailing-icon="nftIdError ? 'i-heroicons-exclamation-triangle-20-solid' : undefined"
-            :autoresize="true"
-            :rows="Math.max(1, orderInfo.quantity || 1)"
-          />
+        <div class="flex flex-wrap items-center justify-center gap-2 w-full">
+          <div
+            v-if="orderInfo.quantity"
+            :class="[orderInfo.quantity > 1 ? 'w-full' : 'flex-grow', 'space-y-1']"
+          >
+            <UInput
+              v-for="i in orderInfo.quantity"
+              :key="`nft-id-input-${i}`"
+              ref="nftIdInputRef"
+              v-model="nftIdInput[i - 1]"
+              class="font-mono"
+              :readonly="!isEditingNFTId"
+              :disabled="!isEditingNFTId"
+            >
+              <template #leading v-if="orderInfo.quantity > 1">
+                <span class="text-sm text-gray-400 dark:text-gray-600">#{{ i }}</span>
+              </template>
+            </UInput>
+          </div>
           <UButton
             :label="isEditingNFTId || (isVerifyingNFTId && !isAutoFetchingNFTId) ? 'Confirm' : 'Edit'"
             :disabled="isLoading || isVerifyingNFTId"
@@ -132,7 +141,7 @@
             color="gray"
             @click="handleClickEditNFTId"
           />
-          <UDivider class="text-sm text-gray-600 sm:w-min">
+          <UDivider :class="['text-sm text-gray-600', { 'sm:w-min': orderInfo.quantity <= 1 }]">
             OR
           </UDivider>
           <UButton
@@ -198,13 +207,13 @@ const ownerWallet = ref(route.query.owner_wallet as string || wallet.value)
 const memo = ref('')
 const { messageCharCount, isLimitReached } = useMessageCharCount(memo, AUTHOR_MESSAGE_LIMIT)
 
-const nftIdInput = ref('')
+const nftIdInput = ref([] as string[])
 const nftIds = ref([] as string[])
 const isVerifyingNFTId = ref(false)
 const isAutoFetchingNFTId = ref(false)
 const nftIdError = ref('')
 const isEditingNFTId = ref(false)
-const nftIdInputRef = ref<any>(undefined)
+const nftIdInputRef = ref<any[] | undefined>(undefined)
 
 const orderInfo = ref<any>({})
 const nftImage = ref('')
@@ -221,7 +230,7 @@ watch(isEditingNFTId, async (isEditing) => {
   if (isEditing) { return }
 
   if (nftIdInput.value) {
-    const ids = nftIdInput.value.split('\n').filter(id => id.trim() !== '')
+    const ids = nftIdInput.value.filter(id => id.trim() !== '')
     if (orderInfo.value.quantity && ids.length > 0 && ids.length !== orderInfo.value.quantity) {
       nftIdError.value = `Number of NFT IDs (${ids.length}) does not match the required quantity (${orderInfo.value.quantity})`
       nftIds.value = []
@@ -252,7 +261,7 @@ function handleClickEditNFTId () {
   nftIdError.value = ''
   nextTick(() => {
     if (isEditingNFTId.value) {
-      nftIdInputRef.value?.$refs?.input?.focus()
+      nftIdInputRef.value?.[0].$refs?.input?.focus()
     }
   })
 }
@@ -298,7 +307,7 @@ async function fetchNextNFTId (count = 1) {
     })
     if (nfts.length) {
       nftIds.value = nfts.map(nft => nft.id)
-      nftIdInput.value = nftIds.value.join('\n')
+      nftIdInput.value = nftIds.value
       await fetchNFTMetadata()
     } else {
       throw new Error(`${ownerWallet.value} does not hold any NFT of class ${classId.value}`)
