@@ -128,7 +128,7 @@
               :readonly="!isEditingNFTId"
               :disabled="!isEditingNFTId"
             >
-              <template #leading v-if="orderInfo.quantity > 1">
+              <template v-if="orderInfo.quantity > 1" #leading>
                 <span class="text-sm text-gray-400 dark:text-gray-600">#{{ i }}</span>
               </template>
             </UInput>

@@ -210,8 +210,8 @@ const props = defineProps<{
   modelValue: ISCNFormData
 }>()
 
-const emit = defineEmits<{
- (e: 'update:modelValue', value: ISCNFormData): void
+const emit = defineEmits<{(e: 'update:modelValue',
+  value: ISCNFormData): void
 }>()
 
 const formData = computed({
