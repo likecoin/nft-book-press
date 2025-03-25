@@ -8,7 +8,6 @@ export interface ISCNRegisterPayload {
   license: string;
   type: string;
   author: string;
-  exifInfo?: any;
   fileSHA256?: string | string[];
   publisher?: string;
   authorDescription?: string;

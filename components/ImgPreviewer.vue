@@ -10,12 +10,12 @@
     ]"
   >
     <img
-      v-if="computedFileType === 'image'"
+      v-if="mimeType.startsWith('image/')"
       :class="['w-full', 'h-auto', 'object-contain', 'rounded-[8px]']"
       :src="props.fileData"
     >
     <UIcon
-      v-else-if="computedFileType === 'epub'"
+      v-else-if="mimeType === 'application/epub+zip' || mimeType === 'application/pdf'"
       name="i-heroicons-book-open"
       class="text-dark-gray w-[40px] h-[40px]"
     />
@@ -28,11 +28,8 @@
 </template>
 
 <script setup lang="ts">
-import { useFileUpload } from '~/composables/useFileUpload'
 
 type FileTypes = 'image' | 'pdf' | 'epub' | 'other'
-
-const { getFileType } = useFileUpload()
 
 const props = defineProps({
   fileType: {
@@ -43,7 +40,7 @@ const props = defineProps({
   size: { type: String, default: 'large' }
 })
 
-const computedFileType = computed(() => {
+const mimeType = computed(() => {
   // If formatted fileType is provided as a prop, use it directly
   if (props.fileType) { return props.fileType }
 
@@ -51,7 +48,6 @@ const computedFileType = computed(() => {
   const dataUrl = props.fileData || ''
   const mimeType = dataUrl.split(';')[0].split(':')[1] || ''
 
-  // Use getFileType function to determine the file type based on MIME type
-  return getFileType(mimeType)
+  return mimeType
 })
 </script>
