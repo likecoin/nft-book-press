@@ -1,5 +1,5 @@
 <template>
-  <UModal :model-value="modelValue" :ui="{ width: 'sm:max-w-7xl' }">
+  <UModal :model-value="modelValue" :ui="{ width: 'min-w-[80vw]' }">
     <UCard
       :ui="{
         header: { base: 'flex justify-between items-center' },
