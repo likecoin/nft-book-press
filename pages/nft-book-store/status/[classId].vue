@@ -58,10 +58,7 @@
           </h3>
           <UButton
             label="View / Edit"
-            :to="{
-              name: 'nft-book-store-status-classId-metadata',
-              params: { classId }
-            }"
+            @click="showModal = true"
           />
         </div>
       </UCard>
@@ -657,6 +654,11 @@
       />
     </template>
 
+    <EditISCNMetadataModal
+      v-model="showModal"
+      :class-id="classId"
+    />
+
     <UModal v-model="isOpenQRCodeModal">
       <QRCodeGenerator
         v-if="selectedPurchaseLink"
@@ -719,6 +721,7 @@ const isUpdatingPricesOrder = ref(false)
 const ordersData = ref<any>({})
 const isUpdatingShippingRates = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
+const showModal = ref(false)
 
 // Search
 const searchInput = ref('')
