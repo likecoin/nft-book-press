@@ -909,8 +909,14 @@ function onDownloadNftsCSV (e?: Event) {
   downloadFile({ data: nftMintListData.value, fileName: 'nfts.csv', fileType: 'csv' })
 }
 
-function onSaveISCN () {
-  window.location.reload()
+function onSaveISCN (iscnId: string) {
+  if (iscnId) {
+    router.replace({ query: { ...route.query, iscn_id: iscnId } })
+    iscnIdInput.value = iscnId
+    step.value = 1
+  } else {
+    window.location.reload()
+  }
 }
 
 </script>

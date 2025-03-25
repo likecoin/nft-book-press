@@ -151,7 +151,11 @@
       >
         <div class="grid grid-cols-3 gap-4 flex-1">
           <UFormGroup label="Type">
-            <UInput v-model="download.type" placeholder="Enter file type" />
+            <USelect
+              v-model="download.type"
+              :options="downloadTypeOptions"
+              placeholder="Select file type"
+            />
           </UFormGroup>
           <UFormGroup label="URL">
             <UInput v-model="download.url" placeholder="Enter download URL" />
@@ -179,6 +183,13 @@
 
 <script setup lang="ts">
 import { typeOptions, licenseOptions, languageOptions } from '~/constant/index'
+
+const downloadTypeOptions = [
+  { label: 'EPUB', value: 'epub' },
+  { label: 'PDF', value: 'pdf' },
+  { label: 'Image', value: 'image' },
+  { label: 'Other', value: 'other' }
+]
 
 interface ISCNFormData {
   type: string

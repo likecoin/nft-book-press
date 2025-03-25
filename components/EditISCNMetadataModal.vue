@@ -62,6 +62,7 @@ const toast = useToast()
 const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
+const route = useRoute()
 
 const props = defineProps<{
   modelValue: boolean
@@ -70,7 +71,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{(e: 'update:modelValue',
   value: boolean): void
-  (e: 'save'): void
+  (e: 'save', iscnId: string): void
 }>()
 
 const iscnId = ref('')
@@ -114,18 +115,21 @@ const iscnData = ref({
 const { payload } = useISCN(iscnData)
 
 watchEffect(async () => {
-  if (props.modelValue && props.classId) {
+  if (route.query.iscn_id) {
+    iscnId.value = (route.query.iscn_id as string).replace(/\/\d+$/, '')
+  }
+  if (props.modelValue && (props.classId || iscnId.value)) {
     try {
-      if (!props.classId) { return }
       isISCNLoading.value = true
-      classData.value = await nftStore.lazyFetchClassMetadataById(
-        props.classId
-      )
-      if (classData.value?.data?.parent) {
-        const parent = classData.value.data.parent
-        iscnId.value = `${parent?.iscn_id_prefix}`
+      if (props.classId) {
+        classData.value = await nftStore.lazyFetchClassMetadataById(
+          props.classId
+        )
+        if (classData.value?.data?.parent) {
+          const parent = classData.value.data.parent
+          iscnId.value = `${parent?.iscn_id_prefix}`
+        }
       }
-
       if (iscnId.value) {
         const data = await iscnStore.fetchISCNById(iscnId.value)
         if (data?.records?.[0]) {
@@ -230,12 +234,14 @@ async function handleSave () {
           .toFixed(0)
       }
     )
-    classData.value = await nftStore.fetchClassMetadataById(props.classId as string)
+    if (props.classId) {
+      classData.value = await nftStore.fetchClassMetadataById(props.classId as string)
+    }
     toast.add({
       title: 'ISCN updated successfully',
       color: 'green'
     })
-    emit('save')
+    emit('save', `${iscnId.value}/${recordVersion.value + 1}`)
     handleClickBack()
   } catch (error) {
     toast.add({
