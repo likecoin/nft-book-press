@@ -99,14 +99,14 @@
     </UFormGroup>
 
     <!-- Content Fingerprints -->
-    <div class="border p-4 rounded-lg">
+    <div class="flex flex-col border p-4 rounded-lg gap-4">
       <div class="flex justify-between items-center mb-4">
         <h3 class="font-medium">
           Content Fingerprint
         </h3>
       </div>
       <div
-        v-for="(fingerprint, index) in modelValue.contentFingerprints"
+        v-for="(fingerprint, index) in formData.contentFingerprints"
         :key="index"
         class="flex gap-4 items-end"
       >
@@ -119,7 +119,7 @@
             />
           </UFormGroup>
           <UButton
-            v-if="modelValue.contentFingerprints.length > 1"
+            v-if="formData.contentFingerprints.length > 1"
             color="red"
             class="w-min"
             variant="soft"
@@ -128,11 +128,19 @@
           />
         </div>
         <UButton
-          v-if="index === modelValue.contentFingerprints.length - 1"
+          v-if="index === formData.contentFingerprints.length - 1"
           variant="soft"
           icon="i-heroicons-plus"
           class="mb-[2px]"
           @click="addContentFingerprint"
+        />
+      </div>
+
+      <div class="flex items-center justify-center">
+        <UButton
+          variant="soft"
+          label="update Content Fingerprint"
+          @click="shouldShowUploadModal = true"
         />
       </div>
     </div>
@@ -145,7 +153,7 @@
         </h3>
       </div>
       <div
-        v-for="(download, index) in modelValue.downloadableUrls"
+        v-for="(download, index) in formData.downloadableUrls"
         :key="index"
         class="flex gap-4 items-end"
       >
@@ -164,25 +172,66 @@
             <UInput v-model="download.fileName" placeholder="Enter filename" />
           </UFormGroup>
         </div>
-      </div><UButton
+      </div>
+      <UButton
         variant="soft"
         icon="i-heroicons-plus"
         class="mb-[2px]"
         @click="addDownloadableUrl"
       />
       <UButton
-        v-if="modelValue.downloadableUrls.length > 1"
+        v-if="formData.downloadableUrls?.length > 1"
         color="red"
         variant="soft"
         icon="i-heroicons-trash"
         @click="removeDownloadableUrl(index)"
       />
     </div>
+
+    <UModal
+      v-model="shouldShowUploadModal"
+      :prevent-close="true"
+      :ui="{ width: 'w-full max-w-[80vw]' }"
+    >
+      <UCard
+        :ui="{
+          header: { base: 'flex justify-between items-center' },
+          body: { base: 'space-y-4' },
+          footer: { base: 'flex justify-end items-center' },
+        }"
+      >
+        <template #header>
+          <h2 class="font-bold font-mono">
+            Upload Files
+          </h2>
+        </template>
+        <UploadForm
+          ref="uploadFormRef"
+          @submit="handleUploadSubmit"
+        />
+        <template #footer>
+          <div class="w-full flex justify-center items-center gap-2">
+            <UButton color="gray" variant="soft" @click="shouldShowUploadModal = false">
+              Cancel
+            </UButton>
+            <UButton
+              color="primary"
+              :loading="false"
+              :disabled="!hasFiles || shouldDisableAction"
+              @click="startUpload"
+            >
+              Confirm Upload
+            </UButton>
+          </div>
+        </template>
+      </UCard>
+    </UModal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { typeOptions, licenseOptions, languageOptions } from '~/constant/index'
+import { useFileUpload } from '~/composables/useFileUpload'
 
 const downloadTypeOptions = [
   { label: 'EPUB', value: 'epub' },
@@ -217,6 +266,9 @@ interface ISCNFormData {
   coverUrl: string
 }
 
+const shouldShowUploadModal = ref(false)
+const uploadFormRef = ref()
+
 const props = defineProps<{
   modelValue: ISCNFormData
 }>()
@@ -234,13 +286,21 @@ const formData = computed({
 
 const isFormValid = computed(() => {
   const requiredFields = {
-    title: !!props.modelValue.title,
-    description: !!props.modelValue.description,
-    authorName: !!props.modelValue.author.name,
-    contentUrl: !!props.modelValue.contentFingerprints.some(f => !!f.url)
+    title: !!formData.value.title,
+    description: !!formData.value.description,
+    authorName: !!formData.value.author.name,
+    contentUrl: !!formData.value.contentFingerprints.some(f => !!f.url)
   }
 
   return Object.values(requiredFields).every(Boolean)
+})
+
+const hasFiles = computed(() => {
+  return uploadFormRef.value?.fileRecords?.length > 0
+})
+
+const shouldDisableAction = computed(() => {
+  return uploadFormRef.value?.uploadStatus !== ''
 })
 
 const addContentFingerprint = () => {
@@ -277,6 +337,50 @@ const removeDownloadableUrl = (index: number) => {
       downloadableUrls: newUrls
     })
   }
+}
+
+const startUpload = async () => {
+  await uploadFormRef.value.onSubmit()
+}
+
+const { getFileType } = useFileUpload()
+
+const handleUploadSubmit = (uploadData: any) => {
+  const { fileRecords } = uploadData
+  if (!fileRecords.length) {
+    return
+  }
+
+  const downloadableUrls = fileRecords
+    .filter(r => r.fileType === 'application/pdf' || r.fileType === 'application/epub+zip')
+    .map(file => ({
+      url: file.arweaveKey ? file.arweaveLink : `ar://${file.arweaveId}`,
+      type: getFileType(file.fileType),
+      fileName: file.fileName
+    }))
+
+  const contentFingerprints = [
+    ...new Set(
+      fileRecords
+        .map((r) => {
+          const arweaveUrl = r.arweaveKey
+            ? r.arweaveLink
+            : `ar://${r.arweaveId}`
+          return r.fileType === 'application/epub+zip' || r.fileType === 'application/pdf'
+            ? arweaveUrl
+            : `ar://${r.arweaveId}`
+        })
+        .filter(Boolean)
+    )
+  ].map(url => ({ url }))
+
+  emit('update:modelValue', {
+    ...props.modelValue,
+    downloadableUrls,
+    contentFingerprints
+  })
+
+  shouldShowUploadModal.value = false
 }
 
 defineExpose({
