@@ -171,6 +171,10 @@
             :padded="false"
           />
         </UFormGroup>
+        <UButton
+          label="Edit ISCN Metadata"
+          @click="showModal = true"
+        />
       </UCard>
 
       <UCard
@@ -439,6 +443,11 @@
           Loading...
         </template>
       </UProgress>
+      <EditISCNMetadataModal
+        v-model="showModal"
+        :class-id="classId"
+        @save="onSaveISCN"
+      />
     </PageBody>
   </PageContainer>
 </template>
@@ -498,6 +507,7 @@ const isCreatingClass = computed(() => !classId.value && step.value === 2)
 const mintMaxCount = computed(() => Math.min(classMaxSupply.value || NFT_DEFAULT_MINT_AMOUNT))
 
 const shouldShowDownloadLink = ref(false)
+const showModal = ref(false)
 
 watch(iscnId, (newIscnId) => {
   if (newIscnId) {
@@ -897,6 +907,10 @@ function onDownloadDefaultClassJSON (e?: Event) {
 function onDownloadNftsCSV (e?: Event) {
   if (e) { e.preventDefault() }
   downloadFile({ data: nftMintListData.value, fileName: 'nfts.csv', fileType: 'csv' })
+}
+
+function onSaveISCN () {
+  window.location.reload()
 }
 
 </script>
