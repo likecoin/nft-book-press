@@ -131,9 +131,6 @@ const nextStep = async () => {
       await registerISCN.value.onSubmit()
       return
     }
-    if (step.value < steps.length - 1) {
-      step.value++
-    }
   } catch (error) {
     console.error('Error during form submission:', error)
   }
