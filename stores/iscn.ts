@@ -10,16 +10,17 @@ export const useIscnStore = defineStore('iscn', {
   state: () => ({
     recordsById: {} as any,
     records: [],
-    isLoading: false,
-    errorMessage: ''
+    isLoading: false
   }),
 
   getters: {
     getISCNById: (state) => {
       return (iscnId: string) => state.recordsById[iscnId]
     },
-    getIsLoading: state => state.isLoading,
-    getErrorMessage: state => state.errorMessage
+    getAllRecords: (state) => {
+      return Object.values(state.recordsById)
+    },
+    getIsLoading: state => state.isLoading
   },
 
   actions: {
@@ -67,32 +68,6 @@ export const useIscnStore = defineStore('iscn', {
         ...res,
         records: addIDToRecords(records)
       }
-    },
-
-    async queryISCNByAddress (address: string) {
-      this.clearRecords()
-      let records: any[] = []
-      try {
-        this.isLoading = true
-        const signingClient = await getSigningClient()
-        const client = signingClient.getISCNQueryClient()
-        let res
-        let nextSequence
-        do {
-          res = await client.queryRecordsByOwner(address, nextSequence)
-          if (res) {
-            nextSequence = res.nextSequence.toNumber()
-            this.appendRecords(res.records)
-            records = records.concat(res.records)
-          }
-        } while (nextSequence !== 0)
-      } catch (error) {
-        console.error(error)
-        this.errorMessage = (error as Error).message
-      } finally {
-        this.isLoading = false
-      }
-      return addIDToRecords(records)
     }
   }
 })
