@@ -58,7 +58,7 @@
           </h3>
           <UButton
             label="View / Edit"
-            @click="showModal = true"
+            @click="showEditISCNModal = true"
           />
         </div>
       </UCard>
@@ -655,7 +655,7 @@
     </template>
 
     <EditISCNMetadataModal
-      v-model="showModal"
+      v-model="showEditISCNModal"
       :class-id="classId"
     />
 
@@ -721,7 +721,7 @@ const isUpdatingPricesOrder = ref(false)
 const ordersData = ref<any>({})
 const isUpdatingShippingRates = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
-const showModal = ref(false)
+const showEditISCNModal = ref(false)
 
 // Search
 const searchInput = ref('')

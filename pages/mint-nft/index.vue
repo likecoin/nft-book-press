@@ -173,7 +173,7 @@
         </UFormGroup>
         <UButton
           label="Edit ISCN Metadata"
-          @click="showModal = true"
+          @click="showEditISCNModal = true"
         />
       </UCard>
 
@@ -444,7 +444,7 @@
         </template>
       </UProgress>
       <EditISCNMetadataModal
-        v-model="showModal"
+        v-model="showEditISCNModal"
         :class-id="classId"
         @save="onSaveISCN"
       />
@@ -507,7 +507,7 @@ const isCreatingClass = computed(() => !classId.value && step.value === 2)
 const mintMaxCount = computed(() => Math.min(classMaxSupply.value || NFT_DEFAULT_MINT_AMOUNT))
 
 const shouldShowDownloadLink = ref(false)
-const showModal = ref(false)
+const showEditISCNModal = ref(false)
 
 watch(iscnId, (newIscnId) => {
   if (newIscnId) {
