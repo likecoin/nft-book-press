@@ -71,7 +71,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{(e: 'update:modelValue',
   value: boolean): void
-  (e: 'save', iscnId: string): void
+  (e: 'save'): void
 }>()
 
 const iscnId = ref('')
@@ -241,7 +241,7 @@ async function handleSave () {
       title: 'ISCN updated successfully',
       color: 'green'
     })
-    emit('save', `${iscnId.value}/${recordVersion.value + 1}`)
+    emit('save')
     handleClickBack()
   } catch (error) {
     toast.add({
@@ -253,4 +253,10 @@ async function handleSave () {
     isSaving.value = false
   }
 }
+
+defineExpose({
+  recordVersion,
+  iscnId
+})
+
 </script>
