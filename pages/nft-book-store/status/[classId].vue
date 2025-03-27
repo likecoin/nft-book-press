@@ -46,6 +46,23 @@
     </UProgress>
 
     <template v-if="bookStoreApiStore.isAuthenticated">
+      <UCard
+        :ui="{
+          header: { base: 'flex justify-between items-center' },
+          body: { padding: '12px' },
+        }"
+      >
+        <div class="flex justify-between items-center w-full">
+          <h3 class="font-bold font-mono">
+            Book Details (Metadata)
+          </h3>
+          <UButton
+            label="View / Edit"
+            @click="showEditISCNModal = true"
+          />
+        </div>
+      </UCard>
+
       <UCard :ui="{ body: { padding: '' } }">
         <template #header>
           <h3 class="font-bold font-mono">
@@ -637,6 +654,11 @@
       />
     </template>
 
+    <EditISCNMetadataModal
+      v-model="showEditISCNModal"
+      :class-id="classId"
+    />
+
     <UModal v-model="isOpenQRCodeModal">
       <QRCodeGenerator
         v-if="selectedPurchaseLink"
@@ -699,6 +721,7 @@ const isUpdatingPricesOrder = ref(false)
 const ordersData = ref<any>({})
 const isUpdatingShippingRates = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
+const showEditISCNModal = ref(false)
 
 // Search
 const searchInput = ref('')

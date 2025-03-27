@@ -48,10 +48,13 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
+import { useUploadStore } from '~/stores/upload'
 
 const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
+const uploadStore = useUploadStore()
+const { setUploadFileData } = uploadStore
 
 const step = ref(0)
 const uploadFormRef = ref()
@@ -126,16 +129,15 @@ const nextStep = async () => {
     }
     if (step.value === 1) {
       await registerISCN.value.onSubmit()
-    }
-    if (step.value < steps.length - 1) {
-      step.value++
+      return
     }
   } catch (error) {
     console.error('Error during form submission:', error)
   }
 }
 
-const handleUploadSubmit = () => {
+const handleUploadSubmit = (uploadFileData: any) => {
+  setUploadFileData(uploadFileData)
   step.value = 1
 }
 
