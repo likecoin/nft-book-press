@@ -29,6 +29,16 @@
         <div v-else-if="step === 1">
           <RegisterISCN ref="registerISCN" @submit="handleIscnSubmit" />
         </div>
+        <div v-else-if="step === 2">
+          <MintNFT ref="mintNFT" @submit="handleMintNFTSubmit" />
+        </div>
+        <div v-else-if="step === 3">
+          <NewNFTBook
+            ref="newNFTBook"
+            class="p-0 flex flex-col text-left gap-[24px]"
+            @submit="handleNewBookSubmit"
+          />
+        </div>
 
         <!-- Navigation Buttons -->
         <div class="flex gap-2 justify-center mt-4">
@@ -49,18 +59,20 @@
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
 import { useUploadStore } from '~/stores/upload'
+import NewNFTBook from '~/pages/nft-book-store/new.vue'
 
 const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
 
 const uploadStore = useUploadStore()
-const { updateUploadFileData } = uploadStore
+const { updateUploadFileData, clearUploadData, setUploadFileData } = uploadStore
 
 const step = ref(0)
 const uploadFormRef = ref()
 const registerISCN = ref()
 const mintNFT = ref()
+const newNFTBook = ref()
 const toast = useToast()
 const currentActionText = computed(() => {
   switch (step.value) {
@@ -83,7 +95,7 @@ const shouldShowActionButton = computed(() => {
   if (step.value === 0) {
     return hasFiles.value
   }
-  return true
+  return step.value < 3
 })
 
 const shouldDisableAction = computed(() => {
@@ -162,12 +174,18 @@ const handleIscnSubmit = async (res: { iscnId: string, txHash: string }) => {
   mintNFT.value?.onISCNIDInput(iscnId)
 }
 
-const handleMintNFTSubmit = (res: any) => {
+const handleMintNFTSubmit = async (res: any) => {
   const { classId, nftMintCount } = res
   updateUploadFileData({
     classData: { classId, nftMintCount }
   })
   step.value = 3
+  await nextTick()
+  newNFTBook.value?.updateClassId({ classId, nftMintCount })
+}
+
+const handleNewBookSubmit = () => {
+  clearUploadData()
 }
 
 </script>
