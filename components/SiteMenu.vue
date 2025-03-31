@@ -175,11 +175,6 @@ const items = computed(() => [
     label: 'Misc Tools',
     links: [
       {
-        label: 'NFT Authz Grants',
-        icon: 'i-heroicons-user-plus',
-        to: { name: 'authz' }
-      },
-      {
         label: 'LikeCoin ISCN/NFT Tools',
         icon: 'i-heroicons-arrow-top-right-on-square',
         to: ISCN_TOOLS_URL,
