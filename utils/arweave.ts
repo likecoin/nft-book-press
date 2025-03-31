@@ -70,6 +70,7 @@ class Provider {
           signatureData: convertedMsg,
           fileSize: this.fileSize,
           ipfsHash: this.ipfsHash,
+          txToken: 'OPETH',
           txHash: this.txHash
         },
         headers: { Authorization: this.token ? `Bearer ${this.token}` : '' }
