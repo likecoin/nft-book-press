@@ -49,25 +49,25 @@
 </template>
 
 <script setup lang="ts">
-import { BigNumber } from 'bignumber.js'
 import { storeToRefs } from 'pinia'
+import { waitForTransactionReceipt } from '@wagmi/vue/actions'
+import { useWriteContract } from '@wagmi/vue'
 import { useNftStore } from '~/stores/nft'
-import { useIscnStore } from '~/stores/iscn'
-import { signISCNTx, formatISCNTxPayload, validateISCNForm } from '~/utils/iscn'
+import { formatISCNTxPayload, validateISCNForm } from '~/utils/iscn'
 import { useWalletStore } from '~/stores/wallet'
-import { ISCN_GAS_FEE, UPDATE_ISCN_GAS_MULTIPLIER } from '~/constant/index'
 import { useISCN } from '~/composables/useISCN'
+import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
+import { config } from '~/utils/wagmi/config'
 
-const iscnStore = useIscnStore()
 const nftStore = useNftStore()
 const toast = useToast()
 const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
-const route = useRoute()
+const { writeContractAsync } = useWriteContract()
 
 const props = defineProps<{
-  classId?: string
+  classId: string
 }>()
 
 const showOpenModal = defineModel<boolean>('modelValue')
@@ -77,11 +77,9 @@ const emit = defineEmits<{
   (e: 'save', iscnId: string): void
 }>()
 
-const iscnId = ref('')
 const classData = ref({} as any)
 const isSaving = ref(false)
 const isISCNLoading = ref(false)
-const recordVersion = ref(0)
 
 const iscnFormData = ref({
   type: 'Book',
@@ -112,79 +110,67 @@ const iscnFormData = ref({
 
 const iscnChainData = ref({} as any)
 
-const { payload } = useISCN({ iscnFormData, iscnChainData })
+const { payload, getFileTypeFromMime } = useISCN({ iscnFormData, iscnChainData })
 
 const formError = computed(() => validateISCNForm(iscnFormData.value))
 const isFormValid = computed(() => !formError.value?.length)
 
 watchEffect(async () => {
-  if (route.query.iscn_id) {
-    iscnId.value = (route.query.iscn_id as string).replace(/\/\d+$/, '')
-  }
-  if (showOpenModal.value && (props.classId || iscnId.value)) {
+  if (showOpenModal.value && props.classId) {
     try {
       isISCNLoading.value = true
       if (props.classId) {
         classData.value = await nftStore.lazyFetchClassMetadataById(
           props.classId
         )
-        if (classData.value?.data?.parent) {
-          const parent = classData.value.data.parent
-          iscnId.value = `${parent?.iscn_id_prefix}`
+        const metadata = classData.value
+
+        // Parse sameAs URLs into downloadableUrls
+        let downloadableUrls = [{
+          url: '',
+          type: '',
+          fileName: ''
+        }]
+        if (metadata.potentialAction?.target && Array.isArray(metadata.potentialAction.target)) {
+          downloadableUrls = metadata.potentialAction.target.map((target: any) => ({
+            type: getFileTypeFromMime(target.contentType),
+            url: target.url,
+            fileName: target.name
+          }))
+        } else if (metadata.sameAs && Array.isArray(metadata.sameAs)) {
+          downloadableUrls = metadata.sameAs.map(parseDownloadableUrl)
         }
-      }
-      if (iscnId.value) {
-        const data = await iscnStore.fetchISCNById(iscnId.value)
-        if (data?.records?.[0]) {
-          const record = data.records[0]
-          const metadata = record.data.contentMetadata
-          iscnChainData.value = metadata
-          recordVersion.value = record.data.recordVersion
-
-          // Parse sameAs URLs into downloadableUrls
-          const downloadableUrls = metadata.sameAs
-            ? metadata.sameAs.map(parseDownloadableUrl)
-            : [
-                {
-                  url: '',
-                  type: '',
-                  fileName: ''
-                }
-              ]
-          const tags: string[] = []
-          if (metadata.keywords) {
-            if (Array.isArray(metadata.keywords)) {
-              tags.push(...metadata.keywords)
-            } else {
-              tags.push(...metadata.keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k))
-            }
+        const tags: string[] = []
+        if (metadata.keywords) {
+          if (Array.isArray(metadata.keywords)) {
+            tags.push(...metadata.keywords)
+          } else {
+            tags.push(...metadata.keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k))
           }
-
-          iscnFormData.value = {
-            ...metadata,
-            recordNotes: record.data?.recordNotes,
-            stakeholders: record.data?.stakeholders,
-            type: metadata['@type'] || 'Book',
-            title: metadata.name || '',
-            description: metadata.description || '',
-            isbn: metadata.isbn || '',
-            publisher: metadata.publisher || '',
-            publicationDate: metadata.datePublished || '',
-            author: {
-              name: metadata.author?.name || metadata.author || '',
-              description: metadata.author?.description || ''
-            },
-            license: metadata.usageInfo || 'All Rights Reserved',
-            contentFingerprints: record.data.contentFingerprints.map((url: string) => ({
-              url
-            })) || [{ url: '' }],
-            downloadableUrls,
-            customLicense: '',
-            language: metadata.inLanguage || '',
-            bookInfoUrl: metadata.url || '',
-            tags,
-            coverUrl: metadata.thumbnailUrl || ''
-          }
+        }
+        iscnChainData.value = metadata
+        iscnFormData.value = {
+          ...metadata,
+          type: metadata['@type'] || 'Book',
+          title: metadata.name || '',
+          description: metadata.description || '',
+          isbn: metadata.isbn || '',
+          publisher: metadata.publisher || '',
+          publicationDate: metadata.datePublished || '',
+          author: {
+            name: metadata.author?.name || metadata.author || '',
+            description: metadata.author?.description || ''
+          },
+          license: metadata.usageInfo || 'All Rights Reserved',
+          contentFingerprints: metadata.contentFingerprints.map((url: string) => ({
+            url
+          })) || [{ url: '' }],
+          downloadableUrls,
+          customLicense: '',
+          language: metadata.inLanguage || '',
+          bookInfoUrl: metadata.url || '',
+          tags,
+          coverUrl: metadata.thumbnailUrl || ''
         }
       }
     } catch (error) {
@@ -236,20 +222,33 @@ async function handleSave () {
   }
   isSaving.value = true
   try {
-    await signISCNTx(
-      formatISCNTxPayload(payload.value),
-      signer.value,
-      wallet.value,
-      {
-        iscnId: `${iscnId.value}/${recordVersion.value}`,
-        gas: new BigNumber(ISCN_GAS_FEE)
-          .multipliedBy(UPDATE_ISCN_GAS_MULTIPLIER)
-          .toFixed(0)
-      }
-    )
-    if (props.classId) {
-      classData.value = await nftStore.fetchClassMetadataById(props.classId as string)
+    const contentMetadata = formatISCNTxPayload(payload.value)
+    const metadata = {
+      name: contentMetadata.name,
+      description: contentMetadata.description,
+      ...contentMetadata,
+      symbol: 'BOOK',
+      image: contentMetadata?.thumbnailUrl || '',
+      external_url: contentMetadata?.url || '',
+      nft_meta_collection_id: 'nft_book',
+      nft_meta_collection_name: 'NFT Book',
+      nft_meta_collection_description: 'NFT Book by Liker Land',
+      recordTimestamp: new Date().toISOString()
     }
+    const txHash = await writeContractAsync({
+      address: props.classId as `0x${string}`,
+      abi: LIKE_NFT_CLASS_ABI,
+      functionName: 'update',
+      args: [{
+        name: metadata.name,
+        symbol: 'BOOK',
+        metadata: JSON.stringify(metadata),
+        max_supply: 1000
+      }]
+    })
+    const receipt = await waitForTransactionReceipt(config, { hash: txHash })
+    console.log(receipt)
+    if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
     toast.add({
       title: 'ISCN updated successfully',
       color: 'blue'
