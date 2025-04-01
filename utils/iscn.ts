@@ -1,30 +1,10 @@
 import { BigNumber } from 'bignumber.js'
 import { OfflineSigner } from '@cosmjs/proto-signing'
-import { ISCNSignPayload, ISCNSigningClient } from '@likecoin/iscn-js'
+import { ISCNSignPayload } from '@likecoin/iscn-js'
 import { DeliverTxResponse } from '@cosmjs/stargate'
 import { ISCNRegisterPayload } from './iscn.type'
 import { ISCN_GAS_FEE, ISCN_GAS_MULTIPLIER } from '~/constant'
-
-let client: ISCNSigningClient | null = null
-let iscnLib: any = null
-
-export async function getISCNLib () {
-  if (!iscnLib) {
-    iscnLib = await import(/* webpackChunkName: "iscn_js" */ '@likecoin/iscn-js')
-  }
-  return iscnLib
-}
-
-export async function getSigningClient () {
-  const network = getNetworkConfig()
-  if (!client) {
-    const iscn = await getISCNLib()
-    const c = new iscn.ISCNSigningClient() as ISCNSigningClient
-    await c.connect(network.rpc)
-    client = c
-  }
-  return client
-}
+import { getSigningClient } from '~/utils/cosmos'
 
 export function formatISCNTxPayload (payload: ISCNRegisterPayload): ISCNSignPayload {
   const {
