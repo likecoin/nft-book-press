@@ -18,6 +18,18 @@ export function useISCN ({
   iscnFormData: Ref<any>;
   iscnChainData?: Ref<any>;
 }) {
+  const getFileTypeFromMime = (fileType: string): string => {
+    switch (fileType) {
+      case 'application/epub+zip':
+        return 'epub'
+      case 'application/pdf':
+        return 'pdf'
+      case 'application/octet-stream':
+      default:
+        return ''
+    }
+  }
+
   const formattedPotentialActionList = computed(() => {
     const apiEndpoints = getApiEndpoints()
     const arweaveLinkEndpoint = apiEndpoints.API_GET_ARWEAVE_V2_LINK
@@ -63,11 +75,13 @@ export function useISCN ({
       : undefined,
     url: iscnFormData.value.bookInfoUrl,
     tagsString: iscnFormData.value.tags?.join(', ') || '',
-    potentialAction: formattedPotentialActionList.value
+    potentialAction: formattedPotentialActionList.value,
     thumbnailUrl: iscnFormData.value.coverUrl
   }))
 
   return {
+    getFileMimeType,
+    getFileTypeFromMime,
     payload
   }
 }

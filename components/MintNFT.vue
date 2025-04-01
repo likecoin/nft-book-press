@@ -27,7 +27,6 @@
     <EditISCNMetadataModal
       v-model="showEditISCNModal"
       :class-id="classId"
-      @save="onSaveISCN"
     />
   </div>
 </template>
@@ -39,8 +38,6 @@ const {
   getClassMetadata,
   checkNFTClassIsBookNFT
 } = useNFTContractReader()
-const router = useRouter()
-const route = useRoute()
 
 const step = ref(1)
 const error = ref('')
@@ -123,19 +120,7 @@ function startNFTMintFlow () {
   liteMintNFTRef.value?.startNFTMintFlow()
 }
 
-function onSaveISCN (iscnId: string) {
-  if (iscnId) {
-    router.replace({ query: { ...route.query, iscn_id: iscnId } })
-    fetchISCNById(iscnId)
-  } else {
-    window.location.reload()
-  }
-}
-
-function handleFinishMintNFT (
-  { classId: newClassId, nftMintCount }:
-  { classId?: string, nftMintCount?: number } = {}
-) {
+function handleFinishMintNFT ({ classId: newClassId, nftMintCount }: { classId?: string, nftMintCount?: number } = {}) {
   classId.value = newClassId || ''
 
   emit('submit', {
