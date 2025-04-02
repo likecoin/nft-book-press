@@ -1,5 +1,3 @@
-import type { ISCNRecord } from '@likecoin/iscn-js'
-
 export interface ISCNRegisterPayload {
   name: string;
   description: string;
@@ -18,7 +16,4 @@ export interface ISCNRegisterPayload {
   datePublished?: string;
   thumbnailUrl?: string;
   isbn?: string;
-}
-export interface ISCNRecordWithID extends ISCNRecord {
-  id: string;
 }
