@@ -122,26 +122,16 @@ exports.randomFillSync = randomFillSync`
 
       SITE_URL: process.env.SITE_URL,
 
-      CHAIN_ID: process.env.CHAIN_ID,
-      CHAIN_NAME: process.env.CHAIN_NAME,
-      CHAIN_DENOM: process.env.CHAIN_DENOM,
-      CHAIN_MINIMAL_DENOM: process.env.CHAIN_MINIMAL_DENOM,
-      COINGECKO_ID: process.env.COINGECKO_ID,
-      RPC_URL: process.env.RPC_URL,
       LCD_URL: process.env.LCD_URL,
       CHAIN_EXPLORER_URL: process.env.CHAIN_EXPLORER_URL,
 
-      LIKER_NFT_FEE_WALLET: process.env.LIKER_NFT_FEE_WALLET,
-      LIKER_NFT_TARGET_ADDRESS: process.env.LIKER_NFT_TARGET_ADDRESS,
       LIKE_EVM_NFT_TARGET_ADDRESS: process.env.LIKE_EVM_NFT_TARGET_ADDRESS,
 
-      AUTHCORE_API_HOST: process.env.AUTHCORE_API_HOST,
       LIKER_LAND_URL: process.env.LIKER_LAND_URL,
       LIKE_CO_HOST: process.env.LIKE_CO_HOST,
       LIKE_CO_API: process.env.LIKE_CO_API,
       LIKE_CO_STATIC_ENDPOINT: process.env.LIKE_CO_STATIC_ENDPOINT,
       APP_LIKE_CO_URL: process.env.APP_LIKE_CO_URL,
-      NFT_MARKETPLACE_URL: process.env.NFT_MARKETPLACE_URL,
       ISCN_TOOLS_URL: process.env.ISCN_TOOLS_URL,
       ARWEAVE_ENDPOINT: process.env.ARWEAVE_ENDPOINT,
       LIKECOIN_V3_BOOK_MIGRATION_SITE_URL: process.env.LIKECOIN_V3_BOOK_MIGRATION_SITE_URL,
