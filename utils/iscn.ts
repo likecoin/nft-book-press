@@ -25,7 +25,9 @@ export async function getSigningClient () {
   return client
 }
 
-export function formatISCNTxPayload (payload: any) {
+export function formatISCNTxPayload (
+  payload: ISCNRegisterPayload & Record<string, unknown>
+): ISCNSignPayload {
   const {
     tagsString = '',
     license,
@@ -34,6 +36,7 @@ export function formatISCNTxPayload (payload: any) {
     contentFingerprints: contentFingerprintsInput = [],
     recordNotes,
     publisher: publisherInput,
+    stakeholders = [],
     ...data
   } = payload
 
@@ -53,8 +56,9 @@ export function formatISCNTxPayload (payload: any) {
     keywords: tagsString.split(','),
     usageInfo: license,
     contentFingerprints: [...new Set(contentFingerprints)],
-    recordNotes
-  }as ISCNSignPayload
+    recordNotes,
+    stakeholders
+  } as ISCNSignPayload
 }
 
 export async function estimateISCNTxGasAndFee (tx: ISCNSignPayload) {
