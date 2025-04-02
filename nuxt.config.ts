@@ -133,6 +133,7 @@ exports.randomFillSync = randomFillSync`
 
       LIKER_NFT_FEE_WALLET: process.env.LIKER_NFT_FEE_WALLET,
       LIKER_NFT_TARGET_ADDRESS: process.env.LIKER_NFT_TARGET_ADDRESS,
+      LIKE_EVM_NFT_TARGET_ADDRESS: process.env.LIKE_EVM_NFT_TARGET_ADDRESS,
 
       AUTHCORE_API_HOST: process.env.AUTHCORE_API_HOST,
       LIKER_LAND_URL: process.env.LIKER_LAND_URL,

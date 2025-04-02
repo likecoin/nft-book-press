@@ -3,7 +3,7 @@ export const IPFS_VIEW_GATEWAY_URL = 'https://ipfs.io/ipfs'
 export const MINIMAL_PRICE = 0.99
 export const DEFAULT_PRICE = 4.99
 
-export const NFT_DEFAULT_MINT_AMOUNT = 50
+export const NFT_DEFAULT_MINT_AMOUNT = 1
 
 export const LIKE_ADDRESS_REGEX = /^like1[ac-hj-np-z02-9]{38}$/
 

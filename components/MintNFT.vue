@@ -34,7 +34,11 @@
 
 <script setup lang="ts">
 
-const { LCD_URL } = useRuntimeConfig().public
+const {
+  getClassOwner,
+  getClassMetadata,
+  checkNFTClassIsBookNFT
+} = useNFTContractReader()
 const router = useRouter()
 const route = useRoute()
 
@@ -89,13 +93,22 @@ async function fetchISCNById (iscnId?: string) {
   }
   try {
     isLoading.value = true
-    if (iscnId.startsWith('iscn://')) {
-      const data = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(iscnId)}`)
-      const { records, owner } = data as any
-      iscnData.value = records[0].data
-      iscnOwner.value = owner
-      iscnData.value.owner = owner
-      step.value = 2
+    if (iscnId.startsWith('0x')) {
+      const isBookNFT = await checkNFTClassIsBookNFT(iscnId)
+      if (!isBookNFT) {
+        throw new Error('Invalid NFT Class ID')
+      }
+      const [data, owner] = await Promise.all([
+        getClassMetadata(iscnId),
+        getClassOwner(iscnId)
+      ])
+      if (!data) {
+        throw new Error('Invalid NFT Class ID')
+      }
+      iscnData.value = { contentMetadata: data, owner, '@id': iscnId }
+      iscnOwner.value = owner as string
+      classId.value = iscnId
+      step.value = 3
     }
   } catch (err) {
     // eslint-disable-next-line no-console
@@ -120,15 +133,14 @@ function onSaveISCN (iscnId: string) {
 }
 
 function handleFinishMintNFT (
-  { classId: newClassId, nftMintCount, prefix }:
-  { classId?: string, nftMintCount?: number, prefix?: string } = {}
+  { classId: newClassId, nftMintCount }:
+  { classId?: string, nftMintCount?: number } = {}
 ) {
   classId.value = newClassId || ''
 
   emit('submit', {
     classId: newClassId || '',
-    nftMintCount,
-    prefix
+    nftMintCount
   })
 }
 
