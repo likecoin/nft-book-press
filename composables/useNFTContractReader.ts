@@ -2,26 +2,35 @@ import { readContract } from '@wagmi/vue/actions'
 import { LIKE_NFT_ABI, LIKE_NFT_CLASS_ABI, LIKE_NFT_CONTRACT_ADDRESS } from '~/contracts/likeNFT'
 import { config } from '~/utils/wagmi/config'
 
+function parseURIString (dataString: string): Record<string, any> | null {
+  const dataUriPattern = /^data:application\/json(?:; ?charset=utf-8|; ?utf8)?(;base64)?,/i
+  const match = dataString.match(dataUriPattern)
+  if (!match) {
+    return null
+  }
+  const isBase64 = !!match[1]
+  dataString = dataString.replace(dataUriPattern, '')
+  if (isBase64) {
+    dataString = Buffer.from(dataString, 'base64').toString('utf-8')
+  }
+  try {
+    const data = JSON.parse(dataString)
+    return data
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error('Failed to parse class metadata:', e)
+    return null
+  }
+}
+
 export const useNFTContractReader = () => {
   const getClassMetadata = async (classId: string) => {
     const dataString = await readContract(config, {
       abi: LIKE_NFT_CLASS_ABI,
       address: classId as any,
       functionName: 'contractURI'
-    })
-
-    if (!(dataString as string)?.startsWith('data:application/json')) {
-      return null
-    }
-
-    try {
-      const data = JSON.parse(
-        (dataString as string).replace('data:application/json;utf8,', '')
-      )
-      return data
-    } catch (e) {
-      return null
-    }
+    }) as string
+    return parseURIString(dataString)
   }
 
   const getClassOwner = async (classId: string) => {
@@ -38,20 +47,8 @@ export const useNFTContractReader = () => {
       address: classId as any,
       functionName: 'tokenURI',
       args: [tokenId]
-    })
-
-    if (!(dataString as string)?.startsWith('data:application/json')) {
-      return null
-    }
-
-    try {
-      const data = JSON.parse(
-        (dataString as string).replace('data:application/json;utf8,', '')
-      )
-      return data
-    } catch (e) {
-      return null
-    }
+    }) as string
+    return parseURIString(dataString)
   }
 
   const getNFTOwner = async (classId: string, tokenId: number) => {
