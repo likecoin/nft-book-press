@@ -1,12 +1,13 @@
 import { BigNumber } from 'bignumber.js'
-import { OfflineSigner } from '@cosmjs/proto-signing'
-import { ISCNSignPayload } from '@likecoin/iscn-js'
-import { DeliverTxResponse } from '@cosmjs/stargate'
-import { ISCNRegisterPayload } from './iscn.type'
+import type { OfflineSigner } from '@cosmjs/proto-signing'
+import type { DeliverTxResponse } from '@cosmjs/stargate'
+import type { ISCNSignPayload } from '@likecoin/iscn-js'
+import type { ISCNRegisterPayload } from './iscn.type'
 import { ISCN_GAS_FEE, ISCN_GAS_MULTIPLIER } from '~/constant'
+
 import { getSigningClient } from '~/utils/cosmos'
 
-export function formatISCNTxPayload (payload: ISCNRegisterPayload): ISCNSignPayload {
+export function formatISCNTxPayload (payload: ISCNRegisterPayload) {
   const {
     tagsString = '',
     license,
@@ -34,12 +35,14 @@ export function formatISCNTxPayload (payload: ISCNRegisterPayload): ISCNSignPayl
     keywords: tagsString.split(','),
     usageInfo: license,
     contentFingerprints: [...new Set(contentFingerprints)],
-    recordNotes
-  }
+    recordNotes,
+    stakeholders: []
+  }as ISCNSignPayload
 }
 
 export async function estimateISCNTxGasAndFee (tx: ISCNSignPayload) {
   const signingClient = await getSigningClient()
+  // typo in the original code
   const res = await signingClient.esimateISCNTxGasAndFee(tx)
   return res
 }
