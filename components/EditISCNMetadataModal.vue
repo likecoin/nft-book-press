@@ -147,6 +147,14 @@ watchEffect(async () => {
                   fileName: ''
                 }
               ]
+          const tags: string[] = []
+          if (metadata.keywords) {
+            if (Array.isArray(metadata.keywords)) {
+              tags.push(...metadata.keywords)
+            } else {
+              tags.push(...metadata.keywords.split(',').map(k => k.trim()))
+            }
+          }
 
           iscnData.value = {
             ...metadata,
@@ -170,9 +178,7 @@ watchEffect(async () => {
             customLicense: '',
             language: metadata.inLanguage || '',
             bookInfoUrl: metadata.url || '',
-            tags: metadata.keywords
-              ? metadata.keywords.split(',').map(k => k.trim())
-              : [],
+            tags,
             coverUrl: metadata.thumbnailUrl || ''
           }
         }
