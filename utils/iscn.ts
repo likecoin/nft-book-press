@@ -1,7 +1,7 @@
 import { BigNumber } from 'bignumber.js'
-import { OfflineSigner } from '@cosmjs/proto-signing'
-import { ISCNSignPayload, ISCNSigningClient } from '@likecoin/iscn-js'
-import { DeliverTxResponse } from '@cosmjs/stargate'
+import type { OfflineSigner } from '@cosmjs/proto-signing'
+import type { DeliverTxResponse } from '@cosmjs/stargate'
+import type { ISCNSignPayload, ISCNSigningClient } from '@likecoin/iscn-js'
 import { ISCN_GAS_FEE, ISCN_GAS_MULTIPLIER } from '~/constant'
 
 let client: ISCNSigningClient | null = null
@@ -54,7 +54,7 @@ export function formatISCNTxPayload (payload: any) {
     usageInfo: license,
     contentFingerprints: [...new Set(contentFingerprints)],
     recordNotes
-  }as import('@likecoin/iscn-js').ISCNSignPayload
+  }as ISCNSignPayload
 }
 
 export async function estimateISCNTxGasAndFee (tx: ISCNSignPayload) {
