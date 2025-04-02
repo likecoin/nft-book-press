@@ -134,6 +134,7 @@ watchEffect(async () => {
         const data = await iscnStore.fetchISCNById(iscnId.value)
         if (data?.records?.[0]) {
           const record = data.records[0]
+          console.log('record', record)
           const metadata = record.data.contentMetadata
           recordVersion.value = record.data.recordVersion
 
@@ -150,8 +151,7 @@ watchEffect(async () => {
 
           iscnData.value = {
             ...metadata,
-            id: record.id,
-            ipld: record.ipld,
+            recordNotes: record.data?.recordNotes,
             stakeholders: record.data?.stakeholders,
             type: metadata['@type'] || 'Book',
             title: metadata.name || '',
