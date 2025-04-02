@@ -134,7 +134,6 @@ watchEffect(async () => {
         const data = await iscnStore.fetchISCNById(iscnId.value)
         if (data?.records?.[0]) {
           const record = data.records[0]
-          console.log('record', record)
           const metadata = record.data.contentMetadata
           recordVersion.value = record.data.recordVersion
 
