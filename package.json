@@ -38,8 +38,6 @@
     "md-editor-v3": "^4.2.2",
     "multiformats": "^13.3.2",
     "pinia": "^2.0.34",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "uuid": "^9.0.0",
     "viem": "2.x",
     "vuedraggable": "^4.1.0"
