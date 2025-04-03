@@ -17,10 +17,10 @@ export const useWalletStore = defineStore('wallet', () => {
     }
   }
 
-  async function connect () {
+  async function connect (index = 0) {
     const { IS_TESTNET } = useRuntimeConfig().public
     const chainId = IS_TESTNET ? optimismSepolia.id : optimism.id
-    const connector = connectors[0]
+    const connector = connectors[index]
     await wagmiConnect({ connector, chainId })
   }
 
