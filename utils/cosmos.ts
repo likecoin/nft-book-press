@@ -19,37 +19,23 @@ export const royaltyUserAmount = 1000000 - royaltyFeeAmount // 1000000 - fee
 
 let iscnSigningClient: any = null
 let iscnLib: any = null
-let iscnParsingLib: any = null
 let cosmLib: any = null
-let iscnMsgLib: any = null
-let likenftMsgLib: any = null
 
 async function getISCNLib () {
   if (!iscnLib) {
-    iscnLib = await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js')
+    const lib = await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js')
+    const parsing = await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js/dist/iscn/parsing')
+    const msgParsing = await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js/dist/messages/parsing')
+    const likenft = await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js/dist/messages/likenft')
+    iscnLib = {
+      ...lib,
+      parseAndCalculateStakeholderRewards: parsing.parseAndCalculateStakeholderRewards,
+      parseAuthzGrant: msgParsing.parseAuthzGrant,
+      parseTxInfoFromIndexedTx: msgParsing.parseTxInfoFromIndexedTx,
+      formatMsgSend: likenft.formatMsgSend
+    }
   }
   return iscnLib
-}
-
-async function getISCNParsingLib () {
-  if (!iscnParsingLib) {
-    iscnParsingLib = await import(/* webpackChunkName: "iscn-parsing" */ '@likecoin/iscn-js/dist/iscn/parsing')
-  }
-  return iscnParsingLib
-}
-
-async function getISCNMsgLib () {
-  if (!iscnMsgLib) {
-    iscnMsgLib = await import(/* webpackChunkName: "iscn-msg" */ '@likecoin/iscn-js/dist/messages/parsing')
-  }
-  return iscnMsgLib
-}
-
-async function getLikeNFTMsgLib () {
-  if (!likenftMsgLib) {
-    likenftMsgLib = await import(/* webpackChunkName: "likenft-msg" */ '@likecoin/iscn-js/dist/messages/likenft')
-  }
-  return likenftMsgLib
 }
 
 async function getCosmLib () {
@@ -101,7 +87,7 @@ export async function queryTxByHash (txHash: string) {
   if (!tx) { return null }
   const { code } = tx
   if (code) { throw new Error(`Tx failed with code: ${code}`) }
-  const { parseTxInfoFromIndexedTx } = await getISCNMsgLib()
+  const { parseTxInfoFromIndexedTx } = await getISCNLib()
   const parsed = parseTxInfoFromIndexedTx(tx)
   return parsed
 }
@@ -133,7 +119,7 @@ export async function getNFTAuthzGranterGrants (granter: string) {
   if (!g?.grants) {
     return []
   }
-  const { parseAuthzGrant } = await getISCNMsgLib()
+  const { parseAuthzGrant } = await getISCNLib()
   const grants = g.grants
     .map(parseAuthzGrant)
     .filter(
@@ -149,7 +135,7 @@ export async function getNFTAuthzGrants (granter: string, grantee: string) {
   const client = await c.getQueryClient()
   const g = await client.authz.grants(granter, grantee, '/cosmos.nft.v1beta1.MsgSend')
   if (!g?.grants) { return null }
-  const { parseAuthzGrant } = await getISCNMsgLib()
+  const { parseAuthzGrant } = await getISCNLib()
   const grants = g.grants.map(parseAuthzGrant)
   return grants[0]
 }
@@ -255,7 +241,7 @@ export async function signCreateRoyltyConfig (
     const totalAmount = royaltyUserAmount
     const signingClient = await getSigningClient()
     await signingClient.connectWithSigner(RPC_URL, signer)
-    const { parseAndCalculateStakeholderRewards } = await getISCNParsingLib()
+    const { parseAndCalculateStakeholderRewards } = await getISCNLib()
     const rewardMap = await parseAndCalculateStakeholderRewards(
       iscnData,
       iscnOwner,
@@ -288,6 +274,7 @@ export async function signCreateRoyltyConfig (
       })
     }
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err)
   }
 }
@@ -322,7 +309,7 @@ export async function signSendNFTs (
   const { RPC_URL } = useRuntimeConfig().public
   const signingClient = await getSigningClient()
   await signingClient.connectWithSigner(RPC_URL, signer)
-  const { formatMsgSend } = await getLikeNFTMsgLib()
+  const { formatMsgSend } = await getISCNLib()
   const messages = classIds.map((classId, index) => formatMsgSend(
     address,
     targetAddress,
