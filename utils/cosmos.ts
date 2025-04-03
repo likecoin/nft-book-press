@@ -5,7 +5,7 @@ import { GenericAuthorization } from 'cosmjs-types/cosmos/authz/v1beta1/authz'
 
 import type { OfflineSigner } from '@cosmjs/proto-signing'
 import type { DeliverTxResponse } from '@cosmjs/stargate'
-import type { ISCNRecordData } from '@likecoin/iscn-js'
+import type { ISCNRecordData, ISCNSigningClient } from '@likecoin/iscn-js'
 
 import { addParamToUrl } from '.'
 import { TRANSFER_GAS } from '~/constant'
@@ -45,7 +45,7 @@ async function getCosmLib () {
   return cosmLib
 }
 
-export async function getSigningClient (): Promise<any> {
+export async function getSigningClient (): Promise<ISCNSigningClient> {
   if (!iscnSigningClient) {
     const { RPC_URL } = useRuntimeConfig().public
     const { ISCNSigningClient } = await getISCNLib()
@@ -56,7 +56,7 @@ export async function getSigningClient (): Promise<any> {
   return iscnSigningClient
 }
 
-export async function getSigningClientWithSigner (signer: OfflineSigner): Promise<any> {
+export async function getSigningClientWithSigner (signer: OfflineSigner): Promise<ISCNSigningClient> {
   const { RPC_URL } = useRuntimeConfig().public
   const signingClient = await getSigningClient()
   await signingClient.connectWithSigner(RPC_URL, signer)
