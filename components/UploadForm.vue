@@ -132,7 +132,6 @@ const uploadStatus = ref('')
 const arweaveFeeMap = ref({})
 const arweaveFeeTargetAddress = ref('')
 const sentArweaveTransactionInfo = ref(new Map())
-const isOpenWarningSnackbar = ref(false)
 const error = ref('')
 const signDialogError = ref('')
 const numberOfSignNeeded = ref(0)
@@ -582,31 +581,24 @@ const setEbookCoverFromImages = async () => {
 }
 
 const onSubmit = async () => {
-  if (!signer.value) {
-    await initIfNecessary()
-  }
-  if (!signer.value) {
-    throw new Error('SIGNER_NOT_INITED')
-  }
-  uploadStatus.value = 'uploading'
-  error.value = ''
-  signDialogError.value = ''
-  console.log(balance)
-  if (!balance || new BigNumber(balance.data).lt(arweaveFee.value)) {
-    error.value = 'INSUFFICIENT_BALANCE'
-    isOpenWarningSnackbar.value = true
-    uploadStatus.value = ''
-    return
-  }
-
-  if (!fileRecords.value.some(file => file.fileBlob)) {
-    error.value = 'NO_FILE_TO_UPLOAD'
-    isOpenWarningSnackbar.value = true
-    uploadStatus.value = ''
-    return
-  }
-
   try {
+    if (!signer.value) {
+      await initIfNecessary()
+    }
+    if (!signer.value) {
+      throw new Error('SIGNER_NOT_INITED')
+    }
+    uploadStatus.value = 'uploading'
+    error.value = ''
+    signDialogError.value = ''
+    if (!balance?.data?.value || new BigNumber(balance.data.value.value.toString()).lt(arweaveFee.value)) {
+      throw new Error('INSUFFICIENT_BALANCE')
+    }
+
+    if (!fileRecords.value.some(file => file.fileBlob)) {
+      throw new Error('NO_FILE_TO_UPLOAD')
+    }
+
     uploadStatus.value = 'uploading'
     if (
       fileRecords.value.find(file => file.fileType === 'application/pdf') &&
@@ -631,6 +623,7 @@ const onSubmit = async () => {
     toast.add({
       icon: 'i-heroicons-exclamation-circle',
       title: 'Error during file upload',
+      description: (error as Error).toString() || 'An error occurred during file upload.',
       timeout: 3000,
       color: 'red'
     })
