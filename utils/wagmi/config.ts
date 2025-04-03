@@ -9,7 +9,8 @@ export const config = createConfig({
     dedicatedWalletConnector({
       chains: [optimism, optimismSepolia],
       options: {
-        apiKey: 'pk_live_5E14E3184484268D' // Liker Land Sepolia
+        apiKey: 'pk_live_5E14E3184484268D', // Liker Land Sepolia
+        accentColor: '#28646e'
       }
     }),
     injected()
