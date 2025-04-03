@@ -357,14 +357,6 @@
                     :padded="false"
                   />
                 </template>
-                <template #authz-data="{ row }">
-                  <UButton
-                    :label="row.grantLabel"
-                    :to="row.grantRoute"
-                    :variant="row.isGranted ? 'outline' : 'solid'"
-                    color="green"
-                  />
-                </template>
                 <template #remove-data="{ row }">
                   <div class="flex justify-end items-center">
                     <UButton
@@ -437,7 +429,7 @@ import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL, deliverMethodOptions } from '~/utils'
-import { getNFTAuthzGrants, sendNFTsToAPIWallet } from '~/utils/cosmos'
+import { sendNFTsToAPIWallet } from '~/utils/cosmos'
 import { useCollectionStore } from '~/stores/collection'
 
 const { LCD_URL } = useRuntimeConfig().public
@@ -484,7 +476,6 @@ const price = ref({
 })
 const shippingRates = ref<any[]>([])
 const moderatorWallets = ref<string[]>([])
-const moderatorWalletsGrants = ref<any>({})
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
@@ -516,24 +507,14 @@ const submitButtonText = computed(() => 'Submit')
 
 const moderatorWalletsTableColumns = computed(() => [
   { key: 'wallet', label: 'Wallet', sortable: true },
-  { key: 'authz', label: 'Send NFT Grant', sortable: false },
   { key: 'remove', label: '', sortable: false }
 ])
 
 const moderatorWalletsTableRows = computed(() => moderatorWallets.value.map((wallet, index) => {
-  const isGranted = !!moderatorWalletsGrants.value[wallet]
   return {
     index,
     wallet,
-    walletLink: getPortfolioURL(wallet),
-    isGranted,
-    grantLabel: isGranted ? 'Granted' : 'Grant',
-    grantRoute: {
-      name: 'authz',
-      query: {
-        grantee: wallet
-      }
-    }
+    walletLink: getPortfolioURL(wallet)
   }
 }))
 
@@ -567,16 +548,6 @@ onMounted(async () => {
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
-})
-
-watch(moderatorWallets, (newModeratorWallets) => {
-  newModeratorWallets?.forEach(async (m) => {
-    if (!moderatorWalletsGrants.value[m]) {
-      try {
-        moderatorWalletsGrants.value[m] = await getNFTAuthzGrants(wallet.value, m)
-      } catch {}
-    }
-  })
 })
 
 useSeoMeta({
