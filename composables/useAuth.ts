@@ -16,13 +16,13 @@ export function useAuth () {
 
   const isAuthenticating = ref(false)
 
-  const onAuthenticate = async () => {
+  const onAuthenticate = async (method = 0) => {
     try {
       isAuthenticating.value = true
       setupPostAuthRedirect()
 
       if (!wallet.value || !signer.value) {
-        await connect()
+        await connect(method)
       }
       if (!wallet.value || !signer.value) {
         return

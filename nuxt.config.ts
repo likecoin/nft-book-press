@@ -66,11 +66,6 @@ export default defineNuxtConfig({
     removeLoggers: false
   },
 
-  plugins: [
-    '~/plugins/buffer.ts',
-    '~/plugins/wagmi.ts'
-  ],
-
   alias: {
     // polyfill process
     process: path.resolve(__dirname, 'node_modules/unenv/runtime/node/process')

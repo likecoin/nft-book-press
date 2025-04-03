@@ -34,16 +34,31 @@
       />
     </template>
     <div v-else class="flex flex-col gap-4">
-      <UButton
-        label="Sign in"
-        icon="i-heroicons-arrow-right-on-rectangle"
-        color="primary"
-        size="lg"
-        :loading="isAuthenticating"
-        :disabled="isRestoringSession"
-        block
-        @click="onAuthenticate"
-      />
+      <div class="flex gap-2">
+        <UButton
+          class="w-1/2"
+          label="Login"
+          icon="i-heroicons-envelope"
+          color="primary"
+          size="lg"
+          :loading="isAuthenticating"
+          :disabled="isRestoringSession"
+          block
+          @click="onAuthenticate(0)"
+        />
+        <UButton
+          class="w-1/2"
+          label="Wallet"
+          icon="i-heroicons-wallet"
+          color="primary"
+          size="lg"
+          :loading="isAuthenticating"
+          :disabled="isRestoringSession"
+          block
+          @click="onAuthenticate(1)"
+        />
+      </div>
+
       <UAlert
         v-if="showMigrateAlert"
         :ui="{ actions: 'justify-end' }"
