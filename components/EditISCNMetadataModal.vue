@@ -152,7 +152,7 @@ watchEffect(async () => {
             if (Array.isArray(metadata.keywords)) {
               tags.push(...metadata.keywords)
             } else {
-              tags.push(...metadata.keywords.split(',').map(k => k.trim()))
+              tags.push(...metadata.keywords.split(',').map(k => k.trim()).filter(k => k))
             }
           }
 
