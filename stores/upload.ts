@@ -21,6 +21,10 @@ export interface UploadFileData {
     arweaveKey?: string
   }>
   iscnRecord?: any
+  classData?: {
+    classId: string
+    nftMintCount: number
+  }
 }
 
 export const useUploadStore = defineStore('upload', {
@@ -31,7 +35,7 @@ export const useUploadStore = defineStore('upload', {
   actions: {
     setUploadFileData (data: Partial<UploadFileData>, options: { merge?: boolean } = {}) {
       const { merge = false } = options
-
+      this.getUploadFileData()
       this.uploadFileData = merge && this.uploadFileData
         ? {
             ...this.uploadFileData,
