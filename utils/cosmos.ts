@@ -24,9 +24,11 @@ let cosmLib: any = null
 async function getISCNLib () {
   if (!iscnLib) {
     const lib = await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js')
-    const parsing = await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js/dist/iscn/parsing')
-    const msgParsing = await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js/dist/messages/parsing')
-    const likenft = await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js/dist/messages/likenft')
+    const [parsing, msgParsing, likenft] = await Promise.all([
+      await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js/dist/iscn/parsing'),
+      await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js/dist/messages/parsing'),
+      await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js/dist/messages/likenft'),
+    ])
     iscnLib = {
       ...lib,
       parseAndCalculateStakeholderRewards: parsing.parseAndCalculateStakeholderRewards,
