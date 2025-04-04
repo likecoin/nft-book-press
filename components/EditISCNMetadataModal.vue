@@ -149,6 +149,9 @@ watchEffect(async () => {
               ]
 
           iscnData.value = {
+            ...metadata,
+            recordNotes: record.data?.recordNotes,
+            stakeholders: record.data?.stakeholders,
             type: metadata['@type'] || 'Book',
             title: metadata.name || '',
             description: metadata.description || '',
