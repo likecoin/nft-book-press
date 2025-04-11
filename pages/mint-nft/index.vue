@@ -134,7 +134,7 @@
           </h2>
         </template>
 
-        <UFormGroup label="ISCN ID">
+        <UFormGroup v-if="iscnId" label="ISCN ID">
           <UButton
             class="font-mono"
             :label="iscnId"
@@ -145,7 +145,7 @@
           />
         </UFormGroup>
 
-        <UFormGroup label="ISCN Owner">
+        <UFormGroup label="Owner">
           <UButton
             :label="iscnOwner"
             :to="`${likerLandURL}/${encodeURIComponent(iscnOwner)}`"
@@ -155,18 +155,20 @@
           />
         </UFormGroup>
 
-        <UFormGroup label="ISCN Title">
+        <UFormGroup label="Title">
           <UInput
+            v-model="className"
             :value="iscnData?.contentMetadata?.name"
-            :readonly="true"
+            :readonly="isCreatingClass"
             variant="none"
             :padded="false"
           />
         </UFormGroup>
-        <UFormGroup label="ISCN Description">
+        <UFormGroup label="Description">
           <UInput
+            v-model="classDescription"
             :value="iscnData?.contentMetadata?.description"
-            :readonly="true"
+            :readonly="isCreatingClass"
             variant="none"
             :padded="false"
           />
@@ -304,58 +306,48 @@
                   Mint NFT by filling required information
                 </h3>
               </template>
-              <UForm :validate="validate" :state="state" class="flex flex-col gap-[12px]">
-                <UFormGroup label="NFT ID Prefix / 前綴（書本編號）" name="prefix" required>
-                  <UInput v-model="state.nftIdPrefix" placeholder="English only ex.MoneyVerse" />
-                </UFormGroup>
+              <UFormGroup label="Number of NFT to mint / 鑄造數量（此批）" required>
+                <UInput
+                  v-model="nftMintCount"
+                  placeholder="0-100"
+                  type="number"
+                  :min="0"
+                  :max="classMaxSupply"
+                />
+              </UFormGroup>
 
-                <UFormGroup label="Number of NFT to mint / 鑄造數量（此批）" required>
-                  <UInput
-                    v-model="nftMintCount"
-                    placeholder="0-100"
-                    type="number"
-                    :min="0"
-                    :max="classMaxSupply"
+              <UFormGroup label="Image URL / 封面網址" required>
+                <UInput v-model="imageUrl" placeholder="ipfs:// ... or ar://...." />
+              </UFormGroup>
+
+              <UFormGroup label="External URL (optional) / 外部網址（選填）">
+                <UInput v-model="externalUrl" placeholder="https://" />
+              </UFormGroup>
+
+              <UFormGroup v-if="isCreatingClass" label="Max number of supply for this NFT Class (optional) / 最大供應量（選填）">
+                <template
+                  v-if="classMaxSupply && classMaxSupply < nftMintCount"
+                  #help
+                >
+                  <UAlert
+                    class="mt-1"
+                    icon="i-heroicons-exclamation-triangle"
+                    title="Should be more than number of NFT to mint"
+                    color="red"
+                    variant="subtle"
                   />
-                </UFormGroup>
-
-                <UFormGroup label="Image URL / 封面網址" required>
-                  <UInput v-model="imageUrl" placeholder="ipfs:// ... or ar://...." />
-                </UFormGroup>
-
-                <UFormGroup label="External URL (optional) / 外部網址（選填）">
-                  <UInput v-model="externalUrl" placeholder="https://" />
-                </UFormGroup>
-
-                <UFormGroup label="URI (optional) / 元資料網址（選填）">
-                  <UInput v-model="uri" placeholder="https://" />
-                </UFormGroup>
-
-                <UFormGroup v-if="isCreatingClass" label="Max number of supply for this NFT Class (optional) / 最大供應量（選填）">
-                  <template
-                    v-if="classMaxSupply && classMaxSupply < nftMintCount"
-                    #help
-                  >
-                    <UAlert
-                      class="mt-1"
-                      icon="i-heroicons-exclamation-triangle"
-                      title="Should be more than number of NFT to mint"
-                      color="red"
-                      variant="subtle"
-                    />
-                  </template>
-                  <UInput
-                    v-model="classMaxSupply"
-                    type="number"
-                    :min="nftMintCount"
-                    :placeholder="`> ${nftMintCount}`"
-                  />
-                </UFormGroup>
-              </UForm>
+                </template>
+                <UInput
+                  v-model="classMaxSupply"
+                  type="number"
+                  :min="nftMintCount"
+                  :placeholder="`> ${nftMintCount}`"
+                />
+              </UFormGroup>
               <template #footer>
                 <UButton
                   label="Mint"
-                  :disabled="isLoading || !(state.nftIdPrefix && nftMintCount && imageUrl) || hasError"
+                  :disabled="isLoading || !(nftMintCount && imageUrl) || hasError"
                   @click="onClickMintByInputting"
                 />
               </template>
@@ -454,19 +446,34 @@
 </template>
 
 <script setup lang="ts">
+import { useWriteContract } from '@wagmi/vue'
 import { storeToRefs } from 'pinia'
-import { v4 as uuidv4 } from 'uuid'
 import { parse } from 'csv-parse/sync'
 import { stringify } from 'csv-stringify/sync'
-import type { FormError } from '#ui/types'
+import { waitForTransactionReceipt } from '@wagmi/vue/actions'
+import { hexToNumber } from 'viem'
 
 import { useWalletStore } from '~/stores/wallet'
-import { downloadFile, convertArrayOfObjectsToCSV, sleep } from '~/utils'
+import { downloadFile, convertArrayOfObjectsToCSV } from '~/utils'
 import { NFT_DEFAULT_MINT_AMOUNT, PUBLISHING_NOTICE_URL_EN, PUBLISHING_NOTICE_URL_ZH } from '~/constant'
+import { LIKE_NFT_ABI, LIKE_NFT_CLASS_ABI, LIKE_NFT_CONTRACT_ADDRESS } from '~/contracts/likeNFT'
+import { config } from '~/utils/wagmi/config'
 
-const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } = useRuntimeConfig().public
+const {
+  getClassOwner,
+  getClassMetadata,
+  checkNFTClassIsBookNFT,
+  getClassCurrentTokenId
+} = useNFTContractReader()
+const {
+  LCD_URL,
+  APP_LIKE_CO_URL,
+  LIKER_LAND_URL,
+  LIKE_EVM_NFT_TARGET_ADDRESS
+} = useRuntimeConfig().public
 const router = useRouter()
 const route = useRoute()
+const { writeContractAsync } = useWriteContract()
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
@@ -480,30 +487,26 @@ const isLoading = ref(false)
 
 const iscnIdInput = ref('')
 const iscnOwner = ref('')
+
 const iscnCreateData = ref<any>(null)
 const iscnData = ref<any>(null)
-const state = reactive({
-  nftIdPrefix: 'BOOKSN'
-})
 const hasError = ref(false)
 const imageUrl = ref('')
 const externalUrl = ref('')
-const uri = ref('')
 
-const classData = ref<any>(null)
-const classMaxSupply = ref<number | undefined>(undefined)
+const classMaxSupply = ref<number>(1000)
 const classCreateData = ref<any>(null)
 
 const nftMintListData = ref<any>([])
 const nftMintDefaultData = ref<any>(null)
 const nftMintCount = ref(NFT_DEFAULT_MINT_AMOUNT)
-const nftData = ref<any>(null)
 const nftCSVData = ref('')
-const existingNftCount = ref(0)
 
 const iscnId = computed(() => iscnData.value?.['@id'])
-const classId = computed(() => classData.value?.id)
+const classId = ref('')
 const isCreatingClass = computed(() => !classId.value && step.value === 2)
+const className = ref('')
+const classDescription = ref('')
 // HACK: set max supply to 50 to avoid authcore max int issue
 const mintMaxCount = computed(() => Math.min(classMaxSupply.value || NFT_DEFAULT_MINT_AMOUNT))
 
@@ -541,19 +544,8 @@ useSeoMeta({
 onMounted(() => {
   // HACK: mitigate disable state stuck issue when iscnIdInput is inited as qs in data
   iscnIdInput.value = route.query.class_id as string || route.query.iscn_id as string || ''
+  classId.value = route.query.class_id as string || ''
 })
-
-const validate = (state: any): FormError[] => {
-  hasError.value = false
-  const errors = []
-  const whitespaceRegex = /^[a-zA-Z][a-zA-Z0-9/:-]{2,100}$/
-
-  if (!whitespaceRegex.test(state.nftIdPrefix)) {
-    hasError.value = true
-    errors.push({ path: 'prefix', message: 'NFT ID cannot contain spaces' })
-  }
-  return errors
-}
 
 function onClickHelpEn () {
   useTrackEvent('mint_nft_click_help_en')
@@ -584,15 +576,19 @@ async function onISCNIDInput () {
       iscnData.value = records[0].data
       iscnOwner.value = owner
       step.value = 2
-    } else if (iscnIdInput.value.startsWith('likenft')) {
-      const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${encodeURIComponent(iscnIdInput.value)}`)
-      if (!data) { throw new Error('INVALID_NFT_CLASS_ID') }
-      classData.value = (data as any).class
-      const parentIscnId = classData.value?.data?.parent?.iscn_id_prefix
-      const resISCN = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(parentIscnId)}`)
-      const { records, owner } = resISCN as any
-      iscnData.value = records[0].data
-      iscnOwner.value = owner
+    } else if (iscnIdInput.value.startsWith('0x')) {
+      const isBookNFT = await checkNFTClassIsBookNFT(iscnIdInput.value)
+      if (!isBookNFT) {
+        throw new Error('Invalid NFT Class ID')
+      }
+      const [data, owner] = await Promise.all([
+        getClassMetadata(iscnIdInput.value),
+        getClassOwner(iscnIdInput.value)
+      ])
+      if (!data) { throw new Error('Invalid NFT Class ID') }
+      iscnData.value = { contentMetadata: data }
+      iscnOwner.value = owner as string
+      classId.value = iscnIdInput.value
       step.value = 3
     } else {
       throw new Error('Invalid ISCN ID or NFT Class ID')
@@ -612,15 +608,7 @@ async function onISCNFileInput () {
       await initIfNecessary()
     }
     if (!wallet.value || !signer.value) { throw new Error('NO_WALLET') }
-    if (!iscnCreateData.value) { throw new Error('NO_ISCN_DATA') }
-    const newIscnId = await signCreateISCNRecord(iscnCreateData.value, signer.value, wallet.value)
-    // HACK: wait 1 block before querying
-    await sleep(6000)
-    const data = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(newIscnId)}`)
-    if (!data) { throw new Error('INVALID_ISCN_ID') }
-    const { records, owner } = data as any
-    iscnData.value = records[0].data
-    iscnOwner.value = owner
+    iscnData.value = iscnCreateData.value
     step.value = 2
   } catch (err) {
     console.error(err)
@@ -650,24 +638,15 @@ function onISCNFileChange (files: FileList) {
 }
 
 function generateNFTMintListCSVData ({
-  prefix,
-  nftExisitngCount = 0,
   nftMintCount,
-  imgUrl,
-  uri
+  imgUrl
 }: {
-  prefix: string;
-  nftExisitngCount?: number;
   nftMintCount: number;
   imgUrl: string;
-  uri: string ;
 }) {
   const csvRows = []
-  for (let i = nftExisitngCount; i <= nftExisitngCount + nftMintCount - 1; i++) {
-    const nftId = `${prefix}-${i.toString().padStart(4, '0')}`
+  for (let i = 0; i < nftMintCount; i++) {
     csvRows.push({
-      nftId,
-      uri,
       image: imgUrl,
       metadata: ''
     })
@@ -679,41 +658,40 @@ async function onClickMintByInputting () {
   isLoading.value = true
   const { contentMetadata } = iscnData.value
 
+  const {
+    name,
+    description
+  } = contentMetadata
   const nftClassData = {
-    name: contentMetadata.name,
-    description: contentMetadata.description,
+    name,
     symbol: 'BOOK',
-    uri: uri.value || '',
     metadata: {
-      name: contentMetadata.name,
+      name,
+      description,
+      symbol: 'BOOK',
+      ...contentMetadata,
       image: imageUrl.value,
       external_url: externalUrl.value,
       nft_meta_collection_id: 'nft_book',
       nft_meta_collection_name: 'NFT Book',
-      nft_meta_collection_description: 'NFT Book by Liker Land'
+      nft_meta_collection_description: 'NFT Book by Liker Land',
+      recordTimestamp: new Date().toISOString()
     }
   }
   const nftsDefaultData = {
-    uri: uri.value || '',
-    metadata: {
-      name: contentMetadata.name,
-      image: imageUrl.value,
-      external_url: externalUrl.value
-    }
-  }
-  if (!isCreatingClass.value) {
-    const { nfts } = await getNFTs({ classId: classId.value as string })
-    existingNftCount.value = nfts.length
+    name,
+    description,
+    symbol: 'BOOK',
+    ...contentMetadata,
+    image: imageUrl.value,
+    external_url: externalUrl.value
   }
   if (typeof nftMintCount.value !== 'number') {
     nftMintCount.value = Number(nftMintCount.value)
   }
   const csvDataString = generateNFTMintListCSVData({
-    prefix: state.nftIdPrefix,
     nftMintCount: nftMintCount.value,
-    nftExisitngCount: existingNftCount.value,
-    imgUrl: imageUrl.value,
-    uri: uri.value
+    imgUrl: imageUrl.value
   })
   const csvDataArray = parse(csvDataString, { columns: true })
 
@@ -727,6 +705,7 @@ async function onClickMintByInputting () {
       await onClassFileInput() // step=3
       if (!classId.value) { throw new Error('CLASS_CREATION_FAILED') }
     }
+    if (!classId.value) { throw new Error('NO_CLASS_ID') }
     await onMintNFTStart() // step=4
     shouldShowDownloadLink.value = true
   } catch (error) {
@@ -743,6 +722,7 @@ async function onClickMintByUploading () {
       await onClassFileInput() // step=3
       if (!classId.value) { throw new Error('CLASS_CREATION_FAILED') }
     }
+    if (!classId.value) { throw new Error('NO_CLASS_ID') }
     await onMintNFTStart() // step=4
     shouldShowDownloadLink.value = false
   } catch (error) {
@@ -760,11 +740,33 @@ async function onClassFileInput () {
     }
     if (!wallet.value || !signer.value) { return }
     if (!classCreateData.value) { throw new Error('NO_CLASS_DATA') }
-    const newClassId = await signCreateNFTClass(classCreateData.value, iscnId.value, signer.value, wallet.value, { nftMaxSupply: classMaxSupply.value })
-    await signCreateRoyltyConfig(newClassId, iscnData.value, iscnOwner.value, false, signer.value, wallet.value)
-    const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${encodeURIComponent(newClassId)}`)
-    if (!data) { throw new Error('INVALID_NFT_CLASS_ID') }
-    classData.value = (data as any).class
+    const {
+      name,
+      symbol,
+      metadata
+    } = classCreateData.value
+    const res = await writeContractAsync({
+      address: LIKE_NFT_CONTRACT_ADDRESS,
+      abi: LIKE_NFT_ABI,
+      functionName: 'newBookNFT',
+      args: [{
+        creator: wallet.value,
+        updaters: [wallet.value, LIKE_EVM_NFT_TARGET_ADDRESS],
+        minters: [wallet.value, LIKE_EVM_NFT_TARGET_ADDRESS],
+        config: {
+          name,
+          symbol,
+          metadata: JSON.stringify(metadata),
+          max_supply: classMaxSupply.value || 1000
+        }
+      }]
+    })
+    const receipt = await waitForTransactionReceipt(config, { hash: res })
+    // eslint-disable-next-line no-console
+    console.log(receipt)
+    if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
+    if (!receipt.logs[0].address) { throw new Error('INVALID_CLASS_ID') }
+    classId.value = receipt.logs[0].address
     step.value = 3
   } catch (err) {
     console.error(err)
@@ -804,19 +806,38 @@ async function onMintNFTStart () {
     if (nftMintListData.value.length && nftMintListData.value.length !== nftMintCount.value) {
       throw new Error(`NFT csv data length ${nftMintListData.value.length} must match nft mint amount ${nftMintCount.value}`)
     }
-    const defaultURI = nftMintDefaultData.value.uri
-    const defaultMetadata = nftMintDefaultData.value.metadata
+    const defaultMetadata = nftMintDefaultData.value
+    const tokenId = await getClassCurrentTokenId(classId.value)
     const nfts = [...Array(nftMintCount.value).keys()].map((i) => {
       const {
-        nftId,
-        uri: dataUri,
         image: dataImage,
         metadata: dataMetadataString,
         ...otherData
       } = nftMintListData?.value?.[i] || {}
       const dataMetadata = JSON.parse(dataMetadataString || '{}')
-      const data = { ...defaultMetadata, ...dataMetadata }
+      const { name } = defaultMetadata
+      const data = { attributes: [], ...defaultMetadata, ...dataMetadata }
+      if (name) { data.name = `${name} #${tokenId + i + 1}` }
       if (dataImage) { data.image = dataImage }
+      if (data.author) {
+        data.attributes.push({
+          trait_type: 'Author',
+          value: data.author
+        })
+      }
+      if (data.publisher) {
+        data.attributes.push({
+          trait_type: 'Publisher',
+          value: data.publisher
+        })
+      }
+      if (data.datePublished) {
+        data.attributes.push({
+          trait_type: 'Publish Date',
+          display_type: 'date',
+          value: (new Date(data.datePublished)).getTime() || 0
+        })
+      }
       Object.entries(otherData).forEach(([key, value]) => {
         if (value) {
           try {
@@ -826,24 +847,34 @@ async function onMintNFTStart () {
           }
         }
       })
-      const id = nftId || `nft-${uuidv4()}`
-      let uri = dataUri || defaultURI || ''
-      const isUriHttp = uri && uri.startsWith('https://')
-      if (isUriHttp) { uri = addParamToUrl(uri, { class_id: classId.value, nft_id: id }) }
       return {
-        id,
-        uri,
+        id: -1,
         metadata: data
       }
     })
+    const res = await writeContractAsync({
+      address: classId.value as `0x${string}`,
+      abi: LIKE_NFT_CLASS_ABI,
+      functionName: 'safeMintWithTokenId',
+      args: [
+        tokenId,
+        Array(nftMintCount.value).fill(wallet.value),
+        Array(nftMintCount.value).fill(''),
+        nfts.map(nft => JSON.stringify(nft.metadata))
+      ]
+    })
+    const receipt = await waitForTransactionReceipt(config, { hash: res })
+    // eslint-disable-next-line no-console
+    console.log(receipt)
+    if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
+    if (receipt.logs[0].topics[3] === undefined) { throw new Error('INVALID_NFT_ID') }
+    receipt.logs.forEach((log) => {
+      if (log.topics[3] !== undefined) {
+        const nftId = hexToNumber(log.topics[3])
+        nfts[nftId].id = nftId
+      }
+    })
     nftCSVData.value = stringify(nfts, { header: true })
-    const res = await signMintNFT(
-      nfts,
-      classId.value,
-      signer.value,
-      wallet.value
-    )
-    nftData.value = res
     step.value = 4
   } catch (err) {
     console.error(err)
@@ -862,7 +893,7 @@ function onMintNFTDefaultFileChange (files: FileList) {
       const text = e.target?.result
       if (typeof text !== 'string') { return }
       const json = JSON.parse(text)
-      if (!json || json.uri === undefined) { throw new Error('Invalid NFT default data json') }
+      if (!json) { throw new Error('Invalid NFT default data json') }
       nftMintDefaultData.value = json
     } catch (err) {
       console.error(err)
