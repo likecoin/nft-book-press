@@ -970,7 +970,9 @@ function updateClassId ({ classId: newClassId, nftMintCount }) {
   if (!isStandalonePage.value) {
     classId.value = newClassId
     classIdInput.value = newClassId
-    prices.value[0].stock = nftMintCount
+    if (nftMintCount) {
+      prices.value[0].stock = nftMintCount
+    }
   }
 }
 
