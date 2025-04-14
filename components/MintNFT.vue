@@ -9,57 +9,14 @@
       :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'red', variant: 'link', padded: false }"
       @close="error = ''"
     />
-    <UCard
-      :ui="{ body: { base: 'space-y-4' } }"
-    >
-      <template #header>
-        <h2 class="font-bold font-mono">
-          ISCN Information
-        </h2>
-      </template>
 
-      <UFormGroup label="ISCN ID" class="text-left">
-        <UButton
-          class="font-mono"
-          :label="iscnId"
-          :to="`${appLikeCoURL}/view/${encodeURIComponent(iscnId)}`"
-          target="_blank"
-          variant="link"
-          :padded="false"
-        />
-      </UFormGroup>
-
-      <UFormGroup label="ISCN Owner" class="text-left">
-        <UButton
-          :label="iscnOwner"
-          :to="`${likerLandURL}/${encodeURIComponent(iscnOwner)}`"
-          target="_blank"
-          variant="link"
-          :padded="false"
-        />
-      </UFormGroup>
-
-      <UFormGroup label="ISCN Title">
-        <UInput
-          :value="iscnData?.contentMetadata?.name"
-          :readonly="true"
-          variant="none"
-          :padded="false"
-        />
-      </UFormGroup>
-      <UFormGroup label="ISCN Description">
-        <UInput
-          :value="iscnData?.contentMetadata?.description"
-          :readonly="true"
-          variant="none"
-          :padded="false"
-        />
-      </UFormGroup>
-      <UButton
-        label="Edit ISCN Metadata"
-        @click="showEditISCNModal = true"
-      />
-    </UCard>
+    <ISCNInfoCard
+      :iscn-id="iscnId"
+      :iscn-owner="iscnOwner"
+      :iscn-data="iscnData"
+      :show-edit-button="true"
+      @edit="showEditISCNModal = true"
+    />
 
     <UCard
       v-if="step === 2 || step === 3"
@@ -471,11 +428,9 @@ async function onMintNFTStart () {
 
 function onSaveISCN () {
   const iscnId = editISCNRef.value?.iscnId
-  const currentVersion = editISCNRef.value?.recordVersion
   if (iscnId) {
-    router.replace({ query: { ...route.query, iscn_id: `${iscnId}/${currentVersion + 1}` } })
-    iscnIdInput.value = `${iscnId}/${currentVersion + 1}`
-    step.value = 1
+    router.replace({ query: { ...route.query, iscn_id: iscnId } })
+    onISCNIDInput(iscnId)
   } else {
     window.location.reload()
   }

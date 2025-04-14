@@ -134,46 +134,12 @@
           </h2>
         </template>
 
-        <UFormGroup label="ISCN ID">
-          <UButton
-            class="font-mono"
-            :label="iscnId"
-            :to="`${appLikeCoURL}/view/${encodeURIComponent(iscnId)}`"
-            target="_blank"
-            variant="link"
-            :padded="false"
-          />
-        </UFormGroup>
-
-        <UFormGroup label="ISCN Owner">
-          <UButton
-            :label="iscnOwner"
-            :to="`${likerLandURL}/${encodeURIComponent(iscnOwner)}`"
-            target="_blank"
-            variant="link"
-            :padded="false"
-          />
-        </UFormGroup>
-
-        <UFormGroup label="ISCN Title">
-          <UInput
-            :value="iscnData?.contentMetadata?.name"
-            :readonly="true"
-            variant="none"
-            :padded="false"
-          />
-        </UFormGroup>
-        <UFormGroup label="ISCN Description">
-          <UInput
-            :value="iscnData?.contentMetadata?.description"
-            :readonly="true"
-            variant="none"
-            :padded="false"
-          />
-        </UFormGroup>
-        <UButton
-          label="Edit ISCN Metadata"
-          @click="showEditISCNModal = true"
+        <ISCNInfoCard
+          :iscn-id="iscnId"
+          :iscn-owner="iscnOwner"
+          :iscn-data="iscnData"
+          :show-edit-button="true"
+          @edit="showEditISCNModal = true"
         />
       </UCard>
 
