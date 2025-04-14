@@ -135,7 +135,7 @@ import { useWalletStore } from '~/stores/wallet'
 import { convertArrayOfObjectsToCSV } from '~/utils'
 import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
 
-const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } = useRuntimeConfig().public
+const { LCD_URL } = useRuntimeConfig().public
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
@@ -144,8 +144,6 @@ const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
 const { initIfNecessary } = store
 
-const appLikeCoURL = APP_LIKE_CO_URL
-const likerLandURL = LIKER_LAND_URL
 const step = ref(1)
 const error = ref('')
 const isLoading = ref(false)

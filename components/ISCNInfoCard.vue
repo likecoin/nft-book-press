@@ -71,9 +71,7 @@ interface Props {
 }
 
 defineProps<Props>()
-defineEmits<{
-  (e: 'edit'): void
-}>()
+defineEmits<{(e: 'edit'): void }>()
 
 const { APP_LIKE_CO_URL: appLikeCoURL, LIKER_LAND_URL: likerLandURL } = useRuntimeConfig().public
 </script>
