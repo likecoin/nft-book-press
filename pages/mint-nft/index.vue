@@ -615,7 +615,10 @@ async function onISCNIDInput () {
         $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${encodeURIComponent(iscnIdInput.value)}`),
         $fetch(`${LIKE_CO_API}/likernft/book/store/${iscnIdInput.value}`)
       ])
-      if (!data || !classInfo) { throw new Error('INVALID_NFT_CLASS_ID') }
+      if (!data || !classInfo) {
+        isRestockingNFT.value = false
+        throw new Error('INVALID_NFT_CLASS_ID')
+      }
       classListingInfo.value = classInfo
       classData.value = (data as any).class
       const parentIscnId = classData.value?.data?.parent?.iscn_id_prefix
