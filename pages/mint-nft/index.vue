@@ -815,7 +815,7 @@ async function onMintNFTStart () {
       const dataMetadata = JSON.parse(dataMetadataString || '{}')
       const { name } = defaultMetadata
       const data = { attributes: [], ...defaultMetadata, ...dataMetadata }
-      if (name) { data.name = `${name} #${tokenId + i + 1}` }
+      if (name) { data.name = `${name} #${Number(tokenId) + i + 1}` }
       if (dataImage) { data.image = dataImage }
       if (data.author) {
         data.attributes.push({
