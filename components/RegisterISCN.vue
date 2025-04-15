@@ -113,7 +113,7 @@ const initializeFromSessionStorage = () => {
     description: stripHtmlTags(data.epubMetadata?.description || ''),
     isbn: '',
     publisher: '',
-    publicationDate: '',
+    publicationDate: new Date().toISOString().split('T')[0],
     author: {
       name: data.epubMetadata?.author || '',
       description: ''
