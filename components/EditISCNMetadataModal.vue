@@ -248,7 +248,7 @@ async function handleSave () {
     }
     toast.add({
       title: 'ISCN updated successfully',
-      color: 'green'
+      color: 'blue'
     })
     emit('save')
     handleClickBack()
