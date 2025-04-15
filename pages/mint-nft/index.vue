@@ -430,6 +430,19 @@
             />
             <div class="p-[4px] border-[2px] border-[#f59e0b] rounded-[0.375rem]">
               <UButton
+                v-if="isRestockingNFT"
+                :to="{
+                  name: 'nft-book-store-status-classId-edit-new',
+                  params: { classId },
+                  query: { priceIndex: editionIndex,count: nftMintCount },
+
+                }"
+                label="publish New Edition / 新庫存上架"
+                variant="solid"
+                color="orange"
+              />
+              <UButton
+                v-else
                 :to="{ name: 'nft-book-store-new', query: { class_id: classId, count: nftMintCount } }"
                 label="Continue to publish NFT Book / 繼續上架"
                 variant="solid"
@@ -466,7 +479,7 @@ import { useWalletStore } from '~/stores/wallet'
 import { downloadFile, convertArrayOfObjectsToCSV, sleep } from '~/utils'
 import { NFT_DEFAULT_MINT_AMOUNT, PUBLISHING_NOTICE_URL_EN, PUBLISHING_NOTICE_URL_ZH } from '~/constant'
 
-const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } = useRuntimeConfig().public
+const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL, LIKE_CO_API } = useRuntimeConfig().public
 const router = useRouter()
 const route = useRoute()
 
@@ -512,6 +525,16 @@ const mintMaxCount = computed(() => Math.min(classMaxSupply.value || NFT_DEFAULT
 const shouldShowDownloadLink = ref(false)
 const showEditISCNModal = ref(false)
 const editISCNRef = ref<any>(null)
+
+const isRestockingNFT = ref(false)
+const classListingInfo = ref<any>(null)
+
+const editionIndex = computed(() => {
+  if (classListingInfo.value) {
+    return classListingInfo.value.prices.length
+  }
+  return 1
+})
 
 watch(iscnId, (newIscnId) => {
   if (newIscnId) {
@@ -587,8 +610,13 @@ async function onISCNIDInput () {
       iscnOwner.value = owner
       step.value = 2
     } else if (iscnIdInput.value.startsWith('likenft')) {
-      const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${encodeURIComponent(iscnIdInput.value)}`)
-      if (!data) { throw new Error('INVALID_NFT_CLASS_ID') }
+      isRestockingNFT.value = true
+      const [data, classInfo] = await Promise.all([
+        $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${encodeURIComponent(iscnIdInput.value)}`),
+        $fetch(`${LIKE_CO_API}/likernft/book/store/${iscnIdInput.value}`)
+      ])
+      if (!data || !classInfo) { throw new Error('INVALID_NFT_CLASS_ID') }
+      classListingInfo.value = classInfo
       classData.value = (data as any).class
       const parentIscnId = classData.value?.data?.parent?.iscn_id_prefix
       const resISCN = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(parentIscnId)}`)
