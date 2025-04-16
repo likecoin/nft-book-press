@@ -397,17 +397,18 @@ const submitToArweave = async (record: any): Promise<void> => {
   }
 
   let txHash = transactionHash
+  let key
   const arrayBuffer = await record.fileBlob.arrayBuffer()
   let buffer = Buffer.from(arrayBuffer)
   let { ipfsHash } = record
 
-  if (!record.encryptedIpfsHash) {
-    const shouldEncrypt =
+  const shouldEncrypt =
       (record.fileType === 'application/epub+zip' ||
         record.fileType === 'application/pdf') &&
       isEncryptEBookData.value
 
-    if (shouldEncrypt) {
+  if (shouldEncrypt) {
+    if (!record.encryptedIpfsHash) {
       const { rawEncryptedKeyAsBase64, combinedArrayBuffer } =
         await encryptDataWithAES({ data: arrayBuffer })
       const encryptedBuffer = Buffer.from(combinedArrayBuffer)
@@ -415,11 +416,12 @@ const submitToArweave = async (record: any): Promise<void> => {
       record.encryptionKey = rawEncryptedKeyAsBase64
       record.encryptedBuffer = encryptedBuffer
       record.encryptedIpfsHash = await calculateIPFSHash(encryptedBuffer)
+    } else {
+      ipfsHash = record.encryptedIpfsHash || ipfsHash
+      buffer = record.encryptedBuffer || buffer
+      key = record.encryptionKey || undefined
     }
   }
-  ipfsHash = record.encryptedIpfsHash || ipfsHash
-  buffer = record.encryptedBuffer || buffer
-  const key = record.encryptionKey || undefined
 
   if (!txHash) {
     // HACK: override ipfsHash memo to match arweave tag later
