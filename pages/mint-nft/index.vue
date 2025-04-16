@@ -72,57 +72,6 @@
             @click="onISCNIDInput"
           />
         </UCard>
-
-        <UDivider label="OR" />
-
-        <UCard :ui="{ body: { base: 'space-y-4' } }">
-          <UFormGroup>
-            <template #label>
-              Upload ISCN data json file
-              <UButton
-                to="https://github.com/likecoin/iscn-nft-tools/blob/master/mint-nft/samples/iscn.json"
-                :padded="false"
-                variant="link"
-                target="_blank"
-              >
-                (iscn.json)
-              </UButton>
-            </template>
-            <UInput class="my-4" type="file" accept="application/json" @change="onISCNFileChange" />
-          </UFormGroup>
-          <UAlert
-            title=""
-            icon="i-heroicons-light-bulb"
-            color="primary"
-            variant="soft"
-          >
-            <template #title>
-              You can also create your ISCN using
-              <UButton
-                :to="`${appLikeCoURL}/new`"
-                :padded="false"
-                variant="link"
-                target="_blank"
-              >
-                app.like.co
-              </UButton>
-            </template>
-          </UAlert>
-
-          <UTextarea
-            v-if="iscnCreateData"
-            :value="JSON.stringify(iscnCreateData, null, 2) "
-            cols="100"
-            :rows="10"
-            readonly
-          />
-
-          <UButton
-            label="Create"
-            :disabled="isLoading || !(iscnCreateData)"
-            @click="onISCNFileInput"
-          />
-        </UCard>
       </UCard>
       <UCard
         v-else-if="step > 1"
@@ -153,181 +102,30 @@
           </h2>
         </template>
 
-        <UTabs
-          class="w-full"
-          :items="[
-            { label: 'By filling required information', slot: 'input' },
-            { label: 'By uploading data files', slot: 'upload' },
-          ]"
+        <UCard
+          class="flex-1"
+          :ui="{ body: { base: 'space-y-4' } }"
         >
-          <template #upload>
-            <UCard :ui="{ body: { base: 'space-y-4' } }">
-              <template #header>
-                <h3 class="font-bold">
-                  Mint NFT by uploading data files
-                </h3>
-              </template>
-
-              <UFormGroup v-if="isCreatingClass" label="Max number of supply for this NFT Class (optional):">
-                <UInput
-                  v-model="classMaxSupply"
-                  type="number"
-                  :min="nftMintCount"
-                />
-              </UFormGroup>
-
-              <UFormGroup label="Number of NFT to mint:">
-                <UInput
-                  v-model="nftMintCount"
-                  type="number"
-                  :min="0"
-                  :max="mintMaxCount"
-                />
-              </UFormGroup>
-
-              <UFormGroup v-if="isCreatingClass">
-                <template #label>
-                  Upload NFT Class data JSON file (<UButton
-                    label="nft_class.json"
-                    to="https://github.com/likecoin/iscn-nft-tools/blob/master/mint-nft/samples/nft_class.json"
-                    variant="link"
-                    :padded="false"
-                    target="_blank"
-                  />)
-                </template>
-                <UInput type="file" accept="application/json" @change="onClassFileChange" />
-                <UTextarea
-                  v-if="classCreateData"
-                  :value="JSON.stringify(classCreateData, null, 2)"
-                  class="mt-2"
-                  cols="100"
-                  :rows="10"
-                  readonly
-                />
-              </UFormGroup>
-
-              <UFormGroup>
-                <template #label>
-                  Upload NFT default data JSON file<br>(<UButton
-                    label="nfts_default.json"
-                    to="https://github.com/likecoin/iscn-nft-tools/blob/master/mint-nft/samples/nfts_default.json"
-                    variant="link"
-                    :padded="false"
-                    target="_blank"
-                  />)
-                </template>
-                <UInput type="file" accept="application/json" @change="onMintNFTDefaultFileChange" />
-                <UTextarea
-                  v-if="nftMintDefaultData"
-                  :value="JSON.stringify(nftMintDefaultData, null, 2)"
-                  cols="100"
-                  :rows="10"
-                  readonly
-                />
-              </UFormGroup>
-
-              <UFormGroup>
-                <template #label>
-                  Upload NFT CSV file (<UButton
-                    label="nfts.csv"
-                    to="https://github.com/likecoin/iscn-nft-tools/blob/master/mint-nft/samples/nfts.csv"
-                    variant="link"
-                    :padded="false"
-                    target="_blank"
-                  />)
-                </template>
-                <UInput type="file" accept=".csv" @change="onMintNFTFileChange" />
-              </UFormGroup>
-
-              <UAlert
-                v-if="nftMintListData?.length"
-                :title="`Number of NFT data in CSV: ${nftMintListData?.length}`"
-              />
-
-              <template #footer>
-                <UButton
-                  label="Mint"
-                  :disabled="
-                    isLoading ||
-                      !(
-                        (!isCreatingClass || classCreateData) &&
-                        nftMintDefaultData &&
-                        nftMintListData
-                      )"
-                  @click="onClickMintByUploading"
-                />
-              </template>
-            </UCard>
+          <template #header>
+            <h3 class="font-bold">
+              Mint NFT by filling required information
+            </h3>
           </template>
+          <NFTMintForm
+            ref="formRef"
+            v-model="state"
+            :max-supply="classMaxSupply"
+            :show-max-supply="isCreatingClass"
+          />
 
-          <template #input>
-            <UCard
-              class="flex-1"
-              :ui="{ body: { base: 'space-y-4' } }"
-            >
-              <template #header>
-                <h3 class="font-bold">
-                  Mint NFT by filling required information
-                </h3>
-              </template>
-              <UForm :validate="validate" :state="state" class="flex flex-col gap-[12px]">
-                <UFormGroup label="NFT ID Prefix / 前綴（書本編號）" name="prefix" required>
-                  <UInput v-model="state.nftIdPrefix" placeholder="English only ex.MoneyVerse" />
-                </UFormGroup>
-
-                <UFormGroup label="Number of NFT to mint / 鑄造數量（此批）" required>
-                  <UInput
-                    v-model="nftMintCount"
-                    placeholder="0-100"
-                    type="number"
-                    :min="0"
-                    :max="classMaxSupply"
-                  />
-                </UFormGroup>
-
-                <UFormGroup label="Image URL / 封面網址" required>
-                  <UInput v-model="imageUrl" placeholder="ipfs:// ... or ar://...." />
-                </UFormGroup>
-
-                <UFormGroup label="External URL (optional) / 外部網址（選填）">
-                  <UInput v-model="externalUrl" placeholder="https://" />
-                </UFormGroup>
-
-                <UFormGroup label="URI (optional) / 元資料網址（選填）">
-                  <UInput v-model="uri" placeholder="https://" />
-                </UFormGroup>
-
-                <UFormGroup v-if="isCreatingClass" label="Max number of supply for this NFT Class (optional) / 最大供應量（選填）">
-                  <template
-                    v-if="classMaxSupply && classMaxSupply < nftMintCount"
-                    #help
-                  >
-                    <UAlert
-                      class="mt-1"
-                      icon="i-heroicons-exclamation-triangle"
-                      title="Should be more than number of NFT to mint"
-                      color="red"
-                      variant="subtle"
-                    />
-                  </template>
-                  <UInput
-                    v-model="classMaxSupply"
-                    type="number"
-                    :min="nftMintCount"
-                    :placeholder="`> ${nftMintCount}`"
-                  />
-                </UFormGroup>
-              </UForm>
-              <template #footer>
-                <UButton
-                  label="Mint"
-                  :disabled="isLoading || !(state.nftIdPrefix && nftMintCount && imageUrl) || hasError"
-                  @click="onClickMintByInputting"
-                />
-              </template>
-            </UCard>
+          <template #footer>
+            <UButton
+              label="Mint"
+              :disabled="isLoading || !(state.prefix && state.mintCount && state.imageUrl) || !isFormValid"
+              @click="onClickMintByInputting"
+            />
           </template>
-        </UTabs>
+        </UCard>
       </UCard>
 
       <UCard v-else-if="step > 2 && classId">
@@ -395,7 +193,7 @@
           />
           <div class="p-[4px] border-[2px] border-[#f59e0b] rounded-[0.375rem]">
             <UButton
-              :to="{ name: 'nft-book-store-new', query: { class_id: classId, count: nftMintCount } }"
+              :to="{ name: 'nft-book-store-new', query: { class_id: classId, count: state.mintCount } }"
               label="Continue to publish NFT Book / 繼續上架"
               variant="solid"
               color="orange"
@@ -424,21 +222,20 @@ import { storeToRefs } from 'pinia'
 import { v4 as uuidv4 } from 'uuid'
 import { parse } from 'csv-parse/sync'
 import { stringify } from 'csv-stringify/sync'
-import type { FormError } from '#ui/types'
 
 import { useWalletStore } from '~/stores/wallet'
-import { downloadFile, convertArrayOfObjectsToCSV, sleep } from '~/utils'
+import { downloadFile, convertArrayOfObjectsToCSV } from '~/utils'
 import { NFT_DEFAULT_MINT_AMOUNT, PUBLISHING_NOTICE_URL_EN, PUBLISHING_NOTICE_URL_ZH } from '~/constant'
 
-const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } = useRuntimeConfig().public
+const { LCD_URL, LIKER_LAND_URL } = useRuntimeConfig().public
 const router = useRouter()
 const route = useRoute()
+const toast = useToast()
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
 const { initIfNecessary } = store
 
-const appLikeCoURL = APP_LIKE_CO_URL
 const likerLandURL = LIKER_LAND_URL
 const step = ref(1)
 const error = ref('')
@@ -449,12 +246,15 @@ const iscnOwner = ref('')
 const iscnCreateData = ref<any>(null)
 const iscnData = ref<any>(null)
 const state = reactive({
-  nftIdPrefix: 'BOOKSN'
+  prefix: 'BOOKSN',
+  mintCount: NFT_DEFAULT_MINT_AMOUNT,
+  imageUrl: '',
+  externalUrl: '',
+  uri: '',
+  maxSupply: undefined
 })
-const hasError = ref(false)
-const imageUrl = ref('')
-const externalUrl = ref('')
-const uri = ref('')
+
+const formRef = ref()
 
 const classData = ref<any>(null)
 const classMaxSupply = ref<number | undefined>(undefined)
@@ -462,7 +262,6 @@ const classCreateData = ref<any>(null)
 
 const nftMintListData = ref<any>([])
 const nftMintDefaultData = ref<any>(null)
-const nftMintCount = ref(NFT_DEFAULT_MINT_AMOUNT)
 const nftData = ref<any>(null)
 const nftCSVData = ref('')
 const existingNftCount = ref(0)
@@ -470,12 +269,14 @@ const existingNftCount = ref(0)
 const iscnId = computed(() => iscnData.value?.['@id'])
 const classId = computed(() => classData.value?.id)
 const isCreatingClass = computed(() => !classId.value && step.value === 2)
-// HACK: set max supply to 50 to avoid authcore max int issue
-const mintMaxCount = computed(() => Math.min(classMaxSupply.value || NFT_DEFAULT_MINT_AMOUNT))
 
 const shouldShowDownloadLink = ref(false)
 const showEditISCNModal = ref(false)
 const editISCNRef = ref<any>(null)
+
+const isFormValid = computed(() => {
+  return formRef.value?.validate(state).length === 0
+})
 
 watch(iscnId, (newIscnId) => {
   if (newIscnId) {
@@ -495,7 +296,7 @@ watch(isLoading, (newIsLoading) => {
 
 watch(iscnData, (recordData) => {
   if (recordData) {
-    imageUrl.value = recordData.contentMetadata?.thumbnailUrl || ''
+    state.imageUrl = recordData.contentMetadata?.thumbnailUrl || ''
   }
 })
 
@@ -508,18 +309,6 @@ onMounted(() => {
   // HACK: mitigate disable state stuck issue when iscnIdInput is inited as qs in data
   iscnIdInput.value = route.query.class_id as string || route.query.iscn_id as string || ''
 })
-
-const validate = (state: any): FormError[] => {
-  hasError.value = false
-  const errors = []
-  const whitespaceRegex = /^[a-zA-Z][a-zA-Z0-9/:-]{2,100}$/
-
-  if (!whitespaceRegex.test(state.nftIdPrefix)) {
-    hasError.value = true
-    errors.push({ path: 'prefix', message: 'NFT ID cannot contain spaces' })
-  }
-  return errors
-}
 
 function onClickHelpEn () {
   useTrackEvent('mint_nft_click_help_en')
@@ -571,50 +360,6 @@ async function onISCNIDInput () {
   }
 }
 
-async function onISCNFileInput () {
-  try {
-    isLoading.value = true
-    if (!wallet.value || !signer.value) {
-      await initIfNecessary()
-    }
-    if (!wallet.value || !signer.value) { throw new Error('NO_WALLET') }
-    if (!iscnCreateData.value) { throw new Error('NO_ISCN_DATA') }
-    const newIscnId = await signCreateISCNRecord(iscnCreateData.value, signer.value, wallet.value)
-    // HACK: wait 1 block before querying
-    await sleep(6000)
-    const data = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(newIscnId)}`)
-    if (!data) { throw new Error('INVALID_ISCN_ID') }
-    const { records, owner } = data as any
-    iscnData.value = records[0].data
-    iscnOwner.value = owner
-    step.value = 2
-  } catch (err) {
-    console.error(err)
-    error.value = (err as Error).toString()
-  } finally {
-    isLoading.value = false
-  }
-}
-
-function onISCNFileChange (files: FileList) {
-  if (!files) { return }
-  const [file] = files
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    try {
-      const text = e.target?.result
-      if (typeof text !== 'string') { return }
-      const json = JSON.parse(text)
-      if (!json || !json.contentMetadata) { throw new Error('Invalid ISCN data json') }
-      iscnCreateData.value = json
-    } catch (err) {
-      console.error(err)
-      error.value = (err as Error).toString()
-    }
-  }
-  reader.readAsText(file)
-}
-
 function generateNFTMintListCSVData ({
   prefix,
   nftExisitngCount = 0,
@@ -645,48 +390,59 @@ async function onClickMintByInputting () {
   isLoading.value = true
   const { contentMetadata } = iscnData.value
 
+  if (formRef.value?.validate(state).length !== 0) {
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: 'Required field missing',
+      timeout: 3000,
+      color: 'red'
+    })
+    isLoading.value = false
+    return
+  }
+
   const nftClassData = {
     name: contentMetadata.name,
     description: contentMetadata.description,
     symbol: 'BOOK',
-    uri: uri.value || '',
+    uri: state.uri || '',
     metadata: {
       name: contentMetadata.name,
-      image: imageUrl.value,
-      external_url: externalUrl.value,
+      image: state.imageUrl,
+      external_url: state.externalUrl,
       nft_meta_collection_id: 'nft_book',
       nft_meta_collection_name: 'NFT Book',
       nft_meta_collection_description: 'NFT Book by Liker Land'
     }
   }
   const nftsDefaultData = {
-    uri: uri.value || '',
+    uri: state.uri || '',
     metadata: {
       name: contentMetadata.name,
-      image: imageUrl.value,
-      external_url: externalUrl.value
+      image: state.imageUrl,
+      external_url: state.externalUrl
     }
   }
   if (!isCreatingClass.value) {
     const { nfts } = await getNFTs({ classId: classId.value as string })
     existingNftCount.value = nfts.length
   }
-  if (typeof nftMintCount.value !== 'number') {
-    nftMintCount.value = Number(nftMintCount.value)
+  if (typeof state.mintCount !== 'number') {
+    state.mintCount = Number(state.mintCount)
   }
   const csvDataString = generateNFTMintListCSVData({
-    prefix: state.nftIdPrefix,
-    nftMintCount: nftMintCount.value,
+    prefix: state.prefix,
+    nftMintCount: state.mintCount,
     nftExisitngCount: existingNftCount.value,
-    imgUrl: imageUrl.value,
-    uri: uri.value
+    imgUrl: state.imageUrl,
+    uri: state.uri
   })
   const csvDataArray = parse(csvDataString, { columns: true })
 
   classCreateData.value = nftClassData
   nftMintDefaultData.value = nftsDefaultData
   nftMintListData.value = csvDataArray
-  nftMintCount.value = csvDataArray.length
+  state.mintCount = csvDataArray.length
 
   try {
     if (step.value === 2) {
@@ -695,22 +451,6 @@ async function onClickMintByInputting () {
     }
     await onMintNFTStart() // step=4
     shouldShowDownloadLink.value = true
-  } catch (error) {
-    console.error(error)
-  } finally {
-    isLoading.value = false
-  }
-}
-
-async function onClickMintByUploading () {
-  isLoading.value = true
-  try {
-    if (step.value === 2) {
-      await onClassFileInput() // step=3
-      if (!classId.value) { throw new Error('CLASS_CREATION_FAILED') }
-    }
-    await onMintNFTStart() // step=4
-    shouldShowDownloadLink.value = false
   } catch (error) {
     console.error(error)
   } finally {
@@ -740,25 +480,6 @@ async function onClassFileInput () {
   }
 }
 
-function onClassFileChange (files: FileList) {
-  if (!files) { return }
-  const [file] = files
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    try {
-      const text = e.target?.result
-      if (typeof text !== 'string') { return }
-      const json = JSON.parse(text)
-      if (!json || !json.name) { throw new Error('Invalid Class data json') }
-      classCreateData.value = json
-    } catch (err) {
-      console.error(err)
-      error.value = (err as Error).toString()
-    }
-  }
-  reader.readAsText(file)
-}
-
 async function onMintNFTStart () {
   try {
     isLoading.value = true
@@ -767,12 +488,12 @@ async function onMintNFTStart () {
     }
     if (!wallet.value || !signer.value) { return }
     if (!nftMintDefaultData.value) { throw new Error('NO_MINT_DATA') }
-    if (nftMintListData.value.length && nftMintListData.value.length !== nftMintCount.value) {
+    if (nftMintListData.value.length && nftMintListData.value.length !== state.mintCount) {
       throw new Error(`NFT csv data length ${nftMintListData.value.length} must match nft mint amount ${nftMintCount.value}`)
     }
     const defaultURI = nftMintDefaultData.value.uri
     const defaultMetadata = nftMintDefaultData.value.metadata
-    const nfts = [...Array(nftMintCount.value).keys()].map((i) => {
+    const nfts = [...Array(state.mintCount).keys()].map((i) => {
       const {
         nftId,
         uri: dataUri,
@@ -817,44 +538,6 @@ async function onMintNFTStart () {
   } finally {
     isLoading.value = false
   }
-}
-
-function onMintNFTDefaultFileChange (files: FileList) {
-  if (!files) { return }
-  const [file] = files
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    try {
-      const text = e.target?.result
-      if (typeof text !== 'string') { return }
-      const json = JSON.parse(text)
-      if (!json || json.uri === undefined) { throw new Error('Invalid NFT default data json') }
-      nftMintDefaultData.value = json
-    } catch (err) {
-      console.error(err)
-      error.value = (err as Error).toString()
-    }
-  }
-  reader.readAsText(file)
-}
-
-function onMintNFTFileChange (files: FileList) {
-  if (!files) { return }
-  const [file] = files
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    try {
-      const text = e.target?.result
-      if (typeof text !== 'string') { return }
-      const data = parse(text, { columns: true })
-      nftMintListData.value = data
-      nftMintCount.value = data.length
-    } catch (err) {
-      console.error(err)
-      error.value = (err as Error).toString()
-    }
-  }
-  reader.readAsText(file)
 }
 
 function onDownloadCSV (e?: Event) {
