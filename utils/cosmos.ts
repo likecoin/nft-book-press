@@ -1,5 +1,4 @@
 import { BigNumber } from 'bignumber.js'
-import { MsgSend } from 'cosmjs-types/cosmos/nft/v1beta1/tx'
 import { PageRequest } from 'cosmjs-types/cosmos/base/query/v1beta1/pagination'
 import { GenericAuthorization } from 'cosmjs-types/cosmos/authz/v1beta1/authz'
 
@@ -326,136 +325,9 @@ export async function signSendNFTs (
   return res
 }
 
-export async function signGrantNFTSendAuthz (
-  grantee: string,
-  signer: OfflineSigner,
-  address: string,
-  memo?: string
-) {
-  const { RPC_URL } = useRuntimeConfig().public
-  const signingClient = await getSigningClient()
-  await signingClient.connectWithSigner(RPC_URL, signer)
-  const expirationInMs = Date.now() + 1000 * 5184000 // 60 days
-  const res = await signingClient.createGenericGrant(address, grantee, '/cosmos.nft.v1beta1.MsgSend', expirationInMs, { memo })
-  return res
-}
-
-export async function signExecNFTSendAuthz (
-  targetAddress: string,
-  ownerAddress: string,
-  classIds: string[],
-  nftIds: string[],
-  signer: OfflineSigner,
-  address: string,
-  memo?: string
-) {
-  const { RPC_URL } = useRuntimeConfig().public
-  const signingClient = await getSigningClient()
-  await signingClient.connectWithSigner(RPC_URL, signer)
-  const messages = [{
-    typeUrl: '/cosmos.authz.v1beta1.MsgExec',
-    value: {
-      grantee: address,
-      msgs: classIds.map((classId, index) => ({
-        typeUrl: '/cosmos.nft.v1beta1.MsgSend',
-        value: MsgSend.encode(
-          MsgSend.fromPartial({
-            sender: ownerAddress,
-            receiver: targetAddress,
-            classId,
-            id: nftIds[index]
-          })
-        ).finish()
-      }))
-    }
-  }]
-  const res = await signingClient.sendMessages(
-    address,
-    messages,
-    { memo }
-  ) as DeliverTxResponse
-  return res
-}
-
-export async function signRevokeNFTSendAuthz (
-  grantee: string,
-  signer: OfflineSigner,
-  address: string,
-  memo?: string
-) {
-  const { RPC_URL } = useRuntimeConfig().public
-  const signingClient = await getSigningClient()
-  await signingClient.connectWithSigner(RPC_URL, signer)
-  const res = await signingClient.revokeGenericGrant(address, grantee, '/cosmos.nft.v1beta1.MsgSend', { memo })
-  return res
-}
-
 export function shortenWalletAddress (address: string) {
   if (!address) { return '-' }
   return `${address.slice(0, 10)}...${address.slice(-6)}`
-}
-
-export async function sendNFTsToAPIWallet (
-  classIds: string[],
-  nftIds: string[],
-  nftCount: number,
-  signer: OfflineSigner,
-  ownerAddress: string
-) {
-  if (nftCount <= 0) { return '' }
-
-  if (!ownerAddress) {
-    throw new Error('Missing owner address')
-  }
-
-  if (!signer) {
-    throw new Error('Missing signer')
-  }
-
-  const results = await Promise.all(classIds.map((classId, index) => getNFTs({
-    classId,
-    nftId: nftIds[index],
-    owner: ownerAddress,
-    needCount: nftCount
-  })))
-
-  let totalClassIds: string[] = []
-  let totalNftIds: string[] = []
-  results.forEach(({ nfts }, index) => {
-    const nftIds = nfts.map(nft => nft.id).slice(0, nftCount)
-    const classId = classIds[index]
-    if (nftIds.length < nftCount) {
-      throw new Error(`Not enough NFTs, has ${nftIds.length} but need ${nftCount}`)
-    }
-    totalNftIds = totalNftIds.concat(nftIds)
-    totalClassIds = totalClassIds.concat(nftIds.map(_ => classId))
-  })
-
-  const { LIKER_NFT_TARGET_ADDRESS } = useRuntimeConfig().public
-  const { transactionHash, code } = await signSendNFTs(
-    LIKER_NFT_TARGET_ADDRESS,
-    totalClassIds,
-    totalNftIds,
-    signer,
-    ownerAddress,
-    'Commission Liker Land to help issue this NFT ebook'
-  )
-
-  if (!transactionHash || code !== 0) {
-    throw new Error('Failed to sign and send NFTs')
-  }
-
-  for (let tryCount = 0; tryCount < 3; tryCount++) {
-    await sleep(3000)
-    try {
-      const tx = await queryTxByHash(transactionHash)
-      if (tx) {
-        break
-      }
-    } catch {}
-  }
-
-  return transactionHash
 }
 
 export function amountToLIKE (likecoin: any, denom: string) {
