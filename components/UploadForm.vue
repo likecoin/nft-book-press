@@ -401,7 +401,7 @@ const submitToArweave = async (record: any): Promise<void> => {
   let buffer = Buffer.from(arrayBuffer)
   let { ipfsHash } = record
 
-  if (!record.cachedIpfsHash) {
+  if (!record.encryptedIpfsHash) {
     const shouldEncrypt =
       (record.fileType === 'application/epub+zip' ||
         record.fileType === 'application/pdf') &&
@@ -414,10 +414,10 @@ const submitToArweave = async (record: any): Promise<void> => {
 
       record.encryptionKey = rawEncryptedKeyAsBase64
       record.encryptedBuffer = encryptedBuffer
-      record.cachedIpfsHash = await calculateIPFSHash(encryptedBuffer)
+      record.encryptedIpfsHash = await calculateIPFSHash(encryptedBuffer)
     }
   }
-  ipfsHash = record.cachedIpfsHash || ipfsHash
+  ipfsHash = record.encryptedIpfsHash || ipfsHash
   buffer = record.encryptedBuffer || buffer
   const key = record.encryptionKey || undefined
 
