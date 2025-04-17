@@ -31,12 +31,10 @@
 
         <UFormGroup label="NFT Class ID">
           <UInput
-            v-if="!isEditMode"
-            v-model="classIdInput"
+            :value="classIdInput"
+            disabled
             class="font-mono"
-            placeholder="likenft...."
           />
-          <UInput v-else :value="classId" :readonly="true" />
         </UFormGroup>
 
         <UFormGroup label="Table Of Content / 章節目錄">
