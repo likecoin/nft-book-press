@@ -788,7 +788,12 @@ onMounted(async () => {
       stripeConnectWallet.value = classStripeWallet
       if (classStripeWallet !== wallet.value) {
         isUsingDefaultAccount.value = false
-        await fetchStripeConnectStatusByWallet(classStripeWallet)
+        try {
+          await fetchStripeConnectStatusByWallet(classStripeWallet)
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error(err)
+        }
       }
     }
     const orders = await $fetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/orders`,
@@ -800,7 +805,12 @@ onMounted(async () => {
 
     ordersData.value = orders
 
-    await fetchStripeConnectStatusByWallet(wallet.value)
+    try {
+      await fetchStripeConnectStatusByWallet(wallet.value)
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err)
+    }
     collectionListingInfo.value.classIds.forEach((classId: string) => lazyFetchClassMetadataById(classId))
   } catch (err) {
     console.error(err)

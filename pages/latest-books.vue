@@ -192,8 +192,14 @@ async function fetchUserStripeInfo () {
     isStripeConnectReady.value = false
     return
   }
-  const stripeConnectStatus = await stripeStore.fetchStripeConnectStatusByWallet(wallet.value)
-  isStripeConnectReady.value = stripeConnectStatus?.isReady
+  try {
+    const stripeConnectStatus = await stripeStore.fetchStripeConnectStatusByWallet(wallet.value)
+    isStripeConnectReady.value = stripeConnectStatus?.isReady
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err)
+    isStripeConnectReady.value = false
+  }
 }
 
 function handleAffiliationSetupButtonClick () {

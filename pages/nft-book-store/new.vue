@@ -654,7 +654,12 @@ useSeoMeta({
 onMounted(async () => {
   try {
     isLoading.value = true
-    await fetchStripeConnectStatusByWallet(wallet.value)
+    try {
+      await fetchStripeConnectStatusByWallet(wallet.value)
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(err)
+    }
 
     if (getStripeConnectStatusByWallet.value(wallet.value).isReady) {
       isStripeConnectChecked.value = true
