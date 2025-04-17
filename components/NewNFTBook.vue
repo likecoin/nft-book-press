@@ -36,9 +36,19 @@
             class="font-mono"
           />
         </UFormGroup>
-
-        <UFormGroup label="Table Of Content / 章節目錄">
-          <UTextarea v-model="tableOfContents" />
+        <UFormGroup>
+          <UCheckbox
+            v-model="hideDownload"
+            name="hideDownload"
+            label="DRM: encrypt content & disable download / 加密文本、禁止下載"
+          />
+        </UFormGroup>
+        <UFormGroup>
+          <UCheckbox
+            v-model="isAllowCustomPrice"
+            name="isAllowCustomPrice"
+            label="Accept tipping / 接受打賞"
+          />
         </UFormGroup>
       </UCard>
 
@@ -437,51 +447,6 @@
                 </template>
               </UTable>
             </UCard>
-
-            <!-- DRM -->
-            <UCard :ui="{ body: { base: 'space-y-8' } }">
-              <template #header>
-                <h3 class="font-bold font-mono">
-                  DRM Options / 數位版權管理選項
-                </h3>
-              </template>
-
-              <div class="grid md:grid-cols-2 gap-4">
-                <UFormGroup
-                  label="Force NFT claim before view"
-                  :ui="{ label: { base: 'font-mono font-bold' } }"
-                >
-                  <UCheckbox
-                    v-model="mustClaimToView"
-                    name="mustClaimToView"
-                    label="Must claim NFT to view"
-                    :disabled="isDrmLocked"
-                  />
-                </UFormGroup>
-
-                <UFormGroup
-                  label="Disable File Download"
-                  :ui="{ label: { base: 'font-mono font-bold' } }"
-                >
-                  <UCheckbox
-                    v-model="hideDownload"
-                    name="hideDownload"
-                    label="Disable Download"
-                  />
-                </UFormGroup>
-
-                <UFormGroup
-                  label="Insert cutomized message page in eBook"
-                  :ui="{ label: { base: 'font-mono font-bold' } }"
-                >
-                  <UCheckbox
-                    v-model="enableCustomMessagePage"
-                    name="enableCustomMessagePage"
-                    label="Enable custom message page"
-                  />
-                </UFormGroup>
-              </div>
-            </UCard>
           </div>
         </template>
       </UCard>
@@ -555,7 +520,6 @@ const mdEditorPlaceholder = ref({
 const classIdInput = ref(classId || '')
 const nextPriceIndex = ref(1)
 const tableOfContents = ref('')
-const mustClaimToView = ref(true)
 const enableCustomMessagePage = ref(false)
 const hideDownload = ref(false)
 const autoDeliverNftIdInput = ref('')
@@ -571,7 +535,7 @@ const prices = ref<any[]>([
     descriptionZh: '',
     hasShipping: false,
     isPhysicalOnly: false,
-    isAllowCustomPrice: false,
+    isAllowCustomPrice: isAllowCustomPrice.value,
     isUnlisted: false
   }
 ])
@@ -611,7 +575,7 @@ const isEditMode = computed(() =>
   Boolean(route.params.editingClassId && editionIndex.value)
 )
 const pageTitle = computed(() =>
-  isEditMode.value ? 'Edit Current Edition' : 'New NFT Book Listing'
+  isEditMode.value ? 'Edit Current Edition' : 'General settings / 一般選項'
 )
 const submitButtonText = computed(() =>
   isEditMode.value ? 'Save Changes' : 'Submit'
@@ -656,12 +620,6 @@ const hasAutoDeliverNFT = computed(() =>
 
 const isStandalonePage = computed(() => {
   return route.name === 'nft-book-store-new'
-})
-
-const isDrmLocked = computed(() => {
-  if (isStandalonePage.value) { return false }
-  const uploadFileData = getUploadFileData()
-  return uploadFileData?.fileRecords?.some(record => record.arweaveKey)
 })
 
 config({
@@ -710,13 +668,6 @@ watch(moderatorWallets, (newModeratorWallets) => {
     }
   })
 })
-
-watch(isDrmLocked, (locked) => {
-  if (locked) {
-    mustClaimToView.value = true
-    hideDownload.value = true
-  }
-}, { immediate: true })
 
 function updatePrice (e: InputEvent, key: string, index: number) {
   prices.value[index][key] = (e.target as HTMLInputElement)?.value
@@ -796,7 +747,7 @@ function mapPrices (prices: any) {
     price: Number(p.price),
     stock: Number(p.stock),
     isAutoDeliver: !p.isPhysicalOnly && p.deliveryMethod === 'auto',
-    isAllowCustomPrice: p.isAllowCustomPrice ?? true,
+    isAllowCustomPrice: isAllowCustomPrice.value,
     isUnlisted: p.isUnlisted ?? false,
     autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
     hasShipping: p.hasShipping || false,
@@ -882,6 +833,10 @@ async function submitNewClass () {
         wallet.value
       )
     }
+
+    const shouldEnableCustomMessagePage =
+    prices.value.some(price => price.deliveryMethod === 'manual')
+
     await newBookListing(classIdInput.value as string, {
       tableOfContents: tableOfContents.value,
       defaultPaymentCurrency: 'USD',
@@ -890,8 +845,8 @@ async function submitNewClass () {
       notificationEmails: notificationEmails.value,
       prices: p,
       shippingRates: s,
-      mustClaimToView: mustClaimToView.value,
-      enableCustomMessagePage: enableCustomMessagePage.value,
+      mustClaimToView: true,
+      enableCustomMessagePage: shouldEnableCustomMessagePage,
       hideDownload: hideDownload.value,
       autoDeliverNFTsTxHash
     })
