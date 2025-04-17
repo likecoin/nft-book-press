@@ -436,7 +436,7 @@
                   params: { classId },
                   query: { count: nftMintCount }
                 }"
-                label="Restock existing listing/ 新庫存上架"
+                label="Restock existing listing / 新庫存上架"
                 variant="solid"
                 color="orange"
               />
@@ -594,6 +594,7 @@ function onClickDisclaimerZh () {
 async function onISCNIDInput () {
   try {
     isLoading.value = true
+    isRestockingNFT.value = false
     if (iscnIdInput.value.startsWith('iscn://')) {
       const data = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(iscnIdInput.value)}`)
       const { records, owner } = data as any
