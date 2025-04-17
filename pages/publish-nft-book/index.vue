@@ -173,8 +173,8 @@ const steps = [
     description: 'Mint NFT'
   },
   {
-    title: '設定上架資訊',
-    description: 'Set up listing information'
+    title: '新書發佈',
+    description: 'Publish new book'
   }
 ]
 
