@@ -96,7 +96,6 @@ const classCreateData = ref<any>(null)
 
 const nftMintListData = ref<any>([])
 const nftMintDefaultData = ref<any>(null)
-const nftMintCount = ref(NFT_DEFAULT_MINT_AMOUNT)
 const nftData = ref<any>(null)
 const nftCSVData = ref('')
 const existingNftCount = ref(0)
@@ -290,12 +289,12 @@ async function onMintNFTStart () {
     }
     if (!wallet.value || !signer.value) { return }
     if (!nftMintDefaultData.value) { throw new Error('NO_MINT_DATA') }
-    if (nftMintListData.value.length && nftMintListData.value.length !== nftMintCount.value) {
-      throw new Error(`NFT csv data length ${nftMintListData.value.length} must match nft mint amount ${nftMintCount.value}`)
+    if (nftMintListData.value.length && nftMintListData.value.length !== formState.mintCount) {
+      throw new Error(`NFT csv data length ${nftMintListData.value.length} must match nft mint amount ${formState.mintCount}`)
     }
     const defaultURI = nftMintDefaultData.value.uri
     const defaultMetadata = nftMintDefaultData.value.metadata
-    const nfts = [...Array(nftMintCount.value).keys()].map((i) => {
+    const nfts = [...Array(formState.mintCount).keys()].map((i) => {
       const {
         nftId,
         uri: dataUri,
