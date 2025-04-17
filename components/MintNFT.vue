@@ -250,7 +250,8 @@ async function onClickMintByInputting () {
     const classData = await onMintNFTStart() // step=4
     emit('submit', {
       classId: classData.id,
-      nftMintCount: formState.mintCount
+      nftMintCount: formState.mintCount,
+      prefix: formState.prefix
     })
   } catch (error) {
     console.error(error)

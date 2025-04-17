@@ -81,11 +81,11 @@ export function getPortfolioURL (wallet: string) {
 export const deliverMethodOptions = [
   {
     value: 'auto',
-    label: 'Automatic deliver NFT'
+    label: 'Auto delivery / 自動發書'
   },
   {
     value: 'manual',
-    label: 'Sign memo and manually deliver each NFT'
+    label: 'Manual delivery / 手動發書'
   }
 ]
 

@@ -24,6 +24,7 @@ export interface UploadFileData {
   classData?: {
     classId: string
     nftMintCount: number
+    prefix: string
   }
 }
 
