@@ -4,7 +4,7 @@
       <div class="flex flex-row justify-between items-center">
         <div class="flex justify-start items-center gap-[8px]">
           <h3 class="font-bold font-mono">
-            Shipping Options / 實體書運送選項
+            Shipping Options / 寄送選項
           </h3>
           <slot name="header" />
         </div>

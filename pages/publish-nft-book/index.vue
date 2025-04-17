@@ -260,7 +260,7 @@ const handleMintNFTSubmit = async (res: any) => {
     router.replace({ query: { class_id: classId } })
   }
   updateUploadFileData({
-    classData: { classId, nftMintCount }
+    classData: { classId, nftMintCount, prefix: res.prefix }
   })
   step.value = 3
   await nextTick()

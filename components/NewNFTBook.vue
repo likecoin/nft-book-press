@@ -77,11 +77,11 @@
             >
               <template #header>
                 <h3 class="font-bold font-mono">
-                  Pricing and Availability
+                  {{ `Edition #${index + 1} / 版本 #${index + 1}` }}
                 </h3>
               </template>
               <UFormGroup
-                :label="`Unit Price in USD (Minimum ${MINIMAL_PRICE}, or 0 for free) / 版本定價（美金）`"
+                :label="`Unit Price in USD (Minimum ${MINIMAL_PRICE}, or 0 for free) / 版本定價（美元）`"
               >
                 <UInput
                   :value="p.price"
@@ -92,7 +92,7 @@
                 />
               </UFormGroup>
               <UFormGroup
-                :label="`Total number of NFT ${hasMultiplePrices ? 'edition' : 'ebook'} for sale / 此定價的銷售數量`"
+                label="No of copies / 數量"
               >
                 <UInput
                   :value="p.stock"
@@ -103,88 +103,9 @@
                   @input="(e) => updatePrice(e, 'stock', index)"
                 />
               </UFormGroup>
-              <URadioGroup
-                v-model="p.deliveryMethod"
-                :disabled="p.isPhysicalOnly"
-                :legend="`Delivery method of this ${priceItemLabel} / 自動或手動發書`"
-                :options="deliverMethodOptions"
-                @change="handleDeliveryMethodChange"
-              />
-              <UFormGroup v-if="p.deliveryMethod === 'auto'">
-                <template #label>
-                  {{ `Memo of this ${priceItemLabel} / 自動發書留言` }}
-                  <ToolTips>
-                    <template #image>
-                      <img
-                        src="~/assets/images/hint/memo.png"
-                        class="object-cover"
-                        alt=""
-                      >
-                    </template>
-                    <UIcon name="i-heroicons-question-mark-circle" />
-                  </ToolTips>
-                </template>
-                <UInput
-                  :value="p.autoMemo"
-                  @input="(e) => updatePrice(e, 'autoMemo', index)"
-                />
-              </UFormGroup>
-              <UFormGroup
-                v-else
-                label="Is Physical only good / 只含實體書"
-              >
-                <UCheckbox
-                  v-model="p.isPhysicalOnly"
-                  name="isPhysicalOnly"
-                  label="This edition does not contain digital file/NFT"
-                />
-              </UFormGroup>
-
-              <UFormGroup>
-                <template #label>
-                  Allow custom price / 開啟打賞功能
-                  <ToolTips :image-style="{ width: '300px' }">
-                    <template #image>
-                      <img
-                        src="~/assets/images/hint/tipping.png"
-                        class="object-cover"
-                        alt=""
-                      >
-                    </template>
-                    <UIcon name="i-heroicons-question-mark-circle" />
-                  </ToolTips>
-                </template>
-                <UCheckbox
-                  v-model="p.isAllowCustomPrice"
-                  name="isAllowCustomPrice"
-                  label="Allow user to pay more than defined price"
-                />
-              </UFormGroup>
-              <UFormGroup label="Unlist Edition / 暫時下架">
-                <UCheckbox
-                  v-model="p.isUnlisted"
-                  name="isUnlisted"
-                  label="Pause selling of this Edition"
-                />
-              </UFormGroup>
-            </UCard>
-
-            <UCard
-              :ui="{
-                body: {
-                  base: 'flex flex-col gap-[20px]',
-                },
-                base: 'overflow-visible'
-              }"
-            >
-              <template #header>
-                <h3 class="font-bold font-mono">
-                  Product Information
-                </h3>
-              </template>
               <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
                 <template #label>
-                  Product Name / 產品名稱（英文）
+                  Product Name / 產品名稱
                   <ToolTips :image-style="{ width: '250px' }">
                     <template #image>
                       <img
@@ -197,8 +118,8 @@
                   </ToolTips>
                 </template>
                 <UInput
-                  placeholder="Product name in English"
-                  :value="p.nameEn"
+                  placeholder="Product name"
+                  :value="p.name"
                   @input="(e) => updatePrice(e, 'nameEn', index)"
                 />
                 <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional) / 描述（選填）</span>
@@ -212,44 +133,83 @@
                   :style="{ height: '200px', width: '100%', marginTop: '0px' }"
                 />
               </UFormGroup>
-              <UFormGroup :ui="{ container: 'space-y-2 my-[20px]' }">
-                <template #label>
-                  產品名稱（中文）
-                  <ToolTips :image-style="{ width: '250px' }">
-                    <template #image>
-                      <img
-                        src="~/assets/images/hint/editionInfo-zh.png"
-                        class="object-cover"
-                        alt=""
-                      >
-                    </template>
-                    <UIcon name="i-heroicons-question-mark-circle" />
-                  </ToolTips>
-                </template>
-                <UInput
-                  placeholder="產品中文名字"
-                  :value="p.nameZh"
-                  @input="(e) => updatePrice(e, 'nameZh', index)"
-                />
-                <span class="block text-[14px] text-[#374151] mt-[8px]">描述 (選填)</span>
-                <md-editor
-                  v-model="p.descriptionZh"
-                  language="en-US"
-                  :editor-id="`zh-${index}`"
-                  :placeholder="mdEditorPlaceholder.zh"
-                  :toolbars="toolbarOptions"
-                  :sanitize="sanitizeHtml"
-                  :style="{ height: '200px', width: '100%', marginTop: '0px' }"
+
+              <div class="flex flex-col gap-2">
+                <!-- Auto delivery option -->
+                <div class="space-y-2">
+                  <URadio
+                    v-model="p.deliveryMethod"
+                    value="auto"
+                    :disabled="p.isPhysicalOnly"
+                    name="deliveryMethod"
+                    label="Auto delivery / 自動發書"
+                    @change="handleDeliveryMethodChange"
+                  />
+
+                  <div v-if="p.deliveryMethod === 'auto'" class="pl-8 space-y-2">
+                    <UFormGroup label="Start ID (optional) / 起始 ID（選填）">
+                      <UInput
+                        v-model="autoDeliverNftIdInput"
+                        class="font-mono"
+                        :placeholder="`${prefix}-000`"
+                      />
+                    </UFormGroup>
+
+                    <UFormGroup label="Memo / 發書留言">
+                      <UInput
+                        :value="p.autoMemo"
+                        placeholder="Thank you for your support. It means a lot to me."
+                        @input="(e) => updatePrice(e, 'autoMemo', index)"
+                      />
+                    </UFormGroup>
+                  </div>
+                </div>
+
+                <!-- Manual delivery option -->
+                <div class="space-y-2">
+                  <URadio
+                    v-model="p.deliveryMethod"
+                    value="manual"
+                    :disabled="p.isPhysicalOnly"
+                    name="deliveryMethod"
+                    label="Manual delivery / 手動發書"
+                    @change="handleDeliveryMethodChange"
+                  />
+                  <div v-if="p.deliveryMethod === 'manual'" class="pl-8 space-y-2">
+                    <UFormGroup label="Autograph image / 簽名圖">
+                      <UInput
+                        type="file"
+                        accept="image/*"
+                        @change="(e)=>onFileUpload(e, 'autographImage', index)"
+                      />
+                    </UFormGroup>
+                  </div>
+                </div>
+              </div>
+
+              <UFormGroup>
+                <UCheckbox
+                  v-model="p.isUnlisted"
+                  name="isUnlisted"
+                  label="Pause selling of this Edition / 暫停此版本的銷售"
                 />
               </UFormGroup>
+              <div class="flex flex-col gap-2">
+                <UCheckbox
+                  v-model="p.hasShipping"
+                  name="hasShipping"
+                  label="Includes physical good that requires shipping / 包含需要運送的實體商品"
+                />
+                <ShippingRatesRateTable
+                  v-if="p.hasShipping"
+                  :is-show-physical-goods-checkbox="false"
+                  :is-show-setting-modal-button="true"
+                  :shipping-info="shippingRates"
+                  @update-shipping-rates="updateShippingRate"
+                />
+              </div>
             </UCard>
 
-            <ShippingRatesRateTable
-              v-model="p.hasShipping"
-              :is-show-physical-goods-checkbox="true"
-              :is-show-setting-modal-button="true"
-              :shipping-info="shippingRates"
-            />
             <div class="flex justify-center items-center">
               <UButton
                 v-if="hasMultiplePrices"
@@ -326,66 +286,18 @@
             />
           </template>
 
-          <template #action-data="{ row }">
-            <div class="flex justify-end items-center">
-              <UButton
-                icon="i-heroicons-x-mark"
-                variant="soft"
-                color="red"
-                @click="() => notificationEmails.splice(row.index, 1)"
-              />
-            </div>
-          </template>
-        </UTable>
-      </UCard>
-
-      <UCard
-        :ui="{
-          header: { base: 'flex justify-between items-center' },
-          body: { padding: '12px' },
-        }"
-      >
-        <div class="flex justify-between items-center w-full">
-          <h3 class="font-bold font-mono">
-            Advanced Settings
-          </h3>
-          <UButton
-            color="gray"
-            variant="ghost"
-            :icon="
-              shouldShowAdvanceSettings
-                ? 'i-heroicons-chevron-up'
-                : 'i-heroicons-chevron-down'
-            "
-            @click="
-              () => {
-                shouldShowAdvanceSettings = !shouldShowAdvanceSettings;
-              }
-            "
-          />
-        </div>
-        <template v-if="shouldShowAdvanceSettings">
-          <div class="mt-[24px] flex flex-col gap-[12px]">
-            <!-- Shipping Rates -->
-            <ShippingRatesRateTable
-              :is-show-physical-goods-checkbox="false"
-              :is-show-setting-modal-button="true"
-              :shipping-info="shippingRates"
-              @update-shipping-rates="updateShippingRate"
-            />
-
-            <!-- Auto deliver NFT ID -->
-            <UFormGroup
-              v-if="hasAutoDeliverNFT"
-              label="Auto deliver NFT start ID (optional)"
-              :ui="{ label: { base: 'font-mono font-bold' } }"
-            >
-              <UInput
-                v-model="autoDeliverNftIdInput"
-                class="font-mono"
-                placeholder="MY-NFT-PREFIX-000"
-              />
-            </UFormGroup>
+                <template #action-data="{ row }">
+                  <div class="flex justify-end items-center">
+                    <UButton
+                      icon="i-heroicons-x-mark"
+                      variant="soft"
+                      color="red"
+                      @click="() => notificationEmails.splice(row.index, 1)"
+                    />
+                  </div>
+                </template>
+              </UTable>
+            </UCard>
 
             <!-- Share sales data -->
             <UCard
@@ -474,7 +386,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { MdEditor, config } from 'md-editor-v3'
+import { MdEditor, config, type ToolbarNames } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
@@ -483,7 +395,7 @@ import { DEFAULT_PRICE, MINIMAL_PRICE } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
-import { getPortfolioURL, deliverMethodOptions } from '~/utils'
+import { getPortfolioURL } from '~/utils'
 import { getNFTAuthzGrants, sendNFTsToAPIWallet } from '~/utils/cosmos'
 import { useUploadStore } from '~/stores/upload'
 
@@ -523,12 +435,19 @@ const tableOfContents = ref('')
 const enableCustomMessagePage = ref(false)
 const hideDownload = ref(false)
 const autoDeliverNftIdInput = ref('')
+const isAllowCustomPrice = ref(true)
+const sessionData = computed(() => {
+  return getUploadFileData()
+})
 const prices = ref<any[]>([
   {
     price: DEFAULT_PRICE,
     deliveryMethod: 'auto',
     autoMemo: 'Thank you for your support. It means a lot to me.',
     stock: Number((route.query.count as string) || 1),
+    name: sessionData.value?.epubMetadata?.language === 'zh'
+      ? '標準版'
+      : 'Standard Edition',
     nameEn: 'Standard Edition',
     nameZh: '標準版',
     descriptionEn: '',
@@ -539,11 +458,11 @@ const prices = ref<any[]>([
     isUnlisted: false
   }
 ])
+const prefix = computed(() => {
+  return sessionData.value?.classData?.prefix || 'BOOKSN'
+})
 const shippingRates = ref<any[]>([])
 const hasMultiplePrices = computed(() => prices.value.length > 1)
-const priceItemLabel = computed(() =>
-  hasMultiplePrices.value ? 'edition' : 'book'
-)
 const moderatorWallets = ref<string[]>([
   'like1rclg677y2jqt8x4ylj0kjlqjjmnn6w63uflpgr'
 ])
@@ -556,7 +475,7 @@ const stripeConnectWallet = ref('')
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
 
-const toolbarOptions = ref<string[]>([
+const toolbarOptions = ref<ToolbarNames[]>([
   'bold',
   'italic',
   'strikeThrough',
@@ -612,10 +531,6 @@ const notificationEmailsTableRows = computed(() =>
     index,
     email
   }))
-)
-
-const hasAutoDeliverNFT = computed(() =>
-  prices.value.some(price => price.deliveryMethod === 'auto' && price.stock > 0)
 )
 
 const isStandalonePage = computed(() => {
@@ -684,6 +599,9 @@ function addMorePrice () {
     deliveryMethod: 'auto',
     autoMemo: '',
     stock: 1,
+    name: sessionData.value?.epubMetadata?.language === 'zh'
+      ? `級別 ${nextPriceIndex.value}`
+      : `Tier ${nextPriceIndex.value}`,
     nameEn: `Tier ${nextPriceIndex.value}`,
     nameZh: `級別 ${nextPriceIndex.value}`,
     descriptionEn: '',
@@ -737,12 +655,21 @@ function sanitizeHtml (html: string) {
 }
 
 function mapPrices (prices: any) {
+  const isEnglish = sessionData.value?.epubMetadata?.language === 'en'
+
   return prices.map((p: any) => ({
-    name: { en: p.nameEn, zh: p.nameZh },
-    description: {
-      en: escapeHtml(p.descriptionEn),
-      zh: escapeHtml(p.descriptionZh)
-    },
+    name: isEnglish
+      ? { en: p.name, zh: p.nameZh }
+      : { en: p.nameEn, zh: p.name },
+    description: isEnglish
+      ? {
+          en: escapeHtml(p.description),
+          zh: escapeHtml(p.descriptionZh)
+        }
+      : {
+          en: escapeHtml(p.descriptionEn),
+          zh: escapeHtml(p.description)
+        },
     priceInDecimal: Math.round(Number(p.price) * 100),
     price: Number(p.price),
     stock: Number(p.stock),
@@ -803,15 +730,6 @@ async function submitNewClass () {
         price: rate.priceInDecimal / 100
       }))
       : undefined
-
-    if (p.some(price => price.isAutoDeliver)) {
-      const ok = confirm(
-        "NFT Book Press - Reminder\nOnce you choose automatic delivery, you can't switch it back to manual delivery.  Are you sure?"
-      )
-      if (!ok) {
-        return
-      }
-    }
 
     const autoDeliverCount = p
       .filter(price => price.isAutoDeliver)
