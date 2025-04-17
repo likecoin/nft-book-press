@@ -436,7 +436,7 @@
                   params: { classId },
                   query: { count: nftMintCount }
                 }"
-                label="publish New Edition / 新庫存上架"
+                label="Restock existing listing/ 新庫存上架"
                 variant="solid"
                 color="orange"
               />
@@ -478,7 +478,7 @@ import { useWalletStore } from '~/stores/wallet'
 import { downloadFile, convertArrayOfObjectsToCSV, sleep } from '~/utils'
 import { NFT_DEFAULT_MINT_AMOUNT, PUBLISHING_NOTICE_URL_EN, PUBLISHING_NOTICE_URL_ZH } from '~/constant'
 
-const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL } = useRuntimeConfig().public
+const { LCD_URL, APP_LIKE_CO_URL, LIKER_LAND_URL, LIKE_CO_API } = useRuntimeConfig().public
 const router = useRouter()
 const route = useRoute()
 
@@ -601,7 +601,10 @@ async function onISCNIDInput () {
       iscnOwner.value = owner
       step.value = 2
     } else if (iscnIdInput.value.startsWith('likenft')) {
-      isRestockingNFT.value = true
+      const existingListing = await fetch(`${LIKE_CO_API}/likernft/book/store/${iscnIdInput.value}`)
+      if (existingListing?.status === 200) {
+        isRestockingNFT.value = true
+      }
       const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${encodeURIComponent(iscnIdInput.value)}`)
       if (!data) {
         isRestockingNFT.value = false
