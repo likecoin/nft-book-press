@@ -3,216 +3,252 @@
     <PageHeader title="Mint Liker Land NFT Book" />
 
     <PageBody class="flex flex-col items-stretch grow space-y-4">
-      <UAlert
-        v-if="error"
-        icon="i-heroicons-exclamation-triangle"
-        color="red"
-        variant="soft"
-        :title="`${error}`"
-        :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'red', variant: 'link', padded: false }"
-        @close="error = ''"
-      />
-      <UAlert
-        v-else
-        icon="i-heroicons-exclamation-circle"
-        color="green"
-        variant="soft"
-        title="First time? 新用戶請看這裏"
-        description="Read our guide to learn how to publish NFT Book."
-        :actions="[{
-          label: 'Read our guide',
-          color: 'green',
-          variant: 'outline',
-          click: onClickHelpEn,
-        }, {
-          label: '打開教學',
-          color: 'green',
-          variant: 'outline',
-          click: onClickHelpZh,
-        },{
-          label: 'Listing Disclaimer',
-          color: 'green',
-          variant: 'outline',
-          click: onClickDisclaimerEn,
-        },{
-          label: '上架須知和收費',
-          color: 'green',
-          variant: 'outline',
-          click: onClickDisclaimerZh,
-        }]"
-      />
-      <UDivider :label="`Steps ${step} / 4`" />
-
-      <UCard
-        v-if="step === 1"
-        :ui="{ body: { base: 'space-y-4' } }"
-      >
-        <template #header>
-          <h2 class="font-bold font-mono">
-            1. Select or Create ISCN
-          </h2>
-        </template>
-
-        <UCard
-          v-if="!iscnCreateData"
-          :ui="{ body: { base: 'space-y-4' } }"
-        >
-          <UFormGroup label="Enter ISCN ID or NFT Class ID">
-            <UInput
-              v-model="iscnIdInput"
-              class="font-mono"
-              placeholder="iscn://... or likenft...."
-            />
-          </UFormGroup>
-
-          <UButton
-            type="submit"
-            label="Submit"
-            :disabled="isLoading || !(iscnIdInput)"
-            @click="onISCNIDInput"
-          />
-        </UCard>
-      </UCard>
-      <UCard
-        v-else-if="step > 1"
-        :ui="{ body: { base: 'space-y-4' } }"
-      >
-        <template #header>
-          <h2 class="font-bold font-mono">
-            ISCN Information
-          </h2>
-        </template>
-
-        <ISCNInfoCard
-          :iscn-id="iscnId"
-          :iscn-owner="iscnOwner"
-          :iscn-data="iscnData"
-          :show-edit-button="true"
-          @edit="showEditISCNModal = true"
+      <AuthRequiredView>
+        <UAlert
+          v-if="error"
+          icon="i-heroicons-exclamation-triangle"
+          color="red"
+          variant="soft"
+          :title="`${error}`"
+          :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'red', variant: 'link', padded: false }"
+          @close="error = ''"
         />
-      </UCard>
-
-      <UCard
-        v-if="step === 2 || step === 3"
-        :ui="{ body: { base: 'space-y-4' } }"
-      >
-        <template #header>
-          <h2 class="font-bold font-mono">
-            {{ step }}. {{ isCreatingClass ? 'Create NFT Class' : 'Mint NFT' }}
-          </h2>
-        </template>
+        <UAlert
+          v-else
+          icon="i-heroicons-exclamation-circle"
+          color="green"
+          variant="soft"
+          title="First time? 新用戶請看這裏"
+          description="Read our guide to learn how to publish NFT Book."
+          :actions="[{
+            label: 'Read our guide',
+            color: 'green',
+            variant: 'outline',
+            click: onClickHelpEn,
+          }, {
+            label: '打開教學',
+            color: 'green',
+            variant: 'outline',
+            click: onClickHelpZh,
+          },{
+            label: 'Listing Disclaimer',
+            color: 'green',
+            variant: 'outline',
+            click: onClickDisclaimerEn,
+          },{
+            label: '上架須知和收費',
+            color: 'green',
+            variant: 'outline',
+            click: onClickDisclaimerZh,
+          }]"
+        />
+        <UDivider :label="`Steps ${step} / 4`" />
 
         <UCard
-          class="flex-1"
+          v-if="step === 1"
           :ui="{ body: { base: 'space-y-4' } }"
         >
           <template #header>
-            <h3 class="font-bold">
-              Mint NFT by filling required information
-            </h3>
+            <h2 class="font-bold font-mono">
+              1. Select or Create ISCN
+            </h2>
           </template>
-          <NFTMintForm
-            ref="formRef"
-            v-model="state"
-            :max-supply="classMaxSupply"
-            :show-max-supply="isCreatingClass"
+
+          <UCard
+            v-if="!iscnCreateData"
+            :ui="{ body: { base: 'space-y-4' } }"
+          >
+            <UFormGroup label="Enter ISCN ID or NFT Class ID">
+              <UInput
+                v-model="iscnIdInput"
+                class="font-mono"
+                placeholder="iscn://... or likenft...."
+              />
+            </UFormGroup>
+
+            <UButton
+              type="submit"
+              label="Submit"
+              :disabled="isLoading || !(iscnIdInput)"
+              @click="onISCNIDInput"
+            />
+          </UCard>
+        </UCard>
+        <UCard
+          v-else-if="step > 1"
+          :ui="{ body: { base: 'space-y-4' } }"
+        >
+          <template #header>
+            <h2 class="font-bold font-mono">
+              ISCN Information
+            </h2>
+          </template>
+
+          <UFormGroup label="ISCN ID">
+            <UButton
+              class="font-mono"
+              :label="iscnId"
+              :to="`${appLikeCoURL}/view/${encodeURIComponent(iscnId)}`"
+              target="_blank"
+              variant="link"
+              :padded="false"
+            />
+          </UFormGroup>
+
+          <UFormGroup label="ISCN Owner">
+            <UButton
+              :label="iscnOwner"
+              :to="`${likerLandURL}/${encodeURIComponent(iscnOwner)}`"
+              target="_blank"
+              variant="link"
+              :padded="false"
+            />
+          </UFormGroup>
+
+          <UFormGroup label="ISCN Title">
+            <UInput
+              :value="iscnData?.contentMetadata?.name"
+              :readonly="true"
+              variant="none"
+              :padded="false"
+            />
+          </UFormGroup>
+          <UFormGroup label="ISCN Description">
+            <UInput
+              :value="iscnData?.contentMetadata?.description"
+              :readonly="true"
+              variant="none"
+              :padded="false"
+            />
+          </UFormGroup>
+          <UButton
+            label="Edit ISCN Metadata"
+            @click="showEditISCNModal = true"
           />
+        </UCard>
+
+        <UCard
+          v-if="step === 2 || step === 3"
+          :ui="{ body: { base: 'space-y-4' } }"
+        >
+          <template #header>
+            <h2 class="font-bold font-mono">
+              {{ step }}. {{ isCreatingClass ? 'Create NFT Class' : 'Mint NFT' }}
+            </h2>
+          </template>
+
+          <UCard
+            class="flex-1"
+            :ui="{ body: { base: 'space-y-4' } }"
+          >
+            <template #header>
+              <h3 class="font-bold">
+                Mint NFT by filling required information
+              </h3>
+            </template>
+            <NFTMintForm
+              ref="formRef"
+              v-model="state"
+              :max-supply="classMaxSupply"
+              :show-max-supply="isCreatingClass"
+            />
+
+            <template #footer>
+              <UButton
+                label="Mint"
+                :disabled="isLoading || !(state.prefix && state.mintCount && state.imageUrl) || !isFormValid"
+                @click="onClickMintByInputting"
+              />
+            </template>
+          </UCard>
+        </UCard>
+
+        <UCard v-else-if="step > 2 && classId">
+          <template #header>
+            <h3>NFT Class Information</h3>
+          </template>
+
+          <UFormGroup label="NFT Class ID">
+            <UButton
+              :label="classId"
+              :to="`${likerLandURL}/nft/class/${encodeURIComponent(classId)}`"
+              target="_blank"
+              variant="link"
+              :padded="false"
+            />
+          </UFormGroup>
+        </UCard>
+
+        <UCard
+          v-if="step > 3"
+          :ui="{
+            header: { base: 'font-bold font-mono' },
+            body: { base: 'flex flex-wrap items-center justify-center gap-2' },
+            footer: { base: 'flex flex-wrap items-center justify-end gap-2' },
+          }"
+        >
+          <template #header>
+            🎉 Success!
+          </template>
+
+          <UButton
+            label="Download NFT result csv"
+            :disabled="isLoading"
+            variant="outline"
+            @click="onDownloadCSV"
+          />
+
+          <template v-if="shouldShowDownloadLink">
+            <UButton
+              label="Download nft_class.json"
+              :disabled="isLoading"
+              variant="outline"
+              @click="onDownloadClassJSON"
+            />
+            <UButton
+              label="Download nft_default.json"
+              :disabled="isLoading"
+              variant="outline"
+              @click="onDownloadDefaultClassJSON"
+            />
+            <UButton
+              label="Download nfts.csv"
+              :disabled="isLoading"
+              variant="outline"
+              @click="onDownloadNftsCSV"
+            />
+          </template>
 
           <template #footer>
             <UButton
-              label="Mint"
-              :disabled="isLoading || !(state.prefix && state.mintCount && state.imageUrl) || !isFormValid"
-              @click="onClickMintByInputting"
+              label="View your NFT"
+              variant="outline"
+              target="_blank"
+              :to="`${likerLandURL}/nft/class/${encodeURIComponent(classId)}`"
             />
+            <div class="p-[4px] border-[2px] border-[#f59e0b] rounded-[0.375rem]">
+              <UButton
+                :to="{ name: 'nft-book-store-new', query: { class_id: classId, count: nftMintCount } }"
+                label="Continue to publish NFT Book / 繼續上架"
+                variant="solid"
+                color="orange"
+              />
+            </div>
           </template>
         </UCard>
-      </UCard>
 
-      <UCard v-else-if="step > 2 && classId">
-        <template #header>
-          <h3>NFT Class Information</h3>
-        </template>
-
-        <UFormGroup label="NFT Class ID">
-          <UButton
-            :label="classId"
-            :to="`${likerLandURL}/nft/class/${encodeURIComponent(classId)}`"
-            target="_blank"
-            variant="link"
-            :padded="false"
-          />
-        </UFormGroup>
-      </UCard>
-
-      <UCard
-        v-if="step > 3"
-        :ui="{
-          header: { base: 'font-bold font-mono' },
-          body: { base: 'flex flex-wrap items-center justify-center gap-2' },
-          footer: { base: 'flex flex-wrap items-center justify-end gap-2' },
-        }"
-      >
-        <template #header>
-          🎉 Success!
-        </template>
-
-        <UButton
-          label="Download NFT result csv"
-          :disabled="isLoading"
-          variant="outline"
-          @click="onDownloadCSV"
+        <UProgress v-if="isLoading" animation="carousel">
+          <template #indicator>
+            Loading...
+          </template>
+        </UProgress>
+        <EditISCNMetadataModal
+          ref="editISCNRef"
+          v-model="showEditISCNModal"
+          :class-id="classId"
+          @save="onSaveISCN"
         />
-
-        <template v-if="shouldShowDownloadLink">
-          <UButton
-            label="Download nft_class.json"
-            :disabled="isLoading"
-            variant="outline"
-            @click="onDownloadClassJSON"
-          />
-          <UButton
-            label="Download nft_default.json"
-            :disabled="isLoading"
-            variant="outline"
-            @click="onDownloadDefaultClassJSON"
-          />
-          <UButton
-            label="Download nfts.csv"
-            :disabled="isLoading"
-            variant="outline"
-            @click="onDownloadNftsCSV"
-          />
-        </template>
-
-        <template #footer>
-          <UButton
-            label="View your NFT"
-            variant="outline"
-            target="_blank"
-            :to="`${likerLandURL}/nft/class/${encodeURIComponent(classId)}`"
-          />
-          <div class="p-[4px] border-[2px] border-[#f59e0b] rounded-[0.375rem]">
-            <UButton
-              :to="{ name: 'nft-book-store-new', query: { class_id: classId, count: state.mintCount } }"
-              label="Continue to publish NFT Book / 繼續上架"
-              variant="solid"
-              color="orange"
-            />
-          </div>
-        </template>
-      </UCard>
-
-      <UProgress v-if="isLoading" animation="carousel">
-        <template #indicator>
-          Loading...
-        </template>
-      </UProgress>
-      <EditISCNMetadataModal
-        ref="editISCNRef"
-        v-model="showEditISCNModal"
-        :class-id="classId"
-        @save="onSaveISCN"
-      />
+      </AuthRequiredView>
     </PageBody>
   </PageContainer>
 </template>
@@ -227,7 +263,7 @@ import { useWalletStore } from '~/stores/wallet'
 import { downloadFile, convertArrayOfObjectsToCSV } from '~/utils'
 import { NFT_DEFAULT_MINT_AMOUNT, PUBLISHING_NOTICE_URL_EN, PUBLISHING_NOTICE_URL_ZH } from '~/constant'
 
-const { LCD_URL, LIKER_LAND_URL } = useRuntimeConfig().public
+const { LCD_URL, LIKER_LAND_URL, LIKE_CO_API } = useRuntimeConfig().public
 const router = useRouter()
 const route = useRoute()
 const toast = useToast()
@@ -277,6 +313,8 @@ const editISCNRef = ref<any>(null)
 const isFormValid = computed(() => {
   return formRef.value?.validate(state).length === 0
 })
+
+const isRestockingNFT = ref(false)
 
 watch(iscnId, (newIscnId) => {
   if (newIscnId) {
@@ -333,6 +371,7 @@ function onClickDisclaimerZh () {
 async function onISCNIDInput () {
   try {
     isLoading.value = true
+    isRestockingNFT.value = false
     if (iscnIdInput.value.startsWith('iscn://')) {
       const data = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(iscnIdInput.value)}`)
       const { records, owner } = data as any
@@ -340,8 +379,15 @@ async function onISCNIDInput () {
       iscnOwner.value = owner
       step.value = 2
     } else if (iscnIdInput.value.startsWith('likenft')) {
+      const existingListing = await fetch(`${LIKE_CO_API}/likernft/book/store/${iscnIdInput.value}`)
+      if (existingListing?.status === 200) {
+        isRestockingNFT.value = true
+      }
       const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${encodeURIComponent(iscnIdInput.value)}`)
-      if (!data) { throw new Error('INVALID_NFT_CLASS_ID') }
+      if (!data) {
+        isRestockingNFT.value = false
+        throw new Error('INVALID_NFT_CLASS_ID')
+      }
       classData.value = (data as any).class
       const parentIscnId = classData.value?.data?.parent?.iscn_id_prefix
       const resISCN = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(parentIscnId)}`)

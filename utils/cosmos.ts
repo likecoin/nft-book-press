@@ -1,13 +1,12 @@
 import { BigNumber } from 'bignumber.js'
-import { OfflineSigner } from '@cosmjs/proto-signing'
-import { ISCNSigningClient, ISCNRecordData } from '@likecoin/iscn-js'
-import { parseAndCalculateStakeholderRewards } from '@likecoin/iscn-js/dist/iscn/parsing'
 import { MsgSend } from 'cosmjs-types/cosmos/nft/v1beta1/tx'
-import { DeliverTxResponse } from '@cosmjs/stargate'
 import { PageRequest } from 'cosmjs-types/cosmos/base/query/v1beta1/pagination'
-import { parseAuthzGrant, parseTxInfoFromIndexedTx } from '@likecoin/iscn-js/dist/messages/parsing'
 import { GenericAuthorization } from 'cosmjs-types/cosmos/authz/v1beta1/authz'
-import { formatMsgSend } from '@likecoin/iscn-js/dist/messages/likenft'
+
+import type { OfflineSigner } from '@cosmjs/proto-signing'
+import type { DeliverTxResponse } from '@cosmjs/stargate'
+import type { ISCNRecordData, ISCNSigningClient } from '@likecoin/iscn-js'
+
 import { addParamToUrl } from '.'
 import { TRANSFER_GAS } from '~/constant'
 
@@ -18,11 +17,40 @@ export const royaltyRateBasisPoints = 1000 // 10% as in current chain config
 export const royaltyFeeAmount = 25000 // 2.5%
 export const royaltyUserAmount = 1000000 - royaltyFeeAmount // 1000000 - fee
 
-let iscnSigningClient: ISCNSigningClient | null = null
+let iscnSigningClient: any = null
+let iscnLib: any = null
+let cosmLib: any = null
+
+async function getISCNLib () {
+  if (!iscnLib) {
+    const lib = await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js')
+    const [parsing, msgParsing, likenft] = await Promise.all([
+      await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js/dist/iscn/parsing'),
+      await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js/dist/messages/parsing'),
+      await import(/* webpackChunkName: "iscn" */ '@likecoin/iscn-js/dist/messages/likenft')
+    ])
+    iscnLib = {
+      ...lib,
+      parseAndCalculateStakeholderRewards: parsing.parseAndCalculateStakeholderRewards,
+      parseAuthzGrant: msgParsing.parseAuthzGrant,
+      parseTxInfoFromIndexedTx: msgParsing.parseTxInfoFromIndexedTx,
+      formatMsgSend: likenft.formatMsgSend
+    }
+  }
+  return iscnLib
+}
+
+async function getCosmLib () {
+  if (!cosmLib) {
+    cosmLib = await import(/* webpackChunkName: "cosmjs" */ '@cosmjs/stargate')
+  }
+  return cosmLib
+}
 
 export async function getSigningClient (): Promise<ISCNSigningClient> {
   if (!iscnSigningClient) {
     const { RPC_URL } = useRuntimeConfig().public
+    const { ISCNSigningClient } = await getISCNLib()
     const c = new ISCNSigningClient()
     await c.connect(RPC_URL)
     iscnSigningClient = c
@@ -61,6 +89,7 @@ export async function queryTxByHash (txHash: string) {
   if (!tx) { return null }
   const { code } = tx
   if (code) { throw new Error(`Tx failed with code: ${code}`) }
+  const { parseTxInfoFromIndexedTx } = await getISCNLib()
   const parsed = parseTxInfoFromIndexedTx(tx)
   return parsed
 }
@@ -89,8 +118,17 @@ export async function getNFTAuthzGranterGrants (granter: string) {
   const c = (await getSigningClient()).getISCNQueryClient()
   const client = await c.getQueryClient()
   const g = await client.authz.granterGrants(granter)
-  if (!g?.grants) { return [] }
-  const grants = g.grants.map(parseAuthzGrant).filter(g => (g?.authorization?.value as GenericAuthorization)?.msg === '/cosmos.nft.v1beta1.MsgSend')
+  if (!g?.grants) {
+    return []
+  }
+  const { parseAuthzGrant } = await getISCNLib()
+  const grants = g.grants
+    .map(parseAuthzGrant)
+    .filter(
+      g =>
+        (g?.authorization?.value as GenericAuthorization)?.msg ===
+        '/cosmos.nft.v1beta1.MsgSend'
+    )
   return grants
 }
 
@@ -99,6 +137,7 @@ export async function getNFTAuthzGrants (granter: string, grantee: string) {
   const client = await c.getQueryClient()
   const g = await client.authz.grants(granter, grantee, '/cosmos.nft.v1beta1.MsgSend')
   if (!g?.grants) { return null }
+  const { parseAuthzGrant } = await getISCNLib()
   const grants = g.grants.map(parseAuthzGrant)
   return grants[0]
 }
@@ -204,6 +243,7 @@ export async function signCreateRoyltyConfig (
     const totalAmount = royaltyUserAmount
     const signingClient = await getSigningClient()
     await signingClient.connectWithSigner(RPC_URL, signer)
+    const { parseAndCalculateStakeholderRewards } = await getISCNLib()
     const rewardMap = await parseAndCalculateStakeholderRewards(
       iscnData,
       iscnOwner,
@@ -236,7 +276,6 @@ export async function signCreateRoyltyConfig (
       })
     }
   } catch (err) {
-    // Don't throw on royalty create, not critical for now
     // eslint-disable-next-line no-console
     console.error(err)
   }
@@ -272,6 +311,7 @@ export async function signSendNFTs (
   const { RPC_URL } = useRuntimeConfig().public
   const signingClient = await getSigningClient()
   await signingClient.connectWithSigner(RPC_URL, signer)
+  const { formatMsgSend } = await getISCNLib()
   const messages = classIds.map((classId, index) => formatMsgSend(
     address,
     targetAddress,
@@ -435,16 +475,6 @@ export async function getAccountBalance (address: string) {
   return new BigNumber(amountToLIKE(balance, CHAIN_MINIMAL_DENOM))
 }
 
-let cosmLib: any = null
-
-async function getCosmLib () {
-  if (!cosmLib) {
-    cosmLib = await import(/* webpackChunkName: "cosmjs" */ '@cosmjs/stargate')
-  }
-  return cosmLib
-}
-
-// Modify sendLIKE to get config from runtime
 export async function sendLIKE (
   fromAddress: string,
   toAddress: string,
@@ -462,13 +492,13 @@ export async function sendLIKE (
     }]
   }
 
-  const cosm = await getCosmLib()
-  const client = await cosm.SigningStargateClient.connectWithSigner(network.rpc, signer)
+  const { SigningStargateClient, assertIsDeliverTxSuccess } = await getCosmLib()
+  const client = await SigningStargateClient.connectWithSigner(network.rpc, signer)
   const coins = [{
     amount: new BigNumber(amount).shiftedBy(9).toFixed(0, 0),
     denom: CHAIN_MINIMAL_DENOM
   }]
   const res = await client.sendTokens(fromAddress, toAddress, coins, DEFAULT_TRANSFER_FEE, memo)
-  cosm.assertIsDeliverTxSuccess(res)
+  assertIsDeliverTxSuccess(res)
   return res
 }

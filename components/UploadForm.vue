@@ -127,12 +127,7 @@ const uploadStatus = ref('')
 const arweaveFeeMap = ref({})
 const arweaveFeeTargetAddress = ref('')
 const sentArweaveTransactionInfo = ref(new Map())
-const isOpenWarningSnackbar = ref(false)
-const error = ref('')
 const balance = ref(new BigNumber(0))
-const signDialogError = ref('')
-const numberOfSignNeeded = ref(0)
-const signProgress = ref(0)
 const isEncryptEBookData = ref(true)
 
 const emit = defineEmits(['arweaveUploaded', 'submit'])
@@ -396,73 +391,76 @@ const submitToArweave = async (record: any): Promise<void> => {
   const existingData =
     sentArweaveTransactionInfo.value.get(record.ipfsHash) || {}
   const { transactionHash, arweaveId: uploadArweaveId } = existingData
-  if (uploadArweaveId) {
-    return
-  }
 
-  if (!record.fileBlob) {
+  if (uploadArweaveId || !record.fileBlob) {
     return
   }
 
   let txHash = transactionHash
-  try {
-    let key
-    const arrayBuffer = await record.fileBlob.arrayBuffer()
-    let buffer = Buffer.from(arrayBuffer)
-    let { ipfsHash } = record
-    if (
+  let key
+  const arrayBuffer = await record.fileBlob.arrayBuffer()
+  let buffer = Buffer.from(arrayBuffer)
+  let { ipfsHash } = record
+
+  const shouldEncrypt =
       (record.fileType === 'application/epub+zip' ||
         record.fileType === 'application/pdf') &&
       isEncryptEBookData.value
-    ) {
+
+  if (shouldEncrypt) {
+    if (!record.encryptedIpfsHash) {
       const { rawEncryptedKeyAsBase64, combinedArrayBuffer } =
         await encryptDataWithAES({ data: arrayBuffer })
-      buffer = Buffer.from(combinedArrayBuffer)
-      key = rawEncryptedKeyAsBase64
-      ipfsHash = await calculateIPFSHash(buffer)
-    }
-    if (!txHash) {
-      // HACK: override ipfsHash memo to match arweave tag later
-      txHash = await sendArweaveFeeTx(record, ipfsHash)
-      if (!txHash) {
-        throw new Error('TRANSACTION_NOT_SENT')
-      }
-    }
+      const encryptedBuffer = Buffer.from(combinedArrayBuffer)
 
-    const { arweaveId, arweaveLink } = await uploadSingleFileToBundlr(buffer, {
-      fileSize: record.fileBlob?.size || 0,
-      ipfsHash,
-      fileType: record.fileType as string,
-      txHash,
-      token: token.value,
-      key
-    })
-
-    if (!arweaveId) {
-      error.value = 'IscnRegisterForm.error.arweave'
-      throw new Error(error.value)
+      record.encryptionKey = rawEncryptedKeyAsBase64
+      record.encryptedBuffer = encryptedBuffer
+      record.encryptedIpfsHash = await calculateIPFSHash(encryptedBuffer)
+    } else {
+      ipfsHash = record.encryptedIpfsHash || ipfsHash
+      buffer = record.encryptedBuffer || buffer
+      key = record.encryptionKey || undefined
     }
-
-    const uploadedData =
-    sentArweaveTransactionInfo.value.get(record.ipfsHash) || {}
-    sentArweaveTransactionInfo.value.set(record.ipfsHash, {
-      ...uploadedData,
-      arweaveId,
-      arweaveLink,
-      arweaveKey: key
-    })
-    if (record.fileName.includes('cover.jpeg')) {
-      const metadata = epubMetadataList.value.find(
-        (file: any) => file.thumbnailIpfsHash === record.ipfsHash
-      )
-      if (metadata) {
-        metadata.thumbnailArweaveId = arweaveId
-      }
-    }
-    emit('arweaveUploaded', { arweaveId, arweaveLink })
-  } catch (err) {
-    throw new Error(err as string)
   }
+
+  if (!txHash) {
+    // HACK: override ipfsHash memo to match arweave tag later
+    txHash = await sendArweaveFeeTx(record, ipfsHash)
+    if (!txHash) {
+      throw new Error('TRANSACTION_NOT_SENT')
+    }
+  }
+
+  const { arweaveId, arweaveLink } = await uploadSingleFileToBundlr(buffer, {
+    fileSize: record.fileBlob?.size || 0,
+    ipfsHash,
+    fileType: record.fileType as string,
+    txHash,
+    token: token.value,
+    key
+  })
+
+  if (!arweaveId) {
+    throw new Error(`Failed to upload file ${record.fileName} with IPFS hash ${ipfsHash}`)
+  }
+
+  const uploadedData =
+  sentArweaveTransactionInfo.value.get(record.ipfsHash) || {}
+  sentArweaveTransactionInfo.value.set(record.ipfsHash, {
+    ...uploadedData,
+    arweaveId,
+    arweaveLink,
+    arweaveKey: key
+  })
+  if (record.fileName?.endsWith('cover.jpeg')) {
+    const metadata = epubMetadataList.value.find(
+      (file: any) => file.thumbnailIpfsHash === record.ipfsHash
+    )
+    if (metadata) {
+      metadata.thumbnailArweaveId = arweaveId
+    }
+  }
+  emit('arweaveUploaded', { arweaveId, arweaveLink })
 }
 
 const sendArweaveFeeTx = async (record: any, memoIpfsOveride?: string): Promise<string> => {
@@ -506,9 +504,6 @@ const sendArweaveFeeTx = async (record: any, memoIpfsOveride?: string): Promise<
       })
       return transactionHash
     }
-  } catch (err) {
-    signDialogError.value = (err as Error).toString()
-    console.error(err)
   } finally {
     uploadStatus.value = 'uploading'
   }
@@ -571,34 +566,26 @@ const setEbookCoverFromImages = async () => {
 }
 
 const onSubmit = async () => {
-  if (!signer.value) {
-    await initIfNecessary()
-  }
-  if (!signer.value) {
-    throw new Error('SIGNER_NOT_INITED')
-  }
-  uploadStatus.value = 'uploading'
-  error.value = ''
-  signDialogError.value = ''
-
-  const currentBalance = await getAccountBalance(wallet.value)
-  balance.value = currentBalance
-
-  if (currentBalance.lt(arweaveFee.value)) {
-    error.value = 'INSUFFICIENT_BALANCE'
-    isOpenWarningSnackbar.value = true
-    uploadStatus.value = ''
-    return
-  }
-
-  if (!fileRecords.value.some(file => file.fileBlob)) {
-    error.value = 'NO_FILE_TO_UPLOAD'
-    isOpenWarningSnackbar.value = true
-    uploadStatus.value = ''
-    return
-  }
-
   try {
+    if (!signer.value) {
+      await initIfNecessary()
+    }
+    if (!signer.value) {
+      throw new Error('SIGNER_NOT_INITED')
+    }
+    uploadStatus.value = 'uploading'
+
+    const currentBalance = await getAccountBalance(wallet.value)
+    balance.value = currentBalance
+
+    if (currentBalance.lt(arweaveFee.value)) {
+      throw new Error('INSUFFICIENT_BALANCE')
+    }
+
+    if (!fileRecords.value.some(file => file.fileBlob)) {
+      throw new Error('NO_FILE_TO_UPLOAD')
+    }
+
     uploadStatus.value = 'uploading'
     if (
       fileRecords.value.find(file => file.fileType === 'application/pdf') &&
@@ -609,20 +596,18 @@ const onSubmit = async () => {
       await setEbookCoverFromImages()
     }
 
-    numberOfSignNeeded.value = fileRecords.value.length
-    signProgress.value = 0
-
     for (let i = 0; i < fileRecords.value.length; i += 1) {
       const record = fileRecords.value[i]
-      signProgress.value = i + 1
       await submitToArweave(record)
     }
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error)
     uploadStatus.value = ''
     toast.add({
       icon: 'i-heroicons-exclamation-circle',
       title: 'Error during file upload',
+      description: (error as Error).message || 'An error occurred during the upload process.',
       timeout: 3000,
       color: 'red'
     })

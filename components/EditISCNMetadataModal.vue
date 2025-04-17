@@ -147,8 +147,19 @@ watchEffect(async () => {
                   fileName: ''
                 }
               ]
+          const tags: string[] = []
+          if (metadata.keywords) {
+            if (Array.isArray(metadata.keywords)) {
+              tags.push(...metadata.keywords)
+            } else {
+              tags.push(...metadata.keywords.split(',').map(k => k.trim()).filter(k => k))
+            }
+          }
 
           iscnData.value = {
+            ...metadata,
+            recordNotes: record.data?.recordNotes,
+            stakeholders: record.data?.stakeholders,
             type: metadata['@type'] || 'Book',
             title: metadata.name || '',
             description: metadata.description || '',
@@ -167,9 +178,7 @@ watchEffect(async () => {
             customLicense: '',
             language: metadata.inLanguage || '',
             bookInfoUrl: metadata.url || '',
-            tags: metadata.keywords
-              ? metadata.keywords.split(',').map(k => k.trim())
-              : [],
+            tags,
             coverUrl: metadata.thumbnailUrl || ''
           }
         }
@@ -239,7 +248,7 @@ async function handleSave () {
     }
     toast.add({
       title: 'ISCN updated successfully',
-      color: 'green'
+      color: 'blue'
     })
     emit('save')
     handleClickBack()

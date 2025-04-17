@@ -44,10 +44,7 @@ export const languageOptions = [
 ]
 
 export const typeOptions = [
-  { label: 'Book', value: 'Book' },
-  { label: 'Photo', value: 'Photo' },
-  { label: 'Image', value: 'Image' },
-  { label: 'CreativeWork', value: 'CreativeWork' }
+  { label: 'Book', value: 'Book' }
 ]
 
 export const licenseOptions = [
