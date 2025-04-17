@@ -242,49 +242,77 @@
 
         @save="handleSaveStripeConnectWallet"
       />
-
+      <!-- Advanced settings -->
       <UCard
         :ui="{
           header: { base: 'flex justify-between items-center' },
-          body: { padding: '' },
+          body: { padding: '12px' },
         }"
       >
-        <template #header>
-          <h4 class="text-sm font-bold font-mono">
-            Email to receive sales notifications / 欲收到銷售通知的電郵
-          </h4>
+        <div class="flex justify-between items-center w-full">
+          <h3 class="font-bold font-mono">
+            Advanced Settings
+          </h3>
+          <UButton
+            color="gray"
+            variant="ghost"
+            :icon="
+              shouldShowAdvanceSettings
+                ? 'i-heroicons-chevron-up'
+                : 'i-heroicons-chevron-down'
+            "
+            @click="
+              () => {
+                shouldShowAdvanceSettings = !shouldShowAdvanceSettings;
+              }
+            "
+          />
+        </div>
+        <template v-if="shouldShowAdvanceSettings">
+          <div class="mt-[24px] flex flex-col gap-[12px]">
+            <!-- Notification Email -->
+            <UCard
+              :ui="{
+                header: { base: 'flex justify-between items-center' },
+                body: { padding: '' },
+              }"
+            >
+              <template #header>
+                <h4 class="text-sm font-bold font-mono">
+                  Email to receive sales notifications / 欲收到銷售通知的電郵
+                </h4>
 
-          <div class="flex gap-2">
-            <UInput
-              v-model="notificationEmailInput"
-              placeholder="abc@example.com"
-            />
+                <div class="flex gap-2">
+                  <UInput
+                    v-model="notificationEmailInput"
+                    placeholder="abc@example.com"
+                  />
 
-            <UButton
-              label="Add"
-              :variant="notificationEmailInput ? 'outline' : 'solid'"
-              :color="notificationEmailInput ? 'primary' : 'gray'"
-              :disabled="!notificationEmailInput"
-              @click="addNotificationEmail"
-            />
-          </div>
-        </template>
+                  <UButton
+                    label="Add"
+                    :variant="notificationEmailInput ? 'outline' : 'solid'"
+                    :color="notificationEmailInput ? 'primary' : 'gray'"
+                    :disabled="!notificationEmailInput"
+                    @click="addNotificationEmail"
+                  />
+                </div>
+              </template>
 
-        <UTable
-          :columns="[
-            { key: 'email', label: 'Email', sortable: true },
-            { key: 'action' },
-          ]"
-          :rows="notificationEmailsTableRows"
-        >
-          <template #email-data="{ row }">
-            <UButton
-              :label="row.email"
-              :to="`mailto:${row.email}`"
-              variant="link"
-              :padded="false"
-            />
-          </template>
+              <UTable
+                :columns="[
+                  { key: 'email', label: 'Email', sortable: true },
+                  { key: 'action' },
+                ]"
+                :rows="notificationEmailsTableRows"
+              >
+                <template #email-data="{ row }">
+                  <UButton
+                    :label="row.email"
+                    :to="`mailto:${row.email}`"
+                    variant="link"
+                    :padded="false"
+                  />
+                </template>
 
                 <template #action-data="{ row }">
                   <div class="flex justify-end items-center">
