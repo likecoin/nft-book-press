@@ -419,6 +419,8 @@ import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
 import { v4 as uuidv4 } from 'uuid'
+import type { FormError } from '#ui/types'
+
 import { DEFAULT_PRICE, MINIMAL_PRICE } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
@@ -436,6 +438,8 @@ const { wallet, signer } = storeToRefs(walletStore)
 const { newBookListing, updateEditionPrice } = bookStoreApiStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
 const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
+
+const UPLOAD_FILESIZE_MAX = 20 * 1024 * 1024
 
 const emit = defineEmits(['submit'])
 const router = useRouter()
@@ -619,6 +623,42 @@ function updatePrice (e: InputEvent, key: string, index: number) {
   }
 }
 
+const getFileInfo = async (file: Blob) => {
+  const fileBytes = (await fileToArrayBuffer(file)) as ArrayBuffer
+  if (!fileBytes) {
+    return null
+  }
+  const [fileSHA256, ipfsHash] = await Promise.all([
+    digestFileSHA256(fileBytes),
+    calculateIPFSHash(Buffer.from(fileBytes))
+  ])
+  return {
+    fileBytes,
+    fileSHA256,
+    ipfsHash
+  }
+}
+
+async function onFileUpload (files: FileList, key: string, index: number) {
+  try {
+    if (files?.length) {
+      const file = files[0]
+      if (file.size < UPLOAD_FILESIZE_MAX) {
+        const info = await getFileInfo(file)
+        if (info) {
+          const { ipfsHash } = info
+          prices.value[index][key] = ipfsHash
+        }
+      } else {
+        error.value = 'File size exceeds 20MB'
+      }
+    }
+  } catch (err) {
+    console.error('File upload error:', err)
+    error.value = 'Failed to upload file'
+  }
+}
+
 function addMorePrice () {
   nextPriceIndex.value += 1
   prices.value.push({
@@ -706,8 +746,45 @@ function mapPrices (prices: any) {
     isUnlisted: p.isUnlisted ?? false,
     autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
     hasShipping: p.hasShipping || false,
-    isPhysicalOnly: p.isPhysicalOnly || false
+    isPhysicalOnly: p.isPhysicalOnly || false,
+    autographImage: p.autographImage || ''
   }))
+}
+
+function validate (prices: any[]) {
+  const errors: FormError[] = []
+  prices.forEach((price: any) => {
+    if (!price.name.en || !price.name.zh) {
+      errors.push({
+        field: 'name',
+        message: 'Please input product name'
+      })
+    }
+    if (!price.isAutoDeliver && !price.autographImage) {
+      errors.push({
+        field: 'autographImage',
+        message: 'Please upload autograph image'
+      })
+    }
+    if (price.isAutoDeliver && !price.autoMemo) {
+      errors.push({
+        field: 'autoMemo',
+        message: 'Please input auto delivery memo'
+      })
+    }
+    if (price.hasShipping && !shippingRates.value.length) {
+      errors.push({
+        field: 'shipping',
+        message: 'Please input shipping rates'
+      })
+    }
+  })
+
+  if (errors.length > 0) {
+    error.value = errors.map(e => e.message).join('\n')
+    return false
+  }
+  return true
 }
 
 async function submitNewClass () {
@@ -856,6 +933,10 @@ async function submitEditedClass () {
 }
 
 function onSubmit () {
+  const p = mapPrices(prices.value)
+  if (!validate(p)) {
+    return
+  }
   return isEditMode.value ? submitEditedClass() : submitNewClass()
 }
 
