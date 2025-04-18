@@ -29,6 +29,16 @@
         <div v-else-if="step === 1">
           <RegisterISCN ref="registerISCN" @submit="handleIscnSubmit" />
         </div>
+        <div v-else-if="step === 2">
+          <MintNFT ref="mintNFT" @submit="handleMintNFTSubmit" />
+        </div>
+        <div v-else-if="step === 3">
+          <NewNFTBook
+            ref="newNFTBook"
+            class="p-0 flex flex-col text-left gap-[24px]"
+            @submit="handleNewBookSubmit"
+          />
+        </div>
 
         <!-- Navigation Buttons -->
         <div class="flex gap-2 justify-center mt-4">
@@ -39,6 +49,40 @@
           >
             {{ currentActionText }}
           </UButton>
+        </div>
+      </div>
+      <div v-if="step === 0" class="flex flex-col justify-center px-[12px] mt-[16px]">
+        <div class="w-full bg-gray-300 h-[1px]" />
+        <div class="flex flex-col items-center gap-4 py-4">
+          <div class="flex items-center">
+            <span>已經有 ISCN ID 了？ 按</span>
+            <UButton
+              variant="ghost"
+              @click="showIscnInput = !showIscnInput"
+            >
+              這裡
+            </UButton>
+          </div>
+
+          <div v-if="showIscnInput" class="flex flex-col items-center gap-2 w-full max-w-md">
+            <UInput
+              v-model="iscnInputValue"
+              placeholder="輸入 ISCN ID"
+            />
+            <UButton
+              :disabled="!iscnInputValue"
+              @click="handleIscnInput"
+            >
+              確認
+            </UButton>
+            <a
+              :href="iscnQueryLink"
+              target="_blank"
+              class="text-primary-500"
+            >
+              or 找到你的 ISCN
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -53,14 +97,22 @@ import { useUploadStore } from '~/stores/upload'
 const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
+const route = useRoute()
+const router = useRouter()
+
 const uploadStore = useUploadStore()
-const { setUploadFileData } = uploadStore
+const { updateUploadFileData, clearUploadData, setUploadFileData } = uploadStore
+const { APP_LIKE_CO_URL } = useRuntimeConfig().public
 
 const step = ref(0)
 const uploadFormRef = ref()
 const registerISCN = ref()
-const router = useRouter()
+const mintNFT = ref()
+const newNFTBook = ref()
 const toast = useToast()
+const storedData = ref<any>(undefined)
+const showIscnInput = ref(false)
+const iscnInputValue = ref('')
 const currentActionText = computed(() => {
   switch (step.value) {
     case 0:
@@ -82,7 +134,7 @@ const shouldShowActionButton = computed(() => {
   if (step.value === 0) {
     return hasFiles.value
   }
-  return true
+  return step.value < 3
 })
 
 const shouldDisableAction = computed(() => {
@@ -90,8 +142,22 @@ const shouldDisableAction = computed(() => {
     return uploadFormRef.value?.uploadStatus !== ''
   } else if (step.value === 1) {
     return !registerISCN.value?.isFormValid
+  } else if (step.value === 2) {
+    return !mintNFT.value?.isFormValid
   }
   return false
+})
+
+const iscnQueryLink = computed(() => {
+  return `${APP_LIKE_CO_URL}/search?owner=${wallet.value}`
+})
+
+const iscnId = computed(() => {
+  return route.query.iscn_id
+})
+
+const classId = computed(() => {
+  return route.query.class_id
 })
 
 const steps = [
@@ -106,8 +172,33 @@ const steps = [
   {
     title: '鑄造區塊鏈書',
     description: 'Mint NFT'
+  },
+  {
+    title: '新書發佈',
+    description: 'Publish new book'
   }
 ]
+
+onMounted(() => {
+  const sessionData = sessionStorage.getItem('uploadFileData')
+  if (sessionData) {
+    storedData.value = JSON.parse(sessionData)
+  }
+  const data = storedData.value
+
+  if (iscnId.value) {
+    if (data?.iscnRecord?.iscnId !== iscnId.value) {
+      clearUploadData()
+    }
+    iscnInputValue.value = iscnId.value as string
+    handleIscnSubmit({ iscnId: iscnId.value as string, txHash: '' })
+  } else if (classId.value) {
+    if (data?.classData?.classId !== classId.value) {
+      clearUploadData()
+    }
+    handleMintNFTSubmit({ classId: classId.value })
+  }
+})
 
 const nextStep = async () => {
   if (!wallet.value || !signer.value) {
@@ -131,6 +222,13 @@ const nextStep = async () => {
       await registerISCN.value.onSubmit()
       return
     }
+    if (step.value === 2) {
+      await mintNFT.value.onClickMintByInputting()
+      return
+    }
+    if (step.value < steps.length - 1) {
+      step.value++
+    }
   } catch (error) {
     console.error('Error during form submission:', error)
   }
@@ -141,12 +239,38 @@ const handleUploadSubmit = (uploadFileData: any) => {
   step.value = 1
 }
 
-const handleIscnSubmit = (res: { iscnId: string, txHash: string }) => {
+const handleIscnSubmit = async (res: { iscnId: string, txHash: string }) => {
+  updateUploadFileData({ iscnRecord: res })
   const { iscnId } = res
-  router.push({
-    path: '/mint-nft',
-    query: { iscn_id: iscnId }
+  if (iscnId) {
+    router.replace({ query: { iscn_id: iscnId } })
+  }
+  step.value = 2
+  await nextTick()
+  mintNFT.value?.onISCNIDInput(iscnId)
+}
+
+const handleMintNFTSubmit = async (res: any) => {
+  const { classId, nftMintCount } = res
+  if (classId) {
+    router.replace({ query: { class_id: classId } })
+  }
+  updateUploadFileData({
+    classData: { classId, nftMintCount, prefix: res.prefix }
   })
+  step.value = 3
+  await nextTick()
+  newNFTBook.value?.updateClassId({ classId, nftMintCount })
+}
+
+const handleNewBookSubmit = () => {
+  clearUploadData()
+}
+
+const handleIscnInput = async () => {
+  if (iscnInputValue.value) {
+    await handleIscnSubmit({ iscnId: iscnInputValue.value, txHash: '' })
+  }
 }
 
 </script>

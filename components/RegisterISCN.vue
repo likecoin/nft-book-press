@@ -38,7 +38,7 @@ const { getFileType } = useFileUpload()
 
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
-const { getUploadFileData, updateUploadFileData } = uploadStore
+const { getUploadFileData } = uploadStore
 const { stripHtmlTags, formatLanguage } = useFileUpload()
 const toast = useToast()
 
@@ -228,7 +228,6 @@ const submitToISCN = async (): Promise<void> => {
       { gas: iscnGasFee.value }
     )
     uploadStatus.value = 'success'
-    updateUploadFileData({ iscnRecord: res })
     emit('submit', res)
   } catch (err) {
     console.error(err)
