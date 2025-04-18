@@ -15,12 +15,6 @@
       @close="error = ''"
     />
 
-    <UProgress v-if="isLoading" animation="carousel">
-      <template #indicator>
-        Loading...
-      </template>
-    </UProgress>
-
     <template v-if="bookStoreApiStore.isAuthenticated">
       <UCard :ui="{ body: { base: 'space-y-4' } }">
         <template #header>
@@ -409,6 +403,24 @@
         />
       </div>
     </template>
+
+    <UModal
+      :model-value="!!isLoading"
+      :prevent-close="true"
+      :ui="{ base: 'p-4 gap-2' }"
+    >
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <UBadge color="Badge" variant="soft">
+            Loading...
+          </UBadge>
+          <p class="text-xs text-gray-500">
+            請勿關閉此視窗，直到操作完成。
+          </p>
+        </div>
+        <UProgress animation="carousel" color="primary" class="w-full" />
+      </div>
+    </UModal>
   </div>
 </template>
 
