@@ -120,7 +120,7 @@
                 <UInput
                   placeholder="Product name"
                   :value="p.name"
-                  @input="(e) => updatePrice(e, 'nameEn', index)"
+                  @input="(e) => updatePrice(e, 'name', index)"
                 />
                 <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional) / 描述（選填）</span>
                 <md-editor
@@ -477,9 +477,10 @@ const prices = ref<any[]>([
     deliveryMethod: 'auto',
     autoMemo: 'Thank you for your support. It means a lot to me.',
     stock: Number((route.query.count as string) || 1),
-    name: sessionData.value?.epubMetadata?.language === 'zh'
-      ? '標準版'
-      : 'Standard Edition',
+    name: sessionData.value?.epubMetadata?.language === 'en'
+      ? 'Standard Edition'
+      : '標準版',
+
     nameEn: 'Standard Edition',
     nameZh: '標準版',
     descriptionEn: '',
@@ -667,9 +668,9 @@ function addMorePrice () {
     deliveryMethod: 'auto',
     autoMemo: '',
     stock: 1,
-    name: sessionData.value?.epubMetadata?.language === 'zh'
-      ? `級別 ${nextPriceIndex.value}`
-      : `Tier ${nextPriceIndex.value}`,
+    name: sessionData.value?.epubMetadata?.language === 'en'
+      ? `Tier ${nextPriceIndex.value}`
+      : `級別 ${nextPriceIndex.value}`,
     nameEn: `Tier ${nextPriceIndex.value}`,
     nameZh: `級別 ${nextPriceIndex.value}`,
     descriptionEn: '',
