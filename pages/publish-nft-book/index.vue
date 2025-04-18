@@ -110,7 +110,6 @@ const registerISCN = ref()
 const mintNFT = ref()
 const newNFTBook = ref()
 const toast = useToast()
-const storedData = ref<any>(undefined)
 const showIscnInput = ref(false)
 const iscnInputValue = ref('')
 const currentActionText = computed(() => {
@@ -180,11 +179,16 @@ const steps = [
 ]
 
 onMounted(() => {
-  const sessionData = sessionStorage.getItem('uploadFileData')
-  if (sessionData) {
-    storedData.value = JSON.parse(sessionData)
+  let data = null
+  try {
+    const sessionData = sessionStorage.getItem('uploadFileData')
+    if (sessionData) {
+      data = JSON.parse(sessionData)
+    }
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err)
   }
-  const data = storedData.value
 
   if (iscnId.value) {
     if (data?.iscnRecord?.iscnId !== iscnId.value) {
