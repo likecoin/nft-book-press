@@ -226,16 +226,6 @@
         />
       </div>
 
-      <StripeConnectCard
-        v-if="isStandalonePage"
-        v-model:is-stripe-connect-checked="isStripeConnectChecked"
-        v-model:is-using-default-account="isUsingDefaultAccount"
-        :stripe-connect-wallet="stripeConnectWallet"
-        :should-disable-setting="shouldDisableStripeConnectSetting"
-        :login-address="wallet"
-
-        @save="handleSaveStripeConnectWallet"
-      />
       <!-- Advanced settings -->
       <UCard
         :ui="{
@@ -320,6 +310,18 @@
                 </template>
               </UTable>
             </UCard>
+
+            <!-- Stripe connect -->
+            <StripeConnectCard
+              v-if="isEditMode"
+              v-model:is-stripe-connect-checked="isStripeConnectChecked"
+              v-model:is-using-default-account="isUsingDefaultAccount"
+              :stripe-connect-wallet="stripeConnectWallet"
+              :should-disable-setting="shouldDisableStripeConnectSetting"
+              :login-address="wallet"
+
+              @save="handleSaveStripeConnectWallet"
+            />
 
             <!-- Share sales data -->
             <UCard
@@ -442,6 +444,7 @@ const { wallet, signer } = storeToRefs(walletStore)
 const { newBookListing, updateEditionPrice } = bookStoreApiStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
 const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
+const { token } = storeToRefs(bookStoreApiStore)
 
 const UPLOAD_FILESIZE_MAX = 20 * 1024 * 1024
 
@@ -588,6 +591,41 @@ onMounted(async () => {
   try {
     isLoading.value = true
     await fetchStripeConnectStatusByWallet(wallet.value)
+
+    if (isEditMode.value) {
+      const classResData: any = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`, {
+        headers: {
+          authorization: `Bearer ${token.value}`
+        }
+      })
+      if (classResData) {
+        shippingRates.value = classResData?.shippingRates || []
+        if (classResData?.ownerWallet !== wallet.value) {
+          throw new Error('NOT_OWNER_OF_NFT_CLASS')
+        }
+        if (classResData.prices.length > 0) {
+          const currentEdition = classResData.prices.filter(e => e.index.toString() === editionIndex.value)[0]
+          prices.value = [{
+            price: currentEdition.price,
+            deliveryMethod: currentEdition.isAutoDeliver ? 'auto' : 'manual',
+            autoMemo: currentEdition.autoMemo,
+            stock: currentEdition.stock,
+            name: classResData.inLanguage === 'en'
+              ? currentEdition.name.en
+              : currentEdition.name.zh,
+
+            nameEn: currentEdition.name.en,
+            nameZh: currentEdition.name.zh,
+            descriptionEn: currentEdition.description.en,
+            descriptionZh: currentEdition.description.zh,
+            hasShipping: currentEdition.hasShipping,
+            isPhysicalOnly: currentEdition.isPhysicalOnly,
+            isAllowCustomPrice: currentEdition.isAllowCustomPrice,
+            isUnlisted: false
+          }]
+        }
+      }
+    }
 
     if (getStripeConnectStatusByWallet.value(wallet.value).isReady) {
       isStripeConnectChecked.value = true
