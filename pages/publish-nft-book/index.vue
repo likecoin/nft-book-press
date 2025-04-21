@@ -269,6 +269,7 @@ const handleMintNFTSubmit = async (res: any) => {
 
 const handleNewBookSubmit = () => {
   clearUploadData()
+  router.push({ name: 'nft-book-store' })
 }
 
 const handleIscnInput = async () => {

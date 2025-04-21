@@ -50,26 +50,26 @@
         :is="hasMultiplePrices ? 'ul' : 'div'"
         class="flex flex-col gap-[12px]"
       >
-        <component
-          :is="hasMultiplePrices ? 'li' : 'div'"
-          v-for="(p, index) in prices"
-          :key="p.index"
+        <UCard
+          :ui="{
+            body: { base: 'space-y-5 relative' },
+            base: 'overflow-visible border-none !border-transparent',
+          }"
         >
-          <UCard
-            :ui="{
-              body: { base: 'space-y-5 border-[4px] relative' },
-              base: 'overflow-visible border-[2px]',
-            }"
+          <component
+            :is="hasMultiplePrices ? 'li' : 'div'"
+            v-for="(p, index) in prices"
+            :key="p.index"
           >
             <UCard
               :ui="{
                 body: {
                   base: 'flex flex-col gap-[20px]',
                 },
-                base: 'overflow-visible'
+                base: 'overflow-visible border-[4px]'
               }"
             >
-              <template #header>
+              <template v-if="hasMultiplePrices" #header>
                 <h3 class="font-bold font-mono">
                   {{ `Edition #${index + 1} / 版本 #${index + 1}` }}
                 </h3>
@@ -212,12 +212,12 @@
                 @click="deletePrice(index)"
               />
             </div>
-          </UCard>
-        </component>
+          </component>
+        </UCard>
       </component>
       <div class="flex justify-center items-center">
         <UButton
-          v-if="!isEditMode"
+          v-if="!isStandalonePage"
           :ui="{ rounded: 'rounded-full' }"
           color="gray"
           icon="i-heroicons-plus-solid"
@@ -385,15 +385,7 @@
         </template>
       </UCard>
 
-      <UButton
-        v-if="isStandalonePage"
-        :label="submitButtonText"
-        :loading="isLoading"
-        size="lg"
-        :disabled="isLoading"
-        @click="onSubmit"
-      />
-      <div v-else class="w-full flex justify-center">
+      <div class="w-full flex justify-center">
         <UButton
           :label="submitButtonText"
           :loading="isLoading"
@@ -428,7 +420,6 @@
 import { storeToRefs } from 'pinia'
 import { MdEditor, config, type ToolbarNames } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
-import DOMPurify from 'dompurify'
 
 import { v4 as uuidv4 } from 'uuid'
 import type { FormError } from '#ui/types'
@@ -440,8 +431,9 @@ import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL } from '~/utils'
 import { getNFTAuthzGrants, sendNFTsToAPIWallet } from '~/utils/cosmos'
 import { useUploadStore } from '~/stores/upload'
+import { escapeHtml, sanitizeHtml, getFileInfo } from '~/utils/newClass'
 
-const { LCD_URL } = useRuntimeConfig().public
+const { LCD_URL, LIKE_CO_API } = useRuntimeConfig().public
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const stripeStore = useStripeStore()
@@ -456,14 +448,13 @@ const UPLOAD_FILESIZE_MAX = 20 * 1024 * 1024
 const emit = defineEmits(['submit'])
 const router = useRouter()
 const route = useRoute()
-// params.editingClassId and params.editionIndex is only available when editing an existing class
-// query.class_id is only available when creating a new class
 const uploadStore = useUploadStore()
 const { getUploadFileData } = uploadStore
 const classId = ref(
-  route.params.editingClassId || (route.query.class_id as string)
+  route.params.classId || (route.query.class_id as string)
 )
-const editionIndex = ref(route.params.editionIndex as string)
+const editionIndex = ref(route.params.editionIndex as string) || ref(route.query.priceIndex as string)
+const newEditionIndex = ref(route.query.priceIndex)
 
 const error = ref('')
 const isLoading = ref(false)
@@ -536,7 +527,7 @@ const toolbarOptions = ref<ToolbarNames[]>([
 ])
 
 const isEditMode = computed(() =>
-  Boolean(route.params.editingClassId && editionIndex.value)
+  Boolean(route.params.classId && editionIndex.value)
 )
 const pageTitle = computed(() =>
   isEditMode.value ? 'Edit Current Edition' : 'General settings / 一般選項'
@@ -579,7 +570,7 @@ const notificationEmailsTableRows = computed(() =>
 )
 
 const isStandalonePage = computed(() => {
-  return route.name === 'nft-book-store-new'
+  return route.name !== 'publish-nft-book'
 })
 
 config({
@@ -633,22 +624,6 @@ function updatePrice (e: InputEvent, key: string, index: number) {
   prices.value[index][key] = (e.target as HTMLInputElement)?.value
   if (key === 'price' && Number((e.target as HTMLInputElement)?.value) === 0) {
     prices.value[index].isAllowCustomPrice = true
-  }
-}
-
-const getFileInfo = async (file: Blob) => {
-  const fileBytes = (await fileToArrayBuffer(file)) as ArrayBuffer
-  if (!fileBytes) {
-    return null
-  }
-  const [fileSHA256, ipfsHash] = await Promise.all([
-    digestFileSHA256(fileBytes),
-    calculateIPFSHash(Buffer.from(fileBytes))
-  ])
-  return {
-    fileBytes,
-    fileSHA256,
-    ipfsHash
   }
 }
 
@@ -723,18 +698,6 @@ function handleSaveStripeConnectWallet (wallet: any) {
   shouldDisableStripeConnectSetting.value = true
 }
 
-function escapeHtml (text = '') {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}
-
-function sanitizeHtml (html: string) {
-  return DOMPurify.sanitize(html)
-}
-
 function mapPrices (prices: any) {
   const isEnglish = sessionData.value?.epubMetadata?.language === 'en'
 
@@ -800,6 +763,29 @@ function validate (prices: any[]) {
   return true
 }
 
+async function onSubmit () {
+  try {
+    const p = mapPrices(prices.value)
+    if (!validate(p)) {
+      return
+    }
+
+    if (isEditMode.value) {
+      await submitEditedClass()
+    } else if (!isStandalonePage.value) { // in /publish-nft-book
+      await submitNewClass()
+    } else {
+      const existingListing = await fetch(`${LIKE_CO_API}/likernft/book/store/${classIdInput.value}`)
+      if (!existingListing.ok) {
+        await submitNewClass()
+      } else {
+        await addNewEdition()
+      }
+    }
+  } catch (error) {
+
+  }
+}
 async function submitNewClass () {
   try {
     if (!classIdInput.value) {
@@ -887,7 +873,6 @@ async function submitNewClass () {
       autoDeliverNFTsTxHash
     })
     emit('submit')
-    router.push({ name: 'nft-book-store' })
   } catch (err) {
     const errorData = (err as any).data || err
     console.error(errorData)
@@ -908,27 +893,6 @@ async function submitEditedClass () {
     const p = mapPrices(prices.value)
     const price = p[0]
 
-    if (!price || price.price === undefined) {
-      throw new Error('Please input price of edition')
-    }
-    if (price.price !== 0 && price.price < MINIMAL_PRICE) {
-      throw new Error(
-        `Price of each edition must be at least $${MINIMAL_PRICE} or $0 (free)`
-      )
-    }
-
-    if (!price.stock && price.stock !== 0) {
-      throw new Error('Please input stock of edition')
-    }
-
-    if (price.stock < 0) {
-      throw new Error('Stock cannot be negative')
-    }
-
-    if (!price.name.en || !price.name.zh) {
-      throw new Error('Please input product name')
-    }
-
     isLoading.value = true
 
     await updateEditionPrice(classId.value as string, editionIndex.value, {
@@ -945,12 +909,43 @@ async function submitEditedClass () {
   }
 }
 
-function onSubmit () {
-  const p = mapPrices(prices.value)
-  if (!validate(p)) {
-    return
+async function addNewEdition () {
+  try {
+    isLoading.value = true
+    const p = mapPrices(prices.value)
+    const price = p[0]
+    const autoDeliverCount = p
+      .filter(price => price.isAutoDeliver)
+      .reduce((acc, price) => acc + price.stock, 0)
+
+    let autoDeliverNFTsTxHash
+
+    if (autoDeliverCount > 0) {
+      if (!wallet.value || !signer.value) {
+        await initIfNecessary()
+      }
+      if (!wallet.value || !signer.value) {
+        throw new Error('Unable to connect to wallet')
+      }
+      autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
+        [classIdInput.value as string],
+        [autoDeliverNftIdInput.value as string],
+        autoDeliverCount,
+        signer.value,
+        wallet.value
+      )
+    }
+    await bookStoreApiStore.addEditionPrice(classId.value as string, newEditionIndex.value as string, {
+      price,
+      autoDeliverNFTsTxHash
+    })
+
+    emit('submit')
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isLoading.value = false
   }
-  return isEditMode.value ? submitEditedClass() : submitNewClass()
 }
 
 function handleDeliveryMethodChange (value: string) {
@@ -960,12 +955,10 @@ function handleDeliveryMethodChange (value: string) {
 }
 
 function updateClassId ({ classId: newClassId, nftMintCount }) {
-  if (!isStandalonePage.value) {
-    classId.value = newClassId
-    classIdInput.value = newClassId
-    if (nftMintCount) {
-      prices.value[0].stock = nftMintCount
-    }
+  classId.value = newClassId
+  classIdInput.value = newClassId
+  if (nftMintCount) {
+    prices.value[0].stock = nftMintCount
   }
 }
 
