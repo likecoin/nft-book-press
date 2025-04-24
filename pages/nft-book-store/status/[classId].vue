@@ -172,15 +172,14 @@
             <h3 class="font-bold font-mono">
               Editions
             </h3>
-            <div class="flex justify-center">
+            <div class="flex justify-between items-center gap-4">
+              <div>
+                Unassigned Stock : {{ UnassignedStock }}
+              </div>
               <UButton
                 icon="i-heroicons-plus-circle"
-                label="New Edition"
-                :to="{
-                  name: 'nft-book-store-status-classId-edit-new',
-                  params: { classId },
-                  query: { priceIndex: prices.length }
-                }"
+                label="Mint New Stock"
+                @click="handleOpenRestockModal"
               />
             </div>
           </div>
@@ -272,6 +271,18 @@
             </template>
           </Draggable>
         </table>
+        <div class="flex justify-center items-center ">
+          <UButton
+            icon="i-heroicons-plus-circle"
+            class="mb-[12px]"
+            label="New Edition"
+            :to="{
+              name: 'nft-book-store-status-classId-edit-new',
+              params: { classId },
+              query: { priceIndex: prices.length }
+            }"
+          />
+        </div>
       </UCard>
 
       <StripeConnectCard
@@ -688,6 +699,9 @@
         </template>
       </QRCodeGenerator>
     </UModal>
+    <UModal v-model="showRestockModal">
+      <LiteMintNFT ref="mintNFT" @submit="handleMintNFTSubmit" />
+    </UModal>
 
     <NuxtPage :transition="false" />
   </PageBody>
@@ -750,6 +764,11 @@ const enableCustomMessagePage = ref(true)
 const useLikerLandPurchaseLink = ref(true)
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
+
+// Restock
+const UnassignedStock = ref(0)
+const showRestockModal = ref(false)
+const mintNFT = ref<any>(null)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
@@ -1126,6 +1145,9 @@ onMounted(async () => {
 
     ordersData.value = orders
 
+    const { nfts } = await getNFTs({ classId: classId.value, owner: wallet.value })
+    UnassignedStock.value = nfts?.length || 0
+
     try {
       await fetchStripeConnectStatusByWallet(wallet.value)
     } catch (err) {
@@ -1383,4 +1405,17 @@ function shortenAllLinks () {
     })
   }
 }
+
+async function handleOpenRestockModal () {
+  showRestockModal.value = true
+  const iscnId = await nftStore.getClassMetadataById(classId.value as string)?.data?.parent?.iscn_id_prefix
+  mintNFT.value?.onISCNIDInput(iscnId)
+}
+
+async function handleMintNFTSubmit () {
+  const { nfts } = await getNFTs({ classId: classId.value, owner: wallet.value })
+  UnassignedStock.value = nfts?.length || 0
+  showRestockModal.value = false
+}
+
 </script>
