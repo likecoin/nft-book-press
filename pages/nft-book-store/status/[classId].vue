@@ -174,7 +174,7 @@
             </h3>
             <div class="flex justify-between items-center gap-4">
               <div>
-                Unassigned Stock : {{ UnassignedStock }}
+                Unassigned Stock : {{ unassignedStock }}
               </div>
               <UButton
                 icon="i-heroicons-plus-circle"
@@ -766,7 +766,7 @@ const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
 
 // Restock
-const UnassignedStock = ref(0)
+const unassignedStock = ref(0)
 const showRestockModal = ref(false)
 const mintNFT = ref<any>(null)
 
@@ -1144,10 +1144,7 @@ onMounted(async () => {
       })
 
     ordersData.value = orders
-
-    const { nfts } = await getNFTs({ classId: classId.value, owner: wallet.value })
-    UnassignedStock.value = nfts?.length || 0
-
+    await calculateStock()
     try {
       await fetchStripeConnectStatusByWallet(wallet.value)
     } catch (err) {
@@ -1162,6 +1159,15 @@ onMounted(async () => {
     isLoading.value = false
   }
 })
+
+async function calculateStock () {
+  const pendingNFTCount = classListingInfo.value.pendingNFTCount || 0
+  const { nfts } = await getNFTs({ classId: classId.value, owner: wallet.value })
+  const manuallyDeliveredNFTs = prices.value
+    .filter(price => !price.isAutoDeliver)
+    .reduce((total, price) => total + (price.stock || 0), 0)
+  unassignedStock.value = nfts?.length - manuallyDeliveredNFTs - pendingNFTCount || 0
+}
 
 async function handlePriceReorder ({
   newIndex: newOrder,
@@ -1413,8 +1419,7 @@ async function handleOpenRestockModal () {
 }
 
 async function handleMintNFTSubmit () {
-  const { nfts } = await getNFTs({ classId: classId.value, owner: wallet.value })
-  UnassignedStock.value = nfts?.length || 0
+  await calculateStock()
   showRestockModal.value = false
 }
 
