@@ -44,7 +44,7 @@
           />
         </div>
       </div>
-      <div class="flex justify-center">
+      <div v-if="shouldShowSubmit" class="flex justify-center">
         <UButton
           label="Submit"
           :loading="isLoading"
@@ -88,8 +88,9 @@ const nftMintDefaultData = ref<any>(null)
 const nftData = ref<any>(null)
 const nftCSVData = ref('')
 const existingNftCount = ref(0)
+const iscnOwner = ref('')
 
-const classId = ref<string>(route.params.classId as string)
+const classId = ref<string>(route.params.classId as string || '')
 
 const formState = reactive({
   prefix: 'BOOKSN',
@@ -107,12 +108,60 @@ const isFormValid = computed(() => {
   return formRef.value?.validate(formState).length === 0
 })
 
+const isCreateClass = computed(() => {
+  return !classId.value
+})
+
 const emit = defineEmits(['submit'])
 const iscnId = ref('')
+
+const props = defineProps({
+  iscnData: {
+    type: Object,
+    default: null
+  },
+  shouldShowSubmit: {
+    type: Boolean,
+    default: true
+  }
+})
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
 })
+
+watch(() => props.iscnData, (recordData) => {
+  if (recordData) {
+    iscnData.value = recordData
+    iscnId.value = recordData['@id']
+    iscnOwner.value = recordData.owner
+    formState.imageUrl = recordData.contentMetadata?.thumbnailUrl || ''
+  }
+}, { immediate: true })
+
+async function onClassFileInput () {
+  try {
+    isLoading.value = true
+    if (!wallet.value || !signer.value) {
+      await initIfNecessary()
+    }
+    if (!wallet.value || !signer.value) { return }
+    if (!classCreateData.value) { throw new Error('NO_CLASS_DATA') }
+    if (iscnOwner.value !== wallet.value) { throw new Error('INVALID_OWNER') }
+    const newClassId = await signCreateNFTClass(classCreateData.value, iscnId.value, signer.value, wallet.value, { nftMaxSupply: classMaxSupply.value })
+    await signCreateRoyltyConfig(newClassId, iscnData.value, iscnOwner.value, false, signer.value, wallet.value)
+    const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${encodeURIComponent(newClassId)}`)
+    if (!data) { throw new Error('INVALID_NFT_CLASS_ID') }
+    const classData = (data as any).class
+
+    return classData
+  } catch (err) {
+    console.error(err)
+    error.value = (err as Error).toString()
+  } finally {
+    isLoading.value = false
+  }
+}
 
 function generateNFTMintListCSVData ({
   prefix,
@@ -177,8 +226,11 @@ async function onClickMintByInputting () {
         external_url: formState.externalUrl
       }
     }
-    const { nfts } = await getNFTs({ classId: classId.value as string })
-    existingNftCount.value = nfts.length
+    if (!isCreateClass.value) {
+      const { nfts } = await getNFTs({ classId: classId.value as string })
+      existingNftCount.value = nfts.length
+    }
+
     if (typeof formState.mintCount !== 'number') {
       formState.mintCount = Number(formState.mintCount)
     }
@@ -196,8 +248,19 @@ async function onClickMintByInputting () {
     nftMintListData.value = csvDataArray
     formState.mintCount = csvDataArray.length
 
+    if (isCreateClass.value) {
+      classData.value = await onClassFileInput()
+      classId.value = classData.value?.id
+    }
     await onMintNFTStart()
-    emit('submit')
+    if (classData.value?.id) {
+      emit('submit', {
+        classId: classData.value?.id,
+        nftMintCount: formState.mintCount
+      })
+    } else {
+      emit('submit')
+    }
   } catch (error) {
     console.error(error)
   } finally {
