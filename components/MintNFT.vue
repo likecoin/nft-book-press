@@ -51,15 +51,6 @@ const liteMintNFTRef = ref<any>(null)
 
 const iscnId = computed(() => iscnData.value?.['@id'])
 
-const formState = reactive({
-  prefix: 'BOOKSN',
-  mintCount: NFT_DEFAULT_MINT_AMOUNT,
-  imageUrl: '',
-  externalUrl: '',
-  uri: '',
-  maxSupply: undefined
-})
-
 const isFormValid = computed(() => {
   return liteMintNFTRef.value?.isFormValid
 })
@@ -70,12 +61,6 @@ const editISCNRef = ref<any>(null)
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
-})
-
-watch(iscnData, (recordData) => {
-  if (recordData) {
-    formState.imageUrl = recordData.contentMetadata?.thumbnailUrl || ''
-  }
 })
 
 useSeoMeta({
@@ -119,12 +104,13 @@ function onSaveISCN () {
   }
 }
 
-function handleFinishMintNFT ({ classId: newClassId, nftMintCount }: { classId: string, nftMintCount: number } = {}) {
+function handleFinishMintNFT ({ classId: newClassId, nftMintCount, prefix }: { classId: string, nftMintCount: number, prefix: string } = {}) {
   classId.value = newClassId || ''
 
   emit('submit', {
     classId: newClassId || '',
-    nftMintCount
+    nftMintCount,
+    prefix
   })
 }
 

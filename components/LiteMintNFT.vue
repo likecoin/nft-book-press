@@ -256,7 +256,8 @@ async function onClickMintByInputting () {
     if (classData.value?.id) {
       emit('submit', {
         classId: classData.value?.id,
-        nftMintCount: formState.mintCount
+        nftMintCount: formState.mintCount,
+        prefix: formState.prefix
       })
     } else {
       emit('submit')
