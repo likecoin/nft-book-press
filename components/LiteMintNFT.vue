@@ -162,19 +162,19 @@ async function onClassFileInput () {
 
 function generateNFTMintListData ({
   prefix,
-  nftExisitngCount = 0,
+  nftExistingCount = 0,
   nftMintCount,
   imgUrl,
   uri
 }: {
   prefix: string;
-  nftExisitngCount?: number;
+  nftExistingCount?: number;
   nftMintCount: number;
   imgUrl: string;
   uri: string ;
 }) {
   const dataRows = []
-  for (let i = nftExisitngCount; i <= nftExisitngCount + nftMintCount - 1; i++) {
+  for (let i = nftExistingCount; i <= nftExistingCount + nftMintCount - 1; i++) {
     const nftId = `${prefix}-${i.toString().padStart(4, '0')}`
     dataRows.push({
       nftId,
@@ -237,7 +237,7 @@ async function onClickMintByInputting () {
     nftMintListData.value = generateNFTMintListData({
       prefix: formState.prefix,
       nftMintCount: formState.mintCount,
-      nftExisitngCount: existingNftCount.value,
+      nftExistingCount: existingNftCount.value,
       imgUrl: formState.imageUrl,
       uri: formState.uri
     })
