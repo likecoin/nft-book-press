@@ -152,6 +152,7 @@ async function onClassFileInput () {
 
     return classData
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err)
     error.value = (err as Error).toString()
   } finally {
@@ -257,6 +258,7 @@ async function onClickMintByInputting () {
       emit('submit')
     }
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error)
   } finally {
     isLoading.value = false
@@ -310,6 +312,7 @@ async function onMintNFTStart () {
     nftData.value = res
     return classData.value
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err)
     error.value = (err as Error).toString()
   } finally {
@@ -331,6 +334,7 @@ async function onISCNIDInput (value: string) {
     iscnData.value = records[0].data
     formState.imageUrl = iscnData.value.contentMetadata?.thumbnailUrl || ''
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error)
   } finally {
     isLoading.value = false
