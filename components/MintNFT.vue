@@ -33,7 +33,6 @@
 </template>
 
 <script setup lang="ts">
-import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
 
 const { LCD_URL } = useRuntimeConfig().public
 const router = useRouter()

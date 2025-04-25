@@ -60,11 +60,8 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { v4 as uuidv4 } from 'uuid'
-import { parse } from 'csv-parse/sync'
-import { stringify } from 'csv-stringify/sync'
 
 import { useWalletStore } from '~/stores/wallet'
-import { convertArrayOfObjectsToCSV } from '~/utils'
 import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
 
 const route = useRoute()
@@ -86,7 +83,6 @@ const classCreateData = ref<any>(null)
 const nftMintListData = ref<any>([])
 const nftMintDefaultData = ref<any>(null)
 const nftData = ref<any>(null)
-const nftCSVData = ref('')
 const existingNftCount = ref(0)
 const iscnOwner = ref('')
 
@@ -163,7 +159,7 @@ async function onClassFileInput () {
   }
 }
 
-function generateNFTMintListCSVData ({
+function generateNFTMintListData ({
   prefix,
   nftExisitngCount = 0,
   nftMintCount,
@@ -176,17 +172,17 @@ function generateNFTMintListCSVData ({
   imgUrl: string;
   uri: string ;
 }) {
-  const csvRows = []
+  const dataRows = []
   for (let i = nftExisitngCount; i <= nftExisitngCount + nftMintCount - 1; i++) {
     const nftId = `${prefix}-${i.toString().padStart(4, '0')}`
-    csvRows.push({
+    dataRows.push({
       nftId,
       uri,
       image: imgUrl,
       metadata: ''
     })
   }
-  return convertArrayOfObjectsToCSV(csvRows)
+  return dataRows
 }
 
 async function onClickMintByInputting () {
@@ -234,19 +230,17 @@ async function onClickMintByInputting () {
     if (typeof formState.mintCount !== 'number') {
       formState.mintCount = Number(formState.mintCount)
     }
-    const csvDataString = generateNFTMintListCSVData({
+
+    classCreateData.value = nftClassData
+    nftMintDefaultData.value = nftsDefaultData
+    nftMintListData.value = generateNFTMintListData({
       prefix: formState.prefix,
       nftMintCount: formState.mintCount,
       nftExisitngCount: existingNftCount.value,
       imgUrl: formState.imageUrl,
       uri: formState.uri
     })
-    const csvDataArray = parse(csvDataString, { columns: true })
-
-    classCreateData.value = nftClassData
-    nftMintDefaultData.value = nftsDefaultData
-    nftMintListData.value = csvDataArray
-    formState.mintCount = csvDataArray.length
+    formState.mintCount = nftMintListData.value.length
 
     if (isCreateClass.value) {
       classData.value = await onClassFileInput()
@@ -277,9 +271,6 @@ async function onMintNFTStart () {
     }
     if (!wallet.value || !signer.value) { return }
     if (!nftMintDefaultData.value) { throw new Error('NO_MINT_DATA') }
-    if (nftMintListData.value.length && nftMintListData.value.length !== formState.mintCount) {
-      throw new Error(`NFT csv data length ${nftMintListData.value.length} must match nft mint amount ${formState.mintCount}`)
-    }
     const defaultURI = nftMintDefaultData.value.uri
     const defaultMetadata = nftMintDefaultData.value.metadata
     const nfts = [...Array(formState.mintCount).keys()].map((i) => {
@@ -287,11 +278,9 @@ async function onMintNFTStart () {
         nftId,
         uri: dataUri,
         image: dataImage,
-        metadata: dataMetadataString,
         ...otherData
       } = nftMintListData?.value?.[i] || {}
-      const dataMetadata = JSON.parse(dataMetadataString || '{}')
-      const data = { ...defaultMetadata, ...dataMetadata }
+      const data = { ...defaultMetadata }
       if (dataImage) { data.image = dataImage }
       Object.entries(otherData).forEach(([key, value]) => {
         if (value) {
@@ -312,7 +301,6 @@ async function onMintNFTStart () {
         metadata: data
       }
     })
-    nftCSVData.value = stringify(nfts, { header: true })
     const res = await signMintNFT(
       nfts,
       classId.value,
