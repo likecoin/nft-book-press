@@ -34,6 +34,7 @@
           <UCheckbox
             v-model="hideDownload"
             name="hideDownload"
+            :disabled="isFileEncrypted === true"
             label="DRM: encrypt content & disable download / 加密文本、禁止下載"
           />
         </UFormGroup>
@@ -430,10 +431,12 @@ import { DEFAULT_PRICE, MINIMAL_PRICE } from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
+import { useNftStore } from '~/stores/nft'
 import { getPortfolioURL } from '~/utils'
 import { getNFTAuthzGrants, sendNFTsToAPIWallet } from '~/utils/cosmos'
 import { useUploadStore } from '~/stores/upload'
 import { escapeHtml, sanitizeHtml, getFileInfo } from '~/utils/newClass'
+import { getApiEndpoints } from '~/constant/api'
 
 const { LCD_URL, LIKE_CO_API } = useRuntimeConfig().public
 const walletStore = useWalletStore()
@@ -445,6 +448,7 @@ const { newBookListing, updateEditionPrice } = bookStoreApiStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
 const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
 const { token } = storeToRefs(bookStoreApiStore)
+const nftStore = useNftStore()
 
 const UPLOAD_FILESIZE_MAX = 20 * 1024 * 1024
 
@@ -513,6 +517,7 @@ const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
+const isFileEncrypted = ref(false)
 
 const toolbarOptions = ref<ToolbarNames[]>([
   'bold',
@@ -539,6 +544,7 @@ const submitButtonText = computed(() =>
   isEditMode.value ? 'Save Changes' : 'Submit'
 )
 const shouldShowAdvanceSettings = ref<boolean>(false)
+const iscnId = ref('')
 
 const moderatorWalletsTableColumns = computed(() => [
   { key: 'wallet', label: 'Wallet', sortable: true },
@@ -590,9 +596,9 @@ useSeoMeta({
 onMounted(async () => {
   try {
     isLoading.value = true
-    await fetchStripeConnectStatusByWallet(wallet.value)
 
     if (isEditMode.value) {
+      await fetchStripeConnectStatusByWallet(wallet.value)
       const classResData: any = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`, {
         headers: {
           authorization: `Bearer ${token.value}`
@@ -657,6 +663,35 @@ watch(moderatorWallets, (newModeratorWallets) => {
     }
   })
 })
+
+watch(classId, async (newClassId) => {
+  if (newClassId && !iscnId.value) {
+    // Fetch ISCN data
+    if (!iscnId.value) {
+      iscnId.value = await getIscnId()
+    }
+    if (!iscnId.value) { return }
+    const data = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(iscnId.value)}`)
+    const { records } = data as any
+
+    if (!records?.length) { return }
+
+    const iscnData = records[0].data
+    const fingerprints = iscnData?.contentFingerprints
+    if (fingerprints && isContentFingerPrintEncrypted(fingerprints)) {
+      isFileEncrypted.value = true
+      hideDownload.value = true
+    }
+  }
+}, { immediate: true })
+
+function isContentFingerPrintEncrypted (contentFingerprints: any[]) {
+  const apiEndpoints = getApiEndpoints()
+  const arweaveLinkEndpoint = apiEndpoints.API_GET_ARWEAVE_V2_LINK
+  return contentFingerprints.some((fingerprint) => {
+    return !!fingerprint.startsWith(arweaveLinkEndpoint) || fingerprint.includes('?key=')
+  })
+}
 
 function updatePrice (e: InputEvent, key: string, index: number) {
   prices.value[index][key] = (e.target as HTMLInputElement)?.value
@@ -992,12 +1027,31 @@ function handleDeliveryMethodChange (value: string) {
   }
 }
 
-function updateClassId ({ classId: newClassId, nftMintCount }) {
+async function updateClassId ({ classId: newClassId, nftMintCount }) {
   classId.value = newClassId
   classIdInput.value = newClassId
   if (nftMintCount) {
     prices.value[0].stock = nftMintCount
   }
+  if (iscnId.value) {
+    iscnId.value = await getIscnId()
+  }
+}
+
+async function getIscnId () {
+  if (sessionData.value?.iscnRecord?.iscnId) {
+    return sessionData.value?.iscnRecord?.iscnId
+  }
+
+  const classData = await nftStore.lazyFetchClassMetadataById(
+    classId.value as string
+  )
+  if (classData?.data?.parent) {
+    const parent = classData.data.parent
+    return parent?.iscn_id_prefix
+  }
+
+  return ''
 }
 
 defineExpose({

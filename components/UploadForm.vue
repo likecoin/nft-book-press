@@ -63,10 +63,7 @@
       </div>
     </div>
     <div class="flex items-center gap-2 mt-4">
-      <UCheckbox v-model="isEncryptEBookData" label="儲存位置加密" />
-      <UTooltip text="加密後只有擁有NFT的用戶才能解密閱讀">
-        <UIcon name="i-heroicons-information-circle" class="w-5 h-5 text-gray-500" />
-      </UTooltip>
+      <UCheckbox v-model="isEncryptEBookData" label="DRM: encrypt content & disable download / 加密文本、禁止下載" />
     </div>
     <UModal
       :model-value="!!uploadStatus"
@@ -107,7 +104,6 @@ import {
 import { sendLIKE } from '~/utils/cosmos'
 import { useWalletStore } from '~/stores/wallet'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
-
 const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024
 
 const store = useWalletStore()
@@ -117,7 +113,23 @@ const bookStoreApiStore = useBookStoreApiStore()
 const { token } = storeToRefs(bookStoreApiStore)
 const toast = useToast()
 
-const fileRecords = ref([])
+interface FileRecord {
+  fileName?: string;
+  fileSize?: number;
+  fileType?: string;
+  fileBlob?: Blob;
+  ipfsHash?: string;
+  fileSHA256?: string;
+  encryptedIpfsHash?: string | null;
+  encryptedBuffer?: Buffer | null;
+  encryptionKey?: string | null;
+  fileData?: string;
+  arweaveId?: string
+  arweaveLink?: string
+  arweaveKey?: string
+}
+
+const fileRecords = ref<FileRecord[]>([])
 const isSizeExceeded = ref(false)
 const isDragging = ref(false)
 const epubMetadataList = ref<any[]>([])
@@ -204,7 +216,11 @@ const onFileUpload = async (event: DragEvent) => {
     if (files?.length) {
       for (const file of files) {
         const reader = new FileReader()
-        let fileRecord: any = {}
+        let fileRecord: any = {
+          encryptedIpfsHash: null,
+          encryptedBuffer: null,
+          encryptionKey: null
+        }
 
         if (file.size < UPLOAD_FILESIZE_MAX) {
           reader.onload = (e) => {
@@ -387,7 +403,8 @@ const estimateArweaveFee = async (): Promise<void> => {
   }
 }
 
-const submitToArweave = async (record: any): Promise<void> => {
+const submitToArweave = async (index: any): Promise<void> => {
+  const record = fileRecords.value[index] as any
   const existingData =
     sentArweaveTransactionInfo.value.get(record.ipfsHash) || {}
   const { transactionHash, arweaveId: uploadArweaveId } = existingData
@@ -412,10 +429,12 @@ const submitToArweave = async (record: any): Promise<void> => {
       const { rawEncryptedKeyAsBase64, combinedArrayBuffer } =
         await encryptDataWithAES({ data: arrayBuffer })
       const encryptedBuffer = Buffer.from(combinedArrayBuffer)
-
-      record.encryptionKey = rawEncryptedKeyAsBase64
-      record.encryptedBuffer = encryptedBuffer
-      record.encryptedIpfsHash = await calculateIPFSHash(encryptedBuffer)
+      ipfsHash = await calculateIPFSHash(encryptedBuffer)
+      key = rawEncryptedKeyAsBase64
+      buffer = encryptedBuffer
+      fileRecords.value[index].encryptionKey = key
+      fileRecords.value[index].encryptedBuffer = buffer
+      fileRecords.value[index].encryptedIpfsHash = ipfsHash
     } else {
       ipfsHash = record.encryptedIpfsHash || ipfsHash
       buffer = record.encryptedBuffer || buffer
@@ -597,8 +616,7 @@ const onSubmit = async () => {
     }
 
     for (let i = 0; i < fileRecords.value.length; i += 1) {
-      const record = fileRecords.value[i]
-      await submitToArweave(record)
+      await submitToArweave(i)
     }
   } catch (error) {
     // eslint-disable-next-line no-console
