@@ -1166,7 +1166,7 @@ async function calculateStock () {
   const manuallyDeliveredNFTs = prices.value
     .filter(price => !price.isAutoDeliver)
     .reduce((total, price) => total + (price.stock || 0), 0)
-  unassignedStock.value = nfts?.length - manuallyDeliveredNFTs - pendingNFTCount || 0
+  unassignedStock.value = Math.max((nfts?.length - manuallyDeliveredNFTs - pendingNFTCount) || 0, 0)
 }
 
 async function handlePriceReorder ({
