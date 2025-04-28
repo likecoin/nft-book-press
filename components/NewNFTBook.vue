@@ -456,7 +456,7 @@ const emit = defineEmits(['submit'])
 const router = useRouter()
 const route = useRoute()
 const uploadStore = useUploadStore()
-const { getUploadFileData } = uploadStore
+const { getUploadFileData, uploadFileData } = uploadStore
 const classId = ref(
   route.params.classId || (route.query.class_id as string)
 )
@@ -479,7 +479,7 @@ const hideDownload = ref(false)
 const autoDeliverNftIdInput = ref('')
 const isAllowCustomPrice = ref(true)
 const sessionData = computed(() => {
-  return getUploadFileData()
+  return uploadFileData
 })
 const prices = ref<any[]>([
   {
@@ -596,6 +596,7 @@ useSeoMeta({
 onMounted(async () => {
   try {
     isLoading.value = true
+    getUploadFileData()
 
     if (isEditMode.value) {
       await fetchStripeConnectStatusByWallet(wallet.value)
