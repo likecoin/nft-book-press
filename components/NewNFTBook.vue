@@ -460,8 +460,8 @@ const { getUploadFileData } = uploadStore
 const classId = ref(
   route.params.classId || (route.query.class_id as string)
 )
-const editionIndex = ref(route.params.editionIndex as string) || ref(route.query.priceIndex as string)
-const newEditionIndex = ref(route.query.priceIndex)
+const editionIndex = ref(route.params.editionIndex as string) || ref(route.query.price_index as string)
+const newEditionIndex = ref(route.query.price_index)
 
 const error = ref('')
 const isLoading = ref(false)

@@ -279,7 +279,7 @@
             :to="{
               name: 'nft-book-store-status-classId-edit-new',
               params: { classId },
-              query: { priceIndex: prices.length }
+              query: { price_index: prices.length }
             }"
           />
         </div>
