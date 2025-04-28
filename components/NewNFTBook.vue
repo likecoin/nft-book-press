@@ -723,6 +723,7 @@ async function onFileUpload (files: FileList, key: string, index: number) {
       }
     }
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error('File upload error:', err)
     error.value = 'Failed to upload file'
   }
@@ -956,6 +957,7 @@ async function submitNewClass () {
     emit('submit')
   } catch (err) {
     const errorData = (err as any).data || err
+    // eslint-disable-next-line no-console
     console.error(errorData)
     error.value = errorData
   } finally {
@@ -983,6 +985,7 @@ async function submitEditedClass () {
     router.push({ name: 'nft-book-store' })
   } catch (err) {
     const errorData = (err as any).data || err
+    // eslint-disable-next-line no-console
     console.error(errorData)
     error.value = errorData
   } finally {
