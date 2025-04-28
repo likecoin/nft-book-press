@@ -1042,7 +1042,7 @@ async function updateClassId ({ classId: newClassId, nftMintCount }) {
   if (nftMintCount) {
     prices.value[0].stock = nftMintCount
   }
-  if (iscnId.value) {
+  if (!iscnId.value) {
     iscnId.value = await getIscnId()
   }
 }
