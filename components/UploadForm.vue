@@ -216,11 +216,7 @@ const onFileUpload = async (event: DragEvent) => {
     if (files?.length) {
       for (const file of files) {
         const reader = new FileReader()
-        let fileRecord: any = {
-          encryptedIpfsHash: null,
-          encryptedBuffer: null,
-          encryptionKey: null
-        }
+        let fileRecord: FileRecord = {}
 
         if (file.size < UPLOAD_FILESIZE_MAX) {
           reader.onload = (e) => {
