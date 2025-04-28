@@ -682,7 +682,7 @@ watch(classId, async (newClassId) => {
     const data = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(iscnId.value)}`)
     const { records } = data as any
 
-    if (!records[0].data) { return }
+    if (!records?.[0]?.data) { return }
 
     const iscnData = records[0].data
     const fingerprints = iscnData?.contentFingerprints
