@@ -255,12 +255,12 @@ const handleIscnSubmit = async (res: { iscnId: string, txHash: string }) => {
 }
 
 const handleMintNFTSubmit = async (res: any) => {
-  const { classId, nftMintCount } = res
+  const { classId, nftMintCount, prefix } = res
   if (classId) {
     router.replace({ query: { class_id: classId } })
   }
   updateUploadFileData({
-    classData: { classId, nftMintCount, prefix: res.prefix }
+    classData: { classId, nftMintCount, prefix }
   })
   step.value = 3
   await nextTick()
