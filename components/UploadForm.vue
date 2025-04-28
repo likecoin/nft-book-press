@@ -399,8 +399,7 @@ const estimateArweaveFee = async (): Promise<void> => {
   }
 }
 
-const submitToArweave = async (index: any): Promise<void> => {
-  const record = fileRecords.value[index] as any
+const submitToArweave = async (record: FileRecord): Promise<void> => {
   const existingData =
     sentArweaveTransactionInfo.value.get(record.ipfsHash) || {}
   const { transactionHash, arweaveId: uploadArweaveId } = existingData
@@ -425,14 +424,14 @@ const submitToArweave = async (index: any): Promise<void> => {
       const { rawEncryptedKeyAsBase64, combinedArrayBuffer } =
         await encryptDataWithAES({ data: arrayBuffer })
       const encryptedBuffer = Buffer.from(combinedArrayBuffer)
-      ipfsHash = await calculateIPFSHash(encryptedBuffer)
+      ipfsHash = await calculateIPFSHash(encryptedBuffer) || ''
       key = rawEncryptedKeyAsBase64
       buffer = encryptedBuffer
-      fileRecords.value[index].encryptionKey = key
-      fileRecords.value[index].encryptedBuffer = buffer
-      fileRecords.value[index].encryptedIpfsHash = ipfsHash
+      record.encryptedIpfsHash = ipfsHash
+      record.encryptedBuffer = encryptedBuffer
+      record.encryptionKey = key
     } else {
-      ipfsHash = record.encryptedIpfsHash || ipfsHash
+      ipfsHash = record.encryptedIpfsHash
       buffer = record.encryptedBuffer || buffer
       key = record.encryptionKey || undefined
     }
@@ -448,7 +447,7 @@ const submitToArweave = async (index: any): Promise<void> => {
 
   const { arweaveId, arweaveLink } = await uploadSingleFileToBundlr(buffer, {
     fileSize: record.fileBlob?.size || 0,
-    ipfsHash,
+    ipfsHash: ipfsHash as string,
     fileType: record.fileType as string,
     txHash,
     token: token.value,
@@ -612,7 +611,8 @@ const onSubmit = async () => {
     }
 
     for (let i = 0; i < fileRecords.value.length; i += 1) {
-      await submitToArweave(i)
+      const record = fileRecords.value[i]
+      await submitToArweave(record)
     }
   } catch (error) {
     // eslint-disable-next-line no-console
