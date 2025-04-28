@@ -28,6 +28,7 @@
         <NewNFTBook
           ref="newNFTBook"
           class="flex flex-col gap-4"
+          :is-new-class-page="false"
           @submit="handleSubmit"
         />
       </UCard>

@@ -19,6 +19,7 @@
 
       <NewNFTBook
         class="flex flex-col gap-4"
+        :is-new-class-page="false"
         @submit="handleNewBookSubmit"
       />
     </UCard>

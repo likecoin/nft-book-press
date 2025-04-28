@@ -36,6 +36,7 @@
           <NewNFTBook
             ref="newNFTBook"
             class="p-0 flex flex-col text-left gap-[24px]"
+            :is-new-class-page="true"
             @submit="handleNewBookSubmit"
           />
         </div>

@@ -218,7 +218,7 @@
       </component>
       <div class="flex justify-center items-center">
         <UButton
-          v-if="!isStandalonePage"
+          v-if="props.isNewClassPage"
           :ui="{ rounded: 'rounded-full' }"
           color="gray"
           icon="i-heroicons-plus-solid"
@@ -578,15 +578,15 @@ const notificationEmailsTableRows = computed(() =>
   }))
 )
 
-const isStandalonePage = computed(() => {
-  return route.name !== 'publish-nft-book'
-})
-
 config({
   markdownItConfig (mdit: any) {
     mdit.options.html = false
   }
 })
+
+const props = defineProps<{
+ isNewClassPage: boolean
+}>()
 
 useSeoMeta({
   title: 'New Book Listing',
@@ -846,7 +846,7 @@ async function onSubmit () {
 
     if (isEditMode.value) {
       await submitEditedClass()
-    } else if (!isStandalonePage.value) { // in /publish-nft-book
+    } else if (props.isNewClassPage) { // in /publish-nft-book
       await submitNewClass()
     } else {
       const existingListing = await fetch(`${LIKE_CO_API}/likernft/book/store/${classIdInput.value}`)
