@@ -610,8 +610,11 @@ onMounted(async () => {
         if (classResData?.ownerWallet !== wallet.value) {
           throw new Error('NOT_OWNER_OF_NFT_CLASS')
         }
-        if (classResData.prices.length > 0) {
-          const currentEdition = classResData.prices.filter(e => e.index.toString() === editionIndex.value)[0]
+        if (classResData.prices.length) {
+          const currentEdition = classResData.prices.find(e => e.index.toString() === editionIndex.value)
+          if (!currentEdition) {
+            throw new Error('Edition not found')
+          }
           prices.value = [{
             price: currentEdition.price,
             deliveryMethod: currentEdition.isAutoDeliver ? 'auto' : 'manual',
@@ -630,7 +633,11 @@ onMounted(async () => {
             isAllowCustomPrice: currentEdition.isAllowCustomPrice,
             isUnlisted: false
           }]
+        } else {
+          throw new Error('No prices found')
         }
+      } else {
+        throw new Error('NFT Class not found')
       }
     }
 
