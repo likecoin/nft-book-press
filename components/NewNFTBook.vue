@@ -34,7 +34,7 @@
           <UCheckbox
             v-model="hideDownload"
             name="hideDownload"
-            :disabled="isFileEncrypted === true"
+            :disabled="!!isFileEncrypted"
             label="DRM: encrypt content & disable download / 加密文本、禁止下載"
           />
         </UFormGroup>
@@ -930,7 +930,7 @@ async function submitNewClass () {
     }
 
     const shouldEnableCustomMessagePage =
-    prices.value.some(price => price.deliveryMethod === 'manual')
+      prices.value.some(price => price.deliveryMethod === 'manual')
 
     await newBookListing(classIdInput.value as string, {
       tableOfContents: tableOfContents.value,
@@ -986,7 +986,6 @@ async function addNewEdition () {
   try {
     isLoading.value = true
     const p = mapPrices(prices.value)
-    const price = p[0]
     const autoDeliverCount = p
       .filter(price => price.isAutoDeliver)
       .reduce((acc, price) => acc + price.stock, 0)
@@ -1008,6 +1007,7 @@ async function addNewEdition () {
         wallet.value
       )
     }
+    const price = p[0]
     await bookStoreApiStore.addEditionPrice(classId.value as string, newEditionIndex.value as string, {
       price,
       autoDeliverNFTsTxHash
@@ -1015,6 +1015,7 @@ async function addNewEdition () {
 
     emit('submit')
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error(error)
   } finally {
     isLoading.value = false
