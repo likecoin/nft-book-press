@@ -637,7 +637,7 @@ onMounted(async () => {
             hasShipping: currentEdition.hasShipping,
             isPhysicalOnly: currentEdition.isPhysicalOnly,
             isAllowCustomPrice: currentEdition.isAllowCustomPrice,
-            isUnlisted: false
+            isUnlisted: currentEdition.isUnlisted
           }]
           oldIsAutoDeliver.value = currentEdition.isAutoDeliver
           oldStock.value = currentEdition.stock
