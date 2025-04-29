@@ -518,6 +518,8 @@ const stripeConnectWallet = ref('')
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
 const isFileEncrypted = ref(false)
+const oldIsAutoDeliver = ref(false)
+const oldStock = ref(0)
 
 const toolbarOptions = ref<ToolbarNames[]>([
   'bold',
@@ -633,6 +635,8 @@ onMounted(async () => {
             isAllowCustomPrice: currentEdition.isAllowCustomPrice,
             isUnlisted: false
           }]
+          oldIsAutoDeliver.value = currentEdition.isAutoDeliver
+          oldStock.value = currentEdition.stock
         } else {
           throw new Error('No prices found')
         }
@@ -974,12 +978,37 @@ async function submitEditedClass () {
       )
     }
     const p = mapPrices(prices.value)
-    const price = p[0]
+    const editedPrice = p[0]
 
     isLoading.value = true
 
+    let newAutoDeliverNFTsCount = 0
+    if (editedPrice.isAutoDeliver) {
+      newAutoDeliverNFTsCount = oldIsAutoDeliver.value
+        ? editedPrice.stock - oldStock.value
+        : editedPrice.stock
+    }
+
+    let autoDeliverNFTsTxHash
+    if (newAutoDeliverNFTsCount > 0) {
+      if (!wallet.value || !signer.value) {
+        await initIfNecessary()
+      }
+      if (!wallet.value || !signer.value) {
+        throw new Error('Unable to connect to wallet')
+      }
+      autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
+        [classIdInput.value as string],
+        [prefix.value],
+        newAutoDeliverNFTsCount,
+        signer.value,
+        wallet.value
+      )
+    }
+
     await updateEditionPrice(classId.value as string, editionIndex.value, {
-      price
+      autoDeliverNFTsTxHash,
+      price: editedPrice
     })
 
     router.push({ name: 'nft-book-store' })
