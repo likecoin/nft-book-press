@@ -725,6 +725,7 @@ const { wallet } = storeToRefs(store)
 const { updateBookListingSetting, reduceListingPendingNFTCountById } = bookStoreApiStore
 const { lazyFetchClassMetadataById } = nftStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
+const { getBalanceOf } = useNFTContractReader()
 
 const route = useRoute()
 const router = useRouter()
@@ -1141,11 +1142,11 @@ onMounted(async () => {
 
 async function calculateStock () {
   const pendingNFTCount = classListingInfo.value.pendingNFTCount || 0
-  const { nfts } = await getNFTs({ classId: classId.value, owner: wallet.value })
+  const count = await getBalanceOf(classId.value, wallet.value as string)
   const manuallyDeliveredNFTs = prices.value
     .filter(price => !price.isAutoDeliver)
     .reduce((total, price) => total + (price.stock || 0), 0)
-  unassignedStock.value = Math.max((nfts?.length - manuallyDeliveredNFTs - pendingNFTCount) || 0, 0)
+  unassignedStock.value = Math.max((Number(count) - manuallyDeliveredNFTs - pendingNFTCount) || 0, 0)
 }
 
 async function handlePriceReorder ({
