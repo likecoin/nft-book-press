@@ -87,7 +87,7 @@
                   type="number"
                   step="0.01"
                   :min="0"
-                  @input="(e) => updatePrice(e, 'price', index)"
+                  @input="(e: InputEvent) => updatePrice(e, 'price', index)"
                 />
               </UFormGroup>
               <UFormGroup
@@ -99,7 +99,7 @@
                   step="1"
                   :min="0"
                   :max="Number(route.query.count) || undefined"
-                  @input="(e) => updatePrice(e, 'stock', index)"
+                  @input="(e: InputEvent) => updatePrice(e, 'stock', index)"
                 />
               </UFormGroup>
               <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
@@ -119,7 +119,7 @@
                 <UInput
                   placeholder="Product name"
                   :value="p.name"
-                  @input="(e) => updatePrice(e, 'name', index)"
+                  @input="(e: InputEvent) => updatePrice(e, 'name', index)"
                 />
                 <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional) / 描述（選填）</span>
                 <md-editor
@@ -158,7 +158,7 @@
                       <UInput
                         :value="p.autoMemo"
                         placeholder="Thank you for your support. It means a lot to me."
-                        @input="(e) => updatePrice(e, 'autoMemo', index)"
+                        @input="(e: InputEvent) => updatePrice(e, 'autoMemo', index)"
                       />
                     </UFormGroup>
                   </div>
@@ -614,7 +614,7 @@ onMounted(async () => {
           throw new Error('NOT_OWNER_OF_NFT_CLASS')
         }
         if (classResData.prices.length) {
-          const currentEdition = classResData.prices.find(e => e.index.toString() === editionIndex.value)
+          const currentEdition = classResData.prices.find((e: any) => e.index.toString() === editionIndex.value)
           if (!currentEdition) {
             throw new Error('Edition not found')
           }
@@ -816,25 +816,25 @@ function validate (prices: any[]) {
   prices.forEach((price: any) => {
     if (!price.name.en || !price.name.zh) {
       errors.push({
-        field: 'name',
+        path: 'name',
         message: 'Please input product name'
       })
     }
     if (!price.isAutoDeliver && !price.autographImage) {
       errors.push({
-        field: 'autographImage',
+        path: 'autographImage',
         message: 'Please upload autograph image'
       })
     }
     if (price.isAutoDeliver && !price.autoMemo) {
       errors.push({
-        field: 'autoMemo',
+        path: 'autoMemo',
         message: 'Please input auto delivery memo'
       })
     }
     if (price.hasShipping && !shippingRates.value.length) {
       errors.push({
-        field: 'shipping',
+        path: 'shipping',
         message: 'Please input shipping rates'
       })
     }
@@ -920,8 +920,8 @@ async function submitNewClass () {
       : undefined
 
     const autoDeliverCount = p
-      .filter(price => price.isAutoDeliver)
-      .reduce((acc, price) => acc + price.stock, 0)
+      .filter((price: any) => price.isAutoDeliver)
+      .reduce((acc: number, price: any) => acc + price.stock, 0)
 
     let autoDeliverNFTsTxHash
     if (autoDeliverCount > 0) {
@@ -1000,8 +1000,8 @@ async function addNewEdition () {
     isLoading.value = true
     const p = mapPrices(prices.value)
     const autoDeliverCount = p
-      .filter(price => price.isAutoDeliver)
-      .reduce((acc, price) => acc + price.stock, 0)
+      .filter((price: any) => price.isAutoDeliver)
+      .reduce((acc: number, price: any) => acc + price.stock, 0)
 
     let autoDeliverNFTsTxHash
 
@@ -1041,7 +1041,10 @@ function handleDeliveryMethodChange (value: string) {
   }
 }
 
-async function updateClassId ({ classId: newClassId, nftMintCount }) {
+async function updateClassId ({ classId: newClassId, nftMintCount } : {
+  classId: string
+  nftMintCount?: number
+}) {
   classId.value = newClassId
   classIdInput.value = newClassId
   if (nftMintCount) {

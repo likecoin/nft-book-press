@@ -235,7 +235,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { MdEditor, config } from 'md-editor-v3'
+import { MdEditor, config, type ToolbarNames } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
@@ -243,7 +243,7 @@ import { DEFAULT_PRICE, MINIMAL_PRICE } from '~/constant'
 import { useCollectionStore } from '~/stores/collection'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
-import { deliverMethodOptions } from '~/utils'
+import { deliverMethodOptions, parseImageURLFromMetadata } from '~/utils'
 
 const collectionStore = useCollectionStore()
 const nftStore = useNftStore()
@@ -278,7 +278,7 @@ const isUpdatingShippingRates = ref(false)
 const oldStock = ref(0)
 const oldIsAutoDeliver = ref(false)
 
-const toolbarOptions = ref<string[]>([
+const toolbarOptions = ref<ToolbarNames[]>([
   'bold',
   'italic',
   'strikeThrough',
@@ -390,7 +390,7 @@ async function updateShippingRates (value: any) {
       shippingRates: value
     })
 
-    const updatedCollectionData = (await collectionStore.fetchCollectionById(collectionId.value as string))
+    const updatedCollectionData: any = (await collectionStore.fetchCollectionById(collectionId.value as string))
     shippingRates.value = updatedCollectionData?.typePayload?.shippingRates
   } catch (err) {
     const errorData = (err as any).data || err

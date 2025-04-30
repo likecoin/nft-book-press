@@ -103,7 +103,10 @@ function onSaveISCN () {
   }
 }
 
-function handleFinishMintNFT ({ classId: newClassId, nftMintCount, prefix }: { classId: string, nftMintCount: number, prefix: string } = {}) {
+function handleFinishMintNFT (
+  { classId: newClassId, nftMintCount, prefix }:
+  { classId?: string, nftMintCount?: number, prefix?: string } = {}
+) {
   classId.value = newClassId || ''
 
   emit('submit', {

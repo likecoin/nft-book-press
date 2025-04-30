@@ -259,7 +259,7 @@ export async function calculateIPFSHash (fileBytes: any, options?: any) {
     let lastCid
     for await (const { cid } of importer([{
       content: fileBytes
-    }], block, {
+    }], block as any, {
       ...options,
       cidVersion: 0,
       rawLeaves: false,

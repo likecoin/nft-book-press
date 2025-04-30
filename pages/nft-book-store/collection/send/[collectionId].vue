@@ -161,7 +161,7 @@
 </template>
 
 <script setup lang="ts">
-import { DeliverTxResponse } from '@cosmjs/stargate'
+import type { DeliverTxResponse } from '@cosmjs/stargate'
 import { storeToRefs } from 'pinia'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
@@ -210,8 +210,8 @@ const nftImages = ref<string[]>([])
 const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
 const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || isAutoFetchingNFTId.value || !!nftIdError.value || isLimitReached.value)
 
-const collectionName = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.name)
-const classIds = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.classIds)
+const collectionName = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.name as string)
+const classIds = computed(() => collectionStore.getCollectionById(collectionId.value as string)?.classIds as string[])
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
@@ -242,7 +242,7 @@ onMounted(async () => {
   fetchNextNFTId(orderInfo.value.quantity || 1)
 })
 
-function getNftClassName (classId) {
+function getNftClassName (classId: string) {
   return nftStore.getClassMetadataById(classId)?.name
 }
 
@@ -256,7 +256,7 @@ function handleClickEditNFTId () {
   })
 }
 
-async function fetchNFTMetadataImage (classId, nftId) {
+async function fetchNFTMetadataImage (classId: string, nftId: string): Promise<string> {
   try {
     isVerifyingNFTId.value = true
     const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/nfts/${classId}/${nftId}`)
@@ -264,6 +264,7 @@ async function fetchNFTMetadataImage (classId, nftId) {
     return parseImageURLFromMetadata(image)
   } catch (err) {
     error.value = (err as Error).toString()
+    return ''
   } finally {
     isVerifyingNFTId.value = false
   }
@@ -277,7 +278,7 @@ async function fetchNextNFTId (count = 1) {
       await initIfNecessary()
     }
     if (!ownerWallet.value) { return }
-    await Promise.all(classIds.value.map(async (classId, index) => {
+    await Promise.all(classIds.value.map(async (classId: string, index: number) => {
       if (!nftNestedIds.value[index]) {
         const { nfts } = await getNFTs({
           classId,

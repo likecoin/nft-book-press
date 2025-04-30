@@ -9,7 +9,7 @@ function addIDToRecords (records: any[]) {
 export const useIscnStore = defineStore('iscn', {
   state: () => ({
     recordsById: {} as any,
-    records: [],
+    records: [] as any[],
     isLoading: false
   }),
 

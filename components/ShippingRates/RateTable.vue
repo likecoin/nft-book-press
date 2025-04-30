@@ -10,10 +10,10 @@
         </div>
         <UButton
           v-if="!shouldHideViewButtonOnViewMode"
-          :icon="buttonConfig.icon"
-          :label="buttonConfig.text"
+          :icon="buttonConfig?.icon"
+          :label="buttonConfig?.text"
           :loading="isLoading"
-          @click="buttonConfig.action"
+          @click="buttonConfig?.action"
         />
       </div>
     </template>
@@ -95,7 +95,7 @@ const props = defineProps({
   }
 })
 const emit = defineEmits(['update:modelValue', 'update-shipping-rates'])
-const isShippingModalOpened = ref<Boolean>(false)
+const isShippingModalOpened = ref(false)
 
 const hasShipping = ref(props.modelValue)
 const isModalReadOnly = ref(props.isShowPhysicalGoodsCheckbox)

@@ -90,7 +90,7 @@ const isStripeConnectReady = ref(false)
 const latestBookList = ref([])
 const bestSellerBookList = ref([] as any[])
 const selectedTabItemIndex = ref(0)
-const q = ref(route.query.q || '')
+const q = ref(route.query.q as string || '')
 
 const channelId = computed(() => {
   if (userLikerInfo.value?.user) {

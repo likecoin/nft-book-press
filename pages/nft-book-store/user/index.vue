@@ -549,8 +549,9 @@ async function onLoginToStripe () {
       throw new Error('CANNOT_GET_STRIPE_CONNECT_RUL')
     }
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error(e)
-    error.value = e.toString()
+    error.value = (e as Error).toString()
   } finally {
     isLoading.value = false
   }
@@ -574,8 +575,9 @@ async function onSetupStripe () {
       throw new Error('CANNOT_GET_STRIPE_CONNECT_RUL')
     }
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error(e)
-    error.value = e.toString()
+    error.value = (e as Error).toString()
   } finally {
     isLoading.value = false
   }

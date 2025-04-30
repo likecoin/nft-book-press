@@ -1,4 +1,3 @@
-import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
 import { useBookStoreApiStore } from '~/stores/book-store-api'

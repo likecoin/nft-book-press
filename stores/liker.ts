@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-import { FetchLikerInfoResult } from 'utils/api'
+import type { FetchLikerInfoResult } from '../utils/api'
 
 export const useLikerStore = defineStore('liker', () => {
   const likerInfoMapById = ref({} as Record<string, FetchLikerInfoResult>)

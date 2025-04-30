@@ -21,7 +21,7 @@ export function useISCN (iscnData: Ref<any>) {
     license: iscnData.value.license === 'Other'
       ? iscnData.value.customLicense
       : iscnData.value.license,
-    contentFingerprints: iscnData.value.contentFingerprints.map(f => f.url),
+    contentFingerprints: iscnData.value.contentFingerprints.map((f: any) => f.url),
     inLanguage: iscnData.value.language,
     publisher: iscnData.value.publisher,
     isbn: iscnData.value.isbn,

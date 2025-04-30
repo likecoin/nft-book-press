@@ -184,7 +184,7 @@
         color="red"
         variant="soft"
         icon="i-heroicons-trash"
-        @click="removeDownloadableUrl(index)"
+        @click="removeDownloadableUrl(formData.downloadableUrls.length - 1)"
       />
     </div>
 
@@ -250,7 +250,7 @@ interface ISCNFormData {
   author: {
     name: string
     description: string
-    url: string
+    url?: string
   }
   license: string
   customLicense: string
@@ -352,25 +352,25 @@ const handleUploadSubmit = (uploadData: any) => {
   }
 
   const downloadableUrls = fileRecords
-    .filter(r => r.fileType === 'application/pdf' || r.fileType === 'application/epub+zip')
-    .map(file => ({
+    .filter((r: any) => r.fileType === 'application/pdf' || r.fileType === 'application/epub+zip')
+    .map((file: any) => ({
       url: file.arweaveKey ? file.arweaveLink : `ar://${file.arweaveId}`,
       type: getFileType(file.fileType),
       fileName: file.fileName
     }))
 
   const contentFingerprints = [
-    ...new Set(
+    ...new Set<string>(
       fileRecords
-        .map((r) => {
-          const arweaveUrl = r.arweaveKey
+        .map((r: any) => {
+          const arweaveUrl: string = r.arweaveKey
             ? r.arweaveLink
             : `ar://${r.arweaveId}`
           return r.fileType === 'application/epub+zip' || r.fileType === 'application/pdf'
             ? arweaveUrl
             : `ar://${r.arweaveId}`
         })
-        .filter(Boolean)
+        .filter((r: string) => !!r)
     )
   ].map(url => ({ url }))
 

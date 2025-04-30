@@ -37,13 +37,13 @@
                 :value="s.nameEn"
                 placeholder="Shipping option name"
                 :disabled="isViewMode"
-                @input="(e) => handleInputShippingRates(e, 'nameEn', index)"
+                @input="(e: InputEvent) => handleInputShippingRates(e, 'nameEn', index)"
               />
               <UInput
                 placeholder="運送選項名稱"
                 :value="s.nameZh"
                 :disabled="isViewMode"
-                @input="(e) => handleInputShippingRates(e, 'nameZh', index)"
+                @input="(e: InputEvent) => handleInputShippingRates(e, 'nameZh', index)"
               />
             </UFormGroup>
 
@@ -54,7 +54,7 @@
                 step="0.01"
                 :min="0"
                 :disabled="isViewMode"
-                @input="(e) => handleInputShippingRates(e, 'price', index)"
+                @input="(e: InputEvent) => handleInputShippingRates(e, 'price', index)"
               />
             </UFormGroup>
 

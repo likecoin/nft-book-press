@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import QRCodeStyling, { FileExtension } from '@likecoin/qr-code-styling'
+import QRCodeStyling, { type FileExtension } from '@likecoin/qr-code-styling'
 
 import { getQRCodeOptions, getQRCodeIcon, iconOptions, DEFAULT_QR_CODE_ICON, DEFAULT_QR_CODE_COLOR } from '~/utils/qrcode'
 

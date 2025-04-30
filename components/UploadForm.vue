@@ -6,11 +6,11 @@
         @drop.prevent="onFileUpload"
         @dragover.prevent="isDragging = true"
         @dragleave.prevent="isDragging = false"
-        @click="$refs.imageFile.click()"
+        @click="($refs.imageFile as HTMLInputElement)?.click()"
       >
         <UIcon name="i-heroicons-folder-arrow-down" class="w-5 h-5" />
         <p class="text-gray-600 my-[16px]" v-text="`把檔案拖到此處上傳或`" />
-        <UButton type="button" variant="ghost" @click.stop="$refs.imageFile.click()">
+        <UButton type="button" variant="ghost" @click.stop="($refs.imageFile as HTMLInputElement)?.click()">
           選擇檔案
         </UButton>
         <p class="text-xs text-gray-500 mt-2" v-text="`建議檔案大小: < 20 MB`" />
@@ -46,7 +46,7 @@
                     {{ fileName }}
                   </p>
                   <p class="text-gray-500 text-sm">
-                    {{ Math.round(fileSize * 0.001) }} KB
+                    {{ Math.round((fileSize || 0) * 0.001) }} KB
                   </p>
                 </div>
               </td>
@@ -136,7 +136,7 @@ const epubMetadataList = ref<any[]>([])
 
 const arweaveFee = ref(new BigNumber(0))
 const uploadStatus = ref('')
-const arweaveFeeMap = ref({})
+const arweaveFeeMap = ref({} as any)
 const arweaveFeeTargetAddress = ref('')
 const sentArweaveTransactionInfo = ref(new Map())
 const balance = ref(new BigNumber(0))
@@ -202,12 +202,12 @@ const getFileInfo = async (file: Blob) => {
   }
 }
 
-const onFileUpload = async (event: DragEvent) => {
+const onFileUpload = async (event: Event) => {
   try {
     uploadStatus.value = 'loading'
     isSizeExceeded.value = false
     const files =
-      event.dataTransfer?.files || (event.target as HTMLInputElement)?.files
+      (event as InputEvent).dataTransfer?.files || (event.target as HTMLInputElement)?.files
 
     if (event.currentTarget instanceof HTMLElement) {
       event.currentTarget.classList.remove('bg-gray-100')
@@ -235,7 +235,7 @@ const onFileUpload = async (event: DragEvent) => {
               fileName: file.name,
               fileSize: file.size,
               fileType: file.type,
-              ipfsHash,
+              ipfsHash: ipfsHash || undefined,
               fileSHA256,
               fileBlob: file
             }
@@ -357,7 +357,7 @@ const estimateArweaveFee = async (): Promise<void> => {
     for (const record of fileRecords.value) {
       await sleep(100)
       const isEbook = record.fileType === 'application/epub+zip' || record.fileType === 'application/pdf'
-      const priceResult = await estimateBundlrFilePrice({
+      const priceResult: any = await estimateBundlrFilePrice({
         fileSize: record.fileBlob?.size || 0,
         ipfsHash: (isEbook && isEncryptEBookData.value) ? undefined : record.ipfsHash
       })
@@ -545,7 +545,7 @@ const setEbookCoverFromImages = async () => {
 
   for (let i = 0; i < fileRecords.value.length; i += 1) {
     const file = fileRecords.value[i]
-    if (file.fileType.startsWith('image')) {
+    if (file.fileType?.startsWith('image')) {
       const existingData = sentArweaveTransactionInfo.value.get(file.ipfsHash) || {}
       if (existingData.arweaveId) {
         epubMetadataList.value.push({

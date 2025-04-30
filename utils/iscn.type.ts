@@ -1,4 +1,4 @@
-import { ISCNRecord } from '@likecoin/iscn-js'
+import type { ISCNRecord } from '@likecoin/iscn-js'
 
 export interface ISCNRegisterPayload {
   name: string;
