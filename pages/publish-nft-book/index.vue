@@ -110,7 +110,7 @@ const route = useRoute()
 const router = useRouter()
 
 const uploadStore = useUploadStore()
-const { updateUploadFileData, clearUploadData, setUploadFileData } = uploadStore
+const { clearUploadData, setUploadFileData } = uploadStore
 const { APP_LIKE_CO_URL } = useRuntimeConfig().public
 
 const step = ref(0)
@@ -258,31 +258,27 @@ const handleUploadSubmit = (uploadFileData: any) => {
 }
 
 const handleIscnSubmit = async (res: { iscnId: string, txHash: string }) => {
-  updateUploadFileData({ iscnRecord: res })
   const { iscnId } = res
   if (iscnId) {
     router.replace({ query: { iscn_id: iscnId } })
   }
+  clearUploadData()
   step.value = 2
   await nextTick()
   mintNFT.value?.onISCNIDInput(iscnId)
 }
 
 const handleMintNFTSubmit = async (res: any) => {
-  const { classId, nftMintCount, prefix } = res
+  const { classId, nftMintCount } = res
   if (classId) {
     router.replace({ query: { class_id: classId } })
   }
-  updateUploadFileData({
-    classData: { classId, nftMintCount, prefix }
-  })
   step.value = 3
   await nextTick()
   newNFTBook.value?.updateClassId({ classId, nftMintCount })
 }
 
 const handleNewBookSubmit = () => {
-  clearUploadData()
   router.push({ name: 'nft-book-store' })
 }
 
