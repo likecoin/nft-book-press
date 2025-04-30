@@ -569,6 +569,10 @@ const notificationEmailsTableRows = computed(() =>
   }))
 )
 
+const iscnDataLanguage = computed(() => {
+  return iscnData.value?.contentMetadata?.inLanguage
+})
+
 config({
   markdownItConfig (mdit: any) {
     mdit.options.html = false
@@ -727,7 +731,7 @@ function addMorePrice () {
     deliveryMethod: 'auto',
     autoMemo: '',
     stock: 1,
-    name: iscnData.value?.contentMetadata?.inLanguage === 'en'
+    name: iscnDataLanguage.value === 'en'
       ? `Tier ${nextPriceIndex.value}`
       : `級別 ${nextPriceIndex.value}`,
     nameEn: `Tier ${nextPriceIndex.value}`,
@@ -771,7 +775,7 @@ function handleSaveStripeConnectWallet (wallet: any) {
 }
 
 function mapPrices (prices: any) {
-  const isEnglish = iscnData.value?.contentMetadata?.inLanguage === 'en'
+  const isEnglish = iscnDataLanguage.value === 'en'
 
   return prices.map((p: any) => ({
     name: isEnglish
