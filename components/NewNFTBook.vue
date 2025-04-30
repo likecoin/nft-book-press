@@ -146,7 +146,7 @@
                       <UInput
                         v-model="autoDeliverNftIdInput"
                         class="font-mono"
-                        :placeholder="`${prefix}-000`"
+                        placeholder="0000"
                       />
                     </UFormGroup>
 
@@ -434,7 +434,6 @@ import { useStripeStore } from '~/stores/stripe'
 import { useNftStore } from '~/stores/nft'
 import { getPortfolioURL } from '~/utils'
 import { getNFTAuthzGrants, sendNFTsToAPIWallet } from '~/utils/cosmos'
-import { useUploadStore } from '~/stores/upload'
 import { escapeHtml, sanitizeHtml, getFileInfo } from '~/utils/newClass'
 import { getApiEndpoints } from '~/constant/api'
 
@@ -455,8 +454,6 @@ const UPLOAD_FILESIZE_MAX = 20 * 1024 * 1024
 const emit = defineEmits(['submit'])
 const router = useRouter()
 const route = useRoute()
-const uploadStore = useUploadStore()
-const { getUploadFileData, uploadFileData } = uploadStore
 const classId = ref(
   route.params.classId || (route.query.class_id as string)
 )
@@ -478,18 +475,14 @@ const enableCustomMessagePage = ref(false)
 const hideDownload = ref(false)
 const autoDeliverNftIdInput = ref('')
 const isAllowCustomPrice = ref(true)
-const sessionData = computed(() => {
-  return uploadFileData
-})
+
 const prices = ref<any[]>([
   {
     price: DEFAULT_PRICE,
     deliveryMethod: 'auto',
     autoMemo: 'Thank you for your support. It means a lot to me.',
     stock: Number((route.query.count as string) || 1),
-    name: sessionData.value?.epubMetadata?.language === 'en'
-      ? 'Standard Edition'
-      : '標準版',
+    name: '標準版',
 
     nameEn: 'Standard Edition',
     nameZh: '標準版',
@@ -501,9 +494,6 @@ const prices = ref<any[]>([
     isUnlisted: false
   }
 ])
-const prefix = computed(() => {
-  return sessionData.value?.classData?.prefix || 'BOOKSN'
-})
 const shippingRates = ref<any[]>([])
 const hasMultiplePrices = computed(() => prices.value.length > 1)
 const moderatorWallets = ref<string[]>([
@@ -518,6 +508,7 @@ const stripeConnectWallet = ref('')
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
 const isFileEncrypted = ref(false)
+const iscnData = ref<any>(null)
 
 const toolbarOptions = ref<ToolbarNames[]>([
   'bold',
@@ -596,7 +587,6 @@ useSeoMeta({
 onMounted(async () => {
   try {
     isLoading.value = true
-    getUploadFileData()
 
     if (isEditMode.value) {
       await fetchStripeConnectStatusByWallet(wallet.value)
@@ -684,8 +674,8 @@ watch(classId, async (newClassId) => {
 
     if (!records?.[0]?.data) { return }
 
-    const iscnData = records[0].data
-    const fingerprints = iscnData?.contentFingerprints
+    iscnData.value = records[0].data
+    const fingerprints = iscnData?.value.contentFingerprints
     if (fingerprints && isContentFingerPrintEncrypted(fingerprints)) {
       isFileEncrypted.value = true
       hideDownload.value = true
@@ -737,7 +727,7 @@ function addMorePrice () {
     deliveryMethod: 'auto',
     autoMemo: '',
     stock: 1,
-    name: sessionData.value?.epubMetadata?.language === 'en'
+    name: iscnData.value?.contentMetadata?.inLanguage === 'en'
       ? `Tier ${nextPriceIndex.value}`
       : `級別 ${nextPriceIndex.value}`,
     nameEn: `Tier ${nextPriceIndex.value}`,
@@ -781,7 +771,7 @@ function handleSaveStripeConnectWallet (wallet: any) {
 }
 
 function mapPrices (prices: any) {
-  const isEnglish = sessionData.value?.epubMetadata?.language === 'en'
+  const isEnglish = iscnData.value?.contentMetadata?.inLanguage === 'en'
 
   return prices.map((p: any) => ({
     name: isEnglish
@@ -1051,10 +1041,6 @@ async function updateClassId ({ classId: newClassId, nftMintCount }) {
 }
 
 async function getIscnId () {
-  if (sessionData.value?.iscnRecord?.iscnId) {
-    return sessionData.value?.iscnRecord?.iscnId
-  }
-
   const classData = await nftStore.lazyFetchClassMetadataById(
     classId.value as string
   )
