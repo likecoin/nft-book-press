@@ -101,16 +101,13 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
-import { useUploadStore } from '~/stores/upload'
+import { clearUploadFileData, setUploadFileData } from '~/utils/uploadFile'
 
 const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
 const route = useRoute()
 const router = useRouter()
-
-const uploadStore = useUploadStore()
-const { clearUploadData, setUploadFileData } = uploadStore
 const { APP_LIKE_CO_URL } = useRuntimeConfig().public
 
 const step = ref(0)
@@ -203,13 +200,13 @@ onMounted(() => {
 
   if (iscnId.value) {
     if (data?.iscnRecord?.iscnId !== iscnId.value) {
-      clearUploadData()
+      clearUploadFileData()
     }
     iscnInputValue.value = iscnId.value as string
     handleIscnSubmit({ iscnId: iscnId.value as string, txHash: '' })
   } else if (classId.value) {
     if (data?.classData?.classId !== classId.value) {
-      clearUploadData()
+      clearUploadFileData()
     }
     handleMintNFTSubmit({ classId: classId.value })
   } else if (data?.epubMetadata && data?.fileRecords) {
@@ -262,7 +259,7 @@ const handleIscnSubmit = async (res: { iscnId: string, txHash: string }) => {
   if (iscnId) {
     router.replace({ query: { iscn_id: iscnId } })
   }
-  clearUploadData()
+  clearUploadFileData()
   step.value = 2
   await nextTick()
   mintNFT.value?.onISCNIDInput(iscnId)

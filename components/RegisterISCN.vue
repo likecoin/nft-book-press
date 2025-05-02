@@ -24,21 +24,19 @@
 <script setup lang="ts">
 import { BigNumber } from 'bignumber.js'
 import { storeToRefs } from 'pinia'
+import { getUploadFileData } from '~/utils/uploadFile'
 import { useFileUpload } from '~/composables/useFileUpload'
 import { estimateISCNTxGasAndFee, signISCNTx } from '~/utils/iscn'
 import { useWalletStore } from '~/stores/wallet'
 import { getAccountBalance } from '~/utils/cosmos'
 import { ISCN_GAS_MULTIPLIER } from '~/constant/index'
-import { useUploadStore } from '~/stores/upload'
 import { useISCN } from '~/composables/useISCN'
 
 const walletStore = useWalletStore()
-const uploadStore = useUploadStore()
 const { getFileType } = useFileUpload()
 
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
-const { getUploadFileData } = uploadStore
 const { stripHtmlTags, formatLanguage } = useFileUpload()
 const toast = useToast()
 
