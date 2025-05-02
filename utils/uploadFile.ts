@@ -20,9 +20,11 @@ export interface UploadFileData {
   }>
 }
 
+const FILE_UPLOAD_KEY = 'publish_book_uploaded_file'
+
 export function setUploadFileData (data: Partial<UploadFileData>) {
   try {
-    sessionStorage.setItem('uploadFileData', JSON.stringify(data))
+    sessionStorage.setItem(FILE_UPLOAD_KEY, JSON.stringify(data))
   } catch (error) {
     // eslint-disable-next-line no-console
     console.warn('Failed to save to sessionStorage:', error)
@@ -31,7 +33,7 @@ export function setUploadFileData (data: Partial<UploadFileData>) {
 
 export function getUploadFileData (): UploadFileData | null {
   try {
-    const stored = sessionStorage.getItem('uploadFileData')
+    const stored = sessionStorage.getItem(FILE_UPLOAD_KEY)
     if (stored) {
       return JSON.parse(stored)
     }
@@ -44,7 +46,7 @@ export function getUploadFileData (): UploadFileData | null {
 
 export function clearUploadFileData () {
   try {
-    sessionStorage.removeItem('uploadFileData')
+    sessionStorage.removeItem(FILE_UPLOAD_KEY)
   } catch (error) {
     // eslint-disable-next-line no-console
     console.warn('Failed to clear sessionStorage:', error)
