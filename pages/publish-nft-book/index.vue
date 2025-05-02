@@ -56,7 +56,7 @@
         <div class="w-full bg-gray-300 h-[1px]" />
         <div class="flex flex-col items-center gap-4 py-4">
           <div class="flex flex-col items-center">
-            <div v-if="shouldStartFromRegister">
+            <div v-if="hasExistingSessionData">
               繼續上次的註冊:
               <UButton variant="ghost" class="text-primary-500 font-semibold" @click="step = 1">
                 {{ bookName }}
@@ -118,8 +118,11 @@ const newNFTBook = ref()
 const toast = useToast()
 const showIscnInput = ref(false)
 const iscnInputValue = ref('')
-const shouldStartFromRegister = ref(false)
 const bookName = ref('')
+
+const hasExistingSessionData = computed(() => {
+  return !bookName.value
+})
 const currentActionText = computed(() => {
   switch (step.value) {
     case 0:
@@ -199,18 +202,11 @@ onMounted(() => {
   }
 
   if (iscnId.value) {
-    if (data?.iscnRecord?.iscnId !== iscnId.value) {
-      clearUploadFileData()
-    }
     iscnInputValue.value = iscnId.value as string
     handleIscnSubmit({ iscnId: iscnId.value as string, txHash: '' })
   } else if (classId.value) {
-    if (data?.classData?.classId !== classId.value) {
-      clearUploadFileData()
-    }
     handleMintNFTSubmit({ classId: classId.value })
   } else if (data?.epubMetadata && data?.fileRecords) {
-    shouldStartFromRegister.value = true
     bookName.value = data?.epubMetadata?.title
   }
 })
