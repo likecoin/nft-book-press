@@ -135,7 +135,7 @@
                   <URadio
                     v-model="p.deliveryMethod"
                     value="auto"
-                    :disabled="p.isPhysicalOnly"
+                    :disabled="p.isPhysicalOnly || (isEditMode && !oldIsAutoDeliver)"
                     name="deliveryMethod"
                     label="Auto delivery / 自動發書"
                     @change="handleDeliveryMethodChange"
@@ -165,7 +165,7 @@
                   <URadio
                     v-model="p.deliveryMethod"
                     value="manual"
-                    :disabled="p.isPhysicalOnly"
+                    :disabled="p.isPhysicalOnly || (isEditMode && oldIsAutoDeliver)"
                     name="deliveryMethod"
                     label="Manual delivery / 手動發書"
                     @change="handleDeliveryMethodChange"
@@ -197,6 +197,7 @@
                 <UCheckbox
                   v-model="p.hasShipping"
                   name="hasShipping"
+                  :disabled="(isEditMode && !p.hasShipping)"
                   label="Includes physical good that requires shipping / 包含需要運送的實體商品"
                 />
                 <ShippingRatesRateTable
