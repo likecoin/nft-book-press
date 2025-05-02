@@ -11,6 +11,7 @@ import type {
   LikeCoinWalletConnectorConnectionResult,
   LikeCoinWalletConnectorMethodType
 } from '@likecoin/wallet-connector'
+import { clearUploadFileData } from '~/utils/uploadFile'
 
 declare global {
   interface Window extends KeplrWindow {}
@@ -209,6 +210,7 @@ export const useWalletStore = defineStore('wallet', () => {
     signer.value = null
     accounts.value = []
     connector.value?.disconnect()
+    clearUploadFileData()
   }
 
   return {
