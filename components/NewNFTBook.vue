@@ -174,7 +174,7 @@
                     <UFormGroup>
                       <template #label>
                         <p>Autograph image / 簽名圖</p>
-                        <span class="text-gray-500 text-[12px]">請上傳白底黑字的圖檔，檔案大小不超過 10MB</span>
+                        <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 10MB</span>
                       </template>
                       <UInput
                         type="file"
