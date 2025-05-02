@@ -1004,7 +1004,7 @@ async function submitEditedClass () {
       }
       autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
         [classIdInput.value as string],
-        [prefix.value],
+        [autoDeliverNftIdInput.value as string],
         newAutoDeliverNFTsCount,
         signer.value,
         wallet.value
