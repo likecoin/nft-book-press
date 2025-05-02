@@ -125,7 +125,7 @@ export async function getNFTAuthzGranterGrants (granter: string) {
   const grants = g.grants
     .map(parseAuthzGrant)
     .filter(
-      g =>
+      (g: any) =>
         (g?.authorization?.value as GenericAuthorization)?.msg ===
         '/cosmos.nft.v1beta1.MsgSend'
     )
@@ -223,7 +223,7 @@ export async function signCreateNFTClass (
   const event = rawLogs[0].events.find(
     (e: any) => e.type === 'likechain.likenft.v1.EventNewClass'
   )
-  const attribute = event.attributes.find(a => a.key === 'class_id')
+  const attribute = event.attributes.find((a: any) => a.key === 'class_id')
   const classId = ((attribute && attribute.value) || '').replace(/^"(.*)"$/, '$1')
   return classId
 }
@@ -244,7 +244,9 @@ export async function signCreateRoyltyConfig (
     const signingClient = await getSigningClient()
     await signingClient.connectWithSigner(RPC_URL, signer)
     const { parseAndCalculateStakeholderRewards } = await getISCNLib()
-    const rewardMap = await parseAndCalculateStakeholderRewards(
+    const rewardMap: Map<string, {
+      amount: string;
+    }> = await parseAndCalculateStakeholderRewards(
       iscnData,
       iscnOwner,
       {

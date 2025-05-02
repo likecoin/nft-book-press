@@ -83,7 +83,7 @@ export function checkJwtTokenValidity (token: string) {
   const isMatchPermissions =
       Array.isArray((decoded as any).permissions) &&
       (decoded as any).permissions.length === SIGN_AUTHORIZATION_PERMISSIONS.length &&
-      (decoded as any).permissions.every((perm: string) =>
+      (decoded as any).permissions.every((perm: typeof SIGN_AUTHORIZATION_PERMISSIONS[number]) =>
         SIGN_AUTHORIZATION_PERMISSIONS.includes(perm)
       )
   return !isExpired && isMatchPermissions

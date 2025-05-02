@@ -125,11 +125,6 @@ const tableColumns = [
     key: 'sold',
     label: 'Sold',
     sortable: true
-  },
-  {
-    key: 'stock',
-    label: 'Remaining Stock',
-    sortable: true
   }
 ]
 
@@ -156,8 +151,7 @@ const tableRows = computed(() => (tabItems[selectedTabItemIndex.value].key === '
   classIds: b.classIds,
   classNames: b.classIds?.map((classId :string) => getClassMetadataById(classId)?.name),
   pendingAction: b.typePayload?.pendingNFTCount || 0,
-  sold: b.typePayload?.sold || 0,
-  stock: b.typePayload?.stock || 0
+  sold: b.typePayload?.sold || 0
 })))
 
 useSeoMeta({

@@ -78,8 +78,8 @@ class Provider {
       const bSig = Buffer.from(signature, 'base64')
       // pad & convert so it's in the format the signer expects to have to convert from.
       const pad = Buffer.concat([
-        Buffer.from([0]),
-        Buffer.from(bSig)
+        Buffer.from([0]) as Buffer,
+        bSig as any
       ]).toString(
         'hex'
       )
@@ -142,7 +142,7 @@ export async function estimateBundlrFilePrice ({
   ipfsHash
 }: {
   fileSize: number
-  ipfsHash: string
+  ipfsHash?: string
 }) {
   const apiEndpoints = getApiEndpoints()
   const data = await $fetch(apiEndpoints.API_POST_ARWEAVE_V2_ESTIMATE, {

@@ -87,7 +87,7 @@
                   type="number"
                   step="0.01"
                   :min="0"
-                  @input="(e) => updatePrice(e, 'price', index)"
+                  @input="(e: InputEvent) => updatePrice(e, 'price', index)"
                 />
               </UFormGroup>
               <UFormGroup
@@ -99,7 +99,7 @@
                   step="1"
                   :min="0"
                   :max="Number(route.query.count) || undefined"
-                  @input="(e) => updatePrice(e, 'stock', index)"
+                  @input="(e: InputEvent) => updatePrice(e, 'stock', index)"
                 />
               </UFormGroup>
               <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
@@ -119,7 +119,7 @@
                 <UInput
                   placeholder="Product name"
                   :value="p.name"
-                  @input="(e) => updatePrice(e, 'name', index)"
+                  @input="(e: InputEvent) => updatePrice(e, 'name', index)"
                 />
                 <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional) / 描述（選填）</span>
                 <md-editor
@@ -139,7 +139,7 @@
                   <URadio
                     v-model="p.deliveryMethod"
                     value="auto"
-                    :disabled="p.isPhysicalOnly"
+                    :disabled="p.isPhysicalOnly || (isEditMode && !oldIsAutoDeliver)"
                     name="deliveryMethod"
                     label="Auto delivery / 自動發書"
                     @change="handleDeliveryMethodChange"
@@ -158,7 +158,7 @@
                       <UInput
                         :value="p.autoMemo"
                         placeholder="Thank you for your support. It means a lot to me."
-                        @input="(e) => updatePrice(e, 'autoMemo', index)"
+                        @input="(e: InputEvent) => updatePrice(e, 'autoMemo', index)"
                       />
                     </UFormGroup>
                   </div>
@@ -175,7 +175,11 @@
                     @change="handleDeliveryMethodChange"
                   />
                   <div v-if="p.deliveryMethod === 'manual'" class="pl-8 space-y-2">
-                    <UFormGroup label="Autograph image / 簽名圖">
+                    <UFormGroup>
+                      <template #label>
+                        <p>Autograph image / 簽名圖</p>
+                        <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 10MB</span>
+                      </template>
                       <UInput
                         type="file"
                         accept="image/*"
@@ -197,6 +201,7 @@
                 <UCheckbox
                   v-model="p.hasShipping"
                   name="hasShipping"
+                  :disabled="(isEditMode && !p.hasShipping)"
                   label="Includes physical good that requires shipping / 包含需要運送的實體商品"
                 />
                 <ShippingRatesRateTable
@@ -512,6 +517,8 @@ const stripeConnectWallet = ref('')
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
 const iscnData = ref<any>(null)
+const oldIsAutoDeliver = ref(false)
+const oldStock = ref(0)
 
 const toolbarOptions = ref<ToolbarNames[]>([
   'bold',
@@ -608,7 +615,7 @@ onMounted(async () => {
           throw new Error('NOT_OWNER_OF_NFT_CLASS')
         }
         if (classResData.prices.length) {
-          const currentEdition = classResData.prices.find(e => e.index.toString() === editionIndex.value)
+          const currentEdition = classResData.prices.find((e: any) => e.index.toString() === editionIndex.value)
           if (!currentEdition) {
             throw new Error('Edition not found')
           }
@@ -628,8 +635,10 @@ onMounted(async () => {
             hasShipping: currentEdition.hasShipping,
             isPhysicalOnly: currentEdition.isPhysicalOnly,
             isAllowCustomPrice: currentEdition.isAllowCustomPrice,
-            isUnlisted: false
+            isUnlisted: currentEdition.isUnlisted
           }]
+          oldIsAutoDeliver.value = currentEdition.isAutoDeliver
+          oldStock.value = currentEdition.stock
         } else {
           throw new Error('No prices found')
         }
@@ -810,25 +819,25 @@ function validate (prices: any[]) {
   prices.forEach((price: any) => {
     if (!price.name.en || !price.name.zh) {
       errors.push({
-        field: 'name',
+        path: 'name',
         message: 'Please input product name'
       })
     }
     if (!price.isAutoDeliver && !price.autographImage) {
       errors.push({
-        field: 'autographImage',
+        path: 'autographImage',
         message: 'Please upload autograph image'
       })
     }
     if (price.isAutoDeliver && !price.autoMemo) {
       errors.push({
-        field: 'autoMemo',
+        path: 'autoMemo',
         message: 'Please input auto delivery memo'
       })
     }
     if (price.hasShipping && !shippingRates.value.length) {
       errors.push({
-        field: 'shipping',
+        path: 'shipping',
         message: 'Please input shipping rates'
       })
     }
@@ -914,8 +923,8 @@ async function submitNewClass () {
       : undefined
 
     const autoDeliverCount = p
-      .filter(price => price.isAutoDeliver)
-      .reduce((acc, price) => acc + price.stock, 0)
+      .filter((price: any) => price.isAutoDeliver)
+      .reduce((acc: number, price: any) => acc + price.stock, 0)
 
     let autoDeliverNFTsTxHash
     if (autoDeliverCount > 0) {
@@ -970,12 +979,37 @@ async function submitEditedClass () {
       )
     }
     const p = mapPrices(prices.value)
-    const price = p[0]
+    const editedPrice = p[0]
 
     isLoading.value = true
 
+    let newAutoDeliverNFTsCount = 0
+    if (editedPrice.isAutoDeliver) {
+      newAutoDeliverNFTsCount = oldIsAutoDeliver.value
+        ? editedPrice.stock - oldStock.value
+        : editedPrice.stock
+    }
+
+    let autoDeliverNFTsTxHash
+    if (newAutoDeliverNFTsCount > 0) {
+      if (!wallet.value || !signer.value) {
+        await initIfNecessary()
+      }
+      if (!wallet.value || !signer.value) {
+        throw new Error('Unable to connect to wallet')
+      }
+      autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
+        [classIdInput.value as string],
+        [autoDeliverNftIdInput.value as string],
+        newAutoDeliverNFTsCount,
+        signer.value,
+        wallet.value
+      )
+    }
+
     await updateEditionPrice(classId.value as string, editionIndex.value, {
-      price
+      autoDeliverNFTsTxHash,
+      price: editedPrice
     })
 
     router.push({ name: 'nft-book-store' })
@@ -994,8 +1028,8 @@ async function addNewEdition () {
     isLoading.value = true
     const p = mapPrices(prices.value)
     const autoDeliverCount = p
-      .filter(price => price.isAutoDeliver)
-      .reduce((acc, price) => acc + price.stock, 0)
+      .filter((price: any) => price.isAutoDeliver)
+      .reduce((acc: number, price: any) => acc + price.stock, 0)
 
     let autoDeliverNFTsTxHash
 
@@ -1035,7 +1069,10 @@ function handleDeliveryMethodChange (value: string) {
   }
 }
 
-async function updateClassId ({ classId: newClassId, nftMintCount }) {
+async function updateClassId ({ classId: newClassId, nftMintCount } : {
+  classId: string
+  nftMintCount?: number
+}) {
   classId.value = newClassId
   classIdInput.value = newClassId
   if (nftMintCount) {

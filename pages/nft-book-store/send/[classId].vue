@@ -175,7 +175,7 @@
 </template>
 
 <script setup lang="ts">
-import { DeliverTxResponse } from '@cosmjs/stargate'
+import type { DeliverTxResponse } from '@cosmjs/stargate'
 import { storeToRefs } from 'pinia'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'

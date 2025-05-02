@@ -12,7 +12,8 @@
     "generate:production": "nuxt generate --dotenv .env.production",
     "lint": "eslint . --ext \".js,.vue,.ts\" --fix",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck"
   },
   "dependencies": {
     "@cosmjs/proto-signing": "^0.30.1",
@@ -59,8 +60,9 @@
     "nuxt": "^3.13.2",
     "nuxt-gtag": "^1.1.2",
     "nuxt-security": "2.1.4",
-    "typescript": "^5.0.4",
+    "typescript": "^5.8.3",
     "vite-plugin-node-polyfills": "^0.22.0",
-    "vite-plugin-replace": "^0.1.1"
+    "vite-plugin-replace": "^0.1.1",
+    "vue-tsc": "^2.2.10"
   }
 }

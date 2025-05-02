@@ -75,7 +75,7 @@ const emit = defineEmits<{(e: 'update:modelValue',
 }>()
 
 const iscnId = ref('')
-const classData = ref({})
+const classData = ref({} as any)
 const iscnFormRef = ref()
 const isSaving = ref(false)
 const isISCNLoading = ref(false)
@@ -152,7 +152,7 @@ watchEffect(async () => {
             if (Array.isArray(metadata.keywords)) {
               tags.push(...metadata.keywords)
             } else {
-              tags.push(...metadata.keywords.split(',').map(k => k.trim()).filter(k => k))
+              tags.push(...metadata.keywords.split(',').map((k: string) => k.trim()).filter((k: string) => k))
             }
           }
 
@@ -171,7 +171,7 @@ watchEffect(async () => {
               description: metadata.author?.description || ''
             },
             license: metadata.usageInfo || 'All Rights Reserved',
-            contentFingerprints: record.data.contentFingerprints.map(url => ({
+            contentFingerprints: record.data.contentFingerprints.map((url: string) => ({
               url
             })) || [{ url: '' }],
             downloadableUrls,

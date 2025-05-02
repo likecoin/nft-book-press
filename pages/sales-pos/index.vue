@@ -330,7 +330,7 @@
 </template>
 
 <script setup lang="ts">
-import type { DropdownItem } from '@nuxt/ui/dist/runtime/types/dropdown'
+import type { DropdownItem } from '#ui/types'
 
 import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'

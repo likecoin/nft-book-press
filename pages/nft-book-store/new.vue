@@ -80,7 +80,7 @@
                   type="number"
                   step="0.01"
                   :min="0"
-                  @input="(e) => updatePrice(e, 'price', index)"
+                  @input="(e: InputEvent) => updatePrice(e, 'price', index)"
                 />
               </UFormGroup>
               <UFormGroup
@@ -92,7 +92,7 @@
                   step="1"
                   :min="0"
                   :max="Number(route.query.count) || undefined"
-                  @input="(e) => updatePrice(e, 'stock', index)"
+                  @input="(e: InputEvent) => updatePrice(e, 'stock', index)"
                 />
               </UFormGroup>
               <URadioGroup
@@ -118,7 +118,7 @@
                 </template>
                 <UInput
                   :value="p.autoMemo"
-                  @input="(e) => updatePrice(e, 'autoMemo', index)"
+                  @input="(e: InputEvent) => updatePrice(e, 'autoMemo', index)"
                 />
               </UFormGroup>
               <UFormGroup
@@ -191,7 +191,7 @@
                 <UInput
                   placeholder="Product name in English"
                   :value="p.nameEn"
-                  @input="(e) => updatePrice(e, 'nameEn', index)"
+                  @input="(e: InputEvent) => updatePrice(e, 'nameEn', index)"
                 />
                 <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional) / 描述（選填）</span>
                 <md-editor
@@ -221,7 +221,7 @@
                 <UInput
                   placeholder="產品中文名字"
                   :value="p.nameZh"
-                  @input="(e) => updatePrice(e, 'nameZh', index)"
+                  @input="(e: InputEvent) => updatePrice(e, 'nameZh', index)"
                 />
                 <span class="block text-[14px] text-[#374151] mt-[8px]">描述 (選填)</span>
                 <md-editor
@@ -499,7 +499,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { MdEditor, config } from 'md-editor-v3'
+import { MdEditor, config, type ToolbarNames } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
@@ -526,7 +526,7 @@ const route = useRoute()
 // params.editingClassId and params.editionIndex is only available when editing an existing class
 // query.class_id is only available when creating a new class
 const classId = ref(
-  route.params.editingClassId || (route.query.class_id as string)
+  (route.params.editingClassId || route.query.class_id || '') as string
 )
 const editionIndex = ref(route.params.editionIndex as string)
 
@@ -578,7 +578,7 @@ const stripeConnectWallet = ref('')
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
 
-const toolbarOptions = ref<string[]>([
+const toolbarOptions = ref<ToolbarNames[]>([
   'bold',
   'italic',
   'strikeThrough',
@@ -827,7 +827,7 @@ async function submitNewClass () {
       }))
       : undefined
 
-    if (p.some(price => price.isAutoDeliver)) {
+    if (p.some((price: any) => price.isAutoDeliver)) {
       const ok = confirm(
         "NFT Book Press - Reminder\nOnce you choose automatic delivery, you can't switch it back to manual delivery.  Are you sure?"
       )
@@ -837,8 +837,8 @@ async function submitNewClass () {
     }
 
     const autoDeliverCount = p
-      .filter(price => price.isAutoDeliver)
-      .reduce((acc, price) => acc + price.stock, 0)
+      .filter((price: any) => price.isAutoDeliver)
+      .reduce((acc: number, price: any) => acc + price.stock, 0)
 
     let autoDeliverNFTsTxHash
     if (autoDeliverCount > 0) {

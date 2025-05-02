@@ -214,8 +214,7 @@ const tableRows = computed(() => (tabItems[selectedTabItemIndex.value].key === '
   priceInUSD: b.prices?.[0].price,
   prices: b.prices?.map((p :any) => p.price),
   pendingAction: b.pendingNFTCount,
-  sold: b.sold,
-  stock: b.stock
+  sold: b.sold
 })).filter((b) => {
   if (!searchInput.value) { return true }
   const normalizedSearchInput = searchInput.value.toLowerCase()
@@ -265,11 +264,6 @@ const tableColumns = [
   {
     key: 'sold',
     label: 'Sold',
-    sortable: true
-  },
-  {
-    key: 'stock',
-    label: 'Remaining Stock',
     sortable: true
   }
 ]

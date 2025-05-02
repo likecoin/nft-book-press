@@ -1,5 +1,3 @@
-import { computed, Ref, ComputedRef } from 'vue'
-
 interface UseMessageCharCountReturn {
   messageCharCount: ComputedRef<number>;
   isLimitReached: ComputedRef<boolean>;

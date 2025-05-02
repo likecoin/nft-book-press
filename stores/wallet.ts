@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import stringify from 'fast-json-stable-stringify'
-import {
+import type {
   Window as KeplrWindow,
   AccountData,
   OfflineAminoSigner,
@@ -164,7 +164,7 @@ export const useWalletStore = defineStore('wallet', () => {
     if (connection) { await handleConnection(connection as LikeCoinWalletConnectorConnectionResult) }
   }
 
-  async function signMessageMemo (action: string, permissions?: string[]) {
+  async function signMessageMemo (action: string, permissions?: readonly string[]) {
     if (!signer.value || !wallet.value) {
       await initIfNecessary()
     }

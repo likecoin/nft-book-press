@@ -29,11 +29,9 @@
 
 <script setup lang="ts">
 
-type FileTypes = 'image' | 'pdf' | 'epub' | 'other'
-
 const props = defineProps({
   fileType: {
-    type: String as PropType<FileTypes>,
+    type: String,
     default: undefined
   },
   fileData: { type: String, default: undefined },

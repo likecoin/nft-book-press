@@ -151,7 +151,7 @@ watch(wallet, async (wallet) => {
     try {
       await fetchAuthzGrants()
     } catch {}
-    if (newGrantee.value && !grants.value.find(g => g.grantee === newGrantee.value)) {
+    if (newGrantee.value && !grants.value.find((g: any) => g.grantee === newGrantee.value)) {
       onNewGrant(newGrantee.value)
     }
   } else {
@@ -190,11 +190,11 @@ async function onNewGrant (grantee = newGrantee.value) {
     isLoading.value = false
   }
 }
-function onClickRenewGrant (grantee) {
+function onClickRenewGrant (grantee: string) {
   onNewGrant(grantee)
 }
 
-async function onClickRevokeGrant (grantee) {
+async function onClickRevokeGrant (grantee: string) {
   try {
     error.value = ''
     isLoading.value = true

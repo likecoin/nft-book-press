@@ -455,7 +455,7 @@ const toast = useToast()
 
 const error = ref('')
 const isLoading = ref(false)
-const collectionId = ref(route.params.collectionId)
+const collectionId = ref(route.params.collectionId as string)
 const fromChannel = ref<string | undefined>(undefined)
 const collectionListingInfo = ref<any>({})
 const ordersData = ref<any>({})

@@ -427,7 +427,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { MdEditor, ToolbarNames, config } from 'md-editor-v3'
+import { MdEditor, type ToolbarNames, config } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
@@ -436,7 +436,7 @@ import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { useStripeStore } from '~/stores/stripe'
-import { getPortfolioURL, deliverMethodOptions } from '~/utils'
+import { getPortfolioURL, deliverMethodOptions, parseImageURLFromMetadata } from '~/utils'
 import { getNFTAuthzGrants, sendNFTsToAPIWallet } from '~/utils/cosmos'
 import { useCollectionStore } from '~/stores/collection'
 

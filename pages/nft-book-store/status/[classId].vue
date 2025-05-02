@@ -195,6 +195,9 @@
                 Name
               </th>
               <th class="px-3 py-4 text-right">
+                stock
+              </th>
+              <th class="px-3 py-4 text-right">
                 Price (USD)
               </th>
               <th v-if="userIsOwner && prices.length > 1" class="px-3 py-4 text-center">
@@ -243,6 +246,9 @@
                   <template v-else>
                     {{ element.name }}
                   </template>
+                </td>
+                <td :class="['px-3', 'py-4', 'text-right', { 'text-red-500': element.stock <= 3 }]">
+                  {{ element.stock }}
                 </td>
                 <td class="px-3 py-4 text-right">
                   {{ element.price }}

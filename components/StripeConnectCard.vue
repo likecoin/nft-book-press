@@ -146,8 +146,8 @@ const stripeStore = useStripeStore()
 const { fetchStripeConnectStatusByWallet } = stripeStore
 const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
 
-const isStripeConnectChecked = defineModel('isStripeConnectChecked')
-const isUsingDefaultAccount = defineModel('isUsingDefaultAccount')
+const isStripeConnectChecked = defineModel<boolean>('isStripeConnectChecked')
+const isUsingDefaultAccount = defineModel<boolean>('isUsingDefaultAccount')
 
 const props = defineProps({
   loginAddress: {
