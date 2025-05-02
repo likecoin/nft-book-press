@@ -30,13 +30,17 @@
             class="font-mono"
           />
         </UFormGroup>
-        <UFormGroup>
-          <UCheckbox
-            v-model="hideDownload"
-            name="hideDownload"
-            :disabled="!!isFileEncrypted"
-            label="DRM: encrypt content & disable download / 加密文本、禁止下載"
-          />
+        <UFormGroup class="flex items-center">
+          <ToolTips
+            tool-tip-text="This option is only available when uploading files / 僅能在上傳檔案時決定"
+          >
+            <UCheckbox
+              v-model="hideDownload"
+              name="hideDownload"
+              :disabled="true"
+              label="DRM: encrypt content & disable download / 加密文本、禁止下載"
+            />
+          </ToolTips>
         </UFormGroup>
         <UFormGroup>
           <UCheckbox
@@ -507,7 +511,6 @@ const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
-const isFileEncrypted = ref(false)
 const iscnData = ref<any>(null)
 
 const toolbarOptions = ref<ToolbarNames[]>([
@@ -681,7 +684,6 @@ watch(classId, async (newClassId) => {
     iscnData.value = records[0].data
     const fingerprints = iscnData?.value.contentFingerprints
     if (fingerprints && isContentFingerPrintEncrypted(fingerprints)) {
-      isFileEncrypted.value = true
       hideDownload.value = true
     }
   }
