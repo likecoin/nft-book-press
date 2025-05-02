@@ -150,7 +150,7 @@
                       <UInput
                         v-model="autoDeliverNftIdInput"
                         class="font-mono"
-                        placeholder="0000"
+                        placeholder="BOOKSN-0000"
                       />
                     </UFormGroup>
 
