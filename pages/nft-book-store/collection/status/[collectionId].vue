@@ -776,11 +776,13 @@ onMounted(async () => {
 
     ordersData.value = orders
 
-    try {
-      await fetchStripeConnectStatusByWallet(wallet.value)
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err)
+    if (wallet.value) {
+      try {
+        await fetchStripeConnectStatusByWallet(wallet.value)
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err)
+      }
     }
     collectionListingInfo.value.classIds.forEach((classId: string) => lazyFetchClassMetadataById(classId))
   } catch (err) {

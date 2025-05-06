@@ -583,11 +583,17 @@ onMounted(async () => {
     isLoading.value = true
 
     if (isEditMode.value) {
-      try {
-        await fetchStripeConnectStatusByWallet(wallet.value)
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error(err)
+      if (wallet.value) {
+        try {
+          await fetchStripeConnectStatusByWallet(wallet.value)
+          if (getStripeConnectStatusByWallet.value(wallet.value).isReady) {
+            isStripeConnectChecked.value = true
+            stripeConnectWallet.value = wallet.value
+          }
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error(err)
+        }
       }
       const classResData: any = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`, {
         headers: {
@@ -631,11 +637,6 @@ onMounted(async () => {
       } else {
         throw new Error('NFT Class not found')
       }
-    }
-
-    if (getStripeConnectStatusByWallet.value(wallet.value).isReady) {
-      isStripeConnectChecked.value = true
-      stripeConnectWallet.value = wallet.value
     }
   } catch (e) {
     // eslint-disable-next-line no-console
