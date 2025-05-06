@@ -83,23 +83,21 @@
                 :label="`Unit Price in USD (Minimum ${MINIMAL_PRICE}, or 0 for free) / 版本定價（美元）`"
               >
                 <UInput
-                  :value="p.price"
+                  v-model="p.price"
                   type="number"
                   step="0.01"
                   :min="0"
-                  @input="(e: InputEvent) => updatePrice(e, 'price', index)"
                 />
               </UFormGroup>
               <UFormGroup
                 label="No of copies / 數量"
               >
                 <UInput
-                  :value="p.stock"
+                  v-model="p.stock"
                   type="number"
                   step="1"
                   :min="0"
                   :max="Number(route.query.count) || undefined"
-                  @input="(e: InputEvent) => updatePrice(e, 'stock', index)"
                 />
               </UFormGroup>
               <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
@@ -117,9 +115,8 @@
                   </ToolTips>
                 </template>
                 <UInput
+                  v-model="p.name"
                   placeholder="Product name"
-                  :value="p.name"
-                  @input="(e: InputEvent) => updatePrice(e, 'name', index)"
                 />
                 <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional) / 描述（選填）</span>
                 <md-editor
@@ -155,9 +152,8 @@
 
                     <UFormGroup label="Memo / 發書留言">
                       <UInput
-                        :value="p.autoMemo"
+                        v-model="p.autoMemo"
                         placeholder="Thank you for your support. It means a lot to me."
-                        @input="(e: InputEvent) => updatePrice(e, 'autoMemo', index)"
                       />
                     </UFormGroup>
                   </div>
@@ -633,6 +629,7 @@ onMounted(async () => {
             isAllowCustomPrice: currentEdition.isAllowCustomPrice,
             isUnlisted: currentEdition.isUnlisted
           }]
+          isAllowCustomPrice.value = currentEdition.isAllowCustomPrice
           oldIsAutoDeliver.value = currentEdition.isAutoDeliver
           oldStock.value = currentEdition.stock
         } else {
@@ -653,6 +650,12 @@ onMounted(async () => {
   } finally {
     isLoading.value = false
   }
+})
+
+watch(isAllowCustomPrice, (newValue) => {
+  prices.value.forEach((price) => {
+    price.isAllowCustomPrice = newValue
+  })
 })
 
 watch(isLoading, (newIsLoading) => {
@@ -700,13 +703,6 @@ function isContentFingerPrintEncrypted (contentFingerprints: any[]) {
   return contentFingerprints.some((fingerprint) => {
     return !!fingerprint.startsWith(arweaveLinkEndpoint) || fingerprint.includes('?key=')
   })
-}
-
-function updatePrice (e: InputEvent, key: string, index: number) {
-  prices.value[index][key] = (e.target as HTMLInputElement)?.value
-  if (key === 'price' && Number((e.target as HTMLInputElement)?.value) === 0) {
-    prices.value[index].isAllowCustomPrice = true
-  }
 }
 
 async function onFileUpload (files: FileList, key: string, index: number) {
@@ -801,7 +797,7 @@ function mapPrices (prices: any) {
     price: Number(p.price),
     stock: Number(p.stock),
     isAutoDeliver: !p.isPhysicalOnly && p.deliveryMethod === 'auto',
-    isAllowCustomPrice: isAllowCustomPrice.value,
+    isAllowCustomPrice: p.isAllowCustomPrice,
     isUnlisted: p.isUnlisted ?? false,
     autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
     hasShipping: p.hasShipping || false,
