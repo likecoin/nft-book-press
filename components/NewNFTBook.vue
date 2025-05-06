@@ -136,7 +136,7 @@
                   <URadio
                     v-model="p.deliveryMethod"
                     value="auto"
-                    :disabled="p.isPhysicalOnly || (isEditMode && !oldIsAutoDeliver)"
+                    :disabled="isEditMode && oldIsAutoDeliver"
                     name="deliveryMethod"
                     label="Auto delivery / 自動發書"
                   />
