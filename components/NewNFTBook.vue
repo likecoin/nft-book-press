@@ -142,7 +142,6 @@
                     :disabled="p.isPhysicalOnly || (isEditMode && !oldIsAutoDeliver)"
                     name="deliveryMethod"
                     label="Auto delivery / 自動發書"
-                    @change="handleDeliveryMethodChange"
                   />
 
                   <div v-if="p.deliveryMethod === 'auto'" class="pl-8 space-y-2">
@@ -172,7 +171,6 @@
                     :disabled="p.isPhysicalOnly"
                     name="deliveryMethod"
                     label="Manual delivery / 手動發書"
-                    @change="handleDeliveryMethodChange"
                   />
                   <div v-if="p.deliveryMethod === 'manual'" class="pl-8 space-y-2">
                     <UFormGroup>
@@ -479,8 +477,6 @@ const mdEditorPlaceholder = ref({
 
 const classIdInput = ref(classId || '')
 const nextPriceIndex = ref(1)
-const tableOfContents = ref('')
-const enableCustomMessagePage = ref(false)
 const hideDownload = ref(false)
 const autoDeliverNftIdInput = ref('')
 const isAllowCustomPrice = ref(true)
@@ -947,7 +943,6 @@ async function submitNewClass () {
       prices.value.some(price => price.deliveryMethod === 'manual')
 
     await newBookListing(classIdInput.value as string, {
-      tableOfContents: tableOfContents.value,
       defaultPaymentCurrency: 'USD',
       connectedWallets,
       moderatorWallets: moderatorWallets.value,
@@ -1060,12 +1055,6 @@ async function addNewEdition () {
     console.error(error)
   } finally {
     isLoading.value = false
-  }
-}
-
-function handleDeliveryMethodChange (value: string) {
-  if (value === 'manual') {
-    enableCustomMessagePage.value = true
   }
 }
 
