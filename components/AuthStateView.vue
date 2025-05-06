@@ -117,7 +117,9 @@ function onClickDisconnect () {
 }
 
 function onClickCopy () {
-  copyToClipboard(wallet.value)
+  if (wallet.value) {
+    copyToClipboard(wallet.value)
+  }
 }
 
 function onClickMigrate () {
