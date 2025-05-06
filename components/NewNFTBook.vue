@@ -174,19 +174,6 @@
                     label="Manual delivery / 手動發書"
                     @change="handleDeliveryMethodChange"
                   />
-                  <div v-if="p.deliveryMethod === 'manual'" class="pl-8 space-y-2">
-                    <UFormGroup>
-                      <template #label>
-                        <p>Autograph image / 簽名圖</p>
-                        <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 10MB</span>
-                      </template>
-                      <UInput
-                        type="file"
-                        accept="image/*"
-                        @change="(e)=>onFileUpload(e, 'autographImage', index)"
-                      />
-                    </UFormGroup>
-                  </div>
                 </div>
               </div>
 
@@ -443,7 +430,7 @@ import { useStripeStore } from '~/stores/stripe'
 import { useNftStore } from '~/stores/nft'
 import { getPortfolioURL } from '~/utils'
 import { getNFTAuthzGrants, sendNFTsToAPIWallet } from '~/utils/cosmos'
-import { escapeHtml, sanitizeHtml, getFileInfo } from '~/utils/newClass'
+import { escapeHtml, sanitizeHtml } from '~/utils/newClass'
 import { getApiEndpoints } from '~/constant/api'
 
 const { LCD_URL, LIKE_CO_API } = useRuntimeConfig().public
@@ -457,8 +444,6 @@ const { fetchStripeConnectStatusByWallet } = stripeStore
 const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
 const { token } = storeToRefs(bookStoreApiStore)
 const nftStore = useNftStore()
-
-const UPLOAD_FILESIZE_MAX = 20 * 1024 * 1024
 
 const emit = defineEmits(['submit'])
 const router = useRouter()
@@ -713,27 +698,6 @@ function updatePrice (e: InputEvent, key: string, index: number) {
   }
 }
 
-async function onFileUpload (files: FileList, key: string, index: number) {
-  try {
-    if (files?.length) {
-      const file = files[0]
-      if (file.size < UPLOAD_FILESIZE_MAX) {
-        const info = await getFileInfo(file)
-        if (info) {
-          const { ipfsHash } = info
-          prices.value[index][key] = ipfsHash
-        }
-      } else {
-        error.value = 'File size exceeds 20MB'
-      }
-    }
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error('File upload error:', err)
-    error.value = 'Failed to upload file'
-  }
-}
-
 function addMorePrice () {
   nextPriceIndex.value += 1
   prices.value.push({
@@ -809,8 +773,7 @@ function mapPrices (prices: any) {
     isUnlisted: p.isUnlisted ?? false,
     autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
     hasShipping: p.hasShipping || false,
-    isPhysicalOnly: p.isPhysicalOnly || false,
-    autographImage: p.autographImage || ''
+    isPhysicalOnly: p.isPhysicalOnly || false
   }))
 }
 
@@ -821,12 +784,6 @@ function validate (prices: any[]) {
       errors.push({
         path: 'name',
         message: 'Please input product name'
-      })
-    }
-    if (!price.isAutoDeliver && !price.autographImage) {
-      errors.push({
-        path: 'autographImage',
-        message: 'Please upload autograph image'
       })
     }
     if (price.isAutoDeliver && !price.autoMemo) {
