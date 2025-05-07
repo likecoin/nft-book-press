@@ -265,10 +265,10 @@ const handleMintNFTSubmit = async (res: any) => {
   const { classId, nftMintCount } = res
   if (classId) {
     router.replace({ query: { class_id: classId } })
+    step.value = 3
+    await nextTick()
+    newNFTBook.value?.updateClassId({ classId, nftMintCount })
   }
-  step.value = 3
-  await nextTick()
-  newNFTBook.value?.updateClassId({ classId, nftMintCount })
 }
 
 const handleNewBookSubmit = () => {

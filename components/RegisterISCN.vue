@@ -228,6 +228,7 @@ const submitToISCN = async (): Promise<void> => {
     uploadStatus.value = 'success'
     emit('submit', res)
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err)
     toast.add({
       icon: 'i-heroicons-exclamation-circle',

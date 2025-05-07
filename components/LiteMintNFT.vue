@@ -260,6 +260,15 @@ async function onClickMintByInputting () {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)
+    toast.add({
+      icon: 'i-heroicons-exclamation-circle',
+      title: (error as Error).toString(),
+      timeout: 0,
+      color: 'red',
+      ui: {
+        title: 'text-red-400 dark:text-red-400'
+      }
+    })
   } finally {
     isLoading.value = false
   }
@@ -312,9 +321,7 @@ async function onMintNFTStart () {
     nftData.value = res
     return classData.value
   } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(err)
-    error.value = (err as Error).toString()
+    throw new Error('MINT_NFT_ERROR:' + (err as Error).toString())
   } finally {
     isLoading.value = false
   }
