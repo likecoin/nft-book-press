@@ -83,23 +83,21 @@
                 :label="`Unit Price in USD (Minimum ${MINIMAL_PRICE}, or 0 for free) / 版本定價（美元）`"
               >
                 <UInput
-                  :value="p.price"
+                  v-model="p.price"
                   type="number"
                   step="0.01"
                   :min="0"
-                  @input="(e: InputEvent) => updatePrice(e, 'price', index)"
                 />
               </UFormGroup>
               <UFormGroup
                 label="No of copies / 數量"
               >
                 <UInput
-                  :value="p.stock"
+                  v-model="p.stock"
                   type="number"
                   step="1"
                   :min="0"
                   :max="Number(route.query.count) || undefined"
-                  @input="(e: InputEvent) => updatePrice(e, 'stock', index)"
                 />
               </UFormGroup>
               <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
@@ -117,9 +115,8 @@
                   </ToolTips>
                 </template>
                 <UInput
+                  v-model="p.name"
                   placeholder="Product name"
-                  :value="p.name"
-                  @input="(e: InputEvent) => updatePrice(e, 'name', index)"
                 />
                 <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional) / 描述（選填）</span>
                 <md-editor
@@ -139,10 +136,9 @@
                   <URadio
                     v-model="p.deliveryMethod"
                     value="auto"
-                    :disabled="p.isPhysicalOnly || (isEditMode && !oldIsAutoDeliver)"
+                    :disabled="isEditMode && oldIsAutoDeliver"
                     name="deliveryMethod"
                     label="Auto delivery / 自動發書"
-                    @change="handleDeliveryMethodChange"
                   />
 
                   <div v-if="p.deliveryMethod === 'auto'" class="pl-8 space-y-2">
@@ -156,9 +152,8 @@
 
                     <UFormGroup label="Memo / 發書留言">
                       <UInput
-                        :value="p.autoMemo"
+                        v-model="p.autoMemo"
                         placeholder="Thank you for your support. It means a lot to me."
-                        @input="(e: InputEvent) => updatePrice(e, 'autoMemo', index)"
                       />
                     </UFormGroup>
                   </div>
@@ -172,7 +167,6 @@
                     :disabled="p.isPhysicalOnly"
                     name="deliveryMethod"
                     label="Manual delivery / 手動發書"
-                    @change="handleDeliveryMethodChange"
                   />
                 </div>
               </div>
@@ -464,8 +458,6 @@ const mdEditorPlaceholder = ref({
 
 const classIdInput = ref(classId || '')
 const nextPriceIndex = ref(1)
-const tableOfContents = ref('')
-const enableCustomMessagePage = ref(false)
 const hideDownload = ref(false)
 const autoDeliverNftIdInput = ref('')
 const isAllowCustomPrice = ref(true)
@@ -588,7 +580,12 @@ onMounted(async () => {
     isLoading.value = true
 
     if (isEditMode.value) {
-      await fetchStripeConnectStatusByWallet(wallet.value)
+      try {
+        await fetchStripeConnectStatusByWallet(wallet.value)
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err)
+      }
       const classResData: any = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`, {
         headers: {
           authorization: `Bearer ${token.value}`
@@ -622,6 +619,7 @@ onMounted(async () => {
             isAllowCustomPrice: currentEdition.isAllowCustomPrice,
             isUnlisted: currentEdition.isUnlisted
           }]
+          isAllowCustomPrice.value = currentEdition.isAllowCustomPrice
           oldIsAutoDeliver.value = currentEdition.isAutoDeliver
           oldStock.value = currentEdition.stock
         } else {
@@ -642,6 +640,12 @@ onMounted(async () => {
   } finally {
     isLoading.value = false
   }
+})
+
+watch(isAllowCustomPrice, (newValue) => {
+  prices.value.forEach((price) => {
+    price.isAllowCustomPrice = newValue
+  })
 })
 
 watch(isLoading, (newIsLoading) => {
@@ -689,13 +693,6 @@ function isContentFingerPrintEncrypted (contentFingerprints: any[]) {
   return contentFingerprints.some((fingerprint) => {
     return !!fingerprint.startsWith(arweaveLinkEndpoint) || fingerprint.includes('?key=')
   })
-}
-
-function updatePrice (e: InputEvent, key: string, index: number) {
-  prices.value[index][key] = (e.target as HTMLInputElement)?.value
-  if (key === 'price' && Number((e.target as HTMLInputElement)?.value) === 0) {
-    prices.value[index].isAllowCustomPrice = true
-  }
 }
 
 function addMorePrice () {
@@ -769,7 +766,7 @@ function mapPrices (prices: any) {
     price: Number(p.price),
     stock: Number(p.stock),
     isAutoDeliver: !p.isPhysicalOnly && p.deliveryMethod === 'auto',
-    isAllowCustomPrice: isAllowCustomPrice.value,
+    isAllowCustomPrice: p.isAllowCustomPrice,
     isUnlisted: p.isUnlisted ?? false,
     autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
     hasShipping: p.hasShipping || false,
@@ -904,7 +901,6 @@ async function submitNewClass () {
       prices.value.some(price => price.deliveryMethod === 'manual')
 
     await newBookListing(classIdInput.value as string, {
-      tableOfContents: tableOfContents.value,
       defaultPaymentCurrency: 'USD',
       connectedWallets,
       moderatorWallets: moderatorWallets.value,
@@ -1017,12 +1013,6 @@ async function addNewEdition () {
     console.error(error)
   } finally {
     isLoading.value = false
-  }
-}
-
-function handleDeliveryMethodChange (value: string) {
-  if (value === 'manual') {
-    enableCustomMessagePage.value = true
   }
 }
 
