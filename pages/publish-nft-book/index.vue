@@ -51,6 +51,7 @@
             ref="newNFTBook"
             class="p-0 flex flex-col text-left gap-[24px]"
             :is-new-class-page="true"
+            :class-id="classId"
             @submit="handleNewBookSubmit"
           />
         </div>
@@ -128,7 +129,6 @@ const step = ref(0)
 const uploadFormRef = ref()
 const registerISCN = ref()
 const mintNFT = ref()
-const newNFTBook = ref()
 const toast = useToast()
 const showIscnInput = ref(false)
 const iscnInputValue = ref('')
@@ -285,10 +285,10 @@ const handleIscnSubmit = async (res: { iscnId: string, txHash: string }) => {
 const handleMintNFTSubmit = async (res: any) => {
   const { classId, nftMintCount } = res
   if (classId) {
-    router.replace({ query: { class_id: classId } })
+    router.replace({ query: { class_id: classId, count: nftMintCount } })
     step.value = 3
     await nextTick()
-    newNFTBook.value?.updateClassId({ classId, nftMintCount })
+    classId.value = classId
   }
 }
 

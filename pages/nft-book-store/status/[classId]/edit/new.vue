@@ -19,7 +19,8 @@
 
       <NewNFTBook
         class="flex flex-col gap-4"
-        :is-new-class-page="false"
+        :class-id="classId"
+        :edition-index="newEditionIndex"
         @submit="handleNewBookSubmit"
       />
     </UCard>
@@ -33,6 +34,7 @@ const route = useRoute()
 const toast = useToast()
 
 const classId = ref(route.params.classId)
+const newEditionIndex = ref(route.query.price_index)
 
 const isLoading = ref(false)
 

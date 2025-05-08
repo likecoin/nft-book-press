@@ -442,11 +442,9 @@ const nftStore = useNftStore()
 const emit = defineEmits(['submit'])
 const router = useRouter()
 const route = useRoute()
-const classId = ref(
-  route.params.classId || (route.query.class_id as string)
-)
-const editionIndex = ref(route.params.editionIndex as string) || ref(route.query.price_index as string)
-const newEditionIndex = ref(route.query.price_index)
+const editionIndex = computed(() => {
+  return props.editionIndex
+})
 
 const error = ref('')
 const isLoading = ref(false)
@@ -456,7 +454,9 @@ const mdEditorPlaceholder = ref({
   zh: '例：此版本包含 EPUB 及 PDF 電子書檔'
 })
 
-const classIdInput = ref(classId || '')
+const classId = computed(() => {
+  return props.classId
+})
 const nextPriceIndex = ref(1)
 const hideDownload = ref(false)
 const autoDeliverNftIdInput = ref('')
@@ -513,7 +513,7 @@ const toolbarOptions = ref<ToolbarNames[]>([
 ])
 
 const isEditMode = computed(() =>
-  Boolean(route.params.classId && editionIndex.value)
+  props.isEditMode
 )
 const pageTitle = computed(() =>
   isEditMode.value ? 'Edit Current Edition' : 'General settings / 一般選項'
@@ -566,9 +566,12 @@ config({
   }
 })
 
-const props = defineProps<{
- isNewClassPage: boolean
-}>()
+const props = defineProps({
+  isNewClassPage: { type: Boolean, default: false },
+  classId: { type: String, default: '' },
+  editionIndex: { type: [String, Number], default: 0 },
+  isEditMode: { type: Boolean, default: false }
+})
 
 useSeoMeta({
   title: 'New Book Listing',
@@ -667,7 +670,7 @@ watch(moderatorWallets, (newModeratorWallets) => {
   })
 })
 
-watch(classId, async (newClassId) => {
+watch(() => props.classId, async (newClassId:string) => {
   if (newClassId && !iscnId.value) {
     // Fetch ISCN data
     if (!iscnId.value) {
@@ -816,7 +819,7 @@ async function onSubmit () {
     } else if (props.isNewClassPage) { // in /publish-nft-book
       await submitNewClass()
     } else {
-      const existingListing = await fetch(`${LIKE_CO_API}/likernft/book/store/${classIdInput.value}`)
+      const existingListing = await fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`)
       if (!existingListing.ok) {
         await submitNewClass()
       } else {
@@ -829,7 +832,7 @@ async function onSubmit () {
 }
 async function submitNewClass () {
   try {
-    if (!classIdInput.value) {
+    if (!classId.value) {
       throw new Error('Please input NFT class ID')
     }
     if (moderatorWalletInput.value) {
@@ -842,7 +845,7 @@ async function submitNewClass () {
     isLoading.value = true
 
     const data = await $fetch(
-      `${LCD_URL}/cosmos/nft/v1beta1/classes/${classIdInput.value}`
+      `${LCD_URL}/cosmos/nft/v1beta1/classes/${classId.value}`
     )
     const collectionId =
       (data as any)?.class?.data?.metadata?.nft_meta_collection_id || ''
@@ -889,7 +892,7 @@ async function submitNewClass () {
         throw new Error('Unable to connect to wallet')
       }
       autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
-        [classIdInput.value as string],
+        [classId.value as string],
         [autoDeliverNftIdInput.value as string],
         autoDeliverCount,
         signer.value,
@@ -900,7 +903,7 @@ async function submitNewClass () {
     const shouldEnableCustomMessagePage =
       prices.value.some(price => price.deliveryMethod === 'manual')
 
-    await newBookListing(classIdInput.value as string, {
+    await newBookListing(classId.value as string, {
       defaultPaymentCurrency: 'USD',
       connectedWallets,
       moderatorWallets: moderatorWallets.value,
@@ -952,7 +955,7 @@ async function submitEditedClass () {
         throw new Error('Unable to connect to wallet')
       }
       autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
-        [classIdInput.value as string],
+        [classId.value as string],
         [autoDeliverNftIdInput.value as string],
         newAutoDeliverNFTsCount,
         signer.value,
@@ -994,7 +997,7 @@ async function addNewEdition () {
         throw new Error('Unable to connect to wallet')
       }
       autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
-        [classIdInput.value as string],
+        [classId.value as string],
         [autoDeliverNftIdInput.value as string],
         autoDeliverCount,
         signer.value,
@@ -1002,7 +1005,7 @@ async function addNewEdition () {
       )
     }
     const price = p[0]
-    await bookStoreApiStore.addEditionPrice(classId.value as string, newEditionIndex.value as string, {
+    await bookStoreApiStore.addEditionPrice(classId.value as string, editionIndex.value as string, {
       price,
       autoDeliverNFTsTxHash
     })

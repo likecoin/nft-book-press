@@ -26,9 +26,10 @@
         </template>
 
         <NewNFTBook
-          ref="newNFTBook"
           class="flex flex-col gap-4"
-          :is-new-class-page="false"
+          :is-edit-mode="true"
+          :edition-index="editionIndex"
+          :class-id="classId"
           @submit="handleSubmit"
         />
       </UCard>
