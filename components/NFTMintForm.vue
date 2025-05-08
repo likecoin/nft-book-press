@@ -74,7 +74,6 @@
 </template>
 
 <script setup lang="ts">
-import type { FormError } from '#ui/types'
 
 interface NFTMintFormState {
   prefix: string

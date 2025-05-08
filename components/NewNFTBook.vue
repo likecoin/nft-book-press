@@ -25,7 +25,7 @@
 
         <UFormGroup label="NFT Class ID">
           <UInput
-            :value="classIdInput"
+            :value="classId"
             disabled
             class="font-mono"
           />
@@ -97,7 +97,6 @@
                   type="number"
                   step="1"
                   :min="0"
-                  :max="Number(route.query.count) || undefined"
                 />
               </UFormGroup>
               <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
@@ -447,7 +446,7 @@ const editionIndex = computed(() => {
 })
 
 const error = ref('')
-const isLoading = ref(false)
+const _isLoading = ref(false)
 
 const mdEditorPlaceholder = ref({
   en: 'e.g.: This edition includes EPUB and PDF ebook files.',
@@ -531,7 +530,7 @@ const moderatorWalletsTableColumns = computed(() => [
 ])
 
 const moderatorWalletsTableRows = computed(() =>
-  moderatorWallets.value.map((wallet, index) => {
+  moderatorWallets.value.map((wallet: string, index: number) => {
     const isGranted = !!moderatorWalletsGrants.value[wallet]
     return {
       index,
@@ -550,7 +549,7 @@ const moderatorWalletsTableRows = computed(() =>
 )
 
 const notificationEmailsTableRows = computed(() =>
-  notificationEmails.value.map((email, index) => ({
+  notificationEmails.value.map((email: string, index: number) => ({
     index,
     email
   }))
@@ -558,6 +557,16 @@ const notificationEmailsTableRows = computed(() =>
 
 const iscnDataLanguage = computed(() => {
   return iscnData.value?.contentMetadata?.inLanguage
+})
+
+const isLoading = computed({
+  get: () => _isLoading.value,
+  set: (val: string) => {
+    _isLoading.value = val
+    if (val) {
+      error.value = ''
+    }
+  }
 })
 
 config({
@@ -645,19 +654,13 @@ onMounted(async () => {
   }
 })
 
-watch(isAllowCustomPrice, (newValue) => {
-  prices.value.forEach((price) => {
+watch(isAllowCustomPrice, (newValue: boolean) => {
+  prices.value.forEach((price: any) => {
     price.isAllowCustomPrice = newValue
   })
 })
 
-watch(isLoading, (newIsLoading) => {
-  if (newIsLoading) {
-    error.value = ''
-  }
-})
-
-watch(moderatorWallets, (newModeratorWallets) => {
+watch(moderatorWallets, (newModeratorWallets: any[]) => {
   newModeratorWallets?.forEach(async (m) => {
     if (!moderatorWalletsGrants.value[m]) {
       try {
@@ -872,7 +875,7 @@ async function submitNewClass () {
           }
         : null
     const s = shippingRates.value.length
-      ? shippingRates.value.map(rate => ({
+      ? shippingRates.value.map((rate: any) => ({
         name: { en: rate.name.en, zh: rate.name.zh },
         priceInDecimal: rate.priceInDecimal,
         price: rate.priceInDecimal / 100
@@ -901,7 +904,7 @@ async function submitNewClass () {
     }
 
     const shouldEnableCustomMessagePage =
-      prices.value.some(price => price.deliveryMethod === 'manual')
+      prices.value.some((price: any) => price.deliveryMethod === 'manual')
 
     await newBookListing(classId.value as string, {
       defaultPaymentCurrency: 'USD',
@@ -1019,20 +1022,6 @@ async function addNewEdition () {
   }
 }
 
-async function updateClassId ({ classId: newClassId, nftMintCount } : {
-  classId: string
-  nftMintCount?: number
-}) {
-  classId.value = newClassId
-  classIdInput.value = newClassId
-  if (nftMintCount) {
-    prices.value[0].stock = nftMintCount
-  }
-  if (!iscnId.value) {
-    iscnId.value = await getIscnId()
-  }
-}
-
 async function getIscnId () {
   const classData = await nftStore.lazyFetchClassMetadataById(
     classId.value as string
@@ -1045,15 +1034,8 @@ async function getIscnId () {
   return ''
 }
 
-defineExpose({
-  updateClassId
-})
-
 </script>
 <style scoped>
-.classIdInput {
-  width: 450px;
-}
 .md-editor {
   width: 60vw;
   min-width: 300px;
