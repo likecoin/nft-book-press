@@ -71,9 +71,24 @@ useSeoMeta({
   ogTitle: 'Mint Liker Land NFT Book'
 })
 
-async function onISCNIDInput (iscnId?: string) {
-  if (iscnId) {
-    iscnIdInput.value = iscnId
+const emit = defineEmits(['submit', 'formValidChange'])
+
+const props = defineProps({
+  iscnId: {
+    type: String,
+    default: ''
+  }
+})
+
+watch(() => props.iscnId, async (val: string) => {
+  if (val) {
+    await fetchISCNById(props.iscnId)
+  }
+}, { immediate: true })
+
+async function fetchISCNById (iscnId?: string) {
+  if (!iscnId) {
+    return
   }
   try {
     isLoading.value = true
@@ -93,15 +108,15 @@ async function onISCNIDInput (iscnId?: string) {
   }
 }
 
-function onClickMintByInputting () {
-  liteMintNFTRef.value?.onClickMintByInputting()
+function startNFTMintFlow () {
+  liteMintNFTRef.value?.startNFTMintFlow()
 }
 
 function onSaveISCN () {
   const iscnId = editISCNRef.value?.iscnId
   if (iscnId) {
     router.replace({ query: { ...route.query, iscn_id: iscnId } })
-    onISCNIDInput(iscnId)
+    fetchISCNById(iscnId)
   } else {
     window.location.reload()
   }
@@ -121,9 +136,7 @@ function handleFinishMintNFT (
 }
 
 defineExpose({
-  isFormValid,
-  onISCNIDInput,
-  onClickMintByInputting
+  startNFTMintFlow
 })
 
 </script>

@@ -246,7 +246,7 @@ const nextStep = async () => {
       return
     }
     if (step.value === 2) {
-      await mintNFT.value.onClickMintByInputting()
+      await mintNFT.value.startNFTMintFlow()
       return
     }
     if (step.value < steps.length - 1) {

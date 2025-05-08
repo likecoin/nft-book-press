@@ -49,7 +49,7 @@
           :loading="isLoading"
           size="lg"
           :disabled="isLoading"
-          @click="onClickMintByInputting"
+          @click="startNFTMintFlow"
         />
       </div>
     </UCard>
@@ -195,7 +195,7 @@ function generateNFTMintListData ({
   return dataRows
 }
 
-async function onClickMintByInputting () {
+async function startNFTMintFlow () {
   try {
     isLoading.value = true
     const { contentMetadata } = iscnData.value
@@ -256,7 +256,7 @@ async function onClickMintByInputting () {
       classData.value = await onClassFileInput()
       classId.value = classData.value?.id
     }
-    await onMintNFTStart()
+    await mintNFTs()
     if (classData.value?.id) {
       emit('submit', {
         classId: classData.value?.id,
@@ -283,7 +283,7 @@ async function onClickMintByInputting () {
   }
 }
 
-async function onMintNFTStart () {
+async function mintNFTs () {
   try {
     isLoading.value = true
     if (!wallet.value || !signer.value) {
@@ -336,7 +336,7 @@ async function onMintNFTStart () {
   }
 }
 
-async function onISCNIDInput (value: string) {
+async function fetchISCNById (iscnId: string) {
   isLoading.value = true
   try {
     iscnId.value = value
@@ -358,10 +358,7 @@ async function onISCNIDInput (value: string) {
 }
 
 defineExpose({
-  isLoading,
-  isFormValid,
-  onISCNIDInput,
-  onClickMintByInputting
+  startNFTMintFlow
 })
 
 </script>
