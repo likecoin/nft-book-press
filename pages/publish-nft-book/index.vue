@@ -29,7 +29,13 @@
           />
         </div>
         <div v-else-if="step === 1">
-          <RegisterISCN ref="registerISCN" @submit="handleIscnSubmit" />
+          <RegisterISCN
+            ref="registerISCN"
+            @form-valid-change="
+              (isFormValid) => (isISCNFormValid = isFormValid)
+            "
+            @submit="handleIscnSubmit"
+          />
         </div>
         <div v-else-if="step === 2">
           <MintNFT ref="mintNFT" @submit="handleMintNFTSubmit" />
@@ -124,6 +130,7 @@ const bookName = ref('')
 
 const fileRecords = ref([])
 const uploadStatus = ref('')
+const isISCNFormValid = ref(false)
 
 const hasExistingSessionData = computed(() => {
   return !!bookName.value
@@ -156,7 +163,7 @@ const shouldDisableAction = computed(() => {
   if (step.value === 0) {
     return uploadStatus.value !== ''
   } else if (step.value === 1) {
-    return !registerISCN.value?.isFormValid
+    return !isISCNFormValid.value
   } else if (step.value === 2) {
     return !mintNFT.value?.isFormValid
   }

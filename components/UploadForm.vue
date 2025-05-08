@@ -672,8 +672,6 @@ const onSubmit = async () => {
 }
 
 defineExpose({
-  onSubmit,
-  fileRecords,
-  uploadStatus
+  onSubmit
 })
 </script>

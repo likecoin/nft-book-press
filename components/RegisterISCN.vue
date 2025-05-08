@@ -70,7 +70,7 @@ const iscnFee = ref(new BigNumber(0))
 const iscnGasFee = ref('0')
 const uploadStatus = ref('')
 const error = ref('')
-const emit = defineEmits(['handleSubmit', 'submit'])
+const emit = defineEmits(['handleSubmit', 'submit', 'formValidChange'])
 
 const totalFee = computed(() => {
   return iscnFee.value || new BigNumber(0)
@@ -78,7 +78,7 @@ const totalFee = computed(() => {
 
 const { payload } = useISCN(iscnData)
 
-const isFormValid = computed(() => {
+const formError = computed(() => {
   const requiredFields = {
     title: !!iscnData.value.title,
     description: !!iscnData.value.description,
@@ -86,12 +86,15 @@ const isFormValid = computed(() => {
     contentUrl: !!iscnData.value.contentFingerprints.some(f => !!f.url)
   }
 
-  error.value = Object.entries(requiredFields)
-    .find(([_, isValid]) => !isValid)?.[0]
-    ?.toUpperCase() || ''
-
-  return Object.values(requiredFields).every(Boolean)
+  return Object.entries(requiredFields)
+    .find(([_, isValid]) => !isValid)?.[0]?.toUpperCase() || ''
 })
+
+const isFormValid = computed(() => !formError.value)
+
+watch(isFormValid, (val) => {
+  emit('formValidChange', val)
+}, { immediate: false })
 
 onMounted(() => {
   const initialData = initializeFromSessionStorage()
@@ -247,9 +250,7 @@ const submitToISCN = async (): Promise<void> => {
 }
 
 defineExpose({
-  iscnData,
-  onSubmit,
-  isFormValid
+  onSubmit
 })
 </script>
 
