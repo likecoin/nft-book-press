@@ -121,7 +121,7 @@ const iscnInputValue = ref('')
 const bookName = ref('')
 
 const hasExistingSessionData = computed(() => {
-  return !bookName.value
+  return !!bookName.value
 })
 const currentActionText = computed(() => {
   switch (step.value) {
