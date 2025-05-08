@@ -498,7 +498,7 @@ const iscnData = ref<any>(null)
 const signatureImage = ref<File | null>(null)
 
 const maxSupply = computed(() => {
-  if (isEditMode.value) {
+  if (isEditMode.value || editionIndex.value !== undefined) {
     return classMaxSupply.value - otherExistingStock.value
   }
   return classMaxSupply.value
@@ -589,7 +589,7 @@ onMounted(async () => {
       classId.value as string
     )) as any)?.max_supply || DEFAULT_MAX_SUPPLY)
 
-    if (isEditMode.value) {
+    if (isEditMode.value || editionIndex.value !== undefined) {
       if (wallet.value) {
         try {
           await fetchStripeConnectStatusByWallet(wallet.value)
@@ -612,41 +612,43 @@ onMounted(async () => {
         if (classResData?.ownerWallet !== wallet.value) {
           throw new Error('NOT_OWNER_OF_NFT_CLASS')
         }
-        if (classResData.prices.length) {
-          const currentEdition = classResData.prices.find((e: any) => e.index.toString() === editionIndex.value)
-          if (!currentEdition) {
-            throw new Error('Edition not found')
-          }
-          prices.value = [{
-            price: currentEdition.price,
-            deliveryMethod: currentEdition.isAutoDeliver ? 'auto' : 'manual',
-            autoMemo: currentEdition.autoMemo,
-            stock: currentEdition.stock,
-            name: classResData.inLanguage === 'en'
-              ? currentEdition.name.en
-              : currentEdition.name.zh,
-
-            nameEn: currentEdition.name.en,
-            nameZh: currentEdition.name.zh,
-            descriptionEn: currentEdition.description.en,
-            descriptionZh: currentEdition.description.zh,
-            hasShipping: currentEdition.hasShipping,
-            isPhysicalOnly: currentEdition.isPhysicalOnly,
-            isAllowCustomPrice: currentEdition.isAllowCustomPrice,
-            isUnlisted: currentEdition.isUnlisted,
-            oldIsAutoDeliver: currentEdition.isAutoDeliver,
-            oldStock: currentEdition.stock
-          }]
-          isAllowCustomPrice.value = currentEdition.isAllowCustomPrice
-          otherExistingStock.value = classResData.prices.reduce((acc: number, price: any) => {
-            if (price.index.toString() !== editionIndex.value) {
-              return acc + price.stock
+        if (editionIndex.value !== undefined) {
+          if (classResData.prices.length) {
+            const currentEdition = classResData.prices.find((e: any) => e.index.toString() === editionIndex.value)
+            if (!currentEdition) {
+              throw new Error('Edition not found')
             }
-            return acc
-          }, 0)
-        } else {
-          throw new Error('No prices found')
+            prices.value = [{
+              price: currentEdition.price,
+              deliveryMethod: currentEdition.isAutoDeliver ? 'auto' : 'manual',
+              autoMemo: currentEdition.autoMemo,
+              stock: currentEdition.stock,
+              name: classResData.inLanguage === 'en'
+                ? currentEdition.name.en
+                : currentEdition.name.zh,
+
+              nameEn: currentEdition.name.en,
+              nameZh: currentEdition.name.zh,
+              descriptionEn: currentEdition.description.en,
+              descriptionZh: currentEdition.description.zh,
+              hasShipping: currentEdition.hasShipping,
+              isPhysicalOnly: currentEdition.isPhysicalOnly,
+              isAllowCustomPrice: currentEdition.isAllowCustomPrice,
+              isUnlisted: currentEdition.isUnlisted,
+              oldIsAutoDeliver: currentEdition.isAutoDeliver,
+              oldStock: currentEdition.stock
+            }]
+            isAllowCustomPrice.value = currentEdition.isAllowCustomPrice
+          } else {
+            throw new Error('No prices found')
+          }
         }
+        otherExistingStock.value = classResData.prices.reduce((acc: number, price: any) => {
+          if (price.index.toString() !== editionIndex.value) {
+            return acc + price.stock
+          }
+          return acc
+        }, 0)
       } else {
         throw new Error('NFT Class not found')
       }
