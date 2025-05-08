@@ -207,6 +207,8 @@
         </template>
         <UploadForm
           ref="uploadFormRef"
+          @file-ready="(records) => (fileRecords = records)"
+          @status-change="(status) => (uploadStatus = status)"
           @submit="handleUploadSubmit"
         />
         <template #footer>
@@ -268,6 +270,8 @@ interface ISCNFormData {
 
 const shouldShowUploadModal = ref(false)
 const uploadFormRef = ref()
+const fileRecords = ref([])
+const uploadStatus = ref('')
 
 const props = defineProps<{
   modelValue: ISCNFormData
@@ -296,11 +300,11 @@ const isFormValid = computed(() => {
 })
 
 const hasFiles = computed(() => {
-  return uploadFormRef.value?.fileRecords?.length > 0
+  return fileRecords.value?.length > 0
 })
 
 const shouldDisableAction = computed(() => {
-  return uploadFormRef.value?.uploadStatus !== ''
+  return uploadStatus.value !== ''
 })
 
 const addContentFingerprint = () => {

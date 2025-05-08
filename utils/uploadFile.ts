@@ -20,7 +20,7 @@ export interface UploadFileData {
   }>
 }
 
-const FILE_UPLOAD_KEY = 'publish_book_uploaded_file'
+export const FILE_UPLOAD_KEY = 'publish_book_uploaded_file'
 
 export function setUploadFileData (data: Partial<UploadFileData>) {
   try {

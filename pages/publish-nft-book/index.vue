@@ -23,6 +23,8 @@
         <div v-if="step === 0">
           <UploadForm
             ref="uploadFormRef"
+            @file-ready="(records) => (fileRecords = records)"
+            @status-change="(status) => (uploadStatus = status)"
             @submit="handleUploadSubmit"
           />
         </div>
@@ -120,6 +122,9 @@ const showIscnInput = ref(false)
 const iscnInputValue = ref('')
 const bookName = ref('')
 
+const fileRecords = ref([])
+const uploadStatus = ref('')
+
 const hasExistingSessionData = computed(() => {
   return !!bookName.value
 })
@@ -137,7 +142,7 @@ const currentActionText = computed(() => {
 })
 
 const hasFiles = computed(() => {
-  return uploadFormRef.value?.fileRecords?.length > 0
+  return fileRecords.value?.length > 0
 })
 
 const shouldShowActionButton = computed(() => {
@@ -149,7 +154,7 @@ const shouldShowActionButton = computed(() => {
 
 const shouldDisableAction = computed(() => {
   if (step.value === 0) {
-    return uploadFormRef.value?.uploadStatus !== ''
+    return uploadStatus.value !== ''
   } else if (step.value === 1) {
     return !registerISCN.value?.isFormValid
   } else if (step.value === 2) {
@@ -192,7 +197,7 @@ const steps = [
 onMounted(() => {
   let data = null
   try {
-    const sessionData = sessionStorage.getItem('uploadFileData')
+    const sessionData = sessionStorage.getItem(FILE_UPLOAD_KEY)
     if (sessionData) {
       data = JSON.parse(sessionData)
     }

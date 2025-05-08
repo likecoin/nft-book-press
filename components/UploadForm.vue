@@ -135,15 +135,22 @@ const isDragging = ref(false)
 const epubMetadataList = ref<any[]>([])
 
 const arweaveFee = ref(new BigNumber(0))
-const uploadStatus = ref('')
+const _uploadStatus = ref('')
 const arweaveFeeMap = ref({} as any)
 const arweaveFeeTargetAddress = ref('')
 const sentArweaveTransactionInfo = ref(new Map())
 const balance = ref(new BigNumber(0))
 const isEncryptEBookData = ref(true)
 
-const emit = defineEmits(['arweaveUploaded', 'submit'])
+const emit = defineEmits(['arweaveUploaded', 'submit', 'fileReady', 'statusChange'])
 
+const uploadStatus = computed({
+  get: () => _uploadStatus.value,
+  set: (val: string) => {
+    _uploadStatus.value = val
+    emit('statusChange', val)
+  }
+})
 const computedFormClasses = computed(() => [
   'block',
   'flex',
@@ -257,6 +264,7 @@ const onFileUpload = async (event: Event) => {
       console.error(error)
     }
     uploadStatus.value = ''
+    emit('fileReady', fileRecords.value)
   }
 }
 
