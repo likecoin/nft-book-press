@@ -38,7 +38,13 @@
           />
         </div>
         <div v-else-if="step === 2">
-          <MintNFT ref="mintNFT" @submit="handleMintNFTSubmit" />
+          <MintNFT
+            ref="mintNFT"
+            :iscn-id="localIscnId"
+            @form-valid-change="
+              (isFormValid) => (isMintFormValid = isFormValid)"
+            @submit="handleMintNFTSubmit"
+          />
         </div>
         <div v-else-if="step === 3">
           <NewNFTBook
@@ -127,10 +133,12 @@ const toast = useToast()
 const showIscnInput = ref(false)
 const iscnInputValue = ref('')
 const bookName = ref('')
+const localIscnId = ref('')
 
 const fileRecords = ref([])
 const uploadStatus = ref('')
 const isISCNFormValid = ref(false)
+const isMintFormValid = ref(false)
 
 const hasExistingSessionData = computed(() => {
   return !!bookName.value
@@ -165,7 +173,7 @@ const shouldDisableAction = computed(() => {
   } else if (step.value === 1) {
     return !isISCNFormValid.value
   } else if (step.value === 2) {
-    return !mintNFT.value?.isFormValid
+    return !isMintFormValid.value
   }
   return false
 })
@@ -253,6 +261,7 @@ const nextStep = async () => {
       step.value++
     }
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Error during form submission:', error)
   }
 }
@@ -270,7 +279,7 @@ const handleIscnSubmit = async (res: { iscnId: string, txHash: string }) => {
   clearUploadFileData()
   step.value = 2
   await nextTick()
-  mintNFT.value?.onISCNIDInput(iscnId)
+  localIscnId.value = iscnId
 }
 
 const handleMintNFTSubmit = async (res: any) => {

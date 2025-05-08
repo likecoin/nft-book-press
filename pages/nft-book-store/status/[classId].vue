@@ -706,7 +706,7 @@
       </QRCodeGenerator>
     </UModal>
     <UModal v-model="showRestockModal">
-      <LiteMintNFT ref="mintNFT" @submit="handleMintNFTSubmit" />
+      <LiteMintNFT :iscn-id="iscnId" @submit="handleMintNFTSubmit" />
     </UModal>
 
     <NuxtPage :transition="false" />
@@ -774,7 +774,7 @@ const isUsingDefaultAccount = ref(true)
 // Restock
 const unassignedStock = ref(0)
 const showRestockModal = ref(false)
-const mintNFT = ref<any>(null)
+const iscnId = ref('')
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
@@ -1420,8 +1420,8 @@ function shortenAllLinks () {
 
 async function handleOpenRestockModal () {
   showRestockModal.value = true
-  const iscnId = await nftStore.getClassMetadataById(classId.value as string)?.data?.parent?.iscn_id_prefix
-  mintNFT.value?.onISCNIDInput(iscnId)
+  iscnId.value = await nftStore.getClassMetadataById(classId.value as string)
+    ?.data?.parent?.iscn_id_prefix
 }
 
 async function handleMintNFTSubmit () {

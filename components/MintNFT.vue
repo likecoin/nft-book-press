@@ -21,6 +21,10 @@
       ref="liteMintNFTRef"
       :iscn-data="iscnData"
       :should-show-submit="false"
+      @form-valid-change="
+        (isFormValid) => {
+          emit('formValidChange', isFormValid)
+        }"
       @submit="handleFinishMintNFT"
     />
     <EditISCNMetadataModal
@@ -39,9 +43,8 @@ const route = useRoute()
 
 const step = ref(1)
 const error = ref('')
-const isLoading = ref(false)
+const _isLoading = ref(false)
 
-const iscnIdInput = ref('')
 const iscnOwner = ref('')
 const iscnData = ref<any>(null)
 const classId = ref('')
@@ -49,11 +52,6 @@ const liteMintNFTRef = ref<any>(null)
 
 const iscnId = computed(() => iscnData.value?.['@id'])
 
-const isFormValid = computed(() => {
-  return liteMintNFTRef.value?.isFormValid
-})
-
-const emit = defineEmits(['submit'])
 const showEditISCNModal = ref(false)
 
 const isLoading = computed({
@@ -92,8 +90,8 @@ async function fetchISCNById (iscnId?: string) {
   }
   try {
     isLoading.value = true
-    if (iscnIdInput.value.startsWith('iscn://')) {
-      const data = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(iscnIdInput.value)}`)
+    if (iscnId.startsWith('iscn://')) {
+      const data = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(iscnId)}`)
       const { records, owner } = data as any
       iscnData.value = records[0].data
       iscnOwner.value = owner
@@ -101,6 +99,7 @@ async function fetchISCNById (iscnId?: string) {
       step.value = 2
     }
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err)
     error.value = (err as Error).toString()
   } finally {
@@ -112,8 +111,7 @@ function startNFTMintFlow () {
   liteMintNFTRef.value?.startNFTMintFlow()
 }
 
-function onSaveISCN () {
-  const iscnId = editISCNRef.value?.iscnId
+function onSaveISCN (iscnId: string) {
   if (iscnId) {
     router.replace({ query: { ...route.query, iscn_id: iscnId } })
     fetchISCNById(iscnId)
