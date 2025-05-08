@@ -970,8 +970,7 @@ async function submitEditedClass () {
       autoDeliverNFTsTxHash,
       price: editedPrice
     })
-
-    router.push({ name: 'nft-book-store' })
+    emit('submit')
   } catch (err) {
     const errorData = (err as any).data || err
     // eslint-disable-next-line no-console
