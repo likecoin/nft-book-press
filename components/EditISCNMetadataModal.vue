@@ -59,6 +59,7 @@ import { MAX_DESCRIPTION_LENGTH } from '~/constant/index'
 import { useISCN } from '~/composables/useISCN'
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
 import { config } from '~/utils/wagmi/config'
+import { DEFAULT_MAX_SUPPLY } from '~/constant'
 
 const nftStore = useNftStore()
 const toast = useToast()
@@ -251,7 +252,7 @@ async function handleSave () {
         name: metadata.name,
         symbol: 'BOOK',
         metadata: JSON.stringify(metadata),
-        max_supply: 1000
+        max_supply: DEFAULT_MAX_SUPPLY
       }]
     })
     const receipt = await waitForTransactionReceipt(config, { hash: txHash })
