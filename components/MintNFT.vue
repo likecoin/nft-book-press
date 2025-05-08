@@ -24,7 +24,6 @@
       @submit="handleFinishMintNFT"
     />
     <EditISCNMetadataModal
-      ref="editISCNRef"
       v-model="showEditISCNModal"
       :class-id="classId"
       @save="onSaveISCN"
@@ -56,10 +55,15 @@ const isFormValid = computed(() => {
 
 const emit = defineEmits(['submit'])
 const showEditISCNModal = ref(false)
-const editISCNRef = ref<any>(null)
 
-watch(isLoading, (newIsLoading) => {
-  if (newIsLoading) { error.value = '' }
+const isLoading = computed({
+  get: () => _isLoading.value,
+  set: (val: string) => {
+    _isLoading.value = val
+    if (val) {
+      error.value = ''
+    }
+  }
 })
 
 useSeoMeta({

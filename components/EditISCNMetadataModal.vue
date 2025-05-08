@@ -250,7 +250,7 @@ async function handleSave () {
       title: 'ISCN updated successfully',
       color: 'blue'
     })
-    emit('save')
+    emit('save', iscnId.value)
     handleClickBack()
   } catch (error) {
     toast.add({
@@ -262,10 +262,5 @@ async function handleSave () {
     isSaving.value = false
   }
 }
-
-defineExpose({
-  recordVersion,
-  iscnId
-})
 
 </script>
