@@ -73,11 +73,6 @@ const props = defineProps<{
 
 const showOpenModal = defineModel<boolean>('modelValue')
 
-// eslint-disable-next-line func-call-spacing
-const emit = defineEmits<{
-  (e: 'save', iscnId: string): void
-}>()
-
 const classData = ref({} as any)
 const isSaving = ref(false)
 const isISCNLoading = ref(false)
@@ -266,7 +261,7 @@ async function handleSave () {
       title: 'ISCN updated successfully',
       color: 'blue'
     })
-    emit('save', iscnId.value)
+    await nftStore.fetchClassMetadataById(props.classId)
     handleClickBack()
   } catch (error) {
     toast.add({
