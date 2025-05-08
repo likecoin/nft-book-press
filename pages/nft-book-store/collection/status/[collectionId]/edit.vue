@@ -67,7 +67,7 @@
             <UInput v-model="price" type="number" step="0.01" :min="MINIMAL_PRICE" @input="onPriceInput" />
           </UFormGroup>
           <UFormGroup :label="`Total number of NFT for sale of this collection / 此定價上架的數量`">
-            <UInput v-model="stock" type="number" step="1" :min="minStock" />
+            <UInput v-model="stock" type="number" step="1" :min="minStock" :max="DEFAULT_MAX_SUPPLY" />
           </UFormGroup>
 
           <URadioGroup
@@ -238,7 +238,7 @@ import { MdEditor, config, type ToolbarNames } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
-import { DEFAULT_PRICE, MINIMAL_PRICE } from '~/constant'
+import { DEFAULT_MAX_SUPPLY, DEFAULT_PRICE, MINIMAL_PRICE } from '~/constant'
 import { useCollectionStore } from '~/stores/collection'
 import { useNftStore } from '~/stores/nft'
 import { deliverMethodOptions, parseImageURLFromMetadata } from '~/utils'

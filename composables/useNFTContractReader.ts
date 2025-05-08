@@ -98,6 +98,15 @@ export const useNFTContractReader = () => {
       args: [classId]
     })
   }
+
+  const getNFTClassConfig = async (classId: string) => {
+    return await readContract(config, {
+      abi: LIKE_NFT_CLASS_ABI,
+      address: classId as `0x${string}`,
+      functionName: 'getBookConfig'
+    })
+  }
+
   return {
     getClassMetadata,
     getClassOwner,
@@ -106,6 +115,7 @@ export const useNFTContractReader = () => {
     getBalanceOf,
     getTokenIdByOwnerIndex,
     getClassCurrentTokenId,
-    checkNFTClassIsBookNFT
+    checkNFTClassIsBookNFT,
+    getNFTClassConfig
   }
 }

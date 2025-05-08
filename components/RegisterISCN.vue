@@ -33,6 +33,7 @@ import { useISCN } from '~/composables/useISCN'
 import { LIKE_NFT_ABI, LIKE_NFT_CONTRACT_ADDRESS } from '~/contracts/likeNFT'
 import { config } from '~/utils/wagmi/config'
 import { useToastComposable } from '~/composables/useToast'
+import { DEFAULT_MAX_SUPPLY } from '~/constant'
 
 const walletStore = useWalletStore()
 const { getFileType } = useFileUpload()
@@ -196,7 +197,7 @@ const submitToISCN = async (): Promise<void> => {
           name: metadata.name,
           symbol: 'BOOK',
           metadata: JSON.stringify(metadata),
-          max_supply: 1000
+          max_supply: DEFAULT_MAX_SUPPLY
         }
       }]
     })
