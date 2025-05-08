@@ -439,7 +439,6 @@ const { token } = storeToRefs(bookStoreApiStore)
 const nftStore = useNftStore()
 
 const emit = defineEmits(['submit'])
-const router = useRouter()
 const route = useRoute()
 const editionIndex = computed(() => {
   return props.editionIndex
