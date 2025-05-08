@@ -21,7 +21,6 @@
       </template>
 
       <NFTMintForm
-        ref="formRef"
         v-model="formState"
         :max-supply="classMaxSupply"
         :show-max-supply="false"
@@ -97,12 +96,22 @@ const formState = reactive({
   maxSupply: undefined
 })
 
-const formRef = ref()
 const { LCD_URL } = useRuntimeConfig().public
+const emit = defineEmits(['submit', 'formValidChange'])
 
 const isFormValid = computed(() => {
-  return formRef.value?.validate(formState).length === 0
+  const requiredFields = {
+    prefix: !!formState.prefix,
+    mintCount: !!formState.mintCount,
+    imageUrl: !!formState.imageUrl
+  }
+
+  return Object.values(requiredFields).every(Boolean)
 })
+
+watch(isFormValid, (val) => {
+  emit('formValidChange', val)
+}, { immediate: true })
 
 const isCreateClass = computed(() => {
   return !classId.value

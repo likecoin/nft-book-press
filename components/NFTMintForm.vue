@@ -1,10 +1,18 @@
 <template>
   <UForm :validate="validate" :state="state" class="flex flex-col gap-[12px]">
-    <UFormGroup label="NFT ID Prefix / 前綴（書本編號）" name="prefix" required>
+    <UFormGroup
+      label="NFT ID Prefix / 前綴（書本編號）"
+      :error="!whitespaceRegex.test(state.prefix) && 'NFT ID cannot contain spaces'"
+      required
+    >
       <UInput v-model="state.prefix" placeholder="English only ex.MoneyVerse" />
     </UFormGroup>
 
-    <UFormGroup label="Number of NFT to mint / 鑄造數量（此批）" required>
+    <UFormGroup
+      label="Number of NFT to mint / 鑄造數量（此批）"
+      :error="(!state.mintCount || state.mintCount <= 0)&&'Mint count must be greater than 0'"
+      required
+    >
       <UInput
         v-model="state.mintCount"
         placeholder="0-100"
@@ -14,7 +22,12 @@
       />
     </UFormGroup>
 
-    <UFormGroup label="Image URL / 封面網址" required>
+    <UFormGroup
+      label="Image URL / 封面網址"
+      name="imageUrl"
+      :error="!state.imageUrl && 'Image URL is required'"
+      required
+    >
       <UInput v-model="state.imageUrl" placeholder="ipfs:// ... or ar://...." />
     </UFormGroup>
 
@@ -87,28 +100,5 @@ const state = computed({
   set: value => emit('update:modelValue', value)
 })
 const shouldShowAdvanceSettings = ref(false)
-
-const validate = (state: NFTMintFormState): FormError[] => {
-  const errors: FormError[] = []
-  const whitespaceRegex = /^[a-zA-Z][a-zA-Z0-9/:-]{2,100}$/
-
-  if (!whitespaceRegex.test(state.prefix)) {
-    errors.push({ path: 'prefix', message: 'NFT ID cannot contain spaces' })
-  }
-
-  if (!state.mintCount || state.mintCount <= 0) {
-    errors.push({ path: 'mintCount', message: 'Mint count must be greater than 0' })
-  }
-
-  if (!state.imageUrl) {
-    errors.push({ path: 'imageUrl', message: 'Image URL is required' })
-  }
-
-  return errors
-}
-
-defineExpose({
-  validate,
-  state
-})
+const whitespaceRegex = /^[a-zA-Z][a-zA-Z0-9/:-]{2,100}$/
 </script>
