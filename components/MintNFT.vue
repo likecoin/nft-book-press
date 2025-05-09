@@ -19,12 +19,9 @@
     />
     <LiteMintNFT
       ref="liteMintNFTRef"
+      v-model:valid="isFormValid"
       :iscn-data="iscnData"
       :should-show-submit="false"
-      @form-valid-change="
-        (isFormValid) => {
-          emit('formValidChange', isFormValid)
-        }"
       @submit="handleFinishMintNFT"
     />
     <EditISCNMetadataModal
@@ -53,6 +50,7 @@ const liteMintNFTRef = ref<any>(null)
 const iscnId = computed(() => iscnData.value?.['@id'])
 
 const showEditISCNModal = ref(false)
+const isFormValid = defineModel<boolean>('valid')
 
 watch(() => isLoading.value, (val: boolean) => {
   if (val) {

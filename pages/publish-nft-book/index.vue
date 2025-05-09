@@ -38,9 +38,9 @@
         <div v-else-if="step === 2">
           <MintNFT
             ref="mintNFT"
+            v-model:valid="isMintFormValid"
+            v-model:loading="isMintLoading"
             :iscn-id="localIscnId"
-            @form-valid-change="
-              (isFormValid) => (isMintFormValid = isFormValid)"
             @submit="handleMintNFTSubmit"
           />
         </div>
@@ -137,6 +137,7 @@ const fileRecords = ref([])
 const uploadStatus = ref('')
 const isISCNFormValid = ref(false)
 const isMintFormValid = ref(false)
+const isMintLoading = ref(false)
 
 const hasExistingSessionData = computed(() => {
   return !!bookName.value
@@ -171,7 +172,7 @@ const shouldDisableAction = computed(() => {
   } else if (step.value === 1) {
     return !isISCNFormValid.value
   } else if (step.value === 2) {
-    return !isMintFormValid.value
+    return !isMintFormValid.value || isMintLoading.value
   }
   return false
 })
@@ -281,12 +282,12 @@ const handleIscnSubmit = async (res: { iscnId: string, txHash: string }) => {
 }
 
 const handleMintNFTSubmit = async (res: any) => {
-  const { classId, nftMintCount } = res
-  if (classId) {
-    router.replace({ query: { class_id: classId, count: nftMintCount } })
+  const { classId: newClassId, nftMintCount } = res
+  if (newClassId) {
+    router.replace({ query: { class_id: newClassId, count: nftMintCount } })
     step.value = 3
     await nextTick()
-    classId.value = classId
+    classId.value = newClassId
   }
 }
 
