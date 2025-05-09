@@ -1006,7 +1006,7 @@ async function addNewEdition () {
       )
     }
     const price = p[0]
-    await bookStoreApiStore.addEditionPrice(classId.value as string, editionIndex.value as string, {
+    await bookStoreApiStore.addEditionPrice(classId.value.toString(), editionIndex.value.toString(), {
       price,
       autoDeliverNFTsTxHash
     })
