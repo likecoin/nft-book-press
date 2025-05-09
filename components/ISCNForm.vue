@@ -207,8 +207,8 @@
         </template>
         <UploadForm
           ref="uploadFormRef"
+          v-model:status="uploadStatus"
           @file-ready="(records) => (fileRecords = records)"
-          @status-change="(status) => (uploadStatus = status)"
           @submit="handleUploadSubmit"
         />
         <template #footer>
@@ -281,6 +281,8 @@ const emit = defineEmits<{(e: 'update:modelValue',
   value: ISCNFormData): void
 }>()
 
+const isFormValid = defineModel<boolean>('valid')
+
 const formData = computed({
   get: () => props.modelValue,
   set: (newValue) => {
@@ -288,7 +290,7 @@ const formData = computed({
   }
 })
 
-const isFormValid = computed(() => {
+const formError = computed(() => {
   const requiredFields = {
     title: !!formData.value.title,
     description: !!formData.value.description,
@@ -296,8 +298,13 @@ const isFormValid = computed(() => {
     contentUrl: !!formData.value.contentFingerprints.some(f => !!f.url)
   }
 
-  return Object.values(requiredFields).every(Boolean)
+  return Object.entries(requiredFields)
+    .find(([_, isValid]) => !isValid)?.[0]?.toUpperCase() || ''
 })
+
+watch(formError, (err) => {
+  isFormValid.value = !err
+}, { immediate: true })
 
 const hasFiles = computed(() => {
   return fileRecords.value?.length > 0

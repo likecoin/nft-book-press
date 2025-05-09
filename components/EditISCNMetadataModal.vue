@@ -26,7 +26,10 @@
         color="primary"
         class="w-full"
       />
-      <ISCNForm v-else ref="iscnFormRef" v-model="iscnData" />
+      <ISCNForm
+        v-else
+        v-model="iscnData"
+      />
       <template #footer>
         <div class="w-full flex justify-center items-center gap-2">
           <UButton color="gray" variant="soft" @click="handleClickBack">
@@ -69,21 +72,17 @@ const props = defineProps<{
   classId?: string
 }>()
 
-const emit = defineEmits<{(e: 'update:modelValue',
-  value: boolean): void
-  (e: 'save'): void
+// eslint-disable-next-line func-call-spacing
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: boolean): void
+  (e: 'save', iscnId: string): void
 }>()
 
 const iscnId = ref('')
 const classData = ref({} as any)
-const iscnFormRef = ref()
 const isSaving = ref(false)
 const isISCNLoading = ref(false)
 const recordVersion = ref(0)
-
-const isFormValid = computed(() => {
-  return iscnFormRef.value?.isFormValid || false
-})
 
 const iscnData = ref({
   type: 'Book',
@@ -113,6 +112,18 @@ const iscnData = ref({
 })
 
 const { payload } = useISCN(iscnData)
+
+const isFormValid = computed(() => {
+  const requiredFields = {
+    title: !!iscnData.value.title,
+    description: !!iscnData.value.description,
+    authorName: !!iscnData.value.author.name,
+    contentUrl: !!iscnData.value.contentFingerprints.some(f => !!f.url)
+  }
+
+  return Object.entries(requiredFields)
+    .find(([_, isValid]) => !isValid)?.[0]?.toUpperCase() || ''
+})
 
 watchEffect(async () => {
   if (route.query.iscn_id) {

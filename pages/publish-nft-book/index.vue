@@ -31,9 +31,7 @@
         <div v-else-if="step === 1">
           <RegisterISCN
             ref="registerISCN"
-            @form-valid-change="
-              (isFormValid) => (isISCNFormValid = isFormValid)
-            "
+            v-model:valid="isISCNFormValid"
             @submit="handleIscnSubmit"
           />
         </div>
