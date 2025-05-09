@@ -43,7 +43,13 @@
           </UCard>
         </UFormGroup>
         <UFormGroup :label="`Total number of packages available for sale`">
-          <UInput v-model="price.stock" type="number" step="0.01" :min="MINIMAL_PRICE" />
+          <UInput
+            v-model="price.stock"
+            type="number"
+            step="1"
+            :min="0"
+            :max="Number(route.query.count) || undefined"
+          />
         </UFormGroup>
       </UCard>
 
