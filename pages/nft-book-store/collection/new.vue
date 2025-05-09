@@ -143,32 +143,6 @@
             Product Information
           </h3>
         </template>
-        <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
-          <template #label>
-            Product Name / 產品名稱（英文）
-            <ToolTips :image-style="{ width: '250px' }">
-              <template #image>
-                <img
-                  src="~/assets/images/hint/editionInfo-en.png"
-                  class="object-cover"
-                  alt=""
-                >
-              </template>
-              <UIcon name="i-heroicons-question-mark-circle" />
-            </ToolTips>
-          </template>
-          <UInput v-model="nameEn" placeholder="Product name in English" />
-          <span class="block text-[14px] text-[#374151] mt-[8px]">Description (Optional) / 描述（選填）</span>
-          <md-editor
-            v-model="descriptionEn"
-            language="en-US"
-            :editor-id="`en`"
-            :placeholder="mdEditorPlaceholder.en"
-            :toolbars="toolbarOptions"
-            :sanitize="sanitizeHtml"
-            :style="{ height: '200px', width: '100%', marginTop: '0px' }"
-          />
-        </UFormGroup>
         <UFormGroup :ui="{ container: 'space-y-2 my-[20px]' }">
           <template #label>
             產品名稱（中文）
@@ -684,7 +658,7 @@ async function submitNewCollection () {
     const s = shippingRates.value.length
       ? shippingRates.value
         .map(rate => ({
-          name: { en: rate.nameEn, zh: rate.nameZh },
+          name: { en: rate.name.en, zh: rate.name.zh },
           priceInDecimal: Math.round(Number(rate.price) * 100),
           price: Number(rate.price)
         }))
