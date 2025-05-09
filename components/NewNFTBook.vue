@@ -136,7 +136,7 @@
                   <URadio
                     v-model="p.deliveryMethod"
                     value="auto"
-                    :disabled="isEditMode && oldIsAutoDeliver"
+                    :disabled="isEditMode && p.oldIsAutoDeliver"
                     name="deliveryMethod"
                     label="Auto delivery / 自動發書"
                   />
@@ -164,7 +164,7 @@
                   <URadio
                     v-model="p.deliveryMethod"
                     value="manual"
-                    :disabled="p.isPhysicalOnly"
+                    :disabled="isEditMode && p.oldIsAutoDeliver"
                     name="deliveryMethod"
                     label="Manual delivery / 手動發書"
                   />
@@ -494,8 +494,6 @@ const stripeConnectWallet = ref('')
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
 const iscnData = ref<any>(null)
-const oldIsAutoDeliver = ref(false)
-const oldStock = ref(0)
 
 const toolbarOptions = ref<ToolbarNames[]>([
   'bold',
@@ -617,11 +615,11 @@ onMounted(async () => {
             hasShipping: currentEdition.hasShipping,
             isPhysicalOnly: currentEdition.isPhysicalOnly,
             isAllowCustomPrice: currentEdition.isAllowCustomPrice,
-            isUnlisted: currentEdition.isUnlisted
+            isUnlisted: currentEdition.isUnlisted,
+            oldIsAutoDeliver: currentEdition.isAutoDeliver,
+            oldStock: currentEdition.stock
           }]
           isAllowCustomPrice.value = currentEdition.isAllowCustomPrice
-          oldIsAutoDeliver.value = currentEdition.isAutoDeliver
-          oldStock.value = currentEdition.stock
         } else {
           throw new Error('No prices found')
         }
@@ -938,8 +936,8 @@ async function submitEditedClass () {
 
     let newAutoDeliverNFTsCount = 0
     if (editedPrice.isAutoDeliver) {
-      newAutoDeliverNFTsCount = oldIsAutoDeliver.value
-        ? editedPrice.stock - oldStock.value
+      newAutoDeliverNFTsCount = prices.value[0].oldIsAutoDeliver
+        ? editedPrice.stock - prices.value[0].oldStock
         : editedPrice.stock
     }
 
