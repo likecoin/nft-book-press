@@ -558,7 +558,7 @@ const iscnDataLanguage = computed(() => {
   return iscnData.value?.contentMetadata?.inLanguage
 })
 
-watch(() => isLoading.value, (val: boolean) => {
+watch(isLoading, (val: boolean) => {
   if (val) {
     error.value = ''
   }
@@ -655,7 +655,7 @@ watch(isAllowCustomPrice, (newValue: boolean) => {
   })
 })
 
-watch(moderatorWallets, (newModeratorWallets: any[]) => {
+watch(moderatorWallets, (newModeratorWallets: string[]) => {
   newModeratorWallets?.forEach(async (m) => {
     if (!moderatorWalletsGrants.value[m]) {
       try {

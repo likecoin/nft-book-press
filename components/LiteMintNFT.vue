@@ -121,7 +121,7 @@ watch(formError, (err) => {
 const isCreateClass = computed(() => {
   return !classId.value
 })
-watch(() => isLoading.value, (val: boolean) => {
+watch(isLoading, (val: boolean) => {
   if (val) {
     error.value = ''
   }

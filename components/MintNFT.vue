@@ -52,7 +52,7 @@ const iscnId = computed(() => iscnData.value?.['@id'])
 const showEditISCNModal = ref(false)
 const isFormValid = defineModel<boolean>('valid')
 
-watch(() => isLoading.value, (val: boolean) => {
+watch(isLoading, (val) => {
   if (val) {
     error.value = ''
   }
