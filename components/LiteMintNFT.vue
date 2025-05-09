@@ -71,7 +71,7 @@ const { wallet, signer } = storeToRefs(store)
 const { initIfNecessary } = store
 
 const error = ref('')
-const _isLoading = ref(false)
+const isLoading = ref(false)
 
 const localISCNData = ref<any>(null)
 const localISCNId = ref('')
@@ -118,16 +118,11 @@ watch(isFormValid, (val) => {
 const isCreateClass = computed(() => {
   return !classId.value
 })
-
-const isLoading = computed({
-  get: () => _isLoading.value,
-  set: (val: string) => {
-    _isLoading.value = val
-    if (val) {
-      error.value = ''
-    }
+watch(() => isLoading.value, (val: boolean) => {
+  if (val) {
+    error.value = ''
   }
-})
+}, { immediate: true })
 
 const props = defineProps({
   iscnData: {

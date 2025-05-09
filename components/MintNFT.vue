@@ -43,7 +43,7 @@ const route = useRoute()
 
 const step = ref(1)
 const error = ref('')
-const _isLoading = ref(false)
+const isLoading = defineModel<boolean>('loading')
 
 const iscnOwner = ref('')
 const iscnData = ref<any>(null)
@@ -54,15 +54,11 @@ const iscnId = computed(() => iscnData.value?.['@id'])
 
 const showEditISCNModal = ref(false)
 
-const isLoading = computed({
-  get: () => _isLoading.value,
-  set: (val: string) => {
-    _isLoading.value = val
-    if (val) {
-      error.value = ''
-    }
+watch(() => isLoading.value, (val: boolean) => {
+  if (val) {
+    error.value = ''
   }
-})
+}, { immediate: true })
 
 useSeoMeta({
   title: 'Mint Liker Land NFT Book',

@@ -445,7 +445,7 @@ const editionIndex = computed(() => {
 })
 
 const error = ref('')
-const _isLoading = ref(false)
+const isLoading = ref(false)
 
 const mdEditorPlaceholder = ref({
   en: 'e.g.: This edition includes EPUB and PDF ebook files.',
@@ -558,15 +558,11 @@ const iscnDataLanguage = computed(() => {
   return iscnData.value?.contentMetadata?.inLanguage
 })
 
-const isLoading = computed({
-  get: () => _isLoading.value,
-  set: (val: string) => {
-    _isLoading.value = val
-    if (val) {
-      error.value = ''
-    }
+watch(() => isLoading.value, (val: boolean) => {
+  if (val) {
+    error.value = ''
   }
-})
+}, { immediate: true })
 
 config({
   markdownItConfig (mdit: any) {
