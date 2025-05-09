@@ -42,7 +42,7 @@
 const router = useRouter()
 const route = useRoute()
 
-const classId = ref(route.params.classId)
+const classId = ref(route.params.classId?.toString() || '')
 const editionIndex = ref(route.params.editionIndex as string)
 
 const classData = ref<any>({})

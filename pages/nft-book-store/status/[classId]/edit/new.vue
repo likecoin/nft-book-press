@@ -33,8 +33,10 @@ const router = useRouter()
 const route = useRoute()
 const toast = useToast()
 
-const classId = ref(route.params.classId)
-const newEditionIndex = ref(route.query.price_index)
+const classId = ref(route.params.classId?.toString() || '')
+const newEditionIndex = computed(() => {
+  return route.query.price_index?.toString() || ''
+})
 
 const isLoading = ref(false)
 

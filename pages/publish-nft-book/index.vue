@@ -186,7 +186,7 @@ const iscnId = computed(() => {
 })
 
 const classId = computed(() => {
-  return route.query.class_id
+  return route.query.class_id?.toString() || ''
 })
 
 const steps = [
@@ -282,12 +282,11 @@ const handleIscnSubmit = async (res: { iscnId: string, txHash: string }) => {
 }
 
 const handleMintNFTSubmit = async (res: any) => {
-  const { classId: newClassId, nftMintCount } = res
-  if (newClassId) {
-    router.replace({ query: { class_id: newClassId, count: nftMintCount } })
+  const { classId, nftMintCount } = res
+  if (classId) {
+    router.replace({ query: { class_id: classId, count: nftMintCount } })
     step.value = 3
     await nextTick()
-    classId.value = newClassId
   }
 }
 

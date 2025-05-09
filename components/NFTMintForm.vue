@@ -1,5 +1,5 @@
 <template>
-  <UForm :validate="validate" :state="state" class="flex flex-col gap-[12px]">
+  <UForm :state="state" class="flex flex-col gap-[12px]">
     <UFormGroup
       label="NFT ID Prefix / 前綴（書本編號）"
       :error="!whitespaceRegex.test(state.prefix) && 'NFT ID cannot contain spaces'"
