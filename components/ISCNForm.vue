@@ -207,7 +207,7 @@
         </template>
         <UploadForm
           ref="uploadFormRef"
-          @file-upload-status="uploadStatus"
+          @file-upload-status="(status) => (uploadStatus = status)"
           @file-ready="(records) => (fileRecords = records)"
           @submit="handleUploadSubmit"
         />

@@ -21,7 +21,7 @@
       ref="liteMintNFTRef"
       :iscn-data="iscnData"
       :should-show-submit="false"
-      @form-valid-change="isFormValid"
+      @form-valid-change="(valid) => (isFormValid = valid)"
       @submit="handleFinishMintNFT"
     />
     <EditISCNMetadataModal
@@ -41,7 +41,6 @@ const route = useRoute()
 const step = ref(1)
 const error = ref('')
 const isLoading = ref(false)
-const isLoading = defineModel<boolean>('loading')
 
 const iscnOwner = ref('')
 const iscnData = ref<any>(null)

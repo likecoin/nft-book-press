@@ -23,7 +23,7 @@
         <div v-if="step === 0">
           <UploadForm
             ref="uploadFormRef"
-            @file-upload-status="uploadStatus"
+            @file-upload-status="(status) => (uploadStatus = status)"
             @file-ready="(records) => (fileRecords = records)"
             @submit="handleUploadSubmit"
           />
@@ -31,7 +31,7 @@
         <div v-else-if="step === 1">
           <RegisterISCN
             ref="registerISCN"
-            @form-valid-change="isISCNFormValid"
+            @form-valid-change="(valid) => (isISCNFormValid = valid)"
             @submit="handleIscnSubmit"
           />
         </div>
@@ -39,8 +39,8 @@
           <MintNFT
             ref="mintNFT"
             :iscn-id="localIscnId"
-            @loading-change="isMintLoading"
-            @form-valid-change="isMintFormValid"
+            @loading-change="(isLoading) => (isMintLoading = isLoading)"
+            @form-valid-change="(valid) => (isISCNFormValid = valid)"
             @submit="handleMintNFTSubmit"
           />
         </div>
