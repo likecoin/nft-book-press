@@ -1,0 +1,2 @@
+import{_ as t,o,c as s,bd as a}from"./mFLatp1V.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},n=new Error().stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="f854d078-497a-4a5c-a851-f3a24569e21f",e._sentryDebugIdIdentifier="sentry-dbid-f854d078-497a-4a5c-a851-f3a24569e21f")}catch{}})();const f={},r={class:"flex flex-col"};function d(e,n){return o(),s("main",r,[a(e.$slots,"default")])}const l=t(f,[["render",d]]);export{l as _};
+//# sourceMappingURL=BlnQ-5vi.js.map
