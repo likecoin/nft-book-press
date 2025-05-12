@@ -62,7 +62,6 @@ watch(isLoading, (val: boolean) => {
 }, { immediate: true })
 
 watch(isFormValid, (val: boolean) => {
-  console.log('isFormValid', val)
   emit('formValidChange', val)
 }, { immediate: true })
 

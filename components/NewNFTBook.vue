@@ -573,7 +573,7 @@ config({
 const props = defineProps({
   isNewClassPage: { type: Boolean, default: false },
   classId: { type: String, default: '' },
-  editionIndex: { type: [String, Number], default: 0 },
+  editionIndex: { type: [String, Number], default: undefined },
   isEditMode: { type: Boolean, default: false }
 })
 
@@ -1002,7 +1002,7 @@ async function addNewEdition () {
       )
     }
     const price = p[0]
-    await bookStoreApiStore.addEditionPrice(classId.value.toString(), editionIndex.value.toString(), {
+    await bookStoreApiStore.addEditionPrice(classId.value.toString(), (editionIndex.value || 0).toString(), {
       price,
       autoDeliverNFTsTxHash
     })

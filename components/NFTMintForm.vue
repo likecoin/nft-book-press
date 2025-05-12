@@ -10,7 +10,7 @@
 
     <UFormGroup
       label="Number of NFT to mint / 鑄造數量（此批）"
-      :error="(!state.mintCount || state.mintCount <= 0)&&'Mint count must be greater than 0'"
+      :error="(!state.mintCount || state.mintCount <= 0) && 'Mint count must be greater than 0'"
       required
     >
       <UInput
