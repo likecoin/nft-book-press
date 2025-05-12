@@ -52,6 +52,8 @@ const iscnId = computed(() => iscnData.value?.['@id'])
 const showEditISCNModal = ref(false)
 const isFormValid = ref(false)
 
+const emit = defineEmits(['submit', 'formValidChange', 'loadingChange'])
+
 watch(isLoading, (val: boolean) => {
   emit('loadingChange', val)
   if (val) {
@@ -60,6 +62,7 @@ watch(isLoading, (val: boolean) => {
 }, { immediate: true })
 
 watch(isFormValid, (val: boolean) => {
+  console.log('isFormValid', val)
   emit('formValidChange', val)
 }, { immediate: true })
 
@@ -67,8 +70,6 @@ useSeoMeta({
   title: 'Mint Liker Land NFT Book',
   ogTitle: 'Mint Liker Land NFT Book'
 })
-
-const emit = defineEmits(['submit', 'formValidChange', 'loadingChange'])
 
 const props = defineProps({
   iscnId: {

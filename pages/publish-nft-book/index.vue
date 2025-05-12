@@ -40,7 +40,7 @@
             ref="mintNFT"
             :iscn-id="localIscnId"
             @loading-change="(isLoading) => (isMintLoading = isLoading)"
-            @form-valid-change="(valid) => (isISCNFormValid = valid)"
+            @form-valid-change="(valid) => (isMintFormValid = valid)"
             @submit="handleMintNFTSubmit"
           />
         </div>
