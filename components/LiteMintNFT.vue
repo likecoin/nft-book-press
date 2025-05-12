@@ -99,7 +99,7 @@ const formState = reactive({
 })
 
 const { LCD_URL } = useRuntimeConfig().public
-const emit = defineEmits(['submit'])
+const emit = defineEmits(['submit', 'formValidChange'])
 
 const formError = computed(() => {
   const requiredFields = {
@@ -112,10 +112,10 @@ const formError = computed(() => {
     .find(([_, isValid]) => !isValid)?.[0]?.toUpperCase() || ''
 })
 
-const isFormValid = defineModel<boolean>('valid')
+const isFormValid = computed(() => !formError.value)
 
-watch(formError, (err) => {
-  isFormValid.value = !err
+watch(isFormValid, (val: boolean) => {
+  emit('formValidChange', val)
 }, { immediate: true })
 
 const isCreateClass = computed(() => {

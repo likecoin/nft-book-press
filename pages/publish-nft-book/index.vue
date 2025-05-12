@@ -31,16 +31,16 @@
         <div v-else-if="step === 1">
           <RegisterISCN
             ref="registerISCN"
-            v-model:valid="isISCNFormValid"
+            @form-valid-change="isISCNFormValid"
             @submit="handleIscnSubmit"
           />
         </div>
         <div v-else-if="step === 2">
           <MintNFT
             ref="mintNFT"
-            v-model:valid="isMintFormValid"
-            v-model:loading="isMintLoading"
             :iscn-id="localIscnId"
+            @loading-change="isMintLoading"
+            @form-valid-change="isMintFormValid"
             @submit="handleMintNFTSubmit"
           />
         </div>

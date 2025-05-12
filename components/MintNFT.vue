@@ -19,9 +19,9 @@
     />
     <LiteMintNFT
       ref="liteMintNFTRef"
-      v-model:valid="isFormValid"
       :iscn-data="iscnData"
       :should-show-submit="false"
+      @form-valid-change="isFormValid"
       @submit="handleFinishMintNFT"
     />
     <EditISCNMetadataModal
@@ -40,6 +40,7 @@ const route = useRoute()
 
 const step = ref(1)
 const error = ref('')
+const isLoading = ref(false)
 const isLoading = defineModel<boolean>('loading')
 
 const iscnOwner = ref('')
@@ -50,12 +51,17 @@ const liteMintNFTRef = ref<any>(null)
 const iscnId = computed(() => iscnData.value?.['@id'])
 
 const showEditISCNModal = ref(false)
-const isFormValid = defineModel<boolean>('valid')
+const isFormValid = ref(false)
 
-watch(isLoading, (val) => {
+watch(isLoading, (val: boolean) => {
+  emit('loadingChange', val)
   if (val) {
     error.value = ''
   }
+}, { immediate: true })
+
+watch(isFormValid, (val: boolean) => {
+  emit('formValidChange', val)
 }, { immediate: true })
 
 useSeoMeta({
@@ -63,7 +69,7 @@ useSeoMeta({
   ogTitle: 'Mint Liker Land NFT Book'
 })
 
-const emit = defineEmits(['submit', 'formValidChange'])
+const emit = defineEmits(['submit', 'formValidChange', 'loadingChange'])
 
 const props = defineProps({
   iscnId: {

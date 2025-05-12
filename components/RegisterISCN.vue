@@ -70,7 +70,7 @@ const iscnFee = ref(new BigNumber(0))
 const iscnGasFee = ref('0')
 const uploadStatus = ref('')
 const error = ref('')
-const emit = defineEmits(['handleSubmit', 'submit'])
+const emit = defineEmits(['handleSubmit', 'submit', 'formValidChange'])
 
 const totalFee = computed(() => {
   return iscnFee.value || new BigNumber(0)
@@ -90,10 +90,12 @@ const formError = computed(() => {
     .find(([_, isValid]) => !isValid)?.[0]?.toUpperCase() || ''
 })
 
-const isFormValid = defineModel<boolean>('valid')
+const isFormValid = computed(() => {
+  return !formError.value
+})
 
-watch(formError, (err) => {
-  isFormValid.value = !err
+watch(isFormValid, (val: boolean) => {
+  emit('formValidChange', val)
 }, { immediate: true })
 
 onMounted(() => {
