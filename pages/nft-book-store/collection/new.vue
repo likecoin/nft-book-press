@@ -34,7 +34,7 @@
               <UInput
                 v-model="classIdInput"
                 class="font-mono w-full"
-                placeholder="likenft...."
+                placeholder="0x...."
               />
               <UButton @click="addMoreClassId">
                 Add
@@ -312,7 +312,7 @@
                   <UInput
                     v-model="moderatorWalletInput"
                     class="font-mono"
-                    placeholder="like1..."
+                    placeholder="0x..."
                   />
                   <UButton
                     label="Add"
@@ -546,6 +546,15 @@ function onPriceChange (event: InputEvent) {
 }
 
 function addMoreClassId () {
+  if (!classIdInput.value) { return }
+  if (classIds.value.includes(classIdInput.value as string)) {
+    error.value = 'Class ID already exists'
+    return
+  }
+  if (!classIdInput.value.startsWith('0x')) {
+    error.value = 'Invalid Class ID'
+    return
+  }
   classIds.value.push(classIdInput.value as string)
   lazyFetchClassMetadataById(classIdInput.value)
   classIdInput.value = ''
