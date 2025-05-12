@@ -10,7 +10,13 @@ export const config = createConfig({
       chains: [optimism, optimismSepolia],
       options: {
         apiKey: 'pk_live_5E14E3184484268D', // Liker Land Sepolia
-        accentColor: '#28646e'
+        accentColor: '#28646e',
+        magicSdkConfiguration: {
+          network: {
+            rpcUrl: 'https://sepolia.optimism.io',
+            chainId: 11155420
+          }
+        }
       }
     }),
     injected()
