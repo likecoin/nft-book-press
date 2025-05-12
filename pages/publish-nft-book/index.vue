@@ -23,7 +23,7 @@
         <div v-if="step === 0">
           <UploadForm
             ref="uploadFormRef"
-            :status="uploadStatus"
+            @file-upload-status="uploadStatus"
             @file-ready="(records) => (fileRecords = records)"
             @submit="handleUploadSubmit"
           />

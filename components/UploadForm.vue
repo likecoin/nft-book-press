@@ -141,8 +141,8 @@ const sentArweaveTransactionInfo = ref(new Map())
 const balance = ref(new BigNumber(0))
 const isEncryptEBookData = ref(true)
 
-const emit = defineEmits(['arweaveUploaded', 'submit', 'fileReady'])
-const uploadStatus = defineModel<string>('status')
+const emit = defineEmits(['arweaveUploaded', 'submit', 'fileReady', 'fileUploadStatus'])
+const uploadStatus = ref('')
 
 const computedFormClasses = computed(() => [
   'block',
@@ -171,6 +171,10 @@ watch(isEncryptEBookData, async () => {
   await estimateArweaveFee()
   uploadStatus.value = ''
 })
+
+watch(uploadStatus, (val: string) => {
+  emit('fileUploadStatus', val)
+}, { immediate: true })
 
 const formatLanguage = (language: string) => {
   let formattedLanguage = ''
