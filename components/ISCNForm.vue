@@ -273,21 +273,7 @@ const uploadFormRef = ref()
 const fileRecords = ref([])
 const uploadStatus = ref('')
 
-const props = defineProps<{
-  modelValue: ISCNFormData
-}>()
-
-// eslint-disable-next-line func-call-spacing
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: ISCNFormData): void
-}>()
-
-const formData = computed({
-  get: () => props.modelValue,
-  set: (newValue) => {
-    emit('update:modelValue', newValue)
-  }
-})
+const formData = defineModel<ISCNFormData>({ required: true })
 
 const hasFiles = computed(() => {
   return fileRecords.value?.length > 0
@@ -298,38 +284,22 @@ const shouldDisableAction = computed(() => {
 })
 
 const addContentFingerprint = () => {
-  emit('update:modelValue', {
-    ...props.modelValue,
-    contentFingerprints: [...props.modelValue.contentFingerprints, { url: '' }]
-  })
+  formData.value.contentFingerprints.push({ url: '' })
 }
 
 const removeContentFingerprint = (index: number) => {
-  if (props.modelValue.contentFingerprints.length > 1) {
-    const newFingerprints = [...props.modelValue.contentFingerprints]
-    newFingerprints.splice(index, 1)
-    emit('update:modelValue', {
-      ...props.modelValue,
-      contentFingerprints: newFingerprints
-    })
+  if (formData.value.contentFingerprints.length) {
+    formData.value.contentFingerprints.splice(index, 1)
   }
 }
 
 const addDownloadableUrl = () => {
-  emit('update:modelValue', {
-    ...props.modelValue,
-    downloadableUrls: [...props.modelValue.downloadableUrls, { url: '', type: '', fileName: '' }]
-  })
+  formData.value.downloadableUrls.push({ url: '', type: '', fileName: '' })
 }
 
 const removeDownloadableUrl = (index: number) => {
-  if (props.modelValue.downloadableUrls.length > 1) {
-    const newUrls = [...props.modelValue.downloadableUrls]
-    newUrls.splice(index, 1)
-    emit('update:modelValue', {
-      ...props.modelValue,
-      downloadableUrls: newUrls
-    })
+  if (formData.value.downloadableUrls.length) {
+    formData.value.downloadableUrls.splice(index, 1)
   }
 }
 
@@ -368,11 +338,8 @@ const handleUploadSubmit = (uploadData: any) => {
     )
   ].map(url => ({ url }))
 
-  emit('update:modelValue', {
-    ...props.modelValue,
-    downloadableUrls,
-    contentFingerprints
-  })
+  formData.value.downloadableUrls = downloadableUrls
+  formData.value.contentFingerprints = contentFingerprints
 
   shouldShowUploadModal.value = false
 }
