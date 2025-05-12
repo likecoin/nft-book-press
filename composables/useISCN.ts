@@ -1,14 +1,36 @@
+import { getApiEndpoints } from '~/constant/api'
+
+const getFileMimeType = (fileType: string): string => {
+  switch (fileType) {
+    case 'epub':
+      return 'application/epub+zip'
+    case 'pdf':
+      return 'application/pdf'
+    default:
+      return 'application/octet-stream'
+  }
+}
+
 export function useISCN (iscnData: Ref<any>) {
-  const formattedSameAsList = computed(() => {
-    return iscnData.value.downloadableUrls
-      .filter((download: any) => download.fileName && download.url)
-      .map((download: any) => {
-        if (download.fileName && download.type) {
-          return `${download.url}?name=${download.fileName}.${download.type}`
+  const formattedPotentialActionList = computed(() => {
+    const apiEndpoints = getApiEndpoints()
+    const arweaveLinkEndpoint = apiEndpoints.API_GET_ARWEAVE_V2_LINK
+    if (!iscnData.value.downloadableUrls?.length) {
+      return undefined
+    }
+    return {
+      '@type': 'ReadAction',
+      target: iscnData.value.downloadableUrls.map((urlObj: any) => {
+        const isEncrypted = urlObj.url?.startsWith(arweaveLinkEndpoint) || urlObj.url?.includes('?key=')
+        return {
+          '@type': 'EntryPoint',
+          contentType: getFileMimeType(urlObj.type),
+          url: urlObj.url,
+          name: urlObj.fileName,
+          encodingType: isEncrypted ? 'aes256gcm' : undefined
         }
-        return ''
       })
-      .filter(Boolean)
+    }
   })
 
   const payload = computed(() => ({
@@ -30,12 +52,11 @@ export function useISCN (iscnData: Ref<any>) {
       : undefined,
     url: iscnData.value.bookInfoUrl,
     tagsString: iscnData.value.tags?.join(', ') || '',
-    sameAs: formattedSameAsList.value,
-    thumbnailUrl: iscnData.value.coverUrl
+    thumbnailUrl: iscnData.value.coverUrl,
+    potentialAction: formattedPotentialActionList.value
   }))
 
   return {
-    formattedSameAsList,
     payload
   }
 }

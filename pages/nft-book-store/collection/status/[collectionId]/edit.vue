@@ -234,22 +234,17 @@
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
 import { MdEditor, config, type ToolbarNames } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
 import { DEFAULT_PRICE, MINIMAL_PRICE } from '~/constant'
 import { useCollectionStore } from '~/stores/collection'
-import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { deliverMethodOptions, parseImageURLFromMetadata } from '~/utils'
 
 const collectionStore = useCollectionStore()
 const nftStore = useNftStore()
-const walletStore = useWalletStore()
-const { initIfNecessary } = walletStore
-const { wallet, signer } = storeToRefs(walletStore)
 
 const router = useRouter()
 const route = useRoute()
@@ -455,36 +450,9 @@ async function handleSubmit () {
 
     isLoading.value = true
 
-    let newAutoDeliverNFTsCount = 0
-    if (editedPrice.isAutoDeliver) {
-      newAutoDeliverNFTsCount = oldIsAutoDeliver.value
-        ? editedPrice.stock - oldStock.value
-        : editedPrice.stock
-    }
-
-    let autoDeliverNFTsTxHash
-    if (newAutoDeliverNFTsCount > 0) {
-      if (!wallet.value || !signer.value) {
-        await initIfNecessary()
-      }
-      if (!wallet.value || !signer.value) {
-        throw new Error('Unable to connect to wallet')
-      }
-      autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
-        classIds.value,
-        [],
-        newAutoDeliverNFTsCount,
-        signer.value,
-        wallet.value
-      )
-    }
-
     await collectionStore.updateNFTBookCollectionById(
       collectionId.value as string,
-      {
-        autoDeliverNFTsTxHash,
-        ...editedPrice
-      }
+      editedPrice
     )
 
     router.push({

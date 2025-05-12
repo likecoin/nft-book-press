@@ -2,8 +2,6 @@ import path from 'path'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { replaceCodePlugin } from 'vite-plugin-replace'
 
-const LikeCoinWalletConnectorCSSPath = '@likecoin/wallet-connector/dist/style.css'
-
 const {
   SENTRY_ORG,
   SENTRY_PROJECT,
@@ -14,7 +12,6 @@ const {
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   css: [
-    LikeCoinWalletConnectorCSSPath,
     '@/assets/styles/global.css'
   ],
 
@@ -69,8 +66,6 @@ export default defineNuxtConfig({
     removeLoggers: false
   },
 
-  plugins: ['~/plugins/buffer.ts'],
-
   alias: {
     // polyfill process
     process: path.resolve(__dirname, 'node_modules/unenv/runtime/node/process')
@@ -78,6 +73,9 @@ export default defineNuxtConfig({
   vite: {
     define: {
       global: 'globalThis'
+    },
+    optimizeDeps: {
+      include: ['eventemitter3']
     },
     plugins: [
       nodePolyfills({
@@ -135,6 +133,7 @@ exports.randomFillSync = randomFillSync`
 
       LIKER_NFT_FEE_WALLET: process.env.LIKER_NFT_FEE_WALLET,
       LIKER_NFT_TARGET_ADDRESS: process.env.LIKER_NFT_TARGET_ADDRESS,
+      LIKE_EVM_NFT_TARGET_ADDRESS: process.env.LIKE_EVM_NFT_TARGET_ADDRESS,
 
       AUTHCORE_API_HOST: process.env.AUTHCORE_API_HOST,
       LIKER_LAND_URL: process.env.LIKER_LAND_URL,
@@ -158,7 +157,6 @@ exports.randomFillSync = randomFillSync`
   },
 
   tailwindcss: {
-    injectPosition: { after: LikeCoinWalletConnectorCSSPath },
     cssPath: '~/assets/css/tailwind.css'
   },
 

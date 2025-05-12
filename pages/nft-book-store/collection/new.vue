@@ -34,7 +34,7 @@
               <UInput
                 v-model="classIdInput"
                 class="font-mono w-full"
-                placeholder="likenft...."
+                placeholder="0x...."
               />
               <UButton @click="addMoreClassId">
                 Add
@@ -312,7 +312,7 @@
                   <UInput
                     v-model="moderatorWalletInput"
                     class="font-mono"
-                    placeholder="like1..."
+                    placeholder="0x..."
                   />
                   <UButton
                     label="Add"
@@ -335,14 +335,6 @@
                     :to="row.walletLink"
                     variant="link"
                     :padded="false"
-                  />
-                </template>
-                <template #authz-data="{ row }">
-                  <UButton
-                    :label="row.grantLabel"
-                    :to="row.grantRoute"
-                    :variant="row.isGranted ? 'outline' : 'solid'"
-                    color="green"
                   />
                 </template>
                 <template #remove-data="{ row }">
@@ -417,17 +409,14 @@ import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL, deliverMethodOptions, parseImageURLFromMetadata } from '~/utils'
-import { getNFTAuthzGrants, sendNFTsToAPIWallet } from '~/utils/cosmos'
 import { useCollectionStore } from '~/stores/collection'
 
-const { LCD_URL } = useRuntimeConfig().public
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const collectionStore = useCollectionStore()
 const nftStore = useNftStore()
 const stripeStore = useStripeStore()
-const { wallet, signer } = storeToRefs(walletStore)
-const { initIfNecessary } = walletStore
+const { wallet } = storeToRefs(walletStore)
 const { newNFTBookCollection } = collectionStore
 const { getClassMetadataById, lazyFetchClassMetadataById } = nftStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
@@ -464,7 +453,6 @@ const price = ref({
 })
 const shippingRates = ref<any[]>([])
 const moderatorWallets = ref<string[]>([])
-const moderatorWalletsGrants = ref<any>({})
 const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
@@ -496,24 +484,14 @@ const submitButtonText = computed(() => 'Submit')
 
 const moderatorWalletsTableColumns = computed(() => [
   { key: 'wallet', label: 'Wallet', sortable: true },
-  { key: 'authz', label: 'Send NFT Grant', sortable: false },
   { key: 'remove', label: '', sortable: false }
 ])
 
 const moderatorWalletsTableRows = computed(() => moderatorWallets.value.map((wallet, index) => {
-  const isGranted = !!moderatorWalletsGrants.value[wallet]
   return {
     index,
     wallet,
-    walletLink: getPortfolioURL(wallet),
-    isGranted,
-    grantLabel: isGranted ? 'Granted' : 'Grant',
-    grantRoute: {
-      name: 'authz',
-      query: {
-        grantee: wallet
-      }
-    }
+    walletLink: getPortfolioURL(wallet)
   }
 }))
 
@@ -531,16 +509,18 @@ config({
 onMounted(async () => {
   try {
     isLoading.value = true
-    try {
-      await fetchStripeConnectStatusByWallet(wallet.value)
-    } catch (err) {
+    if (wallet.value) {
+      try {
+        await fetchStripeConnectStatusByWallet(wallet.value)
+      } catch (err) {
       // eslint-disable-next-line no-console
-      console.error(err)
-    }
+        console.error(err)
+      }
 
-    if (getStripeConnectStatusByWallet.value(wallet.value).isReady) {
-      isStripeConnectChecked.value = true
-      stripeConnectWallet.value = wallet.value
+      if (getStripeConnectStatusByWallet.value(wallet.value).isReady) {
+        isStripeConnectChecked.value = true
+        stripeConnectWallet.value = wallet.value
+      }
     }
   } catch (e) {
     // eslint-disable-next-line no-console
@@ -552,16 +532,6 @@ onMounted(async () => {
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
-})
-
-watch(moderatorWallets, (newModeratorWallets) => {
-  newModeratorWallets?.forEach(async (m) => {
-    if (!moderatorWalletsGrants.value[m]) {
-      try {
-        moderatorWalletsGrants.value[m] = await getNFTAuthzGrants(wallet.value, m)
-      } catch {}
-    }
-  })
 })
 
 useSeoMeta({
@@ -576,6 +546,15 @@ function onPriceChange (event: InputEvent) {
 }
 
 function addMoreClassId () {
+  if (!classIdInput.value) { return }
+  if (classIds.value.includes(classIdInput.value as string)) {
+    error.value = 'Class ID already exists'
+    return
+  }
+  if (!classIdInput.value.startsWith('0x')) {
+    error.value = 'Invalid Class ID'
+    return
+  }
   classIds.value.push(classIdInput.value as string)
   lazyFetchClassMetadataById(classIdInput.value)
   classIdInput.value = ''
@@ -645,9 +624,12 @@ async function submitNewCollection () {
     isLoading.value = true
 
     await Promise.all(classIds.value.map(async (classId) => {
-      const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${classId}`)
-      const collectionId = (data as any)?.class?.data?.metadata?.nft_meta_collection_id || ''
-      if (!collectionId.includes('nft_book') && !collectionId.includes('book_nft')) {
+      const data = await lazyFetchClassMetadataById(classId as string)
+      const collectionId = data.nft_meta_collection_id || ''
+      if (
+        !collectionId.includes('nft_book') &&
+        !collectionId.includes('book_nft')
+      ) {
         throw new Error('NFT Class not in NFT BOOK meta collection')
       }
     }))
@@ -671,33 +653,6 @@ async function submitNewCollection () {
       : undefined
 
     const formattedPrice = formatPrice(price.value)
-
-    let autoDeliverNFTsTxHash
-    if (formattedPrice.isAutoDeliver) {
-      const ok = confirm(
-        "NFT Book Press - Reminder\nOnce you choose automatic delivery, you can't switch it back to manual delivery. Are you sure?"
-      )
-      if (!ok) {
-        return
-      }
-
-      if (formattedPrice.stock > 0) {
-        if (!wallet.value || !signer.value) {
-          await initIfNecessary()
-        }
-        if (!wallet.value || !signer.value) {
-          throw new Error('Unable to connect to wallet')
-        }
-        autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
-          classIds.value,
-          [],
-          formattedPrice.stock,
-          signer.value,
-          wallet.value
-        )
-      }
-    }
-
     await newNFTBookCollection({
       classIds: classIds.value,
       defaultPaymentCurrency: 'USD',
@@ -713,7 +668,6 @@ async function submitNewCollection () {
       image: image.value,
       hideDownload: hideDownload.value,
       mustClaimToView: mustClaimToView.value,
-      autoDeliverNFTsTxHash,
       ...formattedPrice
     })
     router.push({ name: 'nft-book-store-collection' })

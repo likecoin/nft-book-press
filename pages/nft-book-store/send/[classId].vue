@@ -175,17 +175,19 @@
 </template>
 
 <script setup lang="ts">
-import type { DeliverTxResponse } from '@cosmjs/stargate'
 import { storeToRefs } from 'pinia'
+import { waitForTransactionReceipt } from '@wagmi/vue/actions'
+import { useWriteContract } from '@wagmi/vue'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { parseImageURLFromMetadata } from '~/utils'
-import { signExecNFTSendAuthz, signSendNFTs } from '~/utils/cosmos'
 import { useMessageCharCount } from '~/composables/useMessageCharCount'
 import { AUTHOR_MESSAGE_LIMIT } from '~/constant'
+import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
+import { config } from '~/utils/wagmi/config'
 
-const { LIKE_CO_API, LCD_URL } = useRuntimeConfig().public
+const { LIKE_CO_API } = useRuntimeConfig().public
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
@@ -200,6 +202,9 @@ const { lazyFetchClassMetadataById } = nftStore
 const route = useRoute()
 const router = useRouter()
 
+const { writeContractAsync } = useWriteContract()
+const { getBalanceOf, getTokenIdByOwnerIndex } = useNFTContractReader()
+
 const error = ref('')
 const isLoading = ref(false)
 const classId = ref(route.params.classId as string)
@@ -207,9 +212,10 @@ const paymentId = ref(route.query.payment_id as string)
 const ownerWallet = ref(route.query.owner_wallet as string || wallet.value)
 const memo = ref('')
 const { messageCharCount, isLimitReached } = useMessageCharCount(memo, AUTHOR_MESSAGE_LIMIT)
+const { getNFTMetadata, getNFTOwner } = useNFTContractReader()
 
 const nftIdInput = ref([] as string[])
-const nftIds = ref([] as string[])
+const nftIds = ref([] as number[])
 const isVerifyingNFTId = ref(false)
 const isAutoFetchingNFTId = ref(false)
 const nftIdError = ref('')
@@ -219,7 +225,6 @@ const nftIdInputRef = ref<any[] | undefined>(undefined)
 const orderInfo = ref<any>({})
 const nftImage = ref('')
 
-const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
 const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || isAutoFetchingNFTId.value || !!nftIdError.value || isLimitReached.value)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
@@ -232,7 +237,7 @@ watch(isEditingNFTId, async (isEditing) => {
   if (isEditing) { return }
 
   if (nftIdInput.value) {
-    const ids = nftIdInput.value.filter(id => id.trim() !== '')
+    const ids = nftIdInput.value.filter(id => id.trim() !== '').map(id => Number(id))
     if (orderInfo.value.quantity && ids.length > 0 && ids.length !== orderInfo.value.quantity) {
       nftIdError.value = `Number of NFT IDs (${ids.length}) does not match the required quantity (${orderInfo.value.quantity})`
       nftIds.value = []
@@ -276,9 +281,8 @@ async function fetchNFTMetadata () {
       return
     }
     try {
-      const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/nfts/${classId.value}/${nftIds.value[0]}`)
-      const image = (data as any)?.nft?.data?.metadata?.image || ''
-      nftImage.value = parseImageURLFromMetadata(image)
+      const metadata = await getNFTMetadata(classId.value, nftIds.value[0])
+      nftImage.value = parseImageURLFromMetadata(metadata)
     } catch (err) {
       nftImage.value = ''
       if ((err as any)?.data?.code === 2) {
@@ -294,7 +298,7 @@ async function fetchNFTMetadata () {
   }
 }
 
-async function fetchNextNFTId (count = 1) {
+async function fetchNextNFTId (_count = 1) {
   try {
     nftIdError.value = ''
     isAutoFetchingNFTId.value = true
@@ -302,17 +306,14 @@ async function fetchNextNFTId (count = 1) {
       await initIfNecessary()
     }
     if (!ownerWallet.value) { return }
-    const { nfts } = await getNFTs({
-      classId: classId.value,
-      owner: ownerWallet.value,
-      needCount: count
-    })
-    if (nfts.length) {
-      nftIds.value = nfts.map(nft => nft.id)
-      nftIdInput.value = nftIds.value
-      await fetchNFTMetadata()
-    } else {
-      throw new Error(`${ownerWallet.value} does not hold any NFT of class ${classId.value}`)
+    const balance = await getBalanceOf(classId.value, ownerWallet.value) as number
+    if (balance < _count) {
+      throw new Error(`Insufficient balance of NFT classId: ${classId.value} for wallet: ${ownerWallet.value}`)
+    }
+
+    for (let i = 0; i < _count; i++) {
+      const nextNftId = await getTokenIdByOwnerIndex(classId.value, ownerWallet.value, i)
+      nftIds.value.push(Number(nextNftId))
     }
   } catch (err) {
     error.value = (err as Error).toString()
@@ -334,7 +335,7 @@ async function onSendNFTStart () {
     }
     if (!wallet.value || !signer.value) { return }
     if (nftIds.value) {
-      const res = await Promise.all(nftIds.value.map(nftId => getNFTOwner(classId.value, nftId)))
+      const res = await Promise.all(nftIds.value.map(nftId => getNFTOwner(classId.value, Number(nftId))))
       const owners = res.map((item: any) => item.owner)
       const mismatchNftIdIndex = owners.findIndex(owner => owner !== ownerWallet.value)
       if (mismatchNftIdIndex >= 0) {
@@ -342,44 +343,27 @@ async function onSendNFTStart () {
         throw new Error(`NFT classId: ${classId.value} nftId:${mismatchNftId} is not owned by sender!`)
       }
     } else {
-      await fetchNextNFTId(orderInfo.value.quantity || 1)
+      await fetchNextNFTId(orderInfo.value.quantity)
     }
 
-    if (nftIds.value.length !== orderInfo.value.quantity) {
-      throw new Error(`NFT quantity mismatch! Expected ${orderInfo.value.quantity}, got ${nftIds.value.length}`)
-    }
-    const signingClient = await getSigningClientWithSigner(signer.value)
-    const client = signingClient.getSigningStargateClient()
-    if (!client) { throw new Error('Signing client not exists') }
-
-    let res: DeliverTxResponse | undefined
-    if (userIsOwner.value) {
-      res = await signSendNFTs(
-        orderInfo.value.wallet,
-        Array(nftIds.value.length).fill(classId.value),
-        nftIds.value,
-        signer.value,
+    const txHash = await writeContractAsync({
+      address: classId.value as any,
+      abi: LIKE_NFT_CLASS_ABI,
+      functionName: 'batchTransferWithMemo',
+      args: [
         wallet.value,
-        memo.value
-      )
-    } else {
-      res = await signExecNFTSendAuthz(
-        orderInfo.value.wallet,
-        ownerWallet.value,
-        Array(nftIds.value.length).fill(classId.value),
+        Array(orderInfo.value.quantity).fill(orderInfo.value.wallet),
         nftIds.value,
-        signer.value,
-        wallet.value,
-        memo.value
-      )
-    }
-
-    if (res.transactionHash && res.code === 0) {
+        Array(orderInfo.value.quantity).fill(memo.value)
+      ]
+    })
+    const receipt = await waitForTransactionReceipt(config, { hash: txHash })
+    if (receipt?.status === 'success') {
       await $fetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/sent/${paymentId.value}`,
         {
           method: 'POST',
           body: {
-            txHash: res.transactionHash,
+            txHash,
             quantity: orderInfo.value.quantity || 1
           },
           headers: {
