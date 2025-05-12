@@ -1,5 +1,5 @@
 <template>
-  <UModal :model-value="modelValue" :ui="{ width: 'min-w-[80vw]' }">
+  <UModal :model-value="showOpenModal" :ui="{ width: 'min-w-[80vw]' }">
     <UCard
       :ui="{
         header: { base: 'flex justify-between items-center' },
@@ -68,13 +68,13 @@ const { initIfNecessary } = walletStore
 const route = useRoute()
 
 const props = defineProps<{
-  modelValue: boolean
   classId?: string
 }>()
 
+const showOpenModal = defineModel<boolean>('modelValue')
+
 // eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
   (e: 'save', iscnId: string): void
 }>()
 
@@ -129,7 +129,7 @@ watchEffect(async () => {
   if (route.query.iscn_id) {
     iscnId.value = (route.query.iscn_id as string).replace(/\/\d+$/, '')
   }
-  if (props.modelValue && (props.classId || iscnId.value)) {
+  if (showOpenModal.value && (props.classId || iscnId.value)) {
     try {
       isISCNLoading.value = true
       if (props.classId) {
@@ -203,7 +203,7 @@ watchEffect(async () => {
 })
 
 function handleClickBack () {
-  emit('update:modelValue', false)
+  showOpenModal.value = false
 }
 
 function parseDownloadableUrl (url: string) {
