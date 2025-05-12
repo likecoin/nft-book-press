@@ -277,11 +277,10 @@ const props = defineProps<{
   modelValue: ISCNFormData
 }>()
 
-const emit = defineEmits<{(e: 'update:modelValue',
-  value: ISCNFormData): void
+// eslint-disable-next-line func-call-spacing
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: ISCNFormData): void
 }>()
-
-const isFormValid = defineModel<boolean>('valid')
 
 const formData = computed({
   get: () => props.modelValue,
@@ -289,22 +288,6 @@ const formData = computed({
     emit('update:modelValue', newValue)
   }
 })
-
-const formError = computed(() => {
-  const requiredFields = {
-    title: !!formData.value.title,
-    description: !!formData.value.description,
-    authorName: !!formData.value.author.name,
-    contentUrl: !!formData.value.contentFingerprints.some(f => !!f.url)
-  }
-
-  return Object.entries(requiredFields)
-    .find(([_, isValid]) => !isValid)?.[0]?.toUpperCase() || ''
-})
-
-watch(formError, (err) => {
-  isFormValid.value = !err
-}, { immediate: true })
 
 const hasFiles = computed(() => {
   return fileRecords.value?.length > 0
@@ -393,11 +376,6 @@ const handleUploadSubmit = (uploadData: any) => {
 
   shouldShowUploadModal.value = false
 }
-
-defineExpose({
-  isFormValid
-})
-
 </script>
 
 <style scoped>
