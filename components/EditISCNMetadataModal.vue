@@ -113,7 +113,7 @@ const iscnData = ref({
 
 const { payload } = useISCN(iscnData)
 
-const isFormValid = computed(() => {
+const formError = computed(() => {
   const requiredFields = {
     title: !!iscnData.value.title,
     description: !!iscnData.value.description,
@@ -124,6 +124,8 @@ const isFormValid = computed(() => {
   return Object.entries(requiredFields)
     .find(([_, isValid]) => !isValid)?.[0]?.toUpperCase() || ''
 })
+
+const isFormValid = computed(() => !formError.value)
 
 watchEffect(async () => {
   if (route.query.iscn_id) {
