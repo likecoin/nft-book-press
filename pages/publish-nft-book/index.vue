@@ -38,7 +38,7 @@
         <div v-else-if="step === 2">
           <MintNFT
             ref="mintNFT"
-            :iscn-id="localIscnId"
+            :iscn-id="iscnId"
             @loading-change="(isLoading) => (isMintLoading = isLoading)"
             @form-valid-change="(valid) => (isMintFormValid = valid)"
             @submit="handleMintNFTSubmit"
@@ -131,7 +131,9 @@ const toast = useToast()
 const showIscnInput = ref(false)
 const iscnInputValue = ref('')
 const bookName = ref('')
-const localIscnId = ref('')
+
+const iscnId = ref(route.query.iscn_id?.toString() || '')
+const classId = ref(route.query.class_id?.toString() || '')
 
 const fileRecords = ref([])
 const uploadStatus = ref('')
@@ -181,14 +183,6 @@ const iscnQueryLink = computed(() => {
   return `${APP_LIKE_CO_URL}/search?owner=${wallet.value}`
 })
 
-const iscnId = computed(() => {
-  return route.query.iscn_id
-})
-
-const classId = computed(() => {
-  return route.query.class_id?.toString() || ''
-})
-
 const steps = [
   {
     title: '上傳檔案',
@@ -221,8 +215,8 @@ onMounted(() => {
   }
 
   if (iscnId.value) {
-    iscnInputValue.value = iscnId.value as string
-    handleIscnSubmit({ iscnId: iscnId.value as string, txHash: '' })
+    iscnInputValue.value = iscnId.value
+    handleIscnSubmit({ iscnId: iscnId.value, txHash: '' })
   } else if (classId.value) {
     handleMintNFTSubmit({ classId: classId.value })
   } else if (data?.epubMetadata && data?.fileRecords) {
@@ -271,20 +265,21 @@ const handleUploadSubmit = (uploadFileData: any) => {
 }
 
 const handleIscnSubmit = async (res: { iscnId: string, txHash: string }) => {
-  const { iscnId } = res
-  if (iscnId) {
-    router.replace({ query: { iscn_id: iscnId } })
+  const { iscnId: newIscnId } = res
+  if (newIscnId) {
+    router.replace({ query: { iscn_id: newIscnId } })
   }
   clearUploadFileData()
   step.value = 2
   await nextTick()
-  localIscnId.value = iscnId
+  iscnId.value = newIscnId
 }
 
 const handleMintNFTSubmit = async (res: any) => {
-  const { classId, nftMintCount } = res
-  if (classId) {
-    router.replace({ query: { class_id: classId, count: nftMintCount } })
+  const { classId: newClassId, nftMintCount } = res
+  if (newClassId) {
+    classId.value = newClassId
+    router.replace({ query: { class_id: newClassId, count: nftMintCount } })
     step.value = 3
     await nextTick()
   }
