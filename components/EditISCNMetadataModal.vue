@@ -38,7 +38,6 @@
           <UButton
             color="primary"
             :loading="isSaving"
-            :disabled="!isFormValid"
             @click="handleSave"
           >
             Save Changes

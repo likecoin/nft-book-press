@@ -9,11 +9,24 @@
       />
     </UFormGroup>
 
-    <UFormGroup label="Title" class="flex-1" required>
-      <UInput v-model="formData.title" placeholder="Enter ISCN title" />
+    <UFormGroup
+      label="Title"
+      :error="(!formData.title) && 'Title is required'"
+      class="flex-1 text-left"
+      required
+    >
+      <UInput
+        v-model="formData.title"
+        placeholder="Enter ISCN title"
+      />
     </UFormGroup>
 
-    <UFormGroup label="Description" class="flex-1" required>
+    <UFormGroup
+      label="Description"
+      class="flex-1 text-left"
+      :error="(!formData.description) && 'Description is required'"
+      required
+    >
       <UTextarea
         v-model="formData.description"
         placeholder="Enter ISCN description"
@@ -67,7 +80,12 @@
 
     <!-- Author Info -->
     <div class="grid grid-cols-2 gap-4">
-      <UFormGroup label="Author Name" required>
+      <UFormGroup
+        label="Author Name"
+        :error="(!formData.author.name) && 'Author name is required'"
+        class="text-left"
+        required
+      >
         <UInput
           v-model="formData.author.name"
           placeholder="Enter author name"
