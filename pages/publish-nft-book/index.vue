@@ -233,12 +233,7 @@ const nextStep = async () => {
     await initIfNecessary()
   }
   if (!wallet.value || !signer.value) {
-    toast.add({
-      icon: 'i-heroicons-exclamation-circle',
-      title: 'Please login first',
-      timeout: 3000,
-      color: 'red'
-    })
+    showErrorToast('Please login first')
     return
   }
   try {
@@ -248,12 +243,7 @@ const nextStep = async () => {
     }
     if (step.value === 1) {
       if (!isISCNFormValid.value) {
-        toast.add({
-          icon: 'i-heroicons-exclamation-circle',
-          title: 'Please fill in all required fields',
-          timeout: 3000,
-          color: 'red'
-        })
+        showErrorToast('Please fill in all required fields')
         return
       }
       await registerISCN.value.onSubmit()
@@ -261,12 +251,7 @@ const nextStep = async () => {
     }
     if (step.value === 2) {
       if (!isMintFormValid.value) {
-        toast.add({
-          icon: 'i-heroicons-exclamation-circle',
-          title: 'Please fill in all required fields',
-          timeout: 3000,
-          color: 'red'
-        })
+        showErrorToast('Please fill in all required fields')
         return
       }
       await mintNFT.value.startNFTMintFlow()
@@ -314,6 +299,15 @@ const handleIscnInput = async () => {
   if (iscnInputValue.value) {
     await handleIscnSubmit({ iscnId: iscnInputValue.value, txHash: '' })
   }
+}
+
+const showErrorToast = (message: string) => {
+  toast.add({
+    icon: 'i-heroicons-exclamation-circle',
+    title: message,
+    timeout: 3000,
+    color: 'red'
+  })
 }
 
 </script>
