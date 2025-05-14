@@ -169,10 +169,8 @@ const shouldShowActionButton = computed(() => {
 const shouldDisableAction = computed(() => {
   if (step.value === 0) {
     return uploadStatus.value !== ''
-  } else if (step.value === 1) {
-    return !isISCNFormValid.value
   } else if (step.value === 2) {
-    return !isMintFormValid.value || isMintLoading.value
+    return isMintLoading.value
   }
   return false
 })
@@ -249,10 +247,28 @@ const nextStep = async () => {
       return
     }
     if (step.value === 1) {
+      if (!isISCNFormValid.value) {
+        toast.add({
+          icon: 'i-heroicons-exclamation-circle',
+          title: 'Please fill in all required fields',
+          timeout: 3000,
+          color: 'red'
+        })
+        return
+      }
       await registerISCN.value.onSubmit()
       return
     }
     if (step.value === 2) {
+      if (!isMintFormValid.value) {
+        toast.add({
+          icon: 'i-heroicons-exclamation-circle',
+          title: 'Please fill in all required fields',
+          timeout: 3000,
+          color: 'red'
+        })
+        return
+      }
       await mintNFT.value.startNFTMintFlow()
       return
     }
