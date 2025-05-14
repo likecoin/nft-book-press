@@ -2,6 +2,7 @@
   <UForm :state="state" class="flex flex-col gap-[12px]">
     <UFormGroup
       label="NFT ID Prefix / 前綴（書本編號）"
+      class="text-left"
       :error="!whitespaceRegex.test(state.prefix) && 'NFT ID cannot contain spaces'"
       required
     >
@@ -10,6 +11,7 @@
 
     <UFormGroup
       label="Number of NFT to mint / 鑄造數量（此批）"
+      class="text-left"
       :error="(!state.mintCount || state.mintCount <= 0) && 'Mint count must be greater than 0'"
       required
     >
@@ -25,6 +27,7 @@
     <UFormGroup
       label="Image URL / 封面網址"
       name="imageUrl"
+      class="text-left"
       :error="!state.imageUrl && 'Image URL is required'"
       required
     >
