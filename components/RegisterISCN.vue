@@ -31,6 +31,7 @@ import { useWalletStore } from '~/stores/wallet'
 import { getAccountBalance } from '~/utils/cosmos'
 import { ISCN_GAS_MULTIPLIER } from '~/constant/index'
 import { useISCN } from '~/composables/useISCN'
+import { useToastComposable } from '~/composables/useToast'
 
 const walletStore = useWalletStore()
 const { getFileType } = useFileUpload()
@@ -38,7 +39,7 @@ const { getFileType } = useFileUpload()
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
 const { stripHtmlTags, formatLanguage } = useFileUpload()
-const toast = useToast()
+const { showErrorToast } = useToastComposable()
 
 const iscnData = ref({
   type: 'Book',
@@ -182,26 +183,13 @@ const onSubmit = async (): Promise<void> => {
   uploadStatus.value = 'checking'
 
   if (!isFormValid.value) {
-    toast.add({
-      icon: 'i-heroicons-exclamation-circle',
-      title: `Required field missing: ${error.value}`,
-      timeout: 3000,
-      color: 'red'
-    })
+    showErrorToast(`Required field missing: ${error.value}`)
     return
   }
   await calculateISCNFee()
   balance.value = await getAccountBalance(wallet.value)
   if (balance.value?.lt(totalFee.value)) {
-    toast.add({
-      icon: 'i-heroicons-exclamation-circle',
-      title: 'INSUFFICIENT_BALANCE',
-      timeout: 0,
-      color: 'red',
-      ui: {
-        title: 'text-red-400 dark:text-red-400'
-      }
-    })
+    showErrorToast('INSUFFICIENT_BALANCE')
     uploadStatus.value = ''
     return
   }
@@ -235,15 +223,7 @@ const submitToISCN = async (): Promise<void> => {
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err)
-    toast.add({
-      icon: 'i-heroicons-exclamation-circle',
-      title: `'SIGNING_ERROR':${err as string}`,
-      timeout: 0,
-      color: 'red',
-      ui: {
-        title: 'text-red-400 dark:text-red-400'
-      }
-    })
+    showErrorToast(`'SIGNING_ERROR':${err as string}`)
     uploadStatus.value = ''
   } finally {
     balance.value = await getAccountBalance(wallet.value)

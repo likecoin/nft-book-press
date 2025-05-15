@@ -115,6 +115,7 @@
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
 import { clearUploadFileData, setUploadFileData } from '~/utils/uploadFile'
+import { useToastComposable } from '~/composables/useToast'
 
 const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
@@ -122,12 +123,12 @@ const { initIfNecessary } = walletStore
 const route = useRoute()
 const router = useRouter()
 const { APP_LIKE_CO_URL } = useRuntimeConfig().public
+const { showErrorToast } = useToastComposable()
 
 const step = ref(0)
 const uploadFormRef = ref()
 const registerISCN = ref()
 const mintNFT = ref()
-const toast = useToast()
 const showIscnInput = ref(false)
 const iscnInputValue = ref('')
 const bookName = ref('')
@@ -299,15 +300,6 @@ const handleIscnInput = async () => {
   if (iscnInputValue.value) {
     await handleIscnSubmit({ iscnId: iscnInputValue.value, txHash: '' })
   }
-}
-
-const showErrorToast = (message: string) => {
-  toast.add({
-    icon: 'i-heroicons-exclamation-circle',
-    title: message,
-    timeout: 3000,
-    color: 'red'
-  })
 }
 
 </script>

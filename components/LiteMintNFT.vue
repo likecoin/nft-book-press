@@ -62,9 +62,9 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { useWalletStore } from '~/stores/wallet'
 import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
+import { useToastComposable } from '~/composables/useToast'
 
 const route = useRoute()
-const toast = useToast()
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
@@ -100,6 +100,7 @@ const formState = reactive({
 
 const { LCD_URL } = useRuntimeConfig().public
 const emit = defineEmits(['submit', 'formValidChange'])
+const { showErrorToast } = useToastComposable()
 
 const formError = computed(() => {
   const requiredFields = {
@@ -209,12 +210,7 @@ async function startNFTMintFlow () {
     const { contentMetadata } = iscnData.value
 
     if (!isFormValid.value) {
-      toast.add({
-        icon: 'i-heroicons-exclamation-circle',
-        title: `Required field missing: ${error.value}`,
-        timeout: 3000,
-        color: 'red'
-      })
+      showErrorToast(`Required field missing: ${error.value}`)
       return
     }
 
@@ -277,15 +273,7 @@ async function startNFTMintFlow () {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)
-    toast.add({
-      icon: 'i-heroicons-exclamation-circle',
-      title: (error as Error).toString(),
-      timeout: 0,
-      color: 'red',
-      ui: {
-        title: 'text-red-400 dark:text-red-400'
-      }
-    })
+    showErrorToast(`Mint NFT error: ${(error as Error).toString()}`)
   } finally {
     isLoading.value = false
   }
