@@ -11,7 +11,7 @@
 
     <UFormGroup
       label="Title"
-      :error="(!formData.title) && 'Title is required'"
+      :error="!formData.title && 'Title is required'"
       class="flex-1 text-left"
       required
     >
@@ -24,7 +24,7 @@
     <UFormGroup
       label="Description"
       class="flex-1 text-left"
-      :error="(!formData.description) && 'Description is required'"
+      :error="!formData.description && 'Description is required'"
       required
     >
       <UTextarea
@@ -82,7 +82,7 @@
     <div class="grid grid-cols-2 gap-4">
       <UFormGroup
         label="Author Name"
-        :error="(!formData.author.name) && 'Author name is required'"
+        :error="!formData.author.name && 'Author name is required'"
         class="text-left"
         required
       >
