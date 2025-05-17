@@ -113,10 +113,15 @@ onMounted(async () => {
   }
 
   if (isAuthenticated.value) {
-    await Promise.all([
-      fetchBookListing(),
-      listNFTBookCollections()
-    ])
+    try {
+      await Promise.all([
+        fetchBookListing(),
+        listNFTBookCollections()
+      ])
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
   }
 })
 
