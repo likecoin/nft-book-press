@@ -39,10 +39,15 @@ export function useAuth () {
       }
 
       await authenticate(wallet.value, signature)
-      await Promise.all([
-        fetchBookListing(),
-        listNFTBookCollections()
-      ])
+      try {
+        await Promise.all([
+          fetchBookListing(),
+          listNFTBookCollections()
+        ])
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err)
+      }
     } catch (err) {
       disconnect()
       clearSession()
