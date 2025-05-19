@@ -250,7 +250,7 @@ async function mintNFTs () {
       if (data.author) {
         data.attributes.push({
           trait_type: 'Author',
-          value: data.author
+          value: data.author.name || data.author
         })
       }
       if (data.publisher) {
@@ -263,7 +263,7 @@ async function mintNFTs () {
         data.attributes.push({
           trait_type: 'Publish Date',
           display_type: 'date',
-          value: (new Date(data.datePublished)).getTime() || 0
+          value: ((new Date(data.datePublished)).getTime() || 0) / 1000
         })
       }
       Object.entries(otherData).forEach(([key, value]) => {
