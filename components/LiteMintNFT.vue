@@ -330,6 +330,7 @@ async function fetchISCNById (iscnId: string) {
     }
     iscnData.value = { contentMetadata: data, owner, '@id': iscnId }
     formState.imageUrl = iscnData.value.contentMetadata?.thumbnailUrl || ''
+    formState.externalUrl = iscnData.value.contentMetadata?.url || ''
     classId.value = iscnId
   } catch (error) {
     // eslint-disable-next-line no-console
