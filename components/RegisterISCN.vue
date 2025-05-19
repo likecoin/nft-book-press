@@ -192,7 +192,7 @@ const submitToISCN = async (): Promise<void> => {
       ...contentMetadata,
       symbol: 'BOOK',
       image: contentMetadata?.thumbnailUrl || '',
-      external_url: contentMetadata?.url || '',
+      external_link: contentMetadata?.url || '',
       nft_meta_collection_id: 'nft_book',
       nft_meta_collection_name: 'NFT Book',
       nft_meta_collection_description: 'NFT Book by Liker Land',
