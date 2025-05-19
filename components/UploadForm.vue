@@ -245,6 +245,19 @@ const onFileUpload = async (event: Event) => {
             }
             if (fileRecord.fileType === 'application/epub+zip') {
               await processEPub({ buffer: fileBytes, file })
+            } else if (fileRecord.fileType?.startsWith('image/')) {
+              const coverMetadata = epubMetadataList.value[0]
+              if (coverMetadata) {
+                const coverReader = new FileReader()
+                coverReader.onload = (e) => {
+                  if (!e.target) {
+                    return
+                  }
+                  coverMetadata.thumbnailIpfsHash = ipfsHash
+                  coverMetadata.coverData = e.target.result as string
+                }
+                coverReader.readAsDataURL(file)
+              }
             }
           }
         } else {
@@ -347,12 +360,25 @@ const processEPub = async ({ buffer, file }: { buffer: ArrayBuffer; file: File }
     }
     epubMetadataList.value.push(epubMetadata)
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err)
   }
 }
 
 const handleDeleteFile = (index: number) => {
-  fileRecords.value.splice(index, 1)
+  const removedFile = fileRecords.value.splice(index, 1)[0]
+  if (removedFile.fileType?.startsWith('image/')) {
+    epubMetadataList.value = epubMetadataList.value.map((metadata: any) => {
+      if (metadata.thumbnailIpfsHash === removedFile.ipfsHash) {
+        return { ...metadata, thumbnailIpfsHash: null, coverData: null }
+      }
+      return metadata
+    })
+  } else if (removedFile.fileType === 'application/epub+zip') {
+    epubMetadataList.value = epubMetadataList.value.filter(
+      (metadata: any) => metadata.epubFileName !== removedFile.fileName
+    )
+  }
 }
 
 const estimateArweaveFee = async (): Promise<void> => {
