@@ -260,6 +260,11 @@ const onFileUpload = async (event: Event) => {
     } catch (error) {
       console.error(error)
     }
+    // Clear the input value to allow re-uploading the same file
+    const input = event.target as HTMLInputElement
+    if (input) {
+      input.value = ''
+    }
     uploadStatus.value = ''
     emit('fileReady', fileRecords.value)
   }
