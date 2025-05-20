@@ -246,8 +246,8 @@ const onFileUpload = async (event: Event) => {
             if (fileRecord.fileType === 'application/epub+zip') {
               await processEPub({ buffer: fileBytes, file })
             } else if (fileRecord.fileType?.startsWith('image/')) {
-              const coverMetadata = epubMetadataList.value[0]
-              if (coverMetadata) {
+              const [coverMetadata] = epubMetadataList.value
+              if (coverMetadata && !coverMetadata.thumbnailIpfsHash) {
                 const coverReader = new FileReader()
                 coverReader.onload = (e) => {
                   if (!e.target) {
@@ -271,6 +271,7 @@ const onFileUpload = async (event: Event) => {
     try {
       await estimateArweaveFee()
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(error)
     }
     uploadStatus.value = ''
