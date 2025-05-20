@@ -247,7 +247,7 @@ const onFileUpload = async (event: Event) => {
               await processEPub({ buffer: fileBytes, file })
             } else if (fileRecord.fileType?.startsWith('image/')) {
               let coverMetadata = epubMetadataList.value.find(
-                (metadata: any) => !!metadata.thumbnailIpfsHash
+                (metadata: any) => !metadata.thumbnailIpfsHash
               )
 
               if (coverMetadata?.thumbnailIpfsHash) {
