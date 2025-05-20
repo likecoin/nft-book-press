@@ -367,7 +367,7 @@ const processEPub = async ({ buffer, file }: { buffer: ArrayBuffer; file: File }
 }
 
 const handleDeleteFile = (index: number) => {
-  const removedFile = fileRecords.value.splice(index, 1)[0]
+  const [removedFile] = fileRecords.value.splice(index, 1)
   if (removedFile.fileType?.startsWith('image/')) {
     epubMetadataList.value = epubMetadataList.value.map((metadata: any) => {
       if (metadata.thumbnailIpfsHash === removedFile.ipfsHash) {
