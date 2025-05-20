@@ -218,7 +218,14 @@ const onFileUpload = async (event: Event) => {
     }
 
     if (files?.length) {
-      for (const file of files) {
+      const sortedFiles = Array.from(files).sort((a, b) => {
+        const isImageA = a.type.startsWith('image/')
+        const isImageB = b.type.startsWith('image/')
+
+        if (isImageA === isImageB) { return 0 }
+        return isImageA ? 1 : -1
+      })
+      for (const file of sortedFiles) {
         const reader = new FileReader()
         let fileRecord: FileRecord = {}
 
