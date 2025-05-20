@@ -71,7 +71,8 @@ const { writeContractAsync } = useWriteContract()
 const {
   getClassOwner,
   getClassMetadata,
-  checkNFTClassIsBookNFT
+  checkNFTClassIsBookNFT,
+  getClassCurrentTokenId
 } = useNFTContractReader()
 
 const store = useWalletStore()
@@ -271,24 +272,22 @@ async function mintNFTs () {
         metadata: data
       }
     })
+    const fromTokenId = await getClassCurrentTokenId(classId.value)
+    const { BOOK3_URL } = useRuntimeConfig().public
     const res = await writeContractAsync({
       address: classId.value as `0x${string}`,
       abi: LIKE_NFT_CLASS_ABI,
-      functionName: 'batchMint',
+      functionName: 'safeMintWithTokenId',
       args: [
+        fromTokenId,
         Array(formState.mintCount).fill(wallet.value),
         Array(formState.mintCount).fill(''),
-        nfts.map(nft => JSON.stringify({
+        nfts.map((nft, index) => JSON.stringify({
           image: nft.metadata.image,
-          image_data: '',
-          external_url: nft.metadata.external_url || '',
-          description: nft.metadata.description || '',
-          name: nft.metadata.name || '',
-          attributes: nft.metadata.attributes || [],
-          background_color: '',
-          animation_url: '',
-          youtube_url: '',
-          ...nft.metadata
+          external_url: `${BOOK3_URL}/store/${classId.value}/${Number(fromTokenId) + index}`,
+          description: `Copy #${Number(fromTokenId) + index} of ${nft.metadata.name}`,
+          name: `${nft.metadata.name} #${Number(fromTokenId) + index}`,
+          attributes: nft.metadata.attributes || []
         }))
       ]
     })
@@ -321,6 +320,7 @@ async function fetchISCNById (iscnId: string) {
     }
     iscnData.value = { contentMetadata: data, owner, '@id': iscnId }
     formState.imageUrl = iscnData.value.contentMetadata?.thumbnailUrl || ''
+    formState.externalUrl = iscnData.value.contentMetadata?.url || ''
     classId.value = iscnId
   } catch (error) {
     // eslint-disable-next-line no-console

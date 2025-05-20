@@ -179,7 +179,7 @@ const submitToISCN = async (): Promise<void> => {
       ...contentMetadata,
       symbol: 'BOOK',
       image: contentMetadata?.thumbnailUrl || '',
-      external_url: contentMetadata?.url || '',
+      external_link: contentMetadata?.url || '',
       nft_meta_collection_id: 'nft_book',
       nft_meta_collection_name: 'NFT Book',
       nft_meta_collection_description: 'NFT Book by Liker Land',
@@ -188,18 +188,21 @@ const submitToISCN = async (): Promise<void> => {
     const txHash = await writeContractAsync({
       address: LIKE_NFT_CONTRACT_ADDRESS,
       abi: LIKE_NFT_ABI,
-      functionName: 'newBookNFT',
-      args: [{
-        creator: wallet.value,
-        updaters: [wallet.value, LIKE_EVM_NFT_TARGET_ADDRESS],
-        minters: [wallet.value, LIKE_EVM_NFT_TARGET_ADDRESS],
-        config: {
-          name: metadata.name,
-          symbol: 'BOOK',
-          metadata: JSON.stringify(metadata),
-          max_supply: DEFAULT_MAX_SUPPLY
-        }
-      }]
+      functionName: 'newBookNFTWithRoyalty',
+      args: [
+        {
+          creator: wallet.value,
+          updaters: [wallet.value, LIKE_EVM_NFT_TARGET_ADDRESS],
+          minters: [wallet.value, LIKE_EVM_NFT_TARGET_ADDRESS],
+          config: {
+            name: metadata.name,
+            symbol: 'BOOK',
+            metadata: JSON.stringify(metadata),
+            max_supply: DEFAULT_MAX_SUPPLY
+          }
+        },
+        500
+      ]
     })
     const receipt = await waitForTransactionReceipt(config, { hash: txHash })
     // eslint-disable-next-line no-console
