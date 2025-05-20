@@ -411,13 +411,13 @@ const handleDeleteFile = (index: number) => {
   if (removedFile.fileType?.startsWith('image/')) {
     epubMetadataList.value = epubMetadataList.value
       .map((metadata: any) => {
-        if (metadata.thumbnailIpfsHash === removedFile.ipfsHash && metadata.epubFileName) {
+        if (metadata.thumbnailIpfsHash === removedFile.ipfsHash) {
           return { ...metadata, thumbnailIpfsHash: null, coverData: null }
         }
         return metadata
       })
       .filter((metadata: any) =>
-        metadata.epubFileName
+        metadata.epubFileName || metadata.thumbnailIpfsHash
       )
   } else if (removedFile.fileType === 'application/epub+zip') {
     epubMetadataList.value = epubMetadataList.value.filter(
