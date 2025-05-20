@@ -405,11 +405,19 @@ const processEPub = async ({ buffer, file }: { buffer: ArrayBuffer; file: File }
 const handleDeleteFile = (index: number) => {
   const [removedFile] = fileRecords.value.splice(index, 1)
   if (removedFile.fileType?.startsWith('image/')) {
-    epubMetadataList.value = epubMetadataList.value.map((metadata: any) => {
+    epubMetadataList.value = epubMetadataList.value.flatMap((metadata: any) => {
       if (metadata.thumbnailIpfsHash === removedFile.ipfsHash) {
-        return { ...metadata, thumbnailIpfsHash: null, coverData: null }
+        if (metadata.epubFileName) {
+          return [{
+            ...metadata,
+            thumbnailIpfsHash: null,
+            coverData: null
+          }]
+        } else {
+          return []
+        }
       }
-      return metadata
+      return [metadata]
     })
   } else if (removedFile.fileType === 'application/epub+zip') {
     epubMetadataList.value = epubMetadataList.value.filter(
