@@ -230,6 +230,8 @@ const onFileUpload = async (event: Event) => {
     }
 
     if (files?.length) {
+      // Sort files so images are processed last,
+      // ensuring EPUB metadata is ready before assigning cover images.
       const sortedFiles = Array.from(files).sort((a, b) => {
         const isImageA = a.type.startsWith('image/')
         const isImageB = b.type.startsWith('image/')
@@ -270,12 +272,14 @@ const onFileUpload = async (event: Event) => {
               )
               if (!emptyCoverMetadata) {
                 if (epubMetadataList.value.length === 0) {
+                  // No EPUB file was uploaded — epubMetadataList is still empty
                   emptyCoverMetadata = {
                     thumbnailIpfsHash: null,
                     coverData: null
                   }
                   epubMetadataList.value.push(emptyCoverMetadata)
                 } else {
+                  // A cover image has already been assigned — only one cover is allowed
                   toast.add({
                     icon: 'i-heroicons-exclamation-circle',
                     title: 'Warning',
