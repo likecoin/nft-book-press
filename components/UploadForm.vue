@@ -129,10 +129,22 @@ interface FileRecord {
   arweaveKey?: string
 }
 
+interface epubMetadata {
+  title?: string;
+  author?: string;
+  language?: string;
+  description?: string;
+  tags?: string[];
+  epubFileName?: string;
+  thumbnailIpfsHash?: string | null;
+  thumbnailArweaveId?: string | null;
+  coverData?: string | null;
+}
+
 const fileRecords = ref<FileRecord[]>([])
 const isSizeExceeded = ref(false)
 const isDragging = ref(false)
-const epubMetadataList = ref<any[]>([])
+const epubMetadataList = ref<epubMetadata[]>([])
 
 const arweaveFee = ref(new BigNumber(0))
 const arweaveFeeMap = ref({} as any)
@@ -253,34 +265,33 @@ const onFileUpload = async (event: Event) => {
             if (fileRecord.fileType === 'application/epub+zip') {
               await processEPub({ buffer: fileBytes, file })
             } else if (fileRecord.fileType?.startsWith('image/')) {
-              let coverMetadata = epubMetadataList.value.find(
+              let emptyCoverMetadata = epubMetadataList.value.find(
                 (metadata: any) => !metadata.thumbnailIpfsHash
               )
-
-              if (coverMetadata?.thumbnailIpfsHash) {
-                toast.add({
-                  icon: 'i-heroicons-exclamation-circle',
-                  title: 'Warning',
-                  description: 'Only one cover image is allowed.',
-                  timeout: 3000,
-                  color: 'yellow'
-                })
-                return
-              }
-
-              if (!coverMetadata) {
-                coverMetadata = {
-                  thumbnailIpfsHash: null,
-                  coverData: null
+              if (!emptyCoverMetadata) {
+                if (epubMetadataList.value.length === 0) {
+                  emptyCoverMetadata = {
+                    thumbnailIpfsHash: null,
+                    coverData: null
+                  }
+                  epubMetadataList.value.push(emptyCoverMetadata)
+                } else {
+                  toast.add({
+                    icon: 'i-heroicons-exclamation-circle',
+                    title: 'Warning',
+                    description: 'Only one cover image is allowed.',
+                    timeout: 3000,
+                    color: 'yellow'
+                  })
+                  return
                 }
-                epubMetadataList.value.push(coverMetadata)
               }
 
               const coverReader = new FileReader()
               coverReader.onload = (e) => {
                 if (!e.target) { return }
-                coverMetadata.thumbnailIpfsHash = ipfsHash
-                coverMetadata.coverData = e.target.result as string
+                emptyCoverMetadata.thumbnailIpfsHash = ipfsHash
+                emptyCoverMetadata.coverData = e.target.result as string
               }
               coverReader.readAsDataURL(file)
             }
