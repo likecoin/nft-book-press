@@ -246,18 +246,36 @@ const onFileUpload = async (event: Event) => {
             if (fileRecord.fileType === 'application/epub+zip') {
               await processEPub({ buffer: fileBytes, file })
             } else if (fileRecord.fileType?.startsWith('image/')) {
-              const [coverMetadata] = epubMetadataList.value
-              if (coverMetadata && !coverMetadata.thumbnailIpfsHash) {
-                const coverReader = new FileReader()
-                coverReader.onload = (e) => {
-                  if (!e.target) {
-                    return
-                  }
-                  coverMetadata.thumbnailIpfsHash = ipfsHash
-                  coverMetadata.coverData = e.target.result as string
-                }
-                coverReader.readAsDataURL(file)
+              let coverMetadata = epubMetadataList.value.find(
+                (metadata: any) => !!metadata.thumbnailIpfsHash
+              )
+
+              if (coverMetadata?.thumbnailIpfsHash) {
+                toast.add({
+                  icon: 'i-heroicons-exclamation-circle',
+                  title: 'Warning',
+                  description: 'Only one cover image is allowed.',
+                  timeout: 3000,
+                  color: 'yellow'
+                })
+                return
               }
+
+              if (!coverMetadata) {
+                coverMetadata = {
+                  thumbnailIpfsHash: null,
+                  coverData: null
+                }
+                epubMetadataList.value.push(coverMetadata)
+              }
+
+              const coverReader = new FileReader()
+              coverReader.onload = (e) => {
+                if (!e.target) { return }
+                coverMetadata.thumbnailIpfsHash = ipfsHash
+                coverMetadata.coverData = e.target.result as string
+              }
+              coverReader.readAsDataURL(file)
             }
           }
         } else {
