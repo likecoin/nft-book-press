@@ -143,6 +143,7 @@ exports.randomFillSync = randomFillSync`
       APP_LIKE_CO_URL: process.env.APP_LIKE_CO_URL,
       NFT_MARKETPLACE_URL: process.env.NFT_MARKETPLACE_URL,
       ISCN_TOOLS_URL: process.env.ISCN_TOOLS_URL,
+      BOOK3_URL: process.env.BOOK3_URL,
       ARWEAVE_ENDPOINT: process.env.ARWEAVE_ENDPOINT
     }
   },
