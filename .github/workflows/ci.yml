@@ -13,18 +13,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18"
-          cache: "yarn"
 
       - name: Install dependencies
-        run: yarn
+        run: npm ci
 
       - name: Run linter
-        run: yarn lint
+        run: npm run lint
 
       - name: Run typecheck
-        run: yarn typecheck
+        run: npm run typecheck
 
       - name: Build project
-        run: yarn build
+        run: npm run build
         env:
           NODE_OPTIONS: --max_old_space_size=8192

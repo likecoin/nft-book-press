@@ -16,13 +16,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18"
-          cache: "yarn"
 
       - name: Install dependencies
-        run: yarn
+        run: npm ci
 
       - name: Generate
-        run: NUXT_APP_BASE_URL=/ yarn generate:production
+        run: NUXT_APP_BASE_URL=/ npm run generate:production
         env:
           GA_TRACKING_ID: ${{ vars.GA_TRACKING_ID }}
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
