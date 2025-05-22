@@ -160,6 +160,17 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
     return data
   }
 
+  async function uploadSignImages (payload : FormData, classId: string) {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId}/image/upload`, {
+      method: 'POST',
+      body: payload,
+      headers: {
+        authorization: `Bearer ${token.value}`
+      }
+    })
+    return data
+  }
+
   return {
     token,
     wallet: sessionWallet,
@@ -177,6 +188,7 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
     newBookListing,
     updateBookListingSetting,
     updateEditionPrice,
-    addEditionPrice
+    addEditionPrice,
+    uploadSignImages
   }
 })
