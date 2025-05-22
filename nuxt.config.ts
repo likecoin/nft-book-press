@@ -1,5 +1,4 @@
 import path from 'path'
-import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 const {
   SENTRY_ORG,
@@ -66,32 +65,23 @@ export default defineNuxtConfig({
   },
 
   alias: {
-    // polyfill process
-    process: path.resolve(__dirname, 'node_modules/unenv/runtime/node/process')
+    // fix uenv and / suffix mess up
+    'string_decoder/': path.resolve(__dirname, 'node_modules/unenv/runtime/node/string_decoder')
   },
   vite: {
-    define: {
-      global: 'globalThis'
-    },
     optimizeDeps: {
       include: ['eventemitter3']
     },
-    plugins: [
-      nodePolyfills({
-        // global breaks on dev
-        globals: {
-          process: false,
-          Buffer: false,
-          global: false
-        }
-      })
-    ],
     vue: {
       script: {
         defineModel: true,
         propsDestructure: true
       }
     }
+  },
+
+  experimental: {
+    clientNodeCompat: true
   },
 
   runtimeConfig: {
