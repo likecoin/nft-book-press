@@ -76,13 +76,11 @@ const isLoading = ref(false)
 const iscnData = ref<any>(null)
 const localISCNId = ref('')
 
-const classData = ref<any>(null)
 const classMaxSupply = ref<number | undefined>(undefined)
 const classCreateData = ref<any>(null)
 
 const nftMintListData = ref<any>([])
 const nftMintDefaultData = ref<any>(null)
-const nftData = ref<any>(null)
 const existingNftCount = ref(0)
 
 const classId = ref<string>(route.params.classId as string || '')
@@ -169,10 +167,6 @@ async function onClassFileInput () {
     const classData = (data as any).class
 
     return classData
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.error(err)
-    error.value = (err as Error).toString()
   } finally {
     isLoading.value = false
   }
@@ -257,13 +251,16 @@ async function startNFTMintFlow () {
     formState.mintCount = nftMintListData.value.length
 
     if (isCreateClass.value) {
-      classData.value = await onClassFileInput()
-      classId.value = classData.value?.id
+      const classData = await onClassFileInput()
+      classId.value = classData.id
+    }
+    if (!classId.value) {
+      throw new Error('INVALID_CLASS_ID')
     }
     await mintNFTs()
-    if (classData.value?.id) {
+    if (classId.value) {
       emit('submit', {
-        classId: classData.value?.id,
+        classId: classId.value,
         nftMintCount: formState.mintCount,
         prefix: formState.prefix
       })
@@ -317,16 +314,12 @@ async function mintNFTs () {
         metadata: data
       }
     })
-    const res = await signMintNFT(
+    await signMintNFT(
       nfts,
       classId.value,
       signer.value,
       wallet.value
     )
-    nftData.value = res
-    return classData.value
-  } catch (err) {
-    throw new Error('MINT_NFT_ERROR:' + (err as Error).toString())
   } finally {
     isLoading.value = false
   }
