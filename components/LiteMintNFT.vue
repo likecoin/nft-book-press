@@ -282,6 +282,7 @@ async function mintNFTs () {
       }
     })
     const fromTokenId = await getClassCurrentTokenId(classId.value)
+    const { BOOK3_URL } = useRuntimeConfig().public
     const res = await writeContractAsync({
       address: classId.value as `0x${string}`,
       abi: LIKE_NFT_CLASS_ABI,
@@ -292,7 +293,7 @@ async function mintNFTs () {
         Array(formState.mintCount).fill(''),
         nfts.map((nft, index) => JSON.stringify({
           image: nft.metadata.image,
-          external_url: nft.metadata.external_url || '',
+          external_url: `${BOOK3_URL}/store/${classId.value}/${Number(fromTokenId) + index}`,
           description: `Copy #${Number(fromTokenId) + index} of ${nft.metadata.name}`,
           name: `${nft.metadata.name} #${Number(fromTokenId) + index}`,
           attributes: nft.metadata.attributes || []
