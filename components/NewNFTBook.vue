@@ -756,12 +756,6 @@ function validate (prices: any[]) {
         message: 'Please input product name'
       })
     }
-    if (price.isAutoDeliver && !price.autoMemo) {
-      errors.push({
-        path: 'autoMemo',
-        message: 'Please input auto delivery memo'
-      })
-    }
     if (price.hasShipping && !shippingRates.value.length) {
       errors.push({
         path: 'shipping',
