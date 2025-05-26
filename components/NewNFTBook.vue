@@ -932,7 +932,9 @@ async function submitNewClass () {
       mustClaimToView: true,
       enableCustomMessagePage: shouldEnableCustomMessagePage,
       hideDownload: hideDownload.value,
-      autoDeliverNFTsTxHash
+      autoDeliverNFTsTxHash,
+      signImage: signatureImage.value,
+      memoImage: memoImage.value
     })
     emit('submit')
   } catch (err) {
@@ -984,7 +986,9 @@ async function submitEditedClass () {
 
     await updateEditionPrice(classId.value as string, editionIndex.value, {
       autoDeliverNFTsTxHash,
-      price: editedPrice
+      price: editedPrice,
+      signImage: signatureImage.value,
+      memoImage: memoImage.value
     })
     emit('submit')
   } catch (err) {
@@ -1025,7 +1029,9 @@ async function addNewEdition () {
     const price = p[0]
     await bookStoreApiStore.addEditionPrice(classId.value.toString(), (editionIndex.value || 0).toString(), {
       price,
-      autoDeliverNFTsTxHash
+      autoDeliverNFTsTxHash,
+      signImage: signatureImage.value,
+      memoImage: memoImage.value
     })
 
     emit('submit')
