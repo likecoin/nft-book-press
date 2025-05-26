@@ -154,6 +154,19 @@
                         v-model="p.autoMemo"
                         placeholder="Thank you for your support. It means a lot to me."
                       />
+                      <div v-if="p.deliveryMethod === 'auto'" class="pl-8 space-y-2">
+                        <UFormGroup>
+                          <template #label>
+                            <p>Handwritten Message / 手寫留言</p>
+                            <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 10MB</span>
+                          </template>
+                          <UInput
+                            type="file"
+                            accept="image/*"
+                            @change="(e) => onImgUpload(e, 'memoImage')"
+                          />
+                        </UFormGroup>
+                      </div>
                     </UFormGroup>
                   </div>
                 </div>
@@ -176,7 +189,7 @@
                       <UInput
                         type="file"
                         accept="image/*"
-                        @change="(e)=>onFileUpload(e, 'autographImage', index)"
+                        @change="(e) => onImgUpload(e, 'signatureImage')"
                       />
                     </UFormGroup>
                   </div>
@@ -427,8 +440,9 @@ import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
 import { useNftStore } from '~/stores/nft'
 import { getPortfolioURL } from '~/utils'
-import { escapeHtml, sanitizeHtml, getFileInfo } from '~/utils/newClass'
+import { escapeHtml, sanitizeHtml } from '~/utils/newClass'
 import { sendNFTsToAPIWallet } from '~/utils/cosmos'
+import { fileToBase64 } from '~/utils/uploadFile'
 import { getApiEndpoints } from '~/constant/api'
 
 const { LCD_URL, LIKE_CO_API } = useRuntimeConfig().public
@@ -498,6 +512,9 @@ const stripeConnectWallet = ref('')
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
 const iscnData = ref<any>(null)
+
+const signatureImage = ref<string>('')
+const memoImage = ref<string>('')
 
 const toolbarOptions = ref<ToolbarNames[]>([
   'bold',
@@ -683,24 +700,26 @@ function isContentFingerPrintEncrypted (contentFingerprints: any[]) {
   })
 }
 
-async function onFileUpload (files: FileList, key: string, index: number) {
-  try {
-    if (files?.length) {
-      const file = files[0]
-      if (file.size < UPLOAD_FILESIZE_MAX) {
-        const info = await getFileInfo(file)
-        if (info) {
-          const { ipfsHash } = info
-          prices.value[index][key] = ipfsHash
-        }
-      } else {
-        error.value = 'File size exceeds 20MB'
-      }
-    }
-  } catch (err) {
+async function onImgUpload (
+  files: FileList | null,
+  key: 'signatureImage' | 'memoImage' = 'signatureImage'
+) {
+  if (!files?.length) { return }
+
+  const file = files[0]
+  if (file.size > UPLOAD_FILESIZE_MAX) {
+    error.value = '檔案超過 20MB 限制'
+    return
+  }
+
+  const base64String = (await fileToBase64(file)).trim()
+  if (key === 'signatureImage') {
+    signatureImage.value = base64String
+  } else if (key === 'memoImage') {
+    memoImage.value = base64String
+  } else {
     // eslint-disable-next-line no-console
-    console.error('File upload error:', err)
-    error.value = 'Failed to upload file'
+    console.warn(`Unknown upload key: ${key}`)
   }
 }
 
