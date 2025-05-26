@@ -798,8 +798,7 @@ function mapPrices (prices: any) {
     isUnlisted: p.isUnlisted ?? false,
     autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
     hasShipping: p.hasShipping || false,
-    isPhysicalOnly: p.isPhysicalOnly || false,
-    autographImage: p.autographImage || ''
+    isPhysicalOnly: p.isPhysicalOnly || false
   }))
 }
 
