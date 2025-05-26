@@ -154,6 +154,19 @@
                         v-model="p.autoMemo"
                         placeholder="Thank you for your support. It means a lot to me."
                       />
+                      <div v-if="p.deliveryMethod === 'auto'" class="pl-8 space-y-2">
+                        <UFormGroup>
+                          <template #label>
+                            <p>Handwritten Message / 手寫留言</p>
+                            <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 10MB</span>
+                          </template>
+                          <UInput
+                            type="file"
+                            accept="image/*"
+                            @change="(e) => onImgUpload(e, 'memoImage')"
+                          />
+                        </UFormGroup>
+                      </div>
                     </UFormGroup>
                   </div>
                 </div>
@@ -167,6 +180,19 @@
                     name="deliveryMethod"
                     label="Manual delivery / 手動發書"
                   />
+                  <div v-if="p.deliveryMethod === 'manual'" class="pl-8 space-y-2">
+                    <UFormGroup>
+                      <template #label>
+                        <p>Autograph image / 簽名圖</p>
+                        <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 10MB</span>
+                      </template>
+                      <UInput
+                        type="file"
+                        accept="image/*"
+                        @change="(e) => onImgUpload(e, 'signatureImage')"
+                      />
+                    </UFormGroup>
+                  </div>
                 </div>
               </div>
 
@@ -416,6 +442,7 @@ import { useNftStore } from '~/stores/nft'
 import { getPortfolioURL } from '~/utils'
 import { escapeHtml, sanitizeHtml } from '~/utils/newClass'
 import { sendNFTsToAPIWallet } from '~/utils/cosmos'
+import { fileToBase64 } from '~/utils/uploadFile'
 import { getApiEndpoints } from '~/constant/api'
 
 const { LCD_URL, LIKE_CO_API } = useRuntimeConfig().public
@@ -429,6 +456,8 @@ const { fetchStripeConnectStatusByWallet } = stripeStore
 const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
 const { token } = storeToRefs(bookStoreApiStore)
 const nftStore = useNftStore()
+
+const UPLOAD_FILESIZE_MAX = 20 * 1024 * 1024
 
 const emit = defineEmits(['submit'])
 const route = useRoute()
@@ -483,6 +512,9 @@ const stripeConnectWallet = ref('')
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
 const iscnData = ref<any>(null)
+
+const signatureImage = ref<string>('')
+const memoImage = ref<string>('')
 
 const toolbarOptions = ref<ToolbarNames[]>([
   'bold',
@@ -666,6 +698,29 @@ function isContentFingerPrintEncrypted (contentFingerprints: any[]) {
   return contentFingerprints.some((fingerprint) => {
     return !!fingerprint.startsWith(arweaveLinkEndpoint) || fingerprint.includes('?key=')
   })
+}
+
+async function onImgUpload (
+  files: FileList | null,
+  key: 'signatureImage' | 'memoImage' = 'signatureImage'
+) {
+  if (!files?.length) { return }
+
+  const file = files[0]
+  if (file.size > UPLOAD_FILESIZE_MAX) {
+    error.value = '檔案超過 20MB 限制'
+    return
+  }
+
+  const base64String = (await fileToBase64(file)).trim()
+  if (key === 'signatureImage') {
+    signatureImage.value = base64String
+  } else if (key === 'memoImage') {
+    memoImage.value = base64String
+  } else {
+    // eslint-disable-next-line no-console
+    console.warn(`Unknown upload key: ${key}`)
+  }
 }
 
 function addMorePrice () {
@@ -865,7 +920,7 @@ async function submitNewClass () {
     }
 
     const shouldEnableCustomMessagePage =
-      prices.value.some((price: any) => price.deliveryMethod === 'manual')
+      prices.value.some((price: any) => price.deliveryMethod === 'manual') || memoImage.value
 
     await newBookListing(classId.value as string, {
       defaultPaymentCurrency: 'USD',
@@ -877,7 +932,9 @@ async function submitNewClass () {
       mustClaimToView: true,
       enableCustomMessagePage: shouldEnableCustomMessagePage,
       hideDownload: hideDownload.value,
-      autoDeliverNFTsTxHash
+      autoDeliverNFTsTxHash,
+      signImage: signatureImage.value,
+      memoImage: memoImage.value
     })
     emit('submit')
   } catch (err) {
@@ -929,7 +986,9 @@ async function submitEditedClass () {
 
     await updateEditionPrice(classId.value as string, editionIndex.value, {
       autoDeliverNFTsTxHash,
-      price: editedPrice
+      price: editedPrice,
+      signImage: signatureImage.value,
+      memoImage: memoImage.value
     })
     emit('submit')
   } catch (err) {
@@ -970,7 +1029,9 @@ async function addNewEdition () {
     const price = p[0]
     await bookStoreApiStore.addEditionPrice(classId.value.toString(), (editionIndex.value || 0).toString(), {
       price,
-      autoDeliverNFTsTxHash
+      autoDeliverNFTsTxHash,
+      signImage: signatureImage.value,
+      memoImage: memoImage.value
     })
 
     emit('submit')
