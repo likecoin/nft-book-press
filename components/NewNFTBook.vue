@@ -920,7 +920,7 @@ async function submitNewClass () {
     }
 
     const shouldEnableCustomMessagePage =
-      prices.value.some((price: any) => price.deliveryMethod === 'manual')
+      prices.value.some((price: any) => price.deliveryMethod === 'manual') || memoImage.value
 
     await newBookListing(classId.value as string, {
       defaultPaymentCurrency: 'USD',
