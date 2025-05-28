@@ -158,11 +158,11 @@
                         <UFormGroup>
                           <template #label>
                             <p>Handwritten Message / 手寫留言</p>
-                            <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 10MB</span>
+                            <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 1MB</span>
                           </template>
                           <UInput
                             type="file"
-                            accept="image/*"
+                            accept="image/png"
                             @change="(e) => onImgUpload(e, 'memoImage')"
                           />
                         </UFormGroup>
@@ -184,11 +184,11 @@
                     <UFormGroup>
                       <template #label>
                         <p>Autograph image / 簽名圖</p>
-                        <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 10MB</span>
+                        <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 1MB</span>
                       </template>
                       <UInput
                         type="file"
-                        accept="image/*"
+                        accept="image/png"
                         @change="(e) => onImgUpload(e, 'signatureImage')"
                       />
                     </UFormGroup>
@@ -457,7 +457,7 @@ const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
 const { token } = storeToRefs(bookStoreApiStore)
 const nftStore = useNftStore()
 
-const UPLOAD_FILESIZE_MAX = 20 * 1024 * 1024
+const UPLOAD_FILESIZE_MAX = 1 * 1024 * 1024
 
 const emit = defineEmits(['submit'])
 const route = useRoute()
@@ -707,8 +707,12 @@ async function onImgUpload (
   if (!files?.length) { return }
 
   const file = files[0]
+  if (file.type !== 'image/png') {
+    error.value = '僅支援 PNG 檔案'
+    return
+  }
   if (file.size > UPLOAD_FILESIZE_MAX) {
-    error.value = '檔案超過 20MB 限制'
+    error.value = '檔案超過 1MB 限制'
     return
   }
 
