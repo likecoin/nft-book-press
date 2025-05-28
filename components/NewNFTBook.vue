@@ -716,7 +716,7 @@ async function onImgUpload (
     return
   }
 
-  const base64String = (await fileToBase64(file)).trim()
+  const base64String = await fileToBase64(file)
   if (key === 'signatureImage') {
     signatureImage.value = base64String
   } else if (key === 'memoImage') {
