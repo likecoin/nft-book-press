@@ -8,16 +8,14 @@ export const useNFTContractReader = () => {
       abi: LIKE_NFT_CLASS_ABI,
       address: classId as any,
       functionName: 'contractURI'
-    })
+    }) as string
 
-    if (!(dataString as string)?.startsWith('data:application/json')) {
+    const dataUriPattern = /^data:application\/json(; ?charset=utf-8|;utf8)?,/i
+    if (!dataUriPattern.test(dataString)) {
       return null
     }
-
     try {
-      const data = JSON.parse(
-        (dataString as string).replace('data:application/json;utf8,', '')
-      )
+      const data = JSON.parse(dataString.replace(dataUriPattern, ''))
       return data
     } catch (e) {
       return null
@@ -38,16 +36,13 @@ export const useNFTContractReader = () => {
       address: classId as any,
       functionName: 'tokenURI',
       args: [tokenId]
-    })
-
-    if (!(dataString as string)?.startsWith('data:application/json')) {
+    }) as string
+    const dataUriPattern = /^data:application\/json(; ?charset=utf-8|;utf8)?,/i
+    if (!dataUriPattern.test(dataString)) {
       return null
     }
-
     try {
-      const data = JSON.parse(
-        (dataString as string).replace('data:application/json;utf8,', '')
-      )
+      const data = JSON.parse(dataString.replace(dataUriPattern, ''))
       return data
     } catch (e) {
       return null
