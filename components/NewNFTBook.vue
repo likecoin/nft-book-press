@@ -184,7 +184,7 @@
                     <UFormGroup>
                       <template #label>
                         <p>Autograph image / 簽名圖</p>
-                        <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 1MB</span>
+                        <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 1MB，建議尺寸為 600 x 200 </span>
                       </template>
                       <UInput
                         type="file"
