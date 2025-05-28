@@ -154,19 +154,20 @@
                         v-model="p.autoMemo"
                         placeholder="Thank you for your support. It means a lot to me."
                       />
-                      <div v-if="p.deliveryMethod === 'auto'" class="pl-8 space-y-2">
+
+                      <!-- <div v-if="p.deliveryMethod === 'auto'" class="pl-8 space-y-2">
                         <UFormGroup>
                           <template #label>
-                            <p>Handwritten Message / 手寫留言</p>
-                            <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 1MB</span>
+                          <p>Handwritten Message / 手寫留言</p>
+                          <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 1MB</span>
                           </template>
                           <UInput
-                            type="file"
-                            accept="image/png"
-                            @change="(e) => onImgUpload(e, 'memoImage')"
+                          type="file"
+                          accept="image/png"
+                          @change="(e) => onImgUpload(e, 'memoImage')"
                           />
                         </UFormGroup>
-                      </div>
+                        </div> -->
                     </UFormGroup>
                   </div>
                 </div>
