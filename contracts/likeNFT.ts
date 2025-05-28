@@ -244,6 +244,19 @@ export const LIKE_NFT_ABI: Abi = [
   },
   {
     inputs: [],
+    name: 'getRoyaltyReceiver',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [],
     name: 'implementation',
     outputs: [
       {
@@ -537,6 +550,19 @@ export const LIKE_NFT_ABI: Abi = [
     inputs: [
       {
         internalType: 'address',
+        name: 'royaltyReceiver',
+        type: 'address'
+      }
+    ],
+    name: 'setRoyaltyReceiver',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
         name: 'newOwner',
         type: 'address'
       }
@@ -809,6 +835,25 @@ export const LIKE_NFT_CLASS_ABI: Abi = [
     anonymous: false,
     inputs: [
       {
+        indexed: false,
+        internalType: 'address',
+        name: 'previousAdmin',
+        type: 'address'
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'newAdmin',
+        type: 'address'
+      }
+    ],
+    name: 'AdminChanged',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: true,
         internalType: 'address',
         name: 'owner',
@@ -853,6 +898,19 @@ export const LIKE_NFT_CLASS_ABI: Abi = [
       }
     ],
     name: 'ApprovalForAll',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'beacon',
+        type: 'address'
+      }
+    ],
+    name: 'BeaconUpgraded',
     type: 'event'
   },
   {
@@ -1025,6 +1083,19 @@ export const LIKE_NFT_CLASS_ABI: Abi = [
     type: 'event'
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: 'address',
+        name: 'implementation',
+        type: 'address'
+      }
+    ],
+    name: 'Upgraded',
+    type: 'event'
+  },
+  {
     inputs: [],
     name: 'DEFAULT_ADMIN_ROLE',
     outputs: [
@@ -1148,7 +1219,7 @@ export const LIKE_NFT_CLASS_ABI: Abi = [
     ],
     name: 'batchTransferWithMemo',
     outputs: [],
-    stateMutability: 'payable',
+    stateMutability: 'nonpayable',
     type: 'function'
   },
   {
@@ -1830,7 +1901,7 @@ export const LIKE_NFT_CLASS_ABI: Abi = [
     ],
     name: 'transferWithMemo',
     outputs: [],
-    stateMutability: 'payable',
+    stateMutability: 'nonpayable',
     type: 'function'
   },
   {
