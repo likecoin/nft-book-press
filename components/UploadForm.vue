@@ -142,6 +142,10 @@ interface epubMetadata {
   coverData?: string | null;
 }
 
+const props = defineProps({
+  defaultEncrypted: { type: Boolean, default: true }
+})
+
 const fileRecords = ref<FileRecord[]>([])
 const isSizeExceeded = ref(false)
 const isDragging = ref(false)
@@ -152,7 +156,7 @@ const arweaveFeeMap = ref({} as any)
 const arweaveFeeTargetAddress = ref('')
 const sentArweaveTransactionInfo = ref(new Map())
 const balance = ref(new BigNumber(0))
-const isEncryptEBookData = ref(true)
+const isEncryptEBookData = ref(props.defaultEncrypted)
 
 const emit = defineEmits(['arweaveUploaded', 'submit', 'fileReady', 'fileUploadStatus'])
 const uploadStatus = ref('')
