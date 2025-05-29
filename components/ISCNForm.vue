@@ -207,6 +207,7 @@
         </template>
         <UploadForm
           ref="uploadFormRef"
+          :default-encrypted="isContentFingerprintsEncrypted"
           @file-upload-status="(status) => (uploadStatus = status)"
           @file-ready="(records) => (fileRecords = records)"
           @submit="handleUploadSubmit"
@@ -234,6 +235,7 @@
 <script setup lang="ts">
 import { typeOptions, licenseOptions, languageOptions } from '~/constant/index'
 import { useFileUpload } from '~/composables/useFileUpload'
+import { getApiEndpoints } from '~/constant/api'
 
 const downloadTypeOptions = [
   { label: 'EPUB', value: 'epub' },
@@ -281,6 +283,15 @@ const hasFiles = computed(() => {
 
 const shouldDisableAction = computed(() => {
   return uploadStatus.value !== ''
+})
+
+const isContentFingerprintsEncrypted = computed(() => {
+  const contentFingerprints = formData.value.contentFingerprints.map(f => f.url)
+  const apiEndpoints = getApiEndpoints()
+  const arweaveLinkEndpoint = apiEndpoints.API_GET_ARWEAVE_V2_LINK
+  return contentFingerprints.some((fingerprint) => {
+    return !!fingerprint.startsWith(arweaveLinkEndpoint) || fingerprint.includes('?key=')
+  })
 })
 
 const addContentFingerprint = () => {

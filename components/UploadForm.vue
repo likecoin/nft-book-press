@@ -136,6 +136,10 @@ interface FileRecord {
 const fileRecords = ref<FileRecord[]>([])
 const { sendTransactionAsync } = useSendTransaction()
 
+const props = defineProps({
+  defaultEncrypted: { type: Boolean, default: true }
+})
+
 const isSizeExceeded = ref(false)
 const isDragging = ref(false)
 const epubMetadataList = ref<any[]>([])
@@ -144,7 +148,7 @@ const arweaveFee = ref(new BigNumber(0))
 const arweaveFeeMap = ref({} as any)
 const arweaveFeeTargetAddress = ref('')
 const sentArweaveTransactionInfo = ref(new Map())
-const isEncryptEBookData = ref(true)
+const isEncryptEBookData = ref(props.defaultEncrypted)
 
 const emit = defineEmits(['arweaveUploaded', 'submit', 'fileReady', 'fileUploadStatus'])
 const uploadStatus = ref('')
