@@ -57,7 +57,6 @@
 <script setup lang="ts">
 import { useWriteContract } from '@wagmi/vue'
 import { storeToRefs } from 'pinia'
-import { waitForTransactionReceipt } from '@wagmi/vue/actions'
 
 import { useWalletStore } from '~/stores/wallet'
 import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
@@ -65,6 +64,7 @@ import { useToastComposable } from '~/composables/useToast'
 
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
 import { config } from '~/utils/wagmi/config'
+import { waitForTransactionReceipt } from '~/utils/evm'
 
 const route = useRoute()
 const { writeContractAsync } = useWriteContract()
