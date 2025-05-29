@@ -163,7 +163,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWriteContract } from '@wagmi/vue'
-import { waitForTransactionReceipt } from '@wagmi/vue/actions'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
@@ -173,6 +172,7 @@ import { useMessageCharCount } from '~/composables/useMessageCharCount'
 import { AUTHOR_MESSAGE_LIMIT } from '~/constant'
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
 import { config } from '~/utils/wagmi/config'
+import { waitForTransactionReceipt } from '~/utils/evm'
 
 const { LIKE_CO_API } = useRuntimeConfig().public
 const store = useWalletStore()

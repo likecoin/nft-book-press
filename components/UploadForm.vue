@@ -96,7 +96,6 @@ import { storeToRefs } from 'pinia'
 import ePub from 'epubjs'
 import { BigNumber } from 'bignumber.js'
 import { useSendTransaction, useBalance } from '@wagmi/vue'
-import { waitForTransactionReceipt } from '@wagmi/vue/actions'
 import { parseEther } from 'viem'
 import { encryptDataWithAES } from '~/utils/encryption'
 import { fileToArrayBuffer, digestFileSHA256, calculateIPFSHash, sleep } from '~/utils/index'
@@ -107,6 +106,7 @@ import {
 import { useWalletStore } from '~/stores/wallet'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { config } from '~/utils/wagmi/config'
+import { waitForTransactionReceipt } from '~/utils/evm'
 
 const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024
 
