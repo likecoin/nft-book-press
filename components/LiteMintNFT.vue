@@ -237,27 +237,8 @@ async function mintNFTs () {
         ...otherData
       } = nftMintListData?.value?.[i] || {}
       const dataMetadata = JSON.parse(dataMetadataString || '{}')
-      const data = { attributes: [], ...defaultMetadata, ...dataMetadata }
+      const data = { ...defaultMetadata, ...dataMetadata }
       if (dataImage) { data.image = dataImage }
-      if (data.author) {
-        data.attributes.push({
-          trait_type: 'Author',
-          value: data.author.name || data.author
-        })
-      }
-      if (data.publisher) {
-        data.attributes.push({
-          trait_type: 'Publisher',
-          value: data.publisher
-        })
-      }
-      if (data.datePublished) {
-        data.attributes.push({
-          trait_type: 'Publish Date',
-          display_type: 'date',
-          value: ((new Date(data.datePublished)).getTime() || 0) / 1000
-        })
-      }
       Object.entries(otherData).forEach(([key, value]) => {
         if (value) {
           try {
@@ -287,7 +268,7 @@ async function mintNFTs () {
           external_url: `${BOOK3_URL}/store/${classId.value}/${Number(fromTokenId) + index}`,
           description: `Copy #${Number(fromTokenId) + index} of ${nft.metadata.name}`,
           name: `${nft.metadata.name} #${Number(fromTokenId) + index}`,
-          attributes: nft.metadata.attributes || []
+          attributes: nft.metadata.attributes
         }))
       ]
     })
