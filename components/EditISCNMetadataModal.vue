@@ -115,7 +115,7 @@ const { payload } = useISCN(iscnData)
 const formError = computed(() => {
   const requiredFields = {
     title: !!iscnData.value.title,
-    description: !!iscnData.value.description,
+    description: !!iscnData.value.description && iscnData.value.description.length <= 1000,
     authorName: !!iscnData.value.author.name,
     contentUrl: !!iscnData.value.contentFingerprints.some(f => !!f.url)
   }
