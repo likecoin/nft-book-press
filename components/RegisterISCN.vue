@@ -29,7 +29,8 @@ import { useFileUpload } from '~/composables/useFileUpload'
 import { estimateISCNTxGasAndFee, signISCNTx } from '~/utils/iscn'
 import { useWalletStore } from '~/stores/wallet'
 import { getAccountBalance } from '~/utils/cosmos'
-import { ISCN_GAS_MULTIPLIER } from '~/constant/index'
+import { ISCN_GAS_MULTIPLIER, MAX_DESCRIPTION_LENGTH } from '~/constant/index'
+
 import { useISCN } from '~/composables/useISCN'
 import { useToastComposable } from '~/composables/useToast'
 
@@ -80,9 +81,11 @@ const totalFee = computed(() => {
 const { payload } = useISCN(iscnData)
 
 const formError = computed(() => {
+  const desc = iscnData.value.description || ''
+
   const requiredFields = {
     title: !!iscnData.value.title,
-    description: !!iscnData.value.description && iscnData.value.description.length <= 1000,
+    description: desc ? desc.length <= MAX_DESCRIPTION_LENGTH : false,
     authorName: !!iscnData.value.author.name,
     contentUrl: !!iscnData.value.contentFingerprints.some(f => !!f.url)
   }

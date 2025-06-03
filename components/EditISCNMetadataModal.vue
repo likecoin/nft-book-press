@@ -55,7 +55,7 @@ import { useNftStore } from '~/stores/nft'
 import { useIscnStore } from '~/stores/iscn'
 import { signISCNTx, formatISCNTxPayload } from '~/utils/iscn'
 import { useWalletStore } from '~/stores/wallet'
-import { ISCN_GAS_FEE, UPDATE_ISCN_GAS_MULTIPLIER } from '~/constant/index'
+import { ISCN_GAS_FEE, UPDATE_ISCN_GAS_MULTIPLIER, MAX_DESCRIPTION_LENGTH } from '~/constant/index'
 import { useISCN } from '~/composables/useISCN'
 
 const iscnStore = useIscnStore()
@@ -113,9 +113,10 @@ const iscnData = ref({
 const { payload } = useISCN(iscnData)
 
 const formError = computed(() => {
+  const desc = iscnData.value.description || ''
   const requiredFields = {
     title: !!iscnData.value.title,
-    description: !!iscnData.value.description && iscnData.value.description.length <= 1000,
+    description: desc ? desc.length <= MAX_DESCRIPTION_LENGTH : false,
     authorName: !!iscnData.value.author.name,
     contentUrl: !!iscnData.value.contentFingerprints.some(f => !!f.url)
   }

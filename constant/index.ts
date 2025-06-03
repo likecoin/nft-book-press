@@ -58,3 +58,5 @@ export const licenseOptions = [
   { label: 'CC0 (Public Domain)', value: 'https://creativecommons.org/publicdomain/zero/1.0/' },
   { label: 'Other', value: 'Other' }
 ]
+
+export const MAX_DESCRIPTION_LENGTH = 1000
