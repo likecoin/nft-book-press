@@ -12,7 +12,6 @@ export function useISCN (iscnData: Ref<any>) {
   })
 
   const payload = computed(() => ({
-    ...iscnData.value,
     type: iscnData.value.type,
     name: iscnData.value.title,
     description: iscnData.value.description,
