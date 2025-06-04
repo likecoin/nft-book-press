@@ -154,20 +154,6 @@
                         v-model="p.autoMemo"
                         placeholder="Thank you for your support. It means a lot to me."
                       />
-
-                      <!-- <div v-if="p.deliveryMethod === 'auto'" class="pl-8 space-y-2">
-                        <UFormGroup>
-                          <template #label>
-                          <p>Handwritten Message / 手寫留言</p>
-                          <span class="text-gray-500 text-[12px]">僅限 png 圖檔，檔案大小不超過 1MB</span>
-                          </template>
-                          <UInput
-                          type="file"
-                          accept="image/png"
-                          @change="(e) => onImgUpload(e, 'memoImage')"
-                          />
-                        </UFormGroup>
-                        </div> -->
                     </UFormGroup>
                   </div>
                 </div>
@@ -514,7 +500,6 @@ const isUsingDefaultAccount = ref(true)
 const iscnData = ref<any>(null)
 
 const signatureImage = ref<File | null>(null)
-const memoImage = ref<File | null>(null)
 
 const toolbarOptions = ref<ToolbarNames[]>([
   'bold',
@@ -718,8 +703,6 @@ function onImgUpload (
 
   if (key === 'signatureImage') {
     signatureImage.value = file
-  } else if (key === 'memoImage') {
-    memoImage.value = file
   } else {
     // eslint-disable-next-line no-console
     console.warn(`Unknown upload key: ${key}`)
@@ -848,19 +831,14 @@ async function onSubmit () {
         await addNewEdition()
       }
     }
-    // Upload signature and memo images if they exist
-    if (signatureImage.value || memoImage.value) {
+    // Upload signature image
+    if (signatureImage.value) {
       const form = new FormData()
-      const signedMessageText = p.find(price => price.isAutoDeliver)?.autoMemo || ''
 
       if (signatureImage.value) {
         form.append('signImage', signatureImage.value)
       }
-      if (memoImage.value) {
-        form.append('memoImage', memoImage.value)
-      }
 
-      form.append('signedMessageText', signedMessageText)
       await uploadSignImages(form, classId.value)
     }
     emit('submit')
@@ -939,7 +917,7 @@ async function submitNewClass () {
     }
 
     const shouldEnableCustomMessagePage =
-      prices.value.some((price: any) => price.deliveryMethod === 'manual') || memoImage.value
+      prices.value.some((price: any) => price.deliveryMethod === 'manual')
 
     await newBookListing(classId.value as string, {
       defaultPaymentCurrency: 'USD',
