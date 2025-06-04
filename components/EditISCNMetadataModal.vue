@@ -110,9 +110,9 @@ const iscnFormData = ref({
   coverUrl: ''
 })
 
-const iscnOnchainData = ref({} as any)
+const iscnChainData = ref({} as any)
 
-const { payload } = useISCN({ iscnFormData, iscnOnchainData })
+const { payload } = useISCN({ iscnFormData, iscnChainData })
 
 const formError = computed(() => {
   const desc = iscnFormData.value.description || ''
@@ -150,7 +150,7 @@ watchEffect(async () => {
         if (data?.records?.[0]) {
           const record = data.records[0]
           const metadata = record.data.contentMetadata
-          iscnOnchainData.value = metadata
+          iscnChainData.value = metadata
           recordVersion.value = record.data.recordVersion
 
           // Parse sameAs URLs into downloadableUrls

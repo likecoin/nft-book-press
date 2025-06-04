@@ -1,9 +1,9 @@
 export function useISCN ({
   iscnFormData,
-  iscnOnchainData = ref({})
+  iscnChainData = ref({})
 }: {
   iscnFormData: Ref<any>;
-  iscnOnchainData?: Ref<any>;
+  iscnChainData?: Ref<any>;
 }) {
   const formattedSameAsList = computed(() => {
     return iscnFormData.value.downloadableUrls
@@ -17,10 +17,10 @@ export function useISCN ({
       .filter(Boolean)
   })
 
-  const onchainData = computed(() => iscnOnchainData?.value || {})
+  const existingIscnData = computed(() => iscnChainData?.value || {})
 
   const payload = computed(() => ({
-    ...onchainData.value,
+    ...existingIscnData.value,
     type: iscnFormData.value.type,
     name: iscnFormData.value.title,
     description: iscnFormData.value.description,
