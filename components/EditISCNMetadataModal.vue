@@ -28,7 +28,7 @@
       />
       <ISCNForm
         v-else
-        v-model="iscnData"
+        v-model="iscnFormData"
       />
       <template #footer>
         <div class="w-full flex justify-center items-center gap-2">
@@ -83,7 +83,7 @@ const isSaving = ref(false)
 const isISCNLoading = ref(false)
 const recordVersion = ref(0)
 
-const iscnData = ref({
+const iscnFormData = ref({
   type: 'Book',
   title: '',
   description: '',
@@ -110,15 +110,17 @@ const iscnData = ref({
   coverUrl: ''
 })
 
-const { payload } = useISCN(iscnData)
+const iscnOnchainData = ref({} as any)
+
+const { payload } = useISCN({ iscnFormData, iscnOnchainData })
 
 const formError = computed(() => {
-  const desc = iscnData.value.description || ''
+  const desc = iscnFormData.value.description || ''
   const requiredFields = {
-    title: !!iscnData.value.title,
+    title: !!iscnFormData.value.title,
     description: desc ? desc.length <= MAX_DESCRIPTION_LENGTH : false,
-    authorName: !!iscnData.value.author.name,
-    contentUrl: !!iscnData.value.contentFingerprints.some(f => !!f.url)
+    authorName: !!iscnFormData.value.author.name,
+    contentUrl: !!iscnFormData.value.contentFingerprints.some(f => !!f.url)
   }
 
   return Object.entries(requiredFields)
@@ -148,6 +150,7 @@ watchEffect(async () => {
         if (data?.records?.[0]) {
           const record = data.records[0]
           const metadata = record.data.contentMetadata
+          iscnOnchainData.value = metadata
           recordVersion.value = record.data.recordVersion
 
           // Parse sameAs URLs into downloadableUrls
@@ -169,7 +172,7 @@ watchEffect(async () => {
             }
           }
 
-          iscnData.value = {
+          iscnFormData.value = {
             ...metadata,
             recordNotes: record.data?.recordNotes,
             stakeholders: record.data?.stakeholders,

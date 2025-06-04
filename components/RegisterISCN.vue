@@ -1,6 +1,6 @@
 <template>
   <div>
-    <ISCNForm v-model="iscnData" />
+    <ISCNForm v-model="iscnFormData" />
     <UModal
       :model-value="!!uploadStatus"
       :prevent-close="true"
@@ -42,7 +42,7 @@ const { initIfNecessary } = walletStore
 const { stripHtmlTags, formatLanguage } = useFileUpload()
 const { showErrorToast } = useToastComposable()
 
-const iscnData = ref({
+const iscnFormData = ref({
   type: 'Book',
   title: '',
   description: '',
@@ -78,16 +78,16 @@ const totalFee = computed(() => {
   return iscnFee.value || new BigNumber(0)
 })
 
-const { payload } = useISCN(iscnData)
+const { payload } = useISCN({ iscnFormData })
 
 const formError = computed(() => {
-  const desc = iscnData.value.description || ''
+  const desc = iscnFormData.value.description || ''
 
   const requiredFields = {
-    title: !!iscnData.value.title,
+    title: !!iscnFormData.value.title,
     description: desc ? desc.length <= MAX_DESCRIPTION_LENGTH : false,
-    authorName: !!iscnData.value.author.name,
-    contentUrl: !!iscnData.value.contentFingerprints.some(f => !!f.url)
+    authorName: !!iscnFormData.value.author.name,
+    contentUrl: !!iscnFormData.value.contentFingerprints.some(f => !!f.url)
   }
 
   return Object.entries(requiredFields)
@@ -105,7 +105,7 @@ watch(isFormValid, (val: boolean) => {
 onMounted(() => {
   const initialData = initializeFromSessionStorage()
   if (initialData) {
-    iscnData.value = initialData
+    iscnFormData.value = initialData
   }
   calculateISCNFee()
 })
@@ -197,7 +197,7 @@ const onSubmit = async (): Promise<void> => {
     return
   }
   if (
-    iscnData.value.contentFingerprints.length
+    iscnFormData.value.contentFingerprints.length
   ) {
     await submitToISCN()
   }
