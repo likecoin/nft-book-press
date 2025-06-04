@@ -1,6 +1,12 @@
-export function useISCN (iscnData: Ref<any>) {
+export function useISCN ({
+  iscnFormData,
+  iscnOnchainData = ref({})
+}: {
+  iscnFormData: Ref<any>;
+  iscnOnchainData?: Ref<any>;
+}) {
   const formattedSameAsList = computed(() => {
-    return iscnData.value.downloadableUrls
+    return iscnFormData.value.downloadableUrls
       .filter((download: any) => download.fileName && download.url)
       .map((download: any) => {
         if (download.fileName && download.type) {
@@ -11,26 +17,32 @@ export function useISCN (iscnData: Ref<any>) {
       .filter(Boolean)
   })
 
+  const onchainData = computed(() => iscnOnchainData?.value || {})
+
   const payload = computed(() => ({
-    type: iscnData.value.type,
-    name: iscnData.value.title,
-    description: iscnData.value.description,
-    author: iscnData.value.author.name,
-    authorDescription: iscnData.value.author.description,
-    license: iscnData.value.license === 'Other'
-      ? iscnData.value.customLicense
-      : iscnData.value.license,
-    contentFingerprints: iscnData.value.contentFingerprints.map((f: any) => f.url),
-    inLanguage: iscnData.value.language,
-    publisher: iscnData.value.publisher,
-    isbn: iscnData.value.isbn,
-    datePublished: iscnData.value.publicationDate
-      ? new Date(iscnData.value.publicationDate).toISOString().split('T')[0]
+    ...onchainData.value,
+    type: iscnFormData.value.type,
+    name: iscnFormData.value.title,
+    description: iscnFormData.value.description,
+    author: iscnFormData.value.author.name,
+    authorDescription: iscnFormData.value.author.description,
+    license:
+      iscnFormData.value.license === 'Other'
+        ? iscnFormData.value.customLicense
+        : iscnFormData.value.license,
+    contentFingerprints: iscnFormData.value.contentFingerprints.map(
+      (f: any) => f.url
+    ),
+    inLanguage: iscnFormData.value.language,
+    publisher: iscnFormData.value.publisher,
+    isbn: iscnFormData.value.isbn,
+    datePublished: iscnFormData.value.publicationDate
+      ? new Date(iscnFormData.value.publicationDate).toISOString().split('T')[0]
       : undefined,
-    url: iscnData.value.bookInfoUrl,
-    tagsString: iscnData.value.tags?.join(', ') || '',
+    url: iscnFormData.value.bookInfoUrl,
+    tagsString: iscnFormData.value.tags?.join(', ') || '',
     sameAs: formattedSameAsList.value,
-    thumbnailUrl: iscnData.value.coverUrl
+    thumbnailUrl: iscnFormData.value.coverUrl
   }))
 
   return {
