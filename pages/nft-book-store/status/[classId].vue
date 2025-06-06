@@ -1122,11 +1122,13 @@ onMounted(async () => {
 
     ordersData.value = orders
     await calculateStock()
-    try {
-      await fetchStripeConnectStatusByWallet(wallet.value)
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err)
+    if (wallet.value) {
+      try {
+        await fetchStripeConnectStatusByWallet(wallet.value)
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err)
+      }
     }
     lazyFetchClassMetadataById(classId.value as string)
   } catch (err) {
