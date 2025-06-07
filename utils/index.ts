@@ -73,7 +73,7 @@ export function convertArrayOfObjectsToCSV (data: Record<string, any>[]): string
   return csvStringify(data, { header: true })
 }
 
-export function getPortfolioURL (wallet: string) {
+export function getPortfolioURL (wallet = '') {
   const { LIKER_LAND_URL } = useRuntimeConfig().public
   return `${LIKER_LAND_URL}/${wallet}`
 }

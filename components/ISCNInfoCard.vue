@@ -6,7 +6,7 @@
       </h2>
     </template>
 
-    <UFormGroup label="ISCN ID" class="text-left">
+    <UFormGroup v-if="iscnId" label="ISCN ID" class="text-left">
       <UButton
         class="font-mono"
         :label="iscnId"
@@ -17,7 +17,7 @@
       />
     </UFormGroup>
 
-    <UFormGroup label="ISCN Owner" class="text-left">
+    <UFormGroup label="Owner" class="text-left">
       <UButton
         :label="iscnOwner"
         :to="`${likerLandURL}/${encodeURIComponent(iscnOwner)}`"
@@ -27,7 +27,7 @@
       />
     </UFormGroup>
 
-    <UFormGroup label="ISCN Title">
+    <UFormGroup label="Title">
       <UInput
         :value="iscnData?.contentMetadata?.name"
         :readonly="true"
@@ -36,7 +36,7 @@
       />
     </UFormGroup>
 
-    <UFormGroup label="ISCN Description">
+    <UFormGroup label="Description">
       <UInput
         :value="iscnData?.contentMetadata?.description"
         :readonly="true"
