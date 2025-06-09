@@ -80,20 +80,7 @@ const totalFee = computed(() => {
 
 const { payload } = useISCN({ iscnFormData })
 
-const formError = computed(() => {
-  const desc = iscnFormData.value.description || ''
-
-  const requiredFields = {
-    title: !!iscnFormData.value.title,
-    description: desc ? desc.length <= MAX_DESCRIPTION_LENGTH : false,
-    authorName: !!iscnFormData.value.author.name,
-    contentUrl: !!iscnFormData.value.contentFingerprints.some(f => !!f.url)
-  }
-
-  return Object.entries(requiredFields)
-    .filter(([_, isValid]) => !isValid)
-    .map(([key]) => key.toUpperCase())
-})
+const formError = computed(() => validateISCNForm(iscnFormData.value))
 
 const isFormValid = computed(() => {
   return !formError.value?.length
@@ -187,8 +174,7 @@ const onSubmit = async (): Promise<void> => {
   uploadStatus.value = 'checking'
 
   if (!isFormValid.value) {
-    const missingFields = formError.value.join(', ')
-    showErrorToast(`Required field missing: ${missingFields}`)
+    showErrorToast(formError.value.join(', '))
     return
   }
   await calculateISCNFee()

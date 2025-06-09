@@ -24,7 +24,7 @@
     <UFormGroup
       label="Description"
       class="flex-1 text-left"
-      :error="!formData.description && 'Description is required'"
+      :error="descriptionError"
       required
     >
       <UTextarea
@@ -251,9 +251,10 @@
 </template>
 
 <script setup lang="ts">
-import { typeOptions, licenseOptions, languageOptions } from '~/constant/index'
+import { typeOptions, licenseOptions, languageOptions, MAX_DESCRIPTION_LENGTH } from '~/constant/index'
 import { useFileUpload } from '~/composables/useFileUpload'
 import { getApiEndpoints } from '~/constant/api'
+import { validateISCNForm } from '~/utils/iscn'
 
 const downloadTypeOptions = [
   { label: 'EPUB', value: 'epub' },
@@ -301,6 +302,16 @@ const hasFiles = computed(() => {
 
 const shouldDisableAction = computed(() => {
   return uploadStatus.value !== ''
+})
+
+const descriptionError = computed(() => {
+  const desc = formData.value.description || ''
+  if (!desc) {
+    return 'Description is required'
+  } else if (desc.length > MAX_DESCRIPTION_LENGTH) {
+    return `Description cannot exceed ${MAX_DESCRIPTION_LENGTH} characters`
+  }
+  return ''
 })
 
 const isContentFingerprintsEncrypted = computed(() => {

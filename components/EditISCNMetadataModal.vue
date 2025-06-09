@@ -53,9 +53,9 @@ import { BigNumber } from 'bignumber.js'
 import { storeToRefs } from 'pinia'
 import { useNftStore } from '~/stores/nft'
 import { useIscnStore } from '~/stores/iscn'
-import { signISCNTx, formatISCNTxPayload } from '~/utils/iscn'
+import { signISCNTx, formatISCNTxPayload, validateISCNForm } from '~/utils/iscn'
 import { useWalletStore } from '~/stores/wallet'
-import { ISCN_GAS_FEE, UPDATE_ISCN_GAS_MULTIPLIER, MAX_DESCRIPTION_LENGTH } from '~/constant/index'
+import { ISCN_GAS_FEE, UPDATE_ISCN_GAS_MULTIPLIER } from '~/constant/index'
 import { useISCN } from '~/composables/useISCN'
 
 const iscnStore = useIscnStore()
@@ -114,19 +114,7 @@ const iscnChainData = ref({} as any)
 
 const { payload } = useISCN({ iscnFormData, iscnChainData })
 
-const formError = computed(() => {
-  const desc = iscnFormData.value.description || ''
-  const requiredFields = {
-    title: !!iscnFormData.value.title,
-    description: desc ? desc.length <= MAX_DESCRIPTION_LENGTH : false,
-    authorName: !!iscnFormData.value.author.name,
-    contentUrl: !!iscnFormData.value.contentFingerprints.some(f => !!f.url)
-  }
-
-  return Object.entries(requiredFields)
-    .filter(([_, isValid]) => !isValid)
-    .map(([key]) => key.toUpperCase())
-})
+const formError = computed(() => validateISCNForm(iscnFormData.value))
 const isFormValid = computed(() => !formError.value?.length)
 
 watchEffect(async () => {
@@ -241,7 +229,7 @@ async function handleSave () {
   }
   if (!isFormValid.value) {
     toast.add({
-      title: `Please fill in all required fields: ${formError.value.join(', ')}`,
+      title: formError.value.join(', '),
       color: 'red'
     })
     return

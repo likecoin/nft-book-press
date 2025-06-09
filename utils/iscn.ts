@@ -3,7 +3,7 @@ import type { OfflineSigner } from '@cosmjs/proto-signing'
 import type { DeliverTxResponse } from '@cosmjs/stargate'
 import type { ISCNSignPayload } from '@likecoin/iscn-js'
 import type { ISCNRegisterPayload } from './iscn.type'
-import { ISCN_GAS_FEE, ISCN_GAS_MULTIPLIER } from '~/constant'
+import { ISCN_GAS_FEE, ISCN_GAS_MULTIPLIER, MAX_DESCRIPTION_LENGTH } from '~/constant'
 
 import { getSigningClient } from '~/utils/cosmos'
 
@@ -114,4 +114,29 @@ export async function signISCNTx (
     iscnId: newIscnId,
     txHash: res.transactionHash
   }
+}
+
+export function validateISCNForm (data: any, maxDescriptionLength = MAX_DESCRIPTION_LENGTH): string[] {
+  const errors: string[] = []
+  const desc = data.description || ''
+
+  if (!data.title) {
+    errors.push('Please fill in the title')
+  }
+
+  if (!desc) {
+    errors.push('Please fill in the description')
+  } else if (desc.length > maxDescriptionLength) {
+    errors.push(`Description cannot exceed ${maxDescriptionLength} characters`)
+  }
+
+  if (!data.author?.name) {
+    errors.push('Please fill in the author name')
+  }
+
+  if (!Array.isArray(data.contentFingerprints) || !data.contentFingerprints.some(f => !!f.url)) {
+    errors.push('Please provide at least one content URL')
+  }
+
+  return errors
 }
