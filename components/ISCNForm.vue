@@ -24,6 +24,7 @@
     <UFormGroup
       label="Description"
       class="flex-1 text-left"
+      :hint="`${formData.description.length}/${MAX_DESCRIPTION_LENGTH}`"
       :error="descriptionError"
       required
     >
