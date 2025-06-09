@@ -134,7 +134,7 @@ export function validateISCNForm (data: any, maxDescriptionLength = MAX_DESCRIPT
     errors.push('Please fill in the author name')
   }
 
-  if (!Array.isArray(data.contentFingerprints) || !data.contentFingerprints.some(f => !!f.url)) {
+  if (!Array.isArray(data.contentFingerprints) || !data.contentFingerprints.some((f: any) => !!f.url)) {
     errors.push('Please provide at least one content URL')
   }
 
