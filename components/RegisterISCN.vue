@@ -91,11 +91,12 @@ const formError = computed(() => {
   }
 
   return Object.entries(requiredFields)
-    .find(([_, isValid]) => !isValid)?.[0]?.toUpperCase() || ''
+    .filter(([_, isValid]) => !isValid)
+    .map(([key]) => key.toUpperCase())
 })
 
 const isFormValid = computed(() => {
-  return !formError.value
+  return !formError.value?.length
 })
 
 watch(isFormValid, (val: boolean) => {
@@ -186,7 +187,8 @@ const onSubmit = async (): Promise<void> => {
   uploadStatus.value = 'checking'
 
   if (!isFormValid.value) {
-    showErrorToast(`Required field missing: ${error.value}`)
+    const missingFields = formError.value.join(', ')
+    showErrorToast(`Required field missing: ${missingFields}`)
     return
   }
   await calculateISCNFee()

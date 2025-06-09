@@ -108,10 +108,11 @@ const formError = computed(() => {
   }
 
   return Object.entries(requiredFields)
-    .find(([_, isValid]) => !isValid)?.[0]?.toUpperCase() || ''
+    .filter(([_, isValid]) => !isValid)
+    .map(([key]) => key.toUpperCase())
 })
 
-const isFormValid = computed(() => !formError.value)
+const isFormValid = computed(() => !formError.value?.length)
 
 watch(isFormValid, (val: boolean) => {
   emit('formValidChange', val)
@@ -204,7 +205,8 @@ async function startNFTMintFlow () {
     const { contentMetadata } = iscnData.value
 
     if (!isFormValid.value) {
-      showErrorToast(`Required field missing: ${error.value}`)
+      const missingFields = formError.value.join(', ')
+      showErrorToast(`Required field missing: ${missingFields}`)
       return
     }
 

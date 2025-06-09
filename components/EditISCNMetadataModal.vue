@@ -124,10 +124,10 @@ const formError = computed(() => {
   }
 
   return Object.entries(requiredFields)
-    .find(([_, isValid]) => !isValid)?.[0]?.toUpperCase() || ''
+    .filter(([_, isValid]) => !isValid)
+    .map(([key]) => key.toUpperCase())
 })
-
-const isFormValid = computed(() => !formError.value)
+const isFormValid = computed(() => !formError.value?.length)
 
 watchEffect(async () => {
   if (route.query.iscn_id) {
@@ -241,7 +241,7 @@ async function handleSave () {
   }
   if (!isFormValid.value) {
     toast.add({
-      title: 'Please fill in all required fields',
+      title: `Please fill in all required fields: ${formError.value.join(', ')}`,
       color: 'red'
     })
     return
