@@ -29,7 +29,7 @@ import { useFileUpload } from '~/composables/useFileUpload'
 import { estimateISCNTxGasAndFee, signISCNTx } from '~/utils/iscn'
 import { useWalletStore } from '~/stores/wallet'
 import { getAccountBalance } from '~/utils/cosmos'
-import { ISCN_GAS_MULTIPLIER, MAX_DESCRIPTION_LENGTH } from '~/constant/index'
+import { ISCN_GAS_MULTIPLIER } from '~/constant/index'
 
 import { useISCN } from '~/composables/useISCN'
 import { useToastComposable } from '~/composables/useToast'
@@ -80,22 +80,10 @@ const totalFee = computed(() => {
 
 const { payload } = useISCN({ iscnFormData })
 
-const formError = computed(() => {
-  const desc = iscnFormData.value.description || ''
-
-  const requiredFields = {
-    title: !!iscnFormData.value.title,
-    description: desc ? desc.length <= MAX_DESCRIPTION_LENGTH : false,
-    authorName: !!iscnFormData.value.author.name,
-    contentUrl: !!iscnFormData.value.contentFingerprints.some(f => !!f.url)
-  }
-
-  return Object.entries(requiredFields)
-    .find(([_, isValid]) => !isValid)?.[0]?.toUpperCase() || ''
-})
+const formError = computed(() => validateISCNForm(iscnFormData.value))
 
 const isFormValid = computed(() => {
-  return !formError.value
+  return !formError.value?.length
 })
 
 watch(isFormValid, (val: boolean) => {
@@ -186,7 +174,7 @@ const onSubmit = async (): Promise<void> => {
   uploadStatus.value = 'checking'
 
   if (!isFormValid.value) {
-    showErrorToast(`Required field missing: ${error.value}`)
+    showErrorToast(formError.value.join(', '))
     return
   }
   await calculateISCNFee()

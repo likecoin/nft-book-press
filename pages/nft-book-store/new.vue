@@ -635,16 +635,18 @@ useSeoMeta({
 onMounted(async () => {
   try {
     isLoading.value = true
-    try {
-      await fetchStripeConnectStatusByWallet(wallet.value)
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err)
-    }
+    if (wallet.value) {
+      try {
+        await fetchStripeConnectStatusByWallet(wallet.value)
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error(err)
+      }
 
-    if (getStripeConnectStatusByWallet.value(wallet.value).isReady) {
-      isStripeConnectChecked.value = true
-      stripeConnectWallet.value = wallet.value
+      if (getStripeConnectStatusByWallet.value(wallet.value).isReady) {
+        isStripeConnectChecked.value = true
+        stripeConnectWallet.value = wallet.value
+      }
     }
   } catch (e) {
     // eslint-disable-next-line no-console
