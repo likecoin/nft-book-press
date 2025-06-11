@@ -2,8 +2,6 @@ import path from 'path'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { replaceCodePlugin } from 'vite-plugin-replace'
 
-const LikeCoinWalletConnectorCSSPath = '@likecoin/wallet-connector/dist/style.css'
-
 const {
   SENTRY_ORG,
   SENTRY_PROJECT,
@@ -14,7 +12,6 @@ const {
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   css: [
-    LikeCoinWalletConnectorCSSPath,
     '@/assets/styles/global.css'
   ],
 
@@ -69,8 +66,6 @@ export default defineNuxtConfig({
     removeLoggers: false
   },
 
-  plugins: ['~/plugins/buffer.ts'],
-
   alias: {
     // polyfill process
     process: path.resolve(__dirname, 'node_modules/unenv/runtime/node/process')
@@ -78,6 +73,9 @@ export default defineNuxtConfig({
   vite: {
     define: {
       global: 'globalThis'
+    },
+    optimizeDeps: {
+      include: ['eventemitter3']
     },
     plugins: [
       nodePolyfills({
@@ -124,26 +122,18 @@ exports.randomFillSync = randomFillSync`
 
       SITE_URL: process.env.SITE_URL,
 
-      CHAIN_ID: process.env.CHAIN_ID,
-      CHAIN_NAME: process.env.CHAIN_NAME,
-      CHAIN_DENOM: process.env.CHAIN_DENOM,
-      CHAIN_MINIMAL_DENOM: process.env.CHAIN_MINIMAL_DENOM,
-      COINGECKO_ID: process.env.COINGECKO_ID,
-      RPC_URL: process.env.RPC_URL,
       LCD_URL: process.env.LCD_URL,
       CHAIN_EXPLORER_URL: process.env.CHAIN_EXPLORER_URL,
 
-      LIKER_NFT_FEE_WALLET: process.env.LIKER_NFT_FEE_WALLET,
-      LIKER_NFT_TARGET_ADDRESS: process.env.LIKER_NFT_TARGET_ADDRESS,
+      LIKE_EVM_NFT_TARGET_ADDRESS: process.env.LIKE_EVM_NFT_TARGET_ADDRESS,
 
-      AUTHCORE_API_HOST: process.env.AUTHCORE_API_HOST,
       LIKER_LAND_URL: process.env.LIKER_LAND_URL,
       LIKE_CO_HOST: process.env.LIKE_CO_HOST,
       LIKE_CO_API: process.env.LIKE_CO_API,
       LIKE_CO_STATIC_ENDPOINT: process.env.LIKE_CO_STATIC_ENDPOINT,
       APP_LIKE_CO_URL: process.env.APP_LIKE_CO_URL,
-      NFT_MARKETPLACE_URL: process.env.NFT_MARKETPLACE_URL,
       ISCN_TOOLS_URL: process.env.ISCN_TOOLS_URL,
+      BOOK3_URL: process.env.BOOK3_URL,
       ARWEAVE_ENDPOINT: process.env.ARWEAVE_ENDPOINT
     }
   },
@@ -158,7 +148,6 @@ exports.randomFillSync = randomFillSync`
   },
 
   tailwindcss: {
-    injectPosition: { after: LikeCoinWalletConnectorCSSPath },
     cssPath: '~/assets/css/tailwind.css'
   },
 
