@@ -33,17 +33,30 @@
         @click="onClickDisconnect"
       />
     </template>
-    <UButton
-      v-else
-      label="Sign in"
-      icon="i-heroicons-arrow-right-on-rectangle"
-      color="primary"
-      size="lg"
-      :loading="isAuthenticating"
-      :disabled="isRestoringSession"
-      block
-      @click="onAuthenticate"
-    />
+    <div v-else class="flex flex-col gap-4">
+      <UButton
+        label="Sign in"
+        icon="i-heroicons-arrow-right-on-rectangle"
+        color="primary"
+        size="lg"
+        :loading="isAuthenticating"
+        :disabled="isRestoringSession"
+        block
+        @click="onAuthenticate"
+      />
+      <UAlert
+        icon="i-heroicons-exclamation-circle"
+        color="orange"
+        variant="soft"
+        description="If this is your first time visiting from publish.liker.land, please migrate your account to the new platform"
+        :actions="[{
+          label: 'Start Migration',
+          color: 'orange',
+          variant: 'outline',
+          click: onClickMigrate,
+        }]"
+      />
+    </div>
   </div>
 </template>
 
@@ -63,6 +76,9 @@ const { clearSession } = bookStoreApiStore
 const { isRestoringSession } = storeToRefs(bookStoreApiStore)
 const { isAuthenticating, onAuthenticate } = useAuth()
 
+const { LIKECOIN_V3_BOOK_MIGRATION_SITE_URL } = useRuntimeConfig().public
+const migrationURL = LIKECOIN_V3_BOOK_MIGRATION_SITE_URL as string
+
 const portfolioURL = computed(() => getPortfolioURL(wallet.value))
 
 function onClickDisconnect () {
@@ -72,5 +88,9 @@ function onClickDisconnect () {
 
 function onClickCopy () {
   copyToClipboard(wallet.value)
+}
+
+function onClickMigrate () {
+  window.open(migrationURL, '_blank', 'noopener noreferrer')
 }
 </script>
