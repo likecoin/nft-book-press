@@ -144,7 +144,8 @@ exports.randomFillSync = randomFillSync`
       APP_LIKE_CO_URL: process.env.APP_LIKE_CO_URL,
       NFT_MARKETPLACE_URL: process.env.NFT_MARKETPLACE_URL,
       ISCN_TOOLS_URL: process.env.ISCN_TOOLS_URL,
-      ARWEAVE_ENDPOINT: process.env.ARWEAVE_ENDPOINT
+      ARWEAVE_ENDPOINT: process.env.ARWEAVE_ENDPOINT,
+      LIKECOIN_V3_BOOK_MIGRATION_SITE_URL: process.env.LIKECOIN_V3_BOOK_MIGRATION_SITE_URL
     }
   },
 

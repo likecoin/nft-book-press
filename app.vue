@@ -28,6 +28,7 @@
       <span>Restoring session ...</span>
       <UProgress animation="carousel" />
     </UModal>
+    <WelcomeModal />
 
     <NuxtLoadingIndicator />
 
