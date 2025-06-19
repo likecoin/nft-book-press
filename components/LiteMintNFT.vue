@@ -74,6 +74,7 @@ const {
   checkNFTClassIsBookNFT,
   getClassCurrentTokenId
 } = useNFTContractReader()
+const { checkAndGrantMinter } = useNFTContractWriter()
 
 const store = useWalletStore()
 const { wallet } = storeToRefs(store)
@@ -255,6 +256,10 @@ async function mintNFTs () {
     })
     const fromTokenId = await getClassCurrentTokenId(classId.value)
     const { BOOK3_URL } = useRuntimeConfig().public
+    await checkAndGrantMinter({
+      classId: classId.value,
+      wallet: wallet.value
+    })
     const res = await writeContractAsync({
       address: classId.value as `0x${string}`,
       abi: LIKE_NFT_CLASS_ABI,

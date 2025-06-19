@@ -66,6 +66,7 @@ const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
 const { writeContractAsync } = useWriteContract()
+const { checkAndGrantUpdater } = useNFTContractWriter()
 
 const props = defineProps<{
   classId: string
@@ -231,6 +232,10 @@ async function handleSave () {
       nft_meta_collection_description: 'NFT Book by Liker Land',
       recordTimestamp: new Date().toISOString()
     }
+    await checkAndGrantUpdater({
+      classId: props.classId,
+      wallet: wallet.value
+    })
     const txHash = await writeContractAsync({
       address: props.classId as `0x${string}`,
       abi: LIKE_NFT_CLASS_ABI,
