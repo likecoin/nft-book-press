@@ -50,7 +50,7 @@
         icon="i-heroicons-exclamation-circle"
         color="orange"
         variant="soft"
-        description="If this is your first time visiting from publish.liker.land, please migrate your account to the new platform"
+        description="liker.land is now 3ook.com"
         :actions="[
           {
             label: 'Close',
@@ -59,7 +59,7 @@
             click: closeMigrateAlert,
           },
           {
-            label: 'Start Migration',
+            label: 'Migration',
             color: 'orange',
             variant: 'outline',
             click: onClickMigrate,
