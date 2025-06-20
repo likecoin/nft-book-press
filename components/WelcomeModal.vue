@@ -53,8 +53,13 @@
 </template>
 
 <script setup lang="ts">
+import { appendUTMParamsToURL } from '~/utils/index'
 const { show: showModal, close: onClose } = useOneTimePopup('welcomePopup:v3')
 const { LIKECOIN_V3_BOOK_MIGRATION_SITE_URL } = useRuntimeConfig().public
-const migrationURL = LIKECOIN_V3_BOOK_MIGRATION_SITE_URL as string
+const migrationURL = appendUTMParamsToURL({
+  url: LIKECOIN_V3_BOOK_MIGRATION_SITE_URL,
+  medium: 'popup',
+  campaign: 'migration'
+})
 
 </script>

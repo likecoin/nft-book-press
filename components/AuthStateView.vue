@@ -63,7 +63,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
-import { getPortfolioURL, copyToClipboard } from '~/utils/index'
+import { getPortfolioURL, copyToClipboard, appendUTMParamsToURL } from '~/utils/index'
 import { shortenWalletAddress } from '~/utils/cosmos'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useAuth } from '~/composables/useAuth'
@@ -77,7 +77,11 @@ const { isRestoringSession } = storeToRefs(bookStoreApiStore)
 const { isAuthenticating, onAuthenticate } = useAuth()
 
 const { LIKECOIN_V3_BOOK_MIGRATION_SITE_URL } = useRuntimeConfig().public
-const migrationURL = LIKECOIN_V3_BOOK_MIGRATION_SITE_URL as string
+const migrationURL = appendUTMParamsToURL({
+  url: LIKECOIN_V3_BOOK_MIGRATION_SITE_URL,
+  medium: 'login',
+  campaign: 'migration'
+})
 
 const portfolioURL = computed(() => getPortfolioURL(wallet.value))
 

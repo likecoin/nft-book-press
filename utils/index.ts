@@ -277,3 +277,21 @@ export async function calculateIPFSHash (fileBytes: any, options?: any) {
     return null
   }
 }
+
+export function appendUTMParamsToURL ({
+  url,
+  source = 'publish-liker-land',
+  medium = '',
+  campaign = ''
+}:{
+  url: string
+  source?: string
+  medium?: string
+  campaign?: string
+}) {
+  const urlObj = new URL(url)
+  urlObj.searchParams.set('utm_source', source)
+  urlObj.searchParams.set('utm_medium', medium)
+  urlObj.searchParams.set('utm_campaign', campaign)
+  return urlObj.toString()
+}
