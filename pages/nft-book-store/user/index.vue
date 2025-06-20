@@ -64,7 +64,7 @@
             size="lg"
             rel="noopener"
             target="_blank"
-            :to="`${LIKE_CO_HOST}/in/register`"
+            :to="`${BOOK3_URL}/account`"
           />
         </template>
       </UCard>
@@ -134,7 +134,7 @@
             size="lg"
             rel="noopener"
             target="_blank"
-            :to="`${LIKE_CO_HOST}/in/register`"
+            :to="`${BOOK3_URL}/account`"
           />
           <UButton
             v-else
@@ -342,7 +342,7 @@ import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'
 
-const { LIKER_LAND_URL, LIKE_CO_API, LIKE_CO_HOST } = useRuntimeConfig().public
+const { LIKER_LAND_URL, LIKE_CO_API, BOOK3_URL } = useRuntimeConfig().public
 
 const nftStore = useNftStore()
 const bookStoreApiStore = useBookStoreApiStore()
