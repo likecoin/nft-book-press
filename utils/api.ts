@@ -5,6 +5,7 @@ export interface FetchLikerInfoResult {
   wallet: string
   cosmosWallet: string
   likeWallet: string
+  evmWallet: string
   isSubscribedCivicLiker: boolean
   civicLikerSince: number
   description: string

@@ -8,6 +8,7 @@ export const useLikerStore = defineStore('liker', () => {
   const likerIdMapByWallet = computed(() => {
     return Object.entries(likerInfoMapById.value).reduce((acc, [likerId, likerInfo]) => {
       acc[likerInfo.likeWallet] = likerId
+      acc[likerInfo.evmWallet] = likerId
       return acc
     }, {} as Record<string, string>)
   })
