@@ -1,24 +1,18 @@
+import { useStorage } from '@vueuse/core'
+
 export function useOneTimePopup (key: string) {
+  const storage = useStorage<boolean>(key, false)
   const show = ref(false)
 
   onMounted(() => {
-    try {
-      if (!localStorage.getItem(key)) {
-        show.value = true
-      }
-    } catch (e) {
+    if (!storage.value) {
       show.value = true
     }
   })
 
   function close () {
     show.value = false
-    try {
-      localStorage.setItem(key, 'true')
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to set localStorage item:', e)
-    }
+    storage.value = true
   }
 
   return { show, close }
