@@ -18,6 +18,18 @@ export function useISCN ({
   iscnFormData: Ref<any>;
   iscnChainData?: Ref<any>;
 }) {
+  const getFileTypeFromMime = (fileType: string): string => {
+    switch (fileType) {
+      case 'application/epub+zip':
+        return 'epub'
+      case 'application/pdf':
+        return 'pdf'
+      case 'application/octet-stream':
+      default:
+        return ''
+    }
+  }
+
   const formattedPotentialActionList = computed(() => {
     const apiEndpoints = getApiEndpoints()
     const arweaveLinkEndpoint = apiEndpoints.API_GET_ARWEAVE_V2_LINK
@@ -41,6 +53,30 @@ export function useISCN ({
 
   const existingIscnData = computed(() => iscnChainData?.value || {})
 
+  const getAttributes = (data: any) => {
+    const attributes = []
+    if (data.author) {
+      attributes.push({
+        trait_type: 'Author',
+        value: data.author.name || data.author
+      })
+    }
+    if (data.publisher) {
+      attributes.push({
+        trait_type: 'Publisher',
+        value: data.publisher
+      })
+    }
+    if (data.datePublished) {
+      attributes.push({
+        trait_type: 'Publish Date',
+        display_type: 'date',
+        value: ((new Date(data.datePublished)).getTime() || 0) / 1000
+      })
+    }
+    return attributes.length ? attributes : undefined
+  }
+
   const payload = computed(() => ({
     ...existingIscnData.value,
     '@type': iscnFormData.value.type,
@@ -63,11 +99,14 @@ export function useISCN ({
       : undefined,
     url: iscnFormData.value.bookInfoUrl,
     tagsString: iscnFormData.value.tags?.join(', ') || '',
-    potentialAction: formattedPotentialActionList.value
-    thumbnailUrl: iscnFormData.value.coverUrl
+    thumbnailUrl: iscnFormData.value.coverUrl,
+    potentialAction: formattedPotentialActionList.value,
+    attributes: getAttributes(iscnFormData.value)
   }))
 
   return {
+    getFileMimeType,
+    getFileTypeFromMime,
     payload
   }
 }

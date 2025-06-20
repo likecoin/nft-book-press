@@ -59,7 +59,7 @@ import { useWriteContract } from '@wagmi/vue'
 import { storeToRefs } from 'pinia'
 
 import { useWalletStore } from '~/stores/wallet'
-import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
+import { DEFAULT_MAX_SUPPLY, NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
 import { useToastComposable } from '~/composables/useToast'
 
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
@@ -71,8 +71,10 @@ const { writeContractAsync } = useWriteContract()
 const {
   getClassOwner,
   getClassMetadata,
-  checkNFTClassIsBookNFT
+  checkNFTClassIsBookNFT,
+  getClassCurrentTokenId
 } = useNFTContractReader()
+const { checkAndGrantMinter } = useNFTContractWriter()
 
 const store = useWalletStore()
 const { wallet } = storeToRefs(store)
@@ -93,7 +95,7 @@ const formState = reactive({
   mintCount: NFT_DEFAULT_MINT_AMOUNT,
   imageUrl: '',
   externalUrl: '',
-  maxSupply: 1000
+  maxSupply: DEFAULT_MAX_SUPPLY
 })
 
 const emit = defineEmits(['submit', 'formValidChange'])
@@ -236,27 +238,8 @@ async function mintNFTs () {
         ...otherData
       } = nftMintListData?.value?.[i] || {}
       const dataMetadata = JSON.parse(dataMetadataString || '{}')
-      const data = { attributes: [], ...defaultMetadata, ...dataMetadata }
+      const data = { ...defaultMetadata, ...dataMetadata }
       if (dataImage) { data.image = dataImage }
-      if (data.author) {
-        data.attributes.push({
-          trait_type: 'Author',
-          value: data.author.name || data.author
-        })
-      }
-      if (data.publisher) {
-        data.attributes.push({
-          trait_type: 'Publisher',
-          value: data.publisher
-        })
-      }
-      if (data.datePublished) {
-        data.attributes.push({
-          trait_type: 'Publish Date',
-          display_type: 'date',
-          value: ((new Date(data.datePublished)).getTime() || 0) / 1000
-        })
-      }
       Object.entries(otherData).forEach(([key, value]) => {
         if (value) {
           try {
@@ -271,24 +254,26 @@ async function mintNFTs () {
         metadata: data
       }
     })
+    const fromTokenId = await getClassCurrentTokenId(classId.value)
+    const { BOOK3_URL } = useRuntimeConfig().public
+    await checkAndGrantMinter({
+      classId: classId.value,
+      wallet: wallet.value
+    })
     const res = await writeContractAsync({
       address: classId.value as `0x${string}`,
       abi: LIKE_NFT_CLASS_ABI,
-      functionName: 'batchMint',
+      functionName: 'safeMintWithTokenId',
       args: [
+        fromTokenId,
         Array(formState.mintCount).fill(wallet.value),
         Array(formState.mintCount).fill(''),
-        nfts.map(nft => JSON.stringify({
+        nfts.map((nft, index) => JSON.stringify({
           image: nft.metadata.image,
-          image_data: '',
-          external_url: nft.metadata.external_url || '',
-          description: nft.metadata.description || '',
-          name: nft.metadata.name || '',
-          attributes: nft.metadata.attributes || [],
-          background_color: '',
-          animation_url: '',
-          youtube_url: '',
-          ...nft.metadata
+          external_url: `${BOOK3_URL}/store/${classId.value}/${Number(fromTokenId) + index}`,
+          description: `Copy #${Number(fromTokenId) + index} of ${nft.metadata.name}`,
+          name: `${nft.metadata.name} #${Number(fromTokenId) + index}`,
+          attributes: nft.metadata.attributes
         }))
       ]
     })
@@ -321,6 +306,7 @@ async function fetchISCNById (iscnId: string) {
     }
     iscnData.value = { contentMetadata: data, owner, '@id': iscnId }
     formState.imageUrl = iscnData.value.contentMetadata?.thumbnailUrl || ''
+    formState.externalUrl = iscnData.value.contentMetadata?.url || ''
     classId.value = iscnId
   } catch (error) {
     // eslint-disable-next-line no-console
