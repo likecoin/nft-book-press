@@ -21,7 +21,7 @@ export function useISCN ({
 
   const payload = computed(() => ({
     ...existingIscnData.value,
-    type: iscnFormData.value.type,
+    '@type': iscnFormData.value.type,
     name: iscnFormData.value.title,
     description: iscnFormData.value.description,
     author: iscnFormData.value.author.name,

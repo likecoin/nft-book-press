@@ -6,7 +6,7 @@ export interface ISCNRegisterPayload {
   tagsString: string;
   url: string;
   license: string;
-  type: string;
+  '@type': string;
   author: string;
   fileSHA256?: string | string[];
   publisher?: string;
