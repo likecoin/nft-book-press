@@ -97,6 +97,7 @@
                   type="number"
                   step="1"
                   :min="0"
+                  :max="maxSupply"
                 />
               </UFormGroup>
               <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
@@ -141,14 +142,6 @@
                   />
 
                   <div v-if="p.deliveryMethod === 'auto'" class="pl-8 space-y-2">
-                    <UFormGroup label="Start ID (optional) / 起始 ID（選填）">
-                      <UInput
-                        v-model="autoDeliverNftIdInput"
-                        class="font-mono"
-                        placeholder="BOOKSN-0000"
-                      />
-                    </UFormGroup>
-
                     <UFormGroup label="Memo / 發書留言">
                       <UInput
                         v-model="p.autoMemo"
@@ -166,6 +159,7 @@
                     :disabled="isEditMode && p.oldIsAutoDeliver"
                     name="deliveryMethod"
                     label="Manual delivery / 手動發書"
+                    @click="onClickManualDelivery(p)"
                   />
                   <div v-if="p.deliveryMethod === 'manual'" class="pl-8 space-y-2">
                     <UFormGroup>
@@ -421,7 +415,12 @@ import 'md-editor-v3/lib/style.css'
 import { v4 as uuidv4 } from 'uuid'
 import type { FormError } from '#ui/types'
 
-import { DEFAULT_PRICE, MINIMAL_PRICE } from '~/constant'
+import {
+  DEFAULT_PRICE,
+  MINIMAL_PRICE,
+  DEFAULT_MAX_SUPPLY,
+  DEFAULT_STOCK
+} from '~/constant'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
@@ -430,7 +429,7 @@ import { getPortfolioURL } from '~/utils'
 import { escapeHtml, sanitizeHtml } from '~/utils/newClass'
 import { getApiEndpoints } from '~/constant/api'
 
-const { LCD_URL, LIKE_CO_API } = useRuntimeConfig().public
+const { LIKE_CO_API } = useRuntimeConfig().public
 const walletStore = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const stripeStore = useStripeStore()
@@ -441,14 +440,15 @@ const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
 const { token } = storeToRefs(bookStoreApiStore)
 const nftStore = useNftStore()
 
+const { getNFTClassConfig, getBalanceOf } = useNFTContractReader()
+
 const UPLOAD_FILESIZE_MAX = 1 * 1024 * 1024
 
 const emit = defineEmits(['submit'])
-const route = useRoute()
 const editionIndex = computed(() => {
   return props.editionIndex
 })
-
+const { lazyFetchClassMetadataById } = nftStore
 const error = ref('')
 const isLoading = ref(false)
 
@@ -469,7 +469,7 @@ const prices = ref<any[]>([
     price: DEFAULT_PRICE,
     deliveryMethod: 'auto',
     autoMemo: 'Thank you for your support. It means a lot to me.',
-    stock: Number((route.query.count as string) || 1),
+    stock: DEFAULT_STOCK,
     name: '標準版',
 
     nameEn: 'Standard Edition',
@@ -498,6 +498,20 @@ const iscnData = ref<any>(null)
 
 const signatureImage = ref<File | null>(null)
 
+const maxSupply = computed(() => {
+  if (isEditMode.value || editionIndex.value !== undefined) {
+    return classMaxSupply.value - otherExistingStock.value
+  }
+  return classMaxSupply.value
+})
+const availableManualStock = computed(() => {
+  return Math.max(ownedCount.value - otherExistingManualStock.value, 0)
+})
+const otherExistingStock = ref(0)
+const otherExistingManualStock = ref(0)
+const classMaxSupply = ref(DEFAULT_MAX_SUPPLY)
+const ownedCount = ref(0)
+
 const toolbarOptions = ref<ToolbarNames[]>([
   'bold',
   'italic',
@@ -523,7 +537,6 @@ const submitButtonText = computed(() =>
   isEditMode.value ? 'Save Changes' : 'Submit'
 )
 const shouldShowAdvanceSettings = ref<boolean>(false)
-const iscnId = ref('')
 
 const moderatorWalletsTableColumns = computed(() => [
   { key: 'wallet', label: 'Wallet', sortable: true },
@@ -578,8 +591,14 @@ useSeoMeta({
 onMounted(async () => {
   try {
     isLoading.value = true
+    const [bookConfig, balance] = await Promise.all([
+      getNFTClassConfig(classId.value as string),
+      wallet.value ? getBalanceOf(classId.value as string, wallet.value) : 0
+    ])
+    classMaxSupply.value = Number((bookConfig as any)?.max_supply) || DEFAULT_MAX_SUPPLY
+    ownedCount.value = Number(balance) || 0
 
-    if (isEditMode.value) {
+    if (isEditMode.value || editionIndex.value !== undefined) {
       if (wallet.value) {
         try {
           await fetchStripeConnectStatusByWallet(wallet.value)
@@ -602,35 +621,49 @@ onMounted(async () => {
         if (classResData?.ownerWallet !== wallet.value) {
           throw new Error('NOT_OWNER_OF_NFT_CLASS')
         }
-        if (classResData.prices.length) {
-          const currentEdition = classResData.prices.find((e: any) => e.index.toString() === editionIndex.value)
-          if (!currentEdition) {
-            throw new Error('Edition not found')
-          }
-          prices.value = [{
-            price: currentEdition.price,
-            deliveryMethod: currentEdition.isAutoDeliver ? 'auto' : 'manual',
-            autoMemo: currentEdition.autoMemo,
-            stock: currentEdition.stock,
-            name: classResData.inLanguage === 'en'
-              ? currentEdition.name.en
-              : currentEdition.name.zh,
+        if (editionIndex.value !== undefined) {
+          if (classResData.prices.length) {
+            const currentEdition = classResData.prices.find((e: any) => e.index.toString() === editionIndex.value)
+            if (!currentEdition) {
+              throw new Error('Edition not found')
+            }
+            prices.value = [{
+              price: currentEdition.price,
+              deliveryMethod: currentEdition.isAutoDeliver ? 'auto' : 'manual',
+              autoMemo: currentEdition.autoMemo,
+              stock: currentEdition.stock,
+              name: classResData.inLanguage === 'en'
+                ? currentEdition.name.en
+                : currentEdition.name.zh,
 
-            nameEn: currentEdition.name.en,
-            nameZh: currentEdition.name.zh,
-            descriptionEn: currentEdition.description.en,
-            descriptionZh: currentEdition.description.zh,
-            hasShipping: currentEdition.hasShipping,
-            isPhysicalOnly: currentEdition.isPhysicalOnly,
-            isAllowCustomPrice: currentEdition.isAllowCustomPrice,
-            isUnlisted: currentEdition.isUnlisted,
-            oldIsAutoDeliver: currentEdition.isAutoDeliver,
-            oldStock: currentEdition.stock
-          }]
-          isAllowCustomPrice.value = currentEdition.isAllowCustomPrice
-        } else {
-          throw new Error('No prices found')
+              nameEn: currentEdition.name.en,
+              nameZh: currentEdition.name.zh,
+              descriptionEn: currentEdition.description.en,
+              descriptionZh: currentEdition.description.zh,
+              hasShipping: currentEdition.hasShipping,
+              isPhysicalOnly: currentEdition.isPhysicalOnly,
+              isAllowCustomPrice: currentEdition.isAllowCustomPrice,
+              isUnlisted: currentEdition.isUnlisted,
+              oldIsAutoDeliver: currentEdition.isAutoDeliver,
+              oldStock: currentEdition.stock
+            }]
+            isAllowCustomPrice.value = currentEdition.isAllowCustomPrice
+          } else {
+            throw new Error('No prices found')
+          }
         }
+        otherExistingStock.value = classResData.prices.reduce((acc: number, price: any) => {
+          if (price.index.toString() !== editionIndex.value) {
+            return acc + price.stock
+          }
+          return acc
+        }, 0)
+        otherExistingManualStock.value = classResData.prices.reduce((acc: number, price: any) => {
+          if (price.index.toString() !== editionIndex.value && !price.isAutoDeliver) {
+            return acc + price.stock
+          }
+          return acc
+        }, 0)
       } else {
         throw new Error('NFT Class not found')
       }
@@ -656,19 +689,9 @@ watch(isLoading, (newIsLoading) => {
 })
 
 watch(classId, async (newClassId) => {
-  if (newClassId && !iscnId.value) {
-    // Fetch ISCN data
-    if (!iscnId.value) {
-      iscnId.value = await getIscnId()
-    }
-    if (!iscnId.value) { return }
-    const data = await $fetch(`${LCD_URL}/iscn/records/id?iscn_id=${encodeURIComponent(iscnId.value)}`)
-    const { records } = data as any
-
-    if (!records?.[0]?.data) { return }
-
-    iscnData.value = records[0].data
-    const fingerprints = iscnData?.value.contentFingerprints
+  if (newClassId) {
+    const data = await lazyFetchClassMetadataById(newClassId as string)
+    const fingerprints = data?.contentFingerprints
     if (fingerprints && isContentFingerPrintEncrypted(fingerprints)) {
       hideDownload.value = true
     }
@@ -705,6 +728,10 @@ function onImgUpload (
     // eslint-disable-next-line no-console
     console.warn(`Unknown upload key: ${key}`)
   }
+}
+
+function onClickManualDelivery (price: any) {
+  price.stock = Math.min(availableManualStock.value, price.stock)
 }
 
 function addMorePrice () {
@@ -844,6 +871,7 @@ async function onSubmit () {
 
   }
 }
+
 async function submitNewClass () {
   try {
     if (!classId.value) {
@@ -858,11 +886,8 @@ async function submitNewClass () {
 
     isLoading.value = true
 
-    const data = await $fetch(
-      `${LCD_URL}/cosmos/nft/v1beta1/classes/${classId.value}`
-    )
-    const collectionId =
-      (data as any)?.class?.data?.metadata?.nft_meta_collection_id || ''
+    const data = await lazyFetchClassMetadataById(classId.value)
+    const collectionId = data?.nft_meta_collection_id || ''
     if (
       !collectionId.includes('nft_book') &&
       !collectionId.includes('book_nft')
@@ -930,32 +955,7 @@ async function submitEditedClass () {
 
     isLoading.value = true
 
-    let newAutoDeliverNFTsCount = 0
-    if (editedPrice.isAutoDeliver) {
-      newAutoDeliverNFTsCount = prices.value[0].oldIsAutoDeliver
-        ? editedPrice.stock - prices.value[0].oldStock
-        : editedPrice.stock
-    }
-
-    let autoDeliverNFTsTxHash
-    if (newAutoDeliverNFTsCount > 0) {
-      if (!wallet.value || !signer.value) {
-        await initIfNecessary()
-      }
-      if (!wallet.value || !signer.value) {
-        throw new Error('Unable to connect to wallet')
-      }
-      autoDeliverNFTsTxHash = await sendNFTsToAPIWallet(
-        [classId.value as string],
-        [autoDeliverNftIdInput.value as string],
-        newAutoDeliverNFTsCount,
-        signer.value,
-        wallet.value
-      )
-    }
-
     await updateEditionPrice(classId.value as string, editionIndex.value, {
-      autoDeliverNFTsTxHash,
       price: editedPrice
     })
   } catch (err) {
@@ -983,18 +983,6 @@ async function addNewEdition () {
   } finally {
     isLoading.value = false
   }
-}
-
-async function getIscnId () {
-  const classData = await nftStore.lazyFetchClassMetadataById(
-    classId.value as string
-  )
-  if (classData?.data?.parent) {
-    const parent = classData.data.parent
-    return parent?.iscn_id_prefix
-  }
-
-  return ''
 }
 
 </script>
