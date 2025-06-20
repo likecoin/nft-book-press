@@ -45,16 +45,26 @@
         @click="onAuthenticate"
       />
       <UAlert
+        v-if="showMigrateAlert"
+        :ui="{ actions: 'justify-end' }"
         icon="i-heroicons-exclamation-circle"
         color="orange"
         variant="soft"
         description="If this is your first time visiting from publish.liker.land, please migrate your account to the new platform"
-        :actions="[{
-          label: 'Start Migration',
-          color: 'orange',
-          variant: 'outline',
-          click: onClickMigrate,
-        }]"
+        :actions="[
+          {
+            label: 'Close',
+            color: 'gray',
+            variant: 'ghost',
+            click: closeMigrateAlert,
+          },
+          {
+            label: 'Start Migration',
+            color: 'orange',
+            variant: 'outline',
+            click: onClickMigrate,
+          }
+        ]"
       />
     </div>
   </div>
@@ -75,6 +85,7 @@ const bookStoreApiStore = useBookStoreApiStore()
 const { clearSession } = bookStoreApiStore
 const { isRestoringSession } = storeToRefs(bookStoreApiStore)
 const { isAuthenticating, onAuthenticate } = useAuth()
+const { show: showMigrateAlert, close: closeMigrateAlert } = useOneTimePopup('bookPressMigrateAlert:v3')
 
 const { LIKECOIN_V3_BOOK_MIGRATION_SITE_URL } = useRuntimeConfig().public
 const migrationURL = appendUTMParamsToURL({
