@@ -1,0 +1,1 @@
+{"version":3,"file":"NyJfdrpK.js","sources":["../../../../node_modules/@nuxtjs/color-mode/dist/runtime/composables.js"],"sourcesContent":["import { useState } from \"#imports\";\nexport const useColorMode = () => {\n  return useState(\"color-mode\").value;\n};\n"],"names":["useColorMode","useState"],"mappings":"ibACO,MAAMA,EAAe,IACnBC,EAAS,YAAY,EAAE","x_google_ignoreList":[0]}
