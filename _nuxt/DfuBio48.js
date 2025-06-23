@@ -1,2 +1,0 @@
-import{_ as t,o,c as s,b7 as d}from"./DBE1DAG7.js";(function(){try{var e=typeof window<"u"?window:typeof global<"u"?global:typeof self<"u"?self:{},n=new Error().stack;n&&(e._sentryDebugIds=e._sentryDebugIds||{},e._sentryDebugIds[n]="73878a23-3cb1-45d0-a9df-72e258556216",e._sentryDebugIdIdentifier="sentry-dbid-73878a23-3cb1-45d0-a9df-72e258556216")}catch{}})();const r={},c={class:"flex flex-col"};function a(e,n){return o(),s("main",c,[d(e.$slots,"default")])}const l=t(r,[["render",a]]);export{l as _};
-//# sourceMappingURL=DfuBio48.js.map
