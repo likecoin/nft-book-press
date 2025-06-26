@@ -635,42 +635,42 @@ const uploadFileAndGetArweaveId = async (file: any, txHash: string) => {
 }
 
 const setEbookCoverFromImages = async () => {
-  if (epubMetadataList.value?.find(epubMetadata => epubMetadata.thumbnailArweaveId)) {
-    return
-  }
+  const metadata = epubMetadataList.value.find(
+    (m: any) => m.coverData || m.thumbnailIpfsHash
+  )
+  if (metadata?.thumbnailArweaveId) { return }
 
   for (let i = 0; i < fileRecords.value.length; i += 1) {
     const file = fileRecords.value[i]
     if (file.fileType?.startsWith('image')) {
       const existingData = sentArweaveTransactionInfo.value.get(file.ipfsHash) || {}
-      if (existingData.arweaveId) {
-        epubMetadataList.value.push({
-          thumbnailIpfsHash: file.ipfsHash,
-          thumbnailArweaveId: existingData.arweaveId
-        })
-        break
+      let { transactionHash, arweaveId, arweaveLink } = existingData
+
+      if (!arweaveId) {
+        if (!transactionHash) {
+          transactionHash = await sendArweaveFeeTx(file)
+        }
+        const uploadResult = await uploadFileAndGetArweaveId(file, transactionHash)
+        arweaveId = uploadResult.arweaveId
+        arweaveLink = uploadResult.arweaveLink
+        if (arweaveId) {
+          sentArweaveTransactionInfo.value.set(file.ipfsHash, {
+            transactionHash,
+            arweaveId,
+            arweaveLink
+          })
+        }
       }
-      let { transactionHash } = existingData
-      if (!transactionHash) {
-        transactionHash = await sendArweaveFeeTx(file)
-      }
-      const { arweaveId, arweaveLink } = await uploadFileAndGetArweaveId(
-        file,
-        transactionHash
-      )
 
       if (arweaveId) {
-        epubMetadataList.value.push({
-          thumbnailIpfsHash: file.ipfsHash,
-          thumbnailArweaveId: arweaveId
-        })
-        sentArweaveTransactionInfo.value.set(file.ipfsHash, {
-          transactionHash,
-          arweaveId,
-          arweaveLink
-        })
+        if (metadata && file.ipfsHash === metadata.thumbnailIpfsHash) {
+          metadata.thumbnailArweaveId = arweaveId
+        }
         break
       }
+
+      // eslint-disable-next-line no-console
+      console.error(`Failed to upload image file ${file.fileName} to Arweave`)
     }
   }
 }
