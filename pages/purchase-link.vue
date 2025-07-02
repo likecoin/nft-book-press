@@ -882,7 +882,6 @@ async function createAffiliationLink () {
     } catch (error) {
       productIdError.value = (error as Error).message
       isSharingMode.value = false
-      return
     }
   } catch (error) {
     // eslint-disable-next-line no-console
