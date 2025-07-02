@@ -27,7 +27,7 @@
       <div v-if="isLoading" class="w-full">
         <div class="space-y-3">
           <div class="flex justify-between items-center">
-            <UBadge color="Badge" variant="soft">
+            <UBadge variant="soft">
               Minting NFT
             </UBadge>
             <p class="text-xs text-gray-500">
@@ -83,7 +83,7 @@ const { initIfNecessary } = store
 const error = ref('')
 const isLoading = ref(false)
 
-const iscnData = ref<any>(null)
+const localISCNData = ref<any>(null)
 const localISCNId = ref('')
 
 const nftMintListData = ref<any>([])
@@ -141,7 +141,7 @@ const props = defineProps({
 
 watchEffect(async () => {
   if (props.iscnData) {
-    iscnData.value = props.iscnData
+    localISCNData.value = props.iscnData
     localISCNId.value = props.iscnData['@id']
     formState.imageUrl = props.iscnData.contentMetadata?.thumbnailUrl || ''
     classId.value = props.iscnData['@id']
@@ -174,7 +174,7 @@ function generateNFTMintListData ({
 async function startNFTMintFlow () {
   try {
     isLoading.value = true
-    const { contentMetadata } = iscnData.value
+    const { contentMetadata } = localISCNData.value
 
     if (!isFormValid.value) {
       const missingFields = formError.value.join(', ')
@@ -304,9 +304,9 @@ async function fetchISCNById (iscnId: string) {
     if (!data) {
       throw new Error('Invalid NFT Class ID')
     }
-    iscnData.value = { contentMetadata: data, owner, '@id': iscnId }
-    formState.imageUrl = iscnData.value.contentMetadata?.thumbnailUrl || ''
-    formState.externalUrl = iscnData.value.contentMetadata?.url || ''
+    localISCNData.value = { contentMetadata: data, owner, '@id': iscnId }
+    formState.imageUrl = localISCNData.value.contentMetadata?.thumbnailUrl || ''
+    formState.externalUrl = localISCNData.value.contentMetadata?.url || ''
     classId.value = iscnId
   } catch (error) {
     // eslint-disable-next-line no-console

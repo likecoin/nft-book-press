@@ -4,7 +4,7 @@
     :ui="{ width: 'sm:max-w-7xl', padding: 'p-4 sm:p-8' }"
   >
     <UCard
-      ui="{ body: { base: 'space-y-4 sm:p-8' } }"
+      :ui="{ body: { base: 'space-y-4 sm:p-8' } }"
     >
       <template #header>
         <div class="flex justify-end">

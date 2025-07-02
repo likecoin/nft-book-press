@@ -74,7 +74,7 @@
     >
       <div class="space-y-3">
         <div class="flex justify-between items-center">
-          <UBadge color="Badge" variant="soft">
+          <UBadge variant="soft">
             {{ uploadStatus }}
           </UBadge>
           <p class="text-xs text-gray-500">
