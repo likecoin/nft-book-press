@@ -11,7 +11,7 @@
     />
 
     <ISCNInfoCard
-      :iscn-id="iscnId"
+      :iscn-id="computedISCNId"
       :iscn-owner="iscnOwner"
       :iscn-data="iscnData"
       :show-edit-button="true"
@@ -48,7 +48,7 @@ const iscnData = ref<any>(null)
 const classId = ref('')
 const liteMintNFTRef = ref<any>(null)
 
-const iscnId = computed(() => iscnData.value?.['@id'])
+const computedISCNId = computed(() => iscnData.value?.['@id'])
 
 const showEditISCNModal = ref(false)
 const isFormValid = ref(false)
