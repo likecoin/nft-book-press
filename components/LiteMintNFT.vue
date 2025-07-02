@@ -27,7 +27,7 @@
       <div v-if="isLoading" class="w-full">
         <div class="space-y-3">
           <div class="flex justify-between items-center">
-            <UBadge color="Badge" variant="soft">
+            <UBadge variant="soft">
               Minting NFT
             </UBadge>
             <p class="text-xs text-gray-500">
