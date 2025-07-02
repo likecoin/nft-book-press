@@ -126,7 +126,7 @@ interface FileRecord {
   ipfsHash?: string;
   fileSHA256?: string;
   encryptedIpfsHash?: string | null;
-  encryptedBuffer?: Buffer | null;
+  encryptedBuffer?: Buffer<ArrayBuffer> | null;
   encryptionKey?: string | null;
   fileData?: string;
   arweaveId?: string
