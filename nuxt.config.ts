@@ -127,7 +127,6 @@ exports.randomFillSync = randomFillSync`
       LIKE_EVM_NFT_TARGET_ADDRESS: process.env.LIKE_EVM_NFT_TARGET_ADDRESS,
 
       LIKER_LAND_URL: process.env.LIKER_LAND_URL,
-      LIKE_CO_HOST: process.env.LIKE_CO_HOST,
       LIKE_CO_API: process.env.LIKE_CO_API,
       LIKE_CO_STATIC_ENDPOINT: process.env.LIKE_CO_STATIC_ENDPOINT,
       ISCN_TOOLS_URL: process.env.ISCN_TOOLS_URL,
