@@ -141,7 +141,7 @@ export function getPurchaseLink ({
     query.utm_medium = queryInput?.utm_medium ? `${queryInput.utm_medium}-qr` : 'qrcode'
   }
 
-  const { LIKE_CO_API, LIKER_LAND_URL } = useRuntimeConfig().public
+  const { LIKE_CO_API, LIKER_LAND_URL, BOOK3_URL } = useRuntimeConfig().public
   const searchParams = new URLSearchParams({ ...queryInput, ...query })
   if (customLink) {
     const url = new URL(customLink)
@@ -158,7 +158,7 @@ export function getPurchaseLink ({
       : `${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId}/new${queryString}`
   }
   return isUseLikerLandLink
-    ? `${LIKER_LAND_URL}/nft/class/${classId}${queryString}`
+    ? `${BOOK3_URL}/store/${classId}${queryString}`
     : `${LIKE_CO_API}/likernft/book/purchase/${classId}/new${queryString}`
 }
 

@@ -234,7 +234,7 @@
               <UInput
                 class="grow font-mono"
                 :model-value="input.value"
-                placeholder="https://liker.land/nft/class/likenft...."
+                placeholder="https://3ook.com/store/0x...."
                 @update:model-value="handleNewItemInputUpdate(index, $event)"
               />
 
@@ -553,7 +553,7 @@ function addSaleItem () {
       const url = new URL(productId)
       productId = url.pathname.split('/').pop() || ''
     }
-    if (productId.startsWith('likenft')) {
+    if (productId.startsWith('0x')) {
       saleItemList.value.push({ classId: productId, priceIndex: 0 })
       lazyFetchClassMetadataById(productId)
       lazyFetchClassListingInfoById(productId)

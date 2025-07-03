@@ -66,7 +66,7 @@ import { useUserStore } from '~/stores/user'
 import { useStripeStore } from '~/stores/stripe'
 import { useWalletStore } from '~/stores/wallet'
 
-const { LIKER_LAND_URL, LIKE_CO_API } = useRuntimeConfig().public
+const { BOOK3_URL, LIKE_CO_API } = useRuntimeConfig().public
 
 const userStore = useUserStore()
 const stripeStore = useStripeStore()
@@ -138,7 +138,7 @@ const tableRows = computed(() => bookList.value.map((b: any) => {
     image: image ? getImageResizeURL(parseImageURLFromMetadata(image)) : undefined,
     author,
     priceInUSD: `US$${b.minPrice || b.prices?.[0]?.price || 0}`,
-    url: `${LIKER_LAND_URL}/nft/class/${b.classId}?from=${channelId.value}&utm_source=bookpress&utm_medium=list_${selectedTabItemKey.value}`
+    url: `${BOOK3_URL}/store/${b.classId}?from=${channelId.value}&utm_source=bookpress&utm_medium=list_${selectedTabItemKey.value}`
   }
 }))
 
@@ -183,7 +183,7 @@ async function fetchBookList () {
 }
 
 async function fetchBestSellersList () {
-  const data = await $fetch(`${LIKER_LAND_URL}/api/bookstore/products?tag=bestselling`)
+  const data = await $fetch(`${BOOK3_URL}/api/store/products?tag=bestselling`)
   bestSellerBookList.value = (data as any)?.records || []
 }
 

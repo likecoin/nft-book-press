@@ -20,10 +20,10 @@
         />
 
         <UButton
-          label="View in liker.land"
+          label="View in 3ook.com"
           icon="i-heroicons-arrow-top-right-on-square"
           variant="outline"
-          :to="`${LIKER_LAND_URL}/nft/class/${classId}`"
+          :to="`${BOOK3_URL}/store/${classId}`"
           target="_blank"
         />
       </div>
@@ -715,7 +715,7 @@ import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL, downloadFile, convertArrayOfObjectsToCSV, getPurchaseLink, formatShippingAddress } from '~/utils'
 import { shortenWalletAddress } from '~/utils/cosmos'
 
-const { CHAIN_EXPLORER_URL, LIKE_CO_API, LIKER_LAND_URL } = useRuntimeConfig().public
+const { CHAIN_EXPLORER_URL, BOOK3_URL, LIKE_CO_API } = useRuntimeConfig().public
 const store = useWalletStore()
 const bookStoreApiStore = useBookStoreApiStore()
 const nftStore = useNftStore()

@@ -33,7 +33,7 @@
           <UInput
             v-model="customDestinationURLInput"
             class="font-mono"
-            placeholder="https://liker.land/store?tag=blockchain"
+            placeholder="https://3ook.com/store?tag=blockchain"
             name="custom_destination_url"
           />
         </UFormGroup>
@@ -47,7 +47,7 @@
           <UTextarea
             v-model="productIdInputModel"
             class="font-mono"
-            :placeholder="`likenft1ku4ra0e7dgknhd0wckrkxspuultynl4mgkxa3j08xeshfr2l0ujqmmvy83\nlikenft1wrskn9a683stkje3wdmcwuvpuqrp5eevjsnn9y4f55wlystzxausuhj3em`"
+            :placeholder="`0x53c7243b94b3c4a4827816f00d72394ddfb974c4\n0x146736dd2ccb1dbdf266130a117609e00ad566b1`"
             :autoresize="true"
             name="product_id"
           />

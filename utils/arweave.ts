@@ -169,9 +169,9 @@ export async function uploadSingleFileToBundlr (
 ) {
   const bundler = await getBundler({ fileSize, ipfsHash, txHash, token })
   const tags = [
-    { name: 'App-Name', value: 'publish.liker.land' },
+    { name: 'App-Name', value: 'publish.3ook.com' },
     { name: 'App-Version', value: '2.0' },
-    { name: 'User-Agent', value: 'publish.liker.land' },
+    { name: 'User-Agent', value: 'publish.3ook.com' },
     { name: 'IPFS-CID', value: ipfsHash }
   ]
   if (fileType) { tags.push({ name: 'Content-Type', value: fileType }) }

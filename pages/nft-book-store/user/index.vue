@@ -267,7 +267,7 @@
             :ui="{ th: { base: 'text-center' }, td: { base: 'text-center' } }"
           >
             <template #classId-data="{ row }">
-              <a :href="`${LIKER_LAND_URL}/nft/class/${row.classId}`" target="_blank">
+              <a :href="`${BOOK3_URL}/store/${row.classId}`" target="_blank">
                 {{ nftStore.getClassMetadataById(row.classId)?.name }}
               </a>
             </template>

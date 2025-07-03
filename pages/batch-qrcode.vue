@@ -35,7 +35,7 @@
       <QRCodeGenerator
         v-model:icon="selectedQRCodeIcon"
         v-model:color="selectedQRCodeColor"
-        data="https://books.liker.land"
+        :data="`${BOOK3_URL}/store`"
         :width="500"
         :height="500"
         mode="config"
@@ -108,6 +108,8 @@ import { getQRCodeOptions, DEFAULT_QR_CODE_ICON } from '~/utils/qrcode'
 const CSV_HEADER = 'key,url'
 
 definePageMeta({ layout: 'page' })
+
+const { BOOK3_URL } = useRuntimeConfig().public
 
 const toast = useToast()
 
