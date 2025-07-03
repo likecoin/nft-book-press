@@ -131,7 +131,6 @@ exports.randomFillSync = randomFillSync`
       LIKE_CO_HOST: process.env.LIKE_CO_HOST,
       LIKE_CO_API: process.env.LIKE_CO_API,
       LIKE_CO_STATIC_ENDPOINT: process.env.LIKE_CO_STATIC_ENDPOINT,
-      APP_LIKE_CO_URL: process.env.APP_LIKE_CO_URL,
       ISCN_TOOLS_URL: process.env.ISCN_TOOLS_URL,
       ARWEAVE_ENDPOINT: process.env.ARWEAVE_ENDPOINT,
       LIKECOIN_V3_BOOK_MIGRATION_SITE_URL: process.env.LIKECOIN_V3_BOOK_MIGRATION_SITE_URL,

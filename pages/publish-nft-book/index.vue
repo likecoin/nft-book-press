@@ -97,13 +97,6 @@
             >
               確認
             </UButton>
-            <a
-              :href="iscnQueryLink"
-              target="_blank"
-              class="text-primary-500"
-            >
-              or 找到你的 ISCN
-            </a>
           </div>
         </div>
       </div>
@@ -122,7 +115,6 @@ const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
 const route = useRoute()
 const router = useRouter()
-const { APP_LIKE_CO_URL } = useRuntimeConfig().public
 const { showErrorToast } = useToastComposable()
 
 const step = ref(0)
@@ -176,10 +168,6 @@ const shouldDisableAction = computed(() => {
     return isMintLoading.value
   }
   return false
-})
-
-const iscnQueryLink = computed(() => {
-  return `${APP_LIKE_CO_URL}/search?owner=${wallet.value}`
 })
 
 const steps = [
