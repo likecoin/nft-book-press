@@ -74,8 +74,8 @@ export function convertArrayOfObjectsToCSV (data: Record<string, any>[]): string
 }
 
 export function getPortfolioURL (wallet = '') {
-  const { LIKER_LAND_URL } = useRuntimeConfig().public
-  return `${LIKER_LAND_URL}/${wallet}`
+  const { OPENSEA_URL } = useRuntimeConfig().public
+  return `${OPENSEA_URL}/${wallet}`
 }
 
 export const deliverMethodOptions = [

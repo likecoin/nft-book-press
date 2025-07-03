@@ -9,7 +9,7 @@
     <UFormGroup label="Owner" class="text-left">
       <UButton
         :label="iscnOwner"
-        :to="`${likerLandURL}/${encodeURIComponent(iscnOwner)}`"
+        :to="`${OPENSEA_URL}/${encodeURIComponent(iscnOwner)}`"
         target="_blank"
         variant="link"
         :padded="false"
@@ -62,5 +62,5 @@ interface Props {
 defineProps<Props>()
 defineEmits<{(e: 'edit'): void }>()
 
-const { LIKER_LAND_URL: likerLandURL } = useRuntimeConfig().public
+const { OPENSEA_URL } = useRuntimeConfig().public
 </script>
