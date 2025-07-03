@@ -42,7 +42,6 @@ import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useCollectionStore } from '~/stores/collection'
 import { PUBLISHING_NOTICE_URL_EN, PUBLISHING_NOTICE_URL_ZH } from '~/constant'
 
-const { ISCN_TOOLS_URL } = useRuntimeConfig().public
 const bookStoreApiStore = useBookStoreApiStore()
 const collectionStore = useCollectionStore()
 const { getTotalPendingNFTCount } = storeToRefs(bookStoreApiStore)
@@ -167,17 +166,6 @@ const items = computed(() => [
         label: 'Chat with Us 聯絡我們',
         icon: 'i-heroicons-chat-bubble-bottom-center',
         to: 'https://go.crisp.chat/chat/embed/?website_id=5c009125-5863-4059-ba65-43f177ca33f7',
-        target: '_blank'
-      }
-    ]
-  },
-  {
-    label: 'Misc Tools',
-    links: [
-      {
-        label: 'LikeCoin ISCN/NFT Tools',
-        icon: 'i-heroicons-arrow-top-right-on-square',
-        to: ISCN_TOOLS_URL,
         target: '_blank'
       }
     ]

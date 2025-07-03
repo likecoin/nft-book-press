@@ -130,7 +130,7 @@ exports.randomFillSync = randomFillSync`
       LIKER_LAND_URL: process.env.LIKER_LAND_URL,
       LIKE_CO_API: process.env.LIKE_CO_API,
       LIKE_CO_STATIC_ENDPOINT: process.env.LIKE_CO_STATIC_ENDPOINT,
-      ISCN_TOOLS_URL: process.env.ISCN_TOOLS_URL,
+
       ARWEAVE_ENDPOINT: process.env.ARWEAVE_ENDPOINT,
       LIKECOIN_V3_BOOK_MIGRATION_SITE_URL: process.env.LIKECOIN_V3_BOOK_MIGRATION_SITE_URL,
       BOOK3_URL: process.env.BOOK3_URL
