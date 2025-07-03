@@ -57,7 +57,6 @@ import { formatISCNTxPayload, validateISCNForm } from '~/utils/iscn'
 import { useWalletStore } from '~/stores/wallet'
 import { useISCN } from '~/composables/useISCN'
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
-import { config } from '~/utils/wagmi/config'
 import { DEFAULT_MAX_SUPPLY } from '~/constant'
 
 const nftStore = useNftStore()
@@ -247,7 +246,7 @@ async function handleSave () {
         max_supply: DEFAULT_MAX_SUPPLY
       }]
     })
-    const receipt = await waitForTransactionReceipt(config, { hash: txHash })
+    const receipt = await waitForTransactionReceipt({ hash: txHash })
     console.log(receipt)
     if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
     toast.add({

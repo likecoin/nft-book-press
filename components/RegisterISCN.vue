@@ -30,8 +30,7 @@ import { useFileUpload } from '~/composables/useFileUpload'
 import { useWalletStore } from '~/stores/wallet'
 
 import { useISCN } from '~/composables/useISCN'
-import { LIKE_NFT_ABI, LIKE_NFT_CONTRACT_ADDRESS } from '~/contracts/likeNFT'
-import { config } from '~/utils/wagmi/config'
+import { LIKE_NFT_ABI } from '~/contracts/likeNFT'
 import { useToastComposable } from '~/composables/useToast'
 import { DEFAULT_MAX_SUPPLY } from '~/constant'
 
@@ -45,6 +44,7 @@ const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
 const { stripHtmlTags, formatLanguage } = useFileUpload()
 const { showErrorToast } = useToastComposable()
+const { LIKE_NFT_CONTRACT_ADDRESS } = useRuntimeConfig().public
 
 const iscnFormData = ref({
   type: 'Book',
@@ -204,7 +204,7 @@ const submitToISCN = async (): Promise<void> => {
         500
       ]
     })
-    const receipt = await waitForTransactionReceipt(config, { hash: txHash })
+    const receipt = await waitForTransactionReceipt({ hash: txHash })
     // eslint-disable-next-line no-console
     console.log(receipt)
     if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
