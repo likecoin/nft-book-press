@@ -1,5 +1,6 @@
 import { useWriteContract } from '@wagmi/vue'
 import { readContract } from '@wagmi/vue/actions'
+import { getBalance } from '@wagmi/vue/actions'
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
 import { config } from '~/utils/wagmi/config'
 
@@ -31,14 +32,26 @@ export const useNFTContractWriter = () => {
       console.log(`Granted ${role} to ${wallet} in class ${classId}. Transaction hash: ${txHash}`)
     }
   }
-  const checkAndGrantUpdater = ({ classId, wallet }: { classId: string, wallet: string }) => {
+  const checkAndGrantUpdater = async ({ classId, wallet }: { classId: string, wallet: string }) => {
+    await checkWalletBalance({ wallet })
     return checkAndGrantRole({ classId, wallet }, 'UPDATER_ROLE')
   }
-  const checkAndGrantMinter = ({ classId, wallet }: { classId: string, wallet: string }) => {
+  const checkAndGrantMinter = async ({ classId, wallet }: { classId: string, wallet: string }) => {
+    await checkWalletBalance({ wallet })
     return checkAndGrantRole({ classId, wallet }, 'MINTER_ROLE')
+  }
+  const checkWalletBalance = async ({ wallet }: { wallet: string }) => {
+    const balance = await getBalance(config, {
+      address: wallet as `0x${string}`
+    })
+    if (balance.value <= 0n) {
+      throw new Error('Insufficient OP-ETH balance')
+    }
+    return balance
   }
   return {
     checkAndGrantUpdater,
-    checkAndGrantMinter
+    checkAndGrantMinter,
+    checkWalletBalance
   }
 }

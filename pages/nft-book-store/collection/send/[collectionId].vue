@@ -194,6 +194,7 @@ const {
   getTokenIdByOwnerIndex
 } = useNFTContractReader()
 const { writeContractAsync } = useWriteContract()
+const { checkWalletBalance } = useNFTContractWriter()
 
 const route = useRoute()
 const router = useRouter()
@@ -345,6 +346,9 @@ async function onSendNFTStart () {
     let receipt
     let txHash
 
+    await checkWalletBalance({
+      wallet: wallet.value
+    })
     for (let i = 0; i < classIds.value.length; i++) {
       const classId = classIds.value[i]
       txHash = await writeContractAsync({
