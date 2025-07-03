@@ -24,14 +24,13 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWriteContract } from '@wagmi/vue'
-import { waitForTransactionReceipt } from '@wagmi/vue/actions'
+import { waitForTransactionReceipt } from '~/utils/evm'
 import { getUploadFileData } from '~/utils/uploadFile'
 import { useFileUpload } from '~/composables/useFileUpload'
 import { useWalletStore } from '~/stores/wallet'
 
 import { useISCN } from '~/composables/useISCN'
-import { LIKE_NFT_ABI, LIKE_NFT_CONTRACT_ADDRESS } from '~/contracts/likeNFT'
-import { config } from '~/utils/wagmi/config'
+import { LIKE_NFT_ABI } from '~/contracts/likeNFT'
 import { useToastComposable } from '~/composables/useToast'
 import { DEFAULT_MAX_SUPPLY } from '~/constant'
 
@@ -46,6 +45,7 @@ const { initIfNecessary } = walletStore
 const { assertPositiveWalletBalance } = useNFTContractWriter()
 const { stripHtmlTags, formatLanguage } = useFileUpload()
 const { showErrorToast } = useToastComposable()
+const { LIKE_NFT_CONTRACT_ADDRESS } = useRuntimeConfig().public
 
 const iscnFormData = ref({
   type: 'Book',
@@ -190,7 +190,7 @@ const submitToISCN = async (): Promise<void> => {
       wallet: wallet.value
     })
     const txHash = await writeContractAsync({
-      address: LIKE_NFT_CONTRACT_ADDRESS,
+      address: LIKE_NFT_CONTRACT_ADDRESS as `0x${string}`,
       abi: LIKE_NFT_ABI,
       functionName: 'newBookNFTWithRoyalty',
       args: [
@@ -208,7 +208,7 @@ const submitToISCN = async (): Promise<void> => {
         500
       ]
     })
-    const receipt = await waitForTransactionReceipt(config, { hash: txHash })
+    const receipt = await waitForTransactionReceipt({ hash: txHash })
     // eslint-disable-next-line no-console
     console.log(receipt)
     if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }

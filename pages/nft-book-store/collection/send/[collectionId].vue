@@ -171,7 +171,6 @@ import { parseImageURLFromMetadata } from '~/utils'
 import { useMessageCharCount } from '~/composables/useMessageCharCount'
 import { AUTHOR_MESSAGE_LIMIT } from '~/constant'
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
-import { config } from '~/utils/wagmi/config'
 import { waitForTransactionReceipt } from '~/utils/evm'
 
 const { LIKE_CO_API } = useRuntimeConfig().public
@@ -362,7 +361,7 @@ async function onSendNFTStart () {
           Array(orderInfo.value.quantity).fill(memo.value)
         ]
       })
-      receipt = await waitForTransactionReceipt(config, { hash: txHash })
+      receipt = await waitForTransactionReceipt({ hash: txHash })
     }
     if (receipt?.status === 'success') {
       await $fetch(`${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId.value}/sent/${paymentId.value}`,
