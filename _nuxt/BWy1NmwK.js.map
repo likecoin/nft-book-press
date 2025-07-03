@@ -1,1 +1,0 @@
-{"version":3,"file":"BWy1NmwK.js","sources":["../../../../components/PageContainer.vue"],"sourcesContent":["<template>\n  <main class=\"flex flex-col\">\n    <slot />\n  </main>\n</template>\n"],"names":["_sfc_render","_ctx","_cache","_openBlock","_createElementBlock","_hoisted_1"],"mappings":"+YACE,SAAAA,EAAAC,EAAAC,EAAA,QACUC,EAAA,EAAAC,EAAA,OAAAC,EAAA"}
