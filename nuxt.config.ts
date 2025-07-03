@@ -122,7 +122,6 @@ exports.randomFillSync = randomFillSync`
 
       SITE_URL: process.env.SITE_URL,
 
-      LCD_URL: process.env.LCD_URL,
       CHAIN_EXPLORER_URL: process.env.CHAIN_EXPLORER_URL,
 
       LIKE_EVM_NFT_TARGET_ADDRESS: process.env.LIKE_EVM_NFT_TARGET_ADDRESS,

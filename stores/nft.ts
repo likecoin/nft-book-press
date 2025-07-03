@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 
 export const useNftStore = defineStore('nft', () => {
-  const { LCD_URL, LIKE_CO_API } = useRuntimeConfig().public
+  const { LIKE_CO_API } = useRuntimeConfig().public
   const classMetadataByIdMap = ref({} as Record<string, any>)
   const classListingInfoByIdMap = ref({} as Record<string, any>)
 
@@ -10,14 +10,8 @@ export const useNftStore = defineStore('nft', () => {
   const getClassListingInfoById = computed(() => (classId: string) => classListingInfoByIdMap.value[classId])
 
   async function fetchClassMetadataById (classId: string) {
-    let classData: any
-    if (classId.startsWith('0x')) {
-      const { getClassMetadata } = useNFTContractReader()
-      classData = await getClassMetadata(classId)
-    } else {
-      const data = await $fetch(`${LCD_URL}/cosmos/nft/v1beta1/classes/${classId}`);
-      ({ class: classData } = data as any)
-    }
+    const { getClassMetadata } = useNFTContractReader()
+    const classData = await getClassMetadata(classId)
     classMetadataByIdMap.value[classId] = classData
     return classData
   }

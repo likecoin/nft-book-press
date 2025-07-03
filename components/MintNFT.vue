@@ -90,23 +90,21 @@ async function fetchISCNById (iscnId?: string) {
   }
   try {
     isLoading.value = true
-    if (iscnId.startsWith('0x')) {
-      const isBookNFT = await checkNFTClassIsBookNFT(iscnId)
-      if (!isBookNFT) {
-        throw new Error('Invalid NFT Class ID')
-      }
-      const [data, owner] = await Promise.all([
-        getClassMetadata(iscnId),
-        getClassOwner(iscnId)
-      ])
-      if (!data) {
-        throw new Error('Invalid NFT Class ID')
-      }
-      iscnData.value = { contentMetadata: data, owner, '@id': iscnId }
-      iscnOwner.value = owner as string
-      classId.value = iscnId
-      step.value = 3
+    const isBookNFT = await checkNFTClassIsBookNFT(iscnId)
+    if (!isBookNFT) {
+      throw new Error('Invalid NFT Class ID')
     }
+    const [data, owner] = await Promise.all([
+      getClassMetadata(iscnId),
+      getClassOwner(iscnId)
+    ])
+    if (!data) {
+      throw new Error('Invalid NFT Class ID')
+    }
+    iscnData.value = { contentMetadata: data, owner, '@id': iscnId }
+    iscnOwner.value = owner as string
+    classId.value = iscnId
+    step.value = 3
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error(err)
