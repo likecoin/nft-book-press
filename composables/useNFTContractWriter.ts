@@ -1,6 +1,5 @@
 import { useWriteContract } from '@wagmi/vue'
-import { readContract } from '@wagmi/vue/actions'
-import { getBalance } from '@wagmi/vue/actions'
+import { readContract, getBalance } from '@wagmi/vue/actions'
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
 import { config } from '~/utils/wagmi/config'
 
@@ -33,14 +32,14 @@ export const useNFTContractWriter = () => {
     }
   }
   const checkAndGrantUpdater = async ({ classId, wallet }: { classId: string, wallet: string }) => {
-    await checkWalletBalance({ wallet })
+    await assertPositiveWalletBalance({ wallet })
     return checkAndGrantRole({ classId, wallet }, 'UPDATER_ROLE')
   }
   const checkAndGrantMinter = async ({ classId, wallet }: { classId: string, wallet: string }) => {
-    await checkWalletBalance({ wallet })
+    await assertPositiveWalletBalance({ wallet })
     return checkAndGrantRole({ classId, wallet }, 'MINTER_ROLE')
   }
-  const checkWalletBalance = async ({ wallet }: { wallet: string }) => {
+  const assertPositiveWalletBalance = async ({ wallet }: { wallet: string }) => {
     const balance = await getBalance(config, {
       address: wallet as `0x${string}`
     })
@@ -52,6 +51,6 @@ export const useNFTContractWriter = () => {
   return {
     checkAndGrantUpdater,
     checkAndGrantMinter,
-    checkWalletBalance
+    assertPositiveWalletBalance
   }
 }

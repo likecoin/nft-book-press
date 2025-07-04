@@ -43,7 +43,7 @@ const {
 
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
-const { checkWalletBalance } = useNFTContractWriter()
+const { assertPositiveWalletBalance } = useNFTContractWriter()
 const { stripHtmlTags, formatLanguage } = useFileUpload()
 const { showErrorToast } = useToastComposable()
 
@@ -186,7 +186,7 @@ const submitToISCN = async (): Promise<void> => {
       nft_meta_collection_description: 'NFT Book by Liker Land',
       recordTimestamp: new Date().toISOString()
     }
-    await checkWalletBalance({
+    await assertPositiveWalletBalance({
       wallet: wallet.value
     })
     const txHash = await writeContractAsync({
