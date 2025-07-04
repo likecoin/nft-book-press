@@ -63,7 +63,6 @@ import { DEFAULT_MAX_SUPPLY, NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
 import { useToastComposable } from '~/composables/useToast'
 
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
-import { config } from '~/utils/wagmi/config'
 import { waitForTransactionReceipt } from '~/utils/evm'
 
 const route = useRoute()
@@ -277,7 +276,7 @@ async function mintNFTs () {
         }))
       ]
     })
-    const receipt = await waitForTransactionReceipt(config, { hash: res })
+    const receipt = await waitForTransactionReceipt({ hash: res })
     // eslint-disable-next-line no-console
     console.log(receipt)
     if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }

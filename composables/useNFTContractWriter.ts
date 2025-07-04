@@ -1,10 +1,11 @@
 import { useWriteContract } from '@wagmi/vue'
 import { readContract, getBalance } from '@wagmi/vue/actions'
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
-import { config } from '~/utils/wagmi/config'
+import { getConfig as getWagmiConfig } from '~/utils/wagmi/config'
 
 export const useNFTContractWriter = () => {
   const { writeContractAsync } = useWriteContract()
+  const config = getWagmiConfig()
   const checkAndGrantRole = async (
     { classId, wallet }: { classId: string; wallet: string },
     role: string

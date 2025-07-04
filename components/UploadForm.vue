@@ -105,7 +105,6 @@ import {
 } from '~/utils/arweave'
 import { useWalletStore } from '~/stores/wallet'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
-import { config } from '~/utils/wagmi/config'
 import { waitForTransactionReceipt } from '~/utils/evm'
 
 const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024
@@ -603,7 +602,7 @@ const sendArweaveFeeTx = async (record: any, memoIpfsOveride?: string): Promise<
       value: parseEther(arweaveFeeMap.value[record.ipfsHash] as string),
       data: `0x${Buffer.from(memo, 'utf-8').toString('hex')}`
     })
-    const receipt = await waitForTransactionReceipt(config, { hash: transactionHash })
+    const receipt = await waitForTransactionReceipt({ hash: transactionHash })
     if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
     if (transactionHash) {
       const existingData =

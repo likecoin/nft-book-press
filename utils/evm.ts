@@ -1,10 +1,11 @@
 import { waitForTransactionReceipt as wagmiWaitForTransactionReceipt } from '@wagmi/vue/actions'
+import { getConfig as getWagmiConfig } from '~/utils/wagmi/config'
 
 export async function waitForTransactionReceipt (
-  config: Parameters<typeof wagmiWaitForTransactionReceipt>[0],
   parameters: Parameters<typeof wagmiWaitForTransactionReceipt>[1]
 ) {
   let receipt
+  const config = getWagmiConfig()
   try {
     receipt = await wagmiWaitForTransactionReceipt(config, parameters)
   } catch (error) {
