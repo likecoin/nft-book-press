@@ -1,6 +1,5 @@
 import { readContract } from '@wagmi/vue/actions'
 import { LIKE_NFT_ABI, LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
-import { getConfig as getWagmiConfig } from '~/utils/wagmi/config'
 
 function parseURIString (dataString: string): Record<string, any> | null {
   const dataUriPattern = /^data:application\/json(?:; ?charset=utf-8|; ?utf8)?(;base64)?,/i
@@ -25,7 +24,7 @@ function parseURIString (dataString: string): Record<string, any> | null {
 
 export const useNFTContractReader = () => {
   const { LIKE_NFT_CONTRACT_ADDRESS } = useRuntimeConfig().public
-  const config = getWagmiConfig()
+  const { $wagmiConfig: config } = useNuxtApp()
 
   const getClassMetadata = async (classId: string) => {
     const dataString = await readContract(config, {

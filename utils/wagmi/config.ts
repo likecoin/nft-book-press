@@ -3,13 +3,6 @@ import { optimism, optimismSepolia } from '@wagmi/vue/chains'
 import { injected } from '@wagmi/vue/connectors'
 import { dedicatedWalletConnector } from '@magiclabs/wagmi-connector'
 
-let cachedConfig: ReturnType<typeof createConfig>
-
-export function getConfig () {
-  if (!cachedConfig) { throw new Error('Wagmi config not created yet. Call createWagmiConfig first.') }
-  return cachedConfig
-}
-
 export function createWagmiConfig ({
   apiKey,
   rpcURL = '',
@@ -23,7 +16,7 @@ export function createWagmiConfig ({
   customLogoURL?: string
   isServer?: boolean
 }) {
-  cachedConfig = createConfig({
+  return createConfig({
     chains: [optimismSepolia, optimism],
     connectors: [
       // NOTE: @magiclabs/wagmi-connector is not compatible with SSR
@@ -54,7 +47,6 @@ export function createWagmiConfig ({
       [optimismSepolia.id]: http()
     }
   })
-  return cachedConfig
 }
 
 declare module '@wagmi/vue' {

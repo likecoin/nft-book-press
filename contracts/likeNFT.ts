@@ -1,7 +1,5 @@
 import type { Abi } from 'viem'
 
-export const LIKE_NFT_CONTRACT_ADDRESS = '0x67BCd74981c33E95E5e306085754DD0A721183F1'
-
 export const LIKE_NFT_ABI: Abi = [
   {
     inputs: [
