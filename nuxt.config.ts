@@ -131,7 +131,7 @@ exports.randomFillSync = randomFillSync`
       MAGIC_LINK_CHAIN_ID: Number(process.env.MAGIC_LINK_CHAIN_ID) || 0,
       MAGIC_LINK_RPC_URL: process.env.MAGIC_LINK_RPC_URL,
 
-      LIKE_NFT_CONTRACT_ADDRESS: process.env.LIKE_NFT_CONTRACT_ADDRESS,
+      LIKE_NFT_CONTRACT_ADDRESS: process.env.LIKE_NFT_CONTRACT_ADDRESS as `0x${string}`,
 
       LIKER_LAND_URL: process.env.LIKER_LAND_URL,
       LIKE_CO_API: process.env.LIKE_CO_API,

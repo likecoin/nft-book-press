@@ -63,7 +63,6 @@ import { DEFAULT_MAX_SUPPLY, NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
 import { useToastComposable } from '~/composables/useToast'
 
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
-import { waitForTransactionReceipt } from '~/utils/evm'
 
 const route = useRoute()
 const { writeContractAsync } = useWriteContract()
@@ -73,7 +72,7 @@ const {
   checkNFTClassIsBookNFT,
   getClassCurrentTokenId
 } = useNFTContractReader()
-const { checkAndGrantMinter } = useNFTContractWriter()
+const { checkAndGrantMinter, waitForTransactionReceipt } = useNFTContractWriter()
 
 const store = useWalletStore()
 const { wallet } = storeToRefs(store)

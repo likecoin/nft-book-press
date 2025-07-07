@@ -184,7 +184,6 @@ import { parseImageURLFromMetadata } from '~/utils'
 import { useMessageCharCount } from '~/composables/useMessageCharCount'
 import { AUTHOR_MESSAGE_LIMIT } from '~/constant'
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
-import { waitForTransactionReceipt } from '~/utils/evm'
 
 const { LIKE_CO_API } = useRuntimeConfig().public
 
@@ -203,7 +202,7 @@ const router = useRouter()
 
 const { writeContractAsync } = useWriteContract()
 const { getBalanceOf, getTokenIdByOwnerIndex } = useNFTContractReader()
-const { assertPositiveWalletBalance } = useNFTContractWriter()
+const { assertPositiveWalletBalance, waitForTransactionReceipt } = useNFTContractWriter()
 
 const error = ref('')
 const isLoading = ref(false)

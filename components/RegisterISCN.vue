@@ -24,7 +24,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWriteContract } from '@wagmi/vue'
-import { waitForTransactionReceipt } from '~/utils/evm'
 import { getUploadFileData } from '~/utils/uploadFile'
 import { useFileUpload } from '~/composables/useFileUpload'
 import { useWalletStore } from '~/stores/wallet'
@@ -42,7 +41,7 @@ const {
 
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
-const { assertPositiveWalletBalance } = useNFTContractWriter()
+const { assertPositiveWalletBalance, waitForTransactionReceipt } = useNFTContractWriter()
 const { stripHtmlTags, formatLanguage } = useFileUpload()
 const { showErrorToast } = useToastComposable()
 const { LIKE_NFT_CONTRACT_ADDRESS } = useRuntimeConfig().public

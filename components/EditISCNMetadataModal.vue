@@ -51,7 +51,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWriteContract } from '@wagmi/vue'
-import { waitForTransactionReceipt } from '~/utils/evm'
 import { useNftStore } from '~/stores/nft'
 import { formatISCNTxPayload, validateISCNForm } from '~/utils/iscn'
 import { useWalletStore } from '~/stores/wallet'
@@ -65,7 +64,7 @@ const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
 const { writeContractAsync } = useWriteContract()
-const { checkAndGrantUpdater } = useNFTContractWriter()
+const { checkAndGrantUpdater, waitForTransactionReceipt } = useNFTContractWriter()
 
 const props = defineProps<{
   classId: string

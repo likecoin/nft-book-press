@@ -1,6 +1,7 @@
 import { useWriteContract } from '@wagmi/vue'
-import { readContract, getBalance } from '@wagmi/vue/actions'
+import { readContract, getBalance, waitForTransactionReceipt as wagmiWaitForTransactionReceipt } from '@wagmi/vue/actions'
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
+import { sleep } from '~/utils'
 
 export const useNFTContractWriter = () => {
   const { writeContractAsync } = useWriteContract()
@@ -48,9 +49,24 @@ export const useNFTContractWriter = () => {
     }
     return balance
   }
+  const waitForTransactionReceipt = async (
+    parameters: Parameters<typeof wagmiWaitForTransactionReceipt>[1]
+  ) => {
+    let receipt
+    try {
+      receipt = await wagmiWaitForTransactionReceipt(config, parameters)
+    } catch (error) {
+      // Sometimes a TransactionReceiptNotFoundError would be thrown
+      // https://github.com/wevm/viem/issues/1056
+      await sleep(3000)
+      receipt = await wagmiWaitForTransactionReceipt(config, parameters)
+    }
+    return receipt
+  }
   return {
     checkAndGrantUpdater,
     checkAndGrantMinter,
-    assertPositiveWalletBalance
+    assertPositiveWalletBalance,
+    waitForTransactionReceipt
   }
 }

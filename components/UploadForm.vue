@@ -105,13 +105,13 @@ import {
 } from '~/utils/arweave'
 import { useWalletStore } from '~/stores/wallet'
 import { useBookStoreApiStore } from '~/stores/book-store-api'
-import { waitForTransactionReceipt } from '~/utils/evm'
 
 const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
 const { initIfNecessary } = store
+const { waitForTransactionReceipt } = useNFTContractWriter()
 const bookStoreApiStore = useBookStoreApiStore()
 const { token } = storeToRefs(bookStoreApiStore)
 const toast = useToast()
