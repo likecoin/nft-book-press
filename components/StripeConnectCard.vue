@@ -75,7 +75,7 @@
             </URadio>
             <div class="flex flex-col mt-[14px] w-[80%]">
               <UInput
-                :value="inputWallet"
+                v-model="inputWallet"
                 :color="stripeConnectInputError ? 'rose' : 'white'"
                 class="font-mono w-full"
                 placeholder="like1..."
