@@ -3,11 +3,14 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { replaceCodePlugin } from 'vite-plugin-replace'
 
 const {
+  NODE_ENV,
   SENTRY_ORG,
   SENTRY_PROJECT,
   SENTRY_AUTH_TOKEN,
   GA_TRACKING_ID
 } = process.env
+
+const isDevelopment = NODE_ENV === 'development'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -27,7 +30,7 @@ export default defineNuxtConfig({
 
   scripts: {
     registry: {
-      crisp: true
+      intercom: true
     }
   },
 
@@ -48,20 +51,12 @@ export default defineNuxtConfig({
   security: {
     headers: {
       crossOriginEmbedderPolicy: 'unsafe-none',
-      crossOriginOpenerPolicy: 'same-origin-allow-popups',
       contentSecurityPolicy: {
-        'script-src': [
-          "'self'",
-          'https:',
-          "'unsafe-inline'",
-          "'wasm-unsafe-eval'",
-          "'nonce-{{nonce}}'",
-          'https://l.crisp.chat'
-        ],
         'worker-src': ["'self'", 'blob:'],
-        'img-src': ["'self'", 'data:', '*']
-      },
-      referrerPolicy: 'strict-origin'
+        'img-src': ["'self'", 'data:', '*'],
+        // NOTE: Resolve Safari force HTTPS in development
+        'upgrade-insecure-requests': !isDevelopment
+      }
     },
     removeLoggers: false
   },
@@ -114,8 +109,8 @@ exports.randomFillSync = randomFillSync`
   runtimeConfig: {
     public: {
       scripts: {
-        crisp: {
-          id: ''
+        intercom: {
+          app_id: ''
         }
       },
       IS_TESTNET: process.env.IS_TESTNET,

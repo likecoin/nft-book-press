@@ -165,7 +165,7 @@ const items = computed(() => [
       {
         label: 'Chat with Us 聯絡我們',
         icon: 'i-heroicons-chat-bubble-bottom-center',
-        to: 'https://go.crisp.chat/chat/embed/?website_id=5c009125-5863-4059-ba65-43f177ca33f7',
+        to: 'https://cs.3ook.com',
         target: '_blank'
       }
     ]
