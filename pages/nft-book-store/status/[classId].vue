@@ -10,10 +10,10 @@
           class="font-mono break-all"
           label="Gift Books"
           icon="i-heroicons-gift"
-          :to="{
+          :to="localeRoute({
             name: 'nft-book-store-gift-classId',
             params: { classId }
-          }"
+          })"
           color="pink"
           variant="outline"
           target="_blank"
@@ -265,10 +265,10 @@
                 <td class="text-center">
                   <UButton
                     icon="i-heroicons-document-magnifying-glass"
-                    :to="{
+                    :to="localeRoute({
                       name: 'nft-book-store-status-classId-edit-editionIndex',
                       params: { classId, editionIndex: element.index }
-                    }"
+                    })"
                     variant="soft"
                     color="gray"
                   />
@@ -282,11 +282,11 @@
             icon="i-heroicons-plus-circle"
             class="mb-[12px]"
             label="New Edition"
-            :to="{
+            :to="localeRoute({
               name: 'nft-book-store-status-classId-edit-new',
               params: { classId },
               query: { price_index: prices.length }
-            }"
+            })"
           />
         </div>
       </UCard>

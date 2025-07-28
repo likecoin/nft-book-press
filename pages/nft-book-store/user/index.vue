@@ -320,12 +320,12 @@
                 label="Details"
                 size="sm"
                 color="gray"
-                :to="{
+                :to="localeRoute({
                   name: 'nft-book-store-user-payouts-payoutId',
                   params: {
                     payoutId: row.id
                   }
-                }"
+                })"
               />
             </template>
           </UTable>
@@ -351,6 +351,7 @@ const userStore = useUserStore()
 const { token, wallet } = storeToRefs(bookStoreApiStore)
 const { bookUser, isUpdatingBookUserProfile, userLikerInfo, isFetchingUserLikerInfo } = storeToRefs(userStore)
 const toast = useToast()
+const localeRoute = useLocaleRoute()
 
 const error = ref('')
 const isLoading = ref(false)

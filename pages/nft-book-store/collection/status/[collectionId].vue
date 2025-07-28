@@ -157,10 +157,10 @@
             <template #action-data="{ row }">
               <UButton
                 icon="i-heroicons-document-magnifying-glass"
-                :to="{
+                :to="localeRoute({
                   name: 'nft-book-store-collection-status-collectionId-edit',
                   params: { collectionId:row.collectionId }
-                }"
+                })"
                 variant="soft"
                 color="gray"
               />
@@ -442,6 +442,7 @@ const { getClassMetadataById, lazyFetchClassMetadataById } = nftStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
 
 const route = useRoute()
+const localeRoute = useLocaleRoute()
 const router = useRouter()
 const toast = useToast()
 
