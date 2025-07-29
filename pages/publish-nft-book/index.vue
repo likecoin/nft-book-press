@@ -115,7 +115,6 @@ const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
 const route = useRoute()
-const router = useRouter()
 const localeRoute = useLocaleRoute()
 const { showErrorToast } = useToastComposable()
 
@@ -259,7 +258,7 @@ const handleUploadSubmit = (uploadFileData: any) => {
 const handleIscnSubmit = async (res: { iscnId: string, txHash: string }) => {
   const { iscnId: newIscnId } = res
   if (newIscnId) {
-    router.replace({ query: { iscn_id: newIscnId } })
+    await navigateTo(localeRoute({ query: { iscn_id: newIscnId } }), { replace: true })
   }
   clearUploadFileData()
   step.value = 2
@@ -271,14 +270,14 @@ const handleMintNFTSubmit = async (res: any) => {
   const { classId: newClassId, nftMintCount } = res
   if (newClassId) {
     classId.value = newClassId
-    router.replace({ query: { class_id: newClassId, count: nftMintCount } })
+    await navigateTo(localeRoute({ query: { class_id: newClassId, count: nftMintCount } }), { replace: true })
     step.value = 3
     await nextTick()
   }
 }
 
-const handleNewBookSubmit = () => {
-  navigateTo(localeRoute({ name: 'nft-book-store' }))
+const handleNewBookSubmit = async () => {
+  await navigateTo(localeRoute({ name: 'nft-book-store' }))
 }
 
 const handleIscnInput = async () => {

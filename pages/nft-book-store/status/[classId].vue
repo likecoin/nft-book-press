@@ -728,7 +728,6 @@ const { fetchStripeConnectStatusByWallet } = stripeStore
 const { getBalanceOf } = useNFTContractReader()
 
 const route = useRoute()
-const router = useRouter()
 const localeRoute = useLocaleRoute()
 const toast = useToast()
 
@@ -1295,9 +1294,9 @@ async function updateSettings () {
       tableOfContents: tableOfContents.value,
       enableCustomMessagePage: enableCustomMessagePage.value
     })
-    router.push({
+    await navigateTo(localeRoute({
       name: 'nft-book-store'
-    })
+    }))
   } catch (err) {
     const errorData = (err as any).data || err
     console.error(errorData)
@@ -1371,13 +1370,13 @@ function printAllQRCodes () {
   }
 }
 
-function shortenAllLinks () {
+async function shortenAllLinks () {
   try {
     sessionStorage.setItem(
       'nft_book_press_batch_shorten_url',
       convertArrayOfObjectsToCSV(purchaseLinks.value.map(({ channel, url }) => ({ key: channel, url })))
     )
-    navigateTo(localeRoute({ name: 'batch-short-links', query: { print: 1 } }))
+    await navigateTo(localeRoute({ name: 'batch-short-links', query: { print: 1 } }))
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error)

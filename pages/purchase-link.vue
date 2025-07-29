@@ -414,19 +414,18 @@ const stripeStore = useStripeStore()
 const userStore = useUserStore()
 const { userLikerInfo } = storeToRefs(userStore)
 const route = useRoute()
-const router = useRouter()
 const localeRoute = useLocaleRoute()
 const toast = useToast()
 
 const isSharingMode = computed({
   get: () => route.query.share === '1',
   set: (value) => {
-    router.replace({
+    navigateTo(localeRoute({
       query: {
         ...route.query,
         share: value ? '1' : undefined
       }
-    })
+    }), { replace: true })
   }
 })
 

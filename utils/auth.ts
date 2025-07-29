@@ -45,13 +45,13 @@ export function setupPostAuthRedirect () {
   } catch {}
 }
 
-export function executePostAuthRedirect () {
+export async function executePostAuthRedirect () {
   try {
     if (!window.sessionStorage) { return }
 
     const route = window.sessionStorage.getItem(POST_AUTH_REDIRECT_ROUTE_KEY)
-    const router = useRouter()
-    router.replace(route || '/')
+    const localeRoute = useLocaleRoute()
+    await navigateTo(localeRoute(route || '/'), { replace: true })
   } finally {
     clearPostAuthRedirect()
   }

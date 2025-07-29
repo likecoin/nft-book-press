@@ -198,7 +198,7 @@ const nftStore = useNftStore()
 const { lazyFetchClassMetadataById } = nftStore
 
 const route = useRoute()
-const router = useRouter()
+const localeRoute = useLocaleRoute()
 
 const { writeContractAsync } = useWriteContract()
 const { getBalanceOf, getTokenIdByOwnerIndex } = useNFTContractReader()
@@ -375,12 +375,12 @@ async function onSendNFTStart () {
           }
         })
 
-      router.push({
+      await navigateTo(localeRoute({
         name: 'nft-book-store-status-classId',
         params: {
           classId: classId.value
         }
-      })
+      }))
     }
   } catch (err) {
     console.error(err)

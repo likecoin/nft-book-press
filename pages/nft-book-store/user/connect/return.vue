@@ -98,8 +98,8 @@ onMounted(async () => {
     )
     isDone.value = (data as any).isReady || false
 
-    setTimeout(() => {
-      navigateTo(localeRoute({ name: 'nft-book-store-user' }), { replace: true })
+    setTimeout(async () => {
+      await navigateTo(localeRoute({ name: 'nft-book-store-user' }), { replace: true })
     }, 3000)
   } catch (e) {
     console.error(e)

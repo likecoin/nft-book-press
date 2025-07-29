@@ -339,9 +339,9 @@ function downloadAllShortenedLinks () {
   })
 }
 
-function convertToQRCode () {
+async function convertToQRCode () {
   sessionStorage.setItem('nft_book_press_batch_qrcode', convertArrayOfObjectsToCSV(shortenedURLItems.value))
-  navigateTo(localeRoute({ name: 'batch-qrcode' }))
+  await navigateTo(localeRoute({ name: 'batch-qrcode' }))
 }
 
 function handleFileChange (files: FileList) {

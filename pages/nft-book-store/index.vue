@@ -161,7 +161,6 @@ import { useBookStoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 
 const route = useRoute()
-const router = useRouter()
 const localeRoute = useLocaleRoute()
 const bookStoreApiStore = useBookStoreApiStore()
 const nftStore = useNftStore()
@@ -188,7 +187,7 @@ const selectedTabItemIndex = computed({
     return index
   },
   set (value) {
-    router.replace({ query: { tab: tabItems[value].key } })
+    navigateTo(localeRoute({ query: { tab: tabItems[value].key } }), { replace: true })
   }
 })
 
@@ -295,8 +294,8 @@ onMounted(async () => {
   classIds.forEach(classId => lazyFetchClassMetadataById(classId))
 })
 
-function selectTableRow (row: any) {
-  navigateTo(localeRoute({
+async function selectTableRow (row: any) {
+  await navigateTo(localeRoute({
     name: 'nft-book-store-status-classId',
     params: { classId: row.classId }
   }))

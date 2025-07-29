@@ -203,9 +203,9 @@ async function fetchUserStripeInfo () {
   }
 }
 
-function handleAffiliationSetupButtonClick () {
+async function handleAffiliationSetupButtonClick () {
   useTrackEvent('latest_books_click_affiliation_setup')
-  navigateTo(localeRoute({ name: 'nft-book-store-user' }))
+  await navigateTo(localeRoute({ name: 'nft-book-store-user' }))
 }
 
 function selectTableRow (row: any) {

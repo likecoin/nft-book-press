@@ -15,7 +15,7 @@
 const { t: $t } = useI18n()
 const localeRoute = useLocaleRoute()
 
-onMounted(() => {
-  navigateTo(localeRoute({ name: 'latest-books' }), { replace: true })
+onMounted(async () => {
+  await navigateTo(localeRoute({ name: 'latest-books' }), { replace: true })
 })
 </script>

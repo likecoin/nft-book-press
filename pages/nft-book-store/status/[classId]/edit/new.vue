@@ -29,8 +29,8 @@
 
 <script setup lang="ts">
 
-const router = useRouter()
 const route = useRoute()
+const localeRoute = useLocaleRoute()
 const toast = useToast()
 
 const classId = ref(route.params.classId?.toString() || '')
@@ -40,12 +40,12 @@ const newEditionIndex = computed(() => {
 
 const isLoading = ref(false)
 
-function handleNewBookSubmit () {
+async function handleNewBookSubmit () {
   try {
-    router.push({
+    await navigateTo(localeRoute({
       name: 'nft-book-store-status-classId',
       params: { classId: classId.value }
-    })
+    }))
   } catch (err) {
     const errorData = (err as any).data || err
     // eslint-disable-next-line no-console
@@ -64,11 +64,11 @@ function handleNewBookSubmit () {
   }
 }
 
-function handleClickBack () {
-  router.push({
+async function handleClickBack () {
+  await navigateTo(localeRoute({
     name: 'nft-book-store-status-classId',
     params: { classId: classId.value }
-  })
+  }))
 }
 
 </script>

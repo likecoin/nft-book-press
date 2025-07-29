@@ -246,8 +246,8 @@ import { deliverMethodOptions, parseImageURLFromMetadata } from '~/utils'
 const collectionStore = useCollectionStore()
 const nftStore = useNftStore()
 
-const router = useRouter()
 const route = useRoute()
+const localeRoute = useLocaleRoute()
 const toast = useToast()
 const collectionId = ref(route.params.collectionId)
 
@@ -371,11 +371,11 @@ function sanitizeHtml (html: string) {
   return DOMPurify.sanitize(html)
 }
 
-function handleClickBack () {
-  router.push({
+async function handleClickBack () {
+  await navigateTo(localeRoute({
     name: 'nft-book-store-collection-status-collectionId',
     params: { collectionId: collectionId.value }
-  })
+  }))
 }
 
 async function updateShippingRates (value: any) {
@@ -455,10 +455,10 @@ async function handleSubmit () {
       editedPrice
     )
 
-    router.push({
+    await navigateTo(localeRoute({
       name: 'nft-book-store-collection-status-collectionId',
       params: { collectionId: collectionId.value }
-    })
+    }))
   } catch (err) {
     const errorData = (err as any).data || err
     // eslint-disable-next-line no-console

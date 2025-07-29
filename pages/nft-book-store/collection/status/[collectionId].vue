@@ -443,7 +443,6 @@ const { fetchStripeConnectStatusByWallet } = stripeStore
 
 const route = useRoute()
 const localeRoute = useLocaleRoute()
-const router = useRouter()
 const toast = useToast()
 
 const error = ref('')
@@ -900,9 +899,9 @@ async function updateSettings () {
       notificationEmails,
       connectedWallets: newConnectedWallets
     })
-    router.push({
+    await navigateTo(localeRoute({
       name: 'nft-book-store-collection'
-    })
+    }))
   } catch (err) {
     const errorData = (err as any).data || err
     console.error(errorData)

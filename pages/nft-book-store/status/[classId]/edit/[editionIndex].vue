@@ -39,8 +39,8 @@
 
 <script setup lang="ts">
 
-const router = useRouter()
 const route = useRoute()
+const localeRoute = useLocaleRoute()
 
 const classId = ref(route.params.classId?.toString() || '')
 const editionIndex = ref(route.params.editionIndex as string)
@@ -52,17 +52,17 @@ const priceItemLabel = computed(() => hasMultiplePrices.value ? 'edition' : 'boo
 
 const pageTitle = computed(() => `Edit ${priceItemLabel.value} ${hasMultiplePrices.value ? `#${editionIndex.value}` : 'price'} info`)
 
-function handleClickBack () {
-  router.push({
+async function handleClickBack () {
+  await navigateTo(localeRoute({
     name: 'nft-book-store-status-classId',
     params: { classId: classId.value }
-  })
+  }))
 }
 
-function handleSubmit () {
-  router.push({
+async function handleSubmit () {
+  await navigateTo(localeRoute({
     name: 'nft-book-store-status-classId',
     params: { classId: classId.value }
-  })
+  }))
 }
 </script>

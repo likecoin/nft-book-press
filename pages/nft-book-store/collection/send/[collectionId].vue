@@ -195,7 +195,7 @@ const { writeContractAsync } = useWriteContract()
 const { assertPositiveWalletBalance, waitForTransactionReceipt } = useNFTContractWriter()
 
 const route = useRoute()
-const router = useRouter()
+const localeRoute = useLocaleRoute()
 
 const error = ref('')
 const isLoading = ref(false)
@@ -374,12 +374,12 @@ async function onSendNFTStart () {
             authorization: `Bearer ${token.value}`
           }
         })
-      router.push({
+      await navigateTo(localeRoute({
         name: 'nft-book-store-collection-status-collectionId',
         params: {
           collectionId: collectionId.value
         }
-      })
+      }))
     }
   } catch (err) {
     console.error(err)

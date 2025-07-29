@@ -68,7 +68,6 @@ import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'
 
 const route = useRoute()
-const router = useRouter()
 const localeRoute = useLocaleRoute()
 const nftStore = useNftStore()
 const bookStoreApiStore = useBookStoreApiStore()
@@ -98,7 +97,7 @@ const selectedTabItemIndex = computed({
     return index
   },
   set (value) {
-    router.replace({ query: { tab: tabItems[value].key } })
+    navigateTo(localeRoute({ query: { tab: tabItems[value].key } }), { replace: true })
   }
 })
 
@@ -160,8 +159,8 @@ useSeoMeta({
   ogTitle: 'Book Collection Management'
 })
 
-function selectTableRow (row: any) {
-  navigateTo(localeRoute({
+async function selectTableRow (row: any) {
+  await navigateTo(localeRoute({
     name: 'nft-book-store-collection-status-collectionId',
     params: { collectionId: row.collectionId }
   }))

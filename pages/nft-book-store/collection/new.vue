@@ -674,7 +674,7 @@ async function submitNewCollection () {
       mustClaimToView: mustClaimToView.value,
       ...formattedPrice
     })
-    navigateTo(localeRoute({ name: 'nft-book-store-collection' }))
+    await navigateTo(localeRoute({ name: 'nft-book-store-collection' }))
   } catch (err) {
     const errorData = (err as any).data || err
     console.error(errorData)
