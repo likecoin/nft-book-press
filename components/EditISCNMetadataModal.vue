@@ -65,6 +65,7 @@ const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
 const { writeContractAsync } = useWriteContract()
 const { checkAndGrantUpdater, waitForTransactionReceipt } = useNFTContractWriter()
+const { refreshBookMetadata } = useBookStoreApiStore()
 
 const props = defineProps<{
   classId: string
@@ -253,6 +254,7 @@ async function handleSave () {
       color: 'blue'
     })
     await nftStore.fetchClassMetadataById(props.classId)
+    await refreshBookMetadata(props.classId)
     handleClickBack()
   } catch (error) {
     toast.add({

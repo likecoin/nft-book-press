@@ -155,6 +155,16 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
     return data
   }
 
+  async function refreshBookMetadata (classId: string) {
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/class/${classId}/refresh`, {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${token.value}`
+      }
+    })
+    return data
+  }
+
   async function uploadSignImages (payload : FormData, classId: string) {
     const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId}/image/upload`, {
       method: 'POST',
@@ -184,6 +194,7 @@ export const useBookStoreApiStore = defineStore('book-api', () => {
     updateBookListingSetting,
     updateEditionPrice,
     addEditionPrice,
+    refreshBookMetadata,
     uploadSignImages
   }
 })
