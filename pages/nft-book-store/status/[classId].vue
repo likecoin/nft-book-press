@@ -892,7 +892,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
     actionItems.push([{
       label: 'Send NFT',
       icon: 'i-heroicons-paper-airplane',
-      to: {
+      to: localeRoute({
         name: 'nft-book-store-send-classId',
         params: {
           classId: purchaseListItem.classId
@@ -901,7 +901,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
           owner_wallet: ownerWallet.value,
           payment_id: purchaseListItem.id
         }
-      }
+      })
     }])
   }
 
@@ -909,7 +909,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
     actionItems.push([{
       label: 'Handle Shipping',
       icon: 'i-heroicons-truck',
-      to: {
+      to: localeRoute({
         name: 'nft-book-store-send-shipping-classId',
         params: {
           classId: purchaseListItem.classId
@@ -917,7 +917,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
         query: {
           payment_id: purchaseListItem.id
         }
-      }
+      })
     }])
   }
 

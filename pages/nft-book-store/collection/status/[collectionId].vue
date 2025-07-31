@@ -558,7 +558,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
     actionItems.push([{
       label: 'Send NFT',
       icon: 'i-heroicons-paper-airplane',
-      to: {
+      to: localeRoute({
         name: 'nft-book-store-collection-send-collectionId',
         params: {
           collectionId: purchaseListItem.collectionId
@@ -567,7 +567,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
           owner_wallet: ownerWallet.value,
           payment_id: purchaseListItem.id
         }
-      }
+      })
     }])
   }
 
