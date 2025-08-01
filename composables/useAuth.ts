@@ -1,16 +1,16 @@
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useCollectionStore } from '~/stores/collection'
 import { SIGN_AUTHORIZATION_PERMISSIONS } from '~/utils/auth'
 
 export function useAuth () {
-  const bookStoreApiStore = useBookStoreApiStore()
+  const bookstoreApiStore = useBookstoreApiStore()
   const collectionStore = useCollectionStore()
   const store = useWalletStore()
   const { wallet, signer, isConnected } = storeToRefs(store)
   const { connect, disconnect, signMessageMemo } = store
-  const { authenticate, clearSession, fetchBookListing } = bookStoreApiStore
+  const { authenticate, clearSession, fetchBookListing } = bookstoreApiStore
   const { listNFTBookCollections } = collectionStore
   const toast = useToast()
 

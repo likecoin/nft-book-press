@@ -1,6 +1,6 @@
 <template>
   <PageBody
-    v-if="!bookStoreApiStore.isAuthenticated"
+    v-if="!bookstoreApiStore.isAuthenticated"
     :ui="{ base: 'flex flex-col justify-center items-center grow w-auto' }"
   >
     <UAlert
@@ -27,12 +27,12 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useAuth } from '~/composables/useAuth'
 const { t: $t } = useI18n()
 
-const bookStoreApiStore = useBookStoreApiStore()
-const { isRestoringSession } = storeToRefs(bookStoreApiStore)
+const bookstoreApiStore = useBookstoreApiStore()
+const { isRestoringSession } = storeToRefs(bookstoreApiStore)
 const { isAuthenticating, onAuthenticate } = useAuth()
 
 </script>

@@ -1,6 +1,6 @@
 import { defineStore, storeToRefs } from 'pinia'
 
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 
 interface StripeConnectStatus {
   hasAccount: boolean
@@ -21,8 +21,8 @@ function getStripeConnectStatusDefault (): StripeConnectStatus {
 export const useStripeStore = defineStore('stripe-connect', () => {
   const { LIKE_CO_API } = useRuntimeConfig().public
 
-  const bookStoreApiStore = useBookStoreApiStore()
-  const { token } = storeToRefs(bookStoreApiStore)
+  const bookstoreApiStore = useBookstoreApiStore()
+  const { token } = storeToRefs(bookstoreApiStore)
 
   const stripeConnectStatusWalletMap = ref({} as Record<string, StripeConnectStatus>)
 

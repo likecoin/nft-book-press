@@ -39,18 +39,18 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useCollectionStore } from '~/stores/collection'
 import { useUIStore } from '~/stores/ui'
 const { t: $t } = useI18n()
 
 const { SITE_URL } = useRuntimeConfig().public
-const bookStoreApiStore = useBookStoreApiStore()
+const bookstoreApiStore = useBookstoreApiStore()
 const collectionStore = useCollectionStore()
 
-const { restoreAuthSession, fetchBookListing, clearSession } = bookStoreApiStore
+const { restoreAuthSession, fetchBookListing, clearSession } = bookstoreApiStore
 const { listNFTBookCollections } = collectionStore
-const { isRestoringSession, isAuthenticated } = storeToRefs(bookStoreApiStore)
+const { isRestoringSession, isAuthenticated } = storeToRefs(bookstoreApiStore)
 const uiStore = useUIStore()
 const toast = useToast()
 

@@ -65,13 +65,13 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 
 const { LIKE_CO_API } = useRuntimeConfig().public
 
 const localeRoute = useLocaleRoute()
-const bookStoreApiStore = useBookStoreApiStore()
-const { token } = storeToRefs(bookStoreApiStore)
+const bookstoreApiStore = useBookstoreApiStore()
+const { token } = storeToRefs(bookstoreApiStore)
 
 const error = ref('')
 const isLoading = ref(false)

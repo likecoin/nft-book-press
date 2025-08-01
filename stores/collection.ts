@@ -1,10 +1,10 @@
 import { defineStore, storeToRefs } from 'pinia'
-import { useBookStoreApiStore } from './book-store-api'
+import { useBookstoreApiStore } from './book-store-api'
 
 export const useCollectionStore = defineStore('collection', () => {
   const { LIKE_CO_API } = useRuntimeConfig().public
-  const bookStoreApiStore = useBookStoreApiStore()
-  const { token, wallet: sessionWallet } = storeToRefs(bookStoreApiStore)
+  const bookstoreApiStore = useBookstoreApiStore()
+  const { token, wallet: sessionWallet } = storeToRefs(bookstoreApiStore)
 
   const collectionList = ref([] as any[])
   const collectionByIdMap = ref({} as Record<string, any>)

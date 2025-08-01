@@ -21,7 +21,7 @@
       </template>
     </UProgress>
 
-    <template v-if="bookStoreApiStore.isAuthenticated">
+    <template v-if="bookstoreApiStore.isAuthenticated">
       <UCard :ui="{ body: { base: 'space-y-4' } }">
         <template #header>
           <h2 class="font-bold font-mono">
@@ -484,7 +484,7 @@ import DOMPurify from 'dompurify'
 import { v4 as uuidv4 } from 'uuid'
 
 import { DEFAULT_PRICE, MINIMAL_PRICE } from '~/constant'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL, deliverMethodOptions } from '~/utils'
@@ -492,10 +492,10 @@ import { getPortfolioURL, deliverMethodOptions } from '~/utils'
 const { getClassOwner, getClassMetadata } = useNFTContractReader()
 const walletStore = useWalletStore()
 const { t: $t } = useI18n()
-const bookStoreApiStore = useBookStoreApiStore()
+const bookstoreApiStore = useBookstoreApiStore()
 const stripeStore = useStripeStore()
 const { wallet } = storeToRefs(walletStore)
-const { newBookListing, updateEditionPrice } = bookStoreApiStore
+const { newBookListing, updateEditionPrice } = bookstoreApiStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
 const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
 

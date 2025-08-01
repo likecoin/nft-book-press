@@ -21,7 +21,7 @@
     </UProgress>
 
     <UCard
-      v-if="bookStoreApiStore.isAuthenticated"
+      v-if="bookstoreApiStore.isAuthenticated"
       :ui="{ footer: { base: 'space-y-4' } }"
     >
       <template #header>
@@ -162,12 +162,12 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 
 const { LIKE_CO_API } = useRuntimeConfig().public
-const bookStoreApiStore = useBookStoreApiStore()
-const { token } = storeToRefs(bookStoreApiStore)
+const bookstoreApiStore = useBookstoreApiStore()
+const { token } = storeToRefs(bookstoreApiStore)
 const localeRoute = useLocaleRoute()
 
 const nftStore = useNftStore()

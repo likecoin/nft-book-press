@@ -1,13 +1,13 @@
 import { defineStore, storeToRefs } from 'pinia'
 
-import { useBookStoreApiStore } from './book-store-api'
+import { useBookstoreApiStore } from './book-store-api'
 import { useLikerStore } from './liker'
 
 export const useUserStore = defineStore('user', () => {
   const { LIKE_CO_API } = useRuntimeConfig().public
 
-  const bookStoreApiStore = useBookStoreApiStore()
-  const { token, isAuthenticated, wallet } = storeToRefs(bookStoreApiStore)
+  const bookstoreApiStore = useBookstoreApiStore()
+  const { token, isAuthenticated, wallet } = storeToRefs(bookstoreApiStore)
   const likerStore = useLikerStore()
 
   const bookUser = ref<any>(null)

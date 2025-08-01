@@ -2,7 +2,7 @@ import { defineStore, storeToRefs } from 'pinia'
 import { jwtDecode } from 'jwt-decode'
 import { useWalletStore } from './wallet'
 
-export const useBookStoreApiStore = defineStore('book-api', () => {
+export const useBookstoreApiStore = defineStore('book-api', () => {
   const { LIKE_CO_API } = useRuntimeConfig().public
   const walletStore = useWalletStore()
   const { wallet: storeWallet } = storeToRefs(walletStore)

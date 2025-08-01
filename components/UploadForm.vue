@@ -104,7 +104,7 @@ import {
   uploadSingleFileToBundlr
 } from '~/utils/arweave'
 import { useWalletStore } from '~/stores/wallet'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 const { t: $t } = useI18n()
 
 const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024
@@ -113,8 +113,8 @@ const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
 const { initIfNecessary } = store
 const { waitForTransactionReceipt } = useNFTContractWriter()
-const bookStoreApiStore = useBookStoreApiStore()
-const { token } = storeToRefs(bookStoreApiStore)
+const bookstoreApiStore = useBookstoreApiStore()
+const { token } = storeToRefs(bookstoreApiStore)
 const toast = useToast()
 const imageFile = ref<HTMLInputElement | null>(null)
 

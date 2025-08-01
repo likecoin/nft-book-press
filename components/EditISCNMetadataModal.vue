@@ -65,7 +65,7 @@ const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
 const { writeContractAsync } = useWriteContract()
 const { checkAndGrantUpdater, waitForTransactionReceipt } = useNFTContractWriter()
-const { refreshBookMetadata } = useBookStoreApiStore()
+const { refreshBookMetadata } = useBookstoreApiStore()
 
 const props = defineProps<{
   classId: string
