@@ -61,7 +61,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useUserStore } from '~/stores/user'
 import { useStripeStore } from '~/stores/stripe'
 import { useWalletStore } from '~/stores/wallet'
@@ -71,7 +71,7 @@ const { BOOK3_URL, LIKE_CO_API } = useRuntimeConfig().public
 
 const userStore = useUserStore()
 const stripeStore = useStripeStore()
-const bookStoreApiStore = useBookStoreApiStore()
+const bookstoreApiStore = useBookstoreApiStore()
 const walletStore = useWalletStore()
 
 const localeRoute = useLocaleRoute()
@@ -79,7 +79,7 @@ const route = useRoute()
 
 const { wallet } = storeToRefs(walletStore)
 const { userLikerInfo } = storeToRefs(userStore)
-const { isAuthenticated } = storeToRefs(bookStoreApiStore)
+const { isAuthenticated } = storeToRefs(bookstoreApiStore)
 
 const tabItems = computed(() => [
   { label: $t('latest_books.latest_releases'), key: 'latest' },

@@ -16,7 +16,7 @@
       </template>
     </UProgress>
 
-    <template v-if="bookStoreApiStore.isAuthenticated">
+    <template v-if="bookstoreApiStore.isAuthenticated">
       <!-- Collection Info -->
       <UCard :ui="{ body: { base: 'space-y-4' } }">
         <template #header>
@@ -409,7 +409,7 @@ import {
   DEFAULT_STOCK,
   DEFAULT_MAX_SUPPLY
 } from '~/constant'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { useStripeStore } from '~/stores/stripe'
@@ -417,7 +417,7 @@ import { getPortfolioURL, deliverMethodOptions, parseImageURLFromMetadata } from
 import { useCollectionStore } from '~/stores/collection'
 
 const walletStore = useWalletStore()
-const bookStoreApiStore = useBookStoreApiStore()
+const bookstoreApiStore = useBookstoreApiStore()
 const collectionStore = useCollectionStore()
 const nftStore = useNftStore()
 const stripeStore = useStripeStore()

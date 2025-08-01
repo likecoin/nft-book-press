@@ -15,7 +15,7 @@
       @close="error = ''"
     />
 
-    <template v-if="bookStoreApiStore.isAuthenticated">
+    <template v-if="bookstoreApiStore.isAuthenticated">
       <UCard :ui="{ body: { base: 'space-y-4' } }">
         <template #header>
           <h2 class="font-bold font-mono">
@@ -421,7 +421,7 @@ import {
   DEFAULT_MAX_SUPPLY,
   DEFAULT_STOCK
 } from '~/constant'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
 import { useNftStore } from '~/stores/nft'
@@ -432,13 +432,13 @@ const { t: $t } = useI18n()
 
 const { LIKE_CO_API } = useRuntimeConfig().public
 const walletStore = useWalletStore()
-const bookStoreApiStore = useBookStoreApiStore()
+const bookstoreApiStore = useBookstoreApiStore()
 const stripeStore = useStripeStore()
 const { wallet } = storeToRefs(walletStore)
-const { newBookListing, updateEditionPrice, uploadSignImages } = bookStoreApiStore
+const { newBookListing, updateEditionPrice, uploadSignImages } = bookstoreApiStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
 const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
-const { token } = storeToRefs(bookStoreApiStore)
+const { token } = storeToRefs(bookstoreApiStore)
 const nftStore = useNftStore()
 
 const { getNFTClassConfig, getBalanceOf } = useNFTContractReader()
@@ -975,7 +975,7 @@ async function addNewEdition () {
     const p = mapPrices(prices.value)
 
     const price = p[0]
-    await bookStoreApiStore.addEditionPrice(classId.value.toString(), (editionIndex.value || 0).toString(), {
+    await bookstoreApiStore.addEditionPrice(classId.value.toString(), (editionIndex.value || 0).toString(), {
       price
     })
   } catch (error) {

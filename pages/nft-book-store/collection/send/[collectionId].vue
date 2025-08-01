@@ -21,7 +21,7 @@
     </UProgress>
 
     <UCard
-      v-if="bookStoreApiStore.isAuthenticated"
+      v-if="bookstoreApiStore.isAuthenticated"
       :ui="{
         body: { base: 'space-y-4' },
         footer: { base: 'flex justify-center gap-2' }
@@ -163,7 +163,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWriteContract } from '@wagmi/vue'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'
@@ -177,8 +177,8 @@ const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
 const { initIfNecessary } = store
 
-const bookStoreApiStore = useBookStoreApiStore()
-const { token } = storeToRefs(bookStoreApiStore)
+const bookstoreApiStore = useBookstoreApiStore()
+const { token } = storeToRefs(bookstoreApiStore)
 
 const nftStore = useNftStore()
 const collectionStore = useCollectionStore()

@@ -45,7 +45,7 @@
       </template>
     </UProgress>
 
-    <template v-if="bookStoreApiStore.isAuthenticated">
+    <template v-if="bookstoreApiStore.isAuthenticated">
       <UCard
         :ui="{
           header: { base: 'flex justify-between items-center' },
@@ -708,7 +708,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import Draggable from 'vuedraggable'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
@@ -718,12 +718,12 @@ const { t: $t } = useI18n()
 
 const { CHAIN_EXPLORER_URL, BOOK3_URL, LIKE_CO_API } = useRuntimeConfig().public
 const store = useWalletStore()
-const bookStoreApiStore = useBookStoreApiStore()
+const bookstoreApiStore = useBookstoreApiStore()
 const nftStore = useNftStore()
 const stripeStore = useStripeStore()
-const { token } = storeToRefs(bookStoreApiStore)
+const { token } = storeToRefs(bookstoreApiStore)
 const { wallet } = storeToRefs(store)
-const { updateBookListingSetting, reduceListingPendingNFTCountById } = bookStoreApiStore
+const { updateBookListingSetting, reduceListingPendingNFTCountById } = bookstoreApiStore
 const { lazyFetchClassMetadataById } = nftStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
 const { getBalanceOf } = useNFTContractReader()

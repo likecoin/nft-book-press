@@ -20,7 +20,7 @@
       </template>
     </UProgress>
 
-    <template v-if="bookStoreApiStore.isAuthenticated">
+    <template v-if="bookstoreApiStore.isAuthenticated">
       <UCard :ui="{ body: { padding: '' } }">
         <template #header>
           <h3 class="font-bold font-mono">
@@ -421,7 +421,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'
 import { useWalletStore } from '~/stores/wallet'
@@ -431,11 +431,11 @@ import { shortenWalletAddress } from '~/utils/cosmos'
 
 const { CHAIN_EXPLORER_URL, LIKE_CO_API } = useRuntimeConfig().public
 const store = useWalletStore()
-const bookStoreApiStore = useBookStoreApiStore()
+const bookstoreApiStore = useBookstoreApiStore()
 const nftStore = useNftStore()
 const collectionStore = useCollectionStore()
 const stripeStore = useStripeStore()
-const { token } = storeToRefs(bookStoreApiStore)
+const { token } = storeToRefs(bookstoreApiStore)
 const { wallet } = storeToRefs(store)
 const { updateNFTBookCollectionById, reduceListingPendingNFTCountById } = collectionStore
 const { getClassMetadataById, lazyFetchClassMetadataById } = nftStore

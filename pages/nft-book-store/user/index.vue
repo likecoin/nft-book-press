@@ -19,7 +19,7 @@
       :description="$t('user_settings.stripe_express_description')"
     />
 
-    <template v-if="bookStoreApiStore.isAuthenticated">
+    <template v-if="bookstoreApiStore.isAuthenticated">
       <UCard
         :ui="{
           header: { base: 'flex justify-between items-center' },
@@ -338,7 +338,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '~/stores/user'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'
 
@@ -346,10 +346,10 @@ const { LIKER_LAND_URL, LIKE_CO_API, BOOK3_URL } = useRuntimeConfig().public
 const { t: $t } = useI18n()
 
 const nftStore = useNftStore()
-const bookStoreApiStore = useBookStoreApiStore()
+const bookstoreApiStore = useBookstoreApiStore()
 const collectionStore = useCollectionStore()
 const userStore = useUserStore()
-const { token, wallet } = storeToRefs(bookStoreApiStore)
+const { token, wallet } = storeToRefs(bookstoreApiStore)
 const { bookUser, isUpdatingBookUserProfile, userLikerInfo, isFetchingUserLikerInfo } = storeToRefs(userStore)
 const toast = useToast()
 const localeRoute = useLocaleRoute()

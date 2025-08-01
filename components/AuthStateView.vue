@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col items-stretch gap-4">
-    <template v-if="bookStoreApiStore.isAuthenticated">
+    <template v-if="bookstoreApiStore.isAuthenticated">
       <div class="w-full flex items-center gap-[8px] justify-between">
         <UTooltip class="flex w-full" :text="wallet">
           <UButton
@@ -90,16 +90,16 @@ import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
 import { getPortfolioURL, copyToClipboard, appendUTMParamsToURL } from '~/utils/index'
 import { shortenWalletAddress } from '~/utils/cosmos'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useAuth } from '~/composables/useAuth'
 const { t: $t } = useI18n()
 
 const store = useWalletStore()
 const { wallet } = storeToRefs(store)
 const { disconnect } = store
-const bookStoreApiStore = useBookStoreApiStore()
-const { clearSession } = bookStoreApiStore
-const { isRestoringSession } = storeToRefs(bookStoreApiStore)
+const bookstoreApiStore = useBookstoreApiStore()
+const { clearSession } = bookstoreApiStore
+const { isRestoringSession } = storeToRefs(bookstoreApiStore)
 const { isAuthenticating, onAuthenticate } = useAuth()
 const { show: showMigrateAlert, close: closeMigrateAlert } = useOneTimePopup('bookPressMigrateAlert:v3')
 

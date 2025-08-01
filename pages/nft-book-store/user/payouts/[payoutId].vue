@@ -94,13 +94,13 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 
 const { t: $t } = useI18n()
 
 const { LIKE_CO_API } = useRuntimeConfig().public
-const bookStoreApiStore = useBookStoreApiStore()
-const { token } = storeToRefs(bookStoreApiStore)
+const bookstoreApiStore = useBookstoreApiStore()
+const { token } = storeToRefs(bookstoreApiStore)
 
 const route = useRoute()
 const payoutData = ref<any>({})

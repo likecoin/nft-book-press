@@ -31,7 +31,7 @@
       </template>
 
       <UTabs
-        v-if="bookStoreApiStore.isAuthenticated"
+        v-if="bookstoreApiStore.isAuthenticated"
         v-model="selectedTabItemIndex"
         class="w-full"
         :items="tabItems"
@@ -151,17 +151,17 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 
 const route = useRoute()
 const localeRoute = useLocaleRoute()
 const { t: $t } = useI18n()
-const bookStoreApiStore = useBookStoreApiStore()
+const bookstoreApiStore = useBookstoreApiStore()
 const nftStore = useNftStore()
-const { listingList: bookList, moderatedBookList, token } = storeToRefs(bookStoreApiStore)
+const { listingList: bookList, moderatedBookList, token } = storeToRefs(bookstoreApiStore)
 const { lazyFetchClassMetadataById } = nftStore
-const { fetchBookListing, fetchModeratedBookList } = bookStoreApiStore
+const { fetchBookListing, fetchModeratedBookList } = bookstoreApiStore
 
 const error = ref('')
 const isLoading = ref(false)

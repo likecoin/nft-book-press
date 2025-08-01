@@ -20,7 +20,7 @@
       </template>
     </UProgress>
 
-    <UCard v-if="bookStoreApiStore.isAuthenticated">
+    <UCard v-if="bookstoreApiStore.isAuthenticated">
       <template #header>
         <h3 class="font-bold font-mono">
           Order status
@@ -153,13 +153,13 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useCollectionStore } from '~/stores/collection'
 
 const { LIKE_CO_API } = useRuntimeConfig().public
 
-const bookStoreApiStore = useBookStoreApiStore()
-const { token } = storeToRefs(bookStoreApiStore)
+const bookstoreApiStore = useBookstoreApiStore()
+const { token } = storeToRefs(bookstoreApiStore)
 
 const collectionStore = useCollectionStore()
 const { lazyFetchCollectionById } = collectionStore

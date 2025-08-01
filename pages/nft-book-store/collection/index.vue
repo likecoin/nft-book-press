@@ -63,18 +63,18 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useCollectionStore } from '~/stores/collection'
 
 const route = useRoute()
 const localeRoute = useLocaleRoute()
 const nftStore = useNftStore()
-const bookStoreApiStore = useBookStoreApiStore()
+const bookstoreApiStore = useBookstoreApiStore()
 const collectionStore = useCollectionStore()
 const { listNFTBookCollections, listModeratedNFTBookCollections } = collectionStore
 const { getClassMetadataById, lazyFetchClassMetadataById } = nftStore
-const { token } = storeToRefs(bookStoreApiStore)
+const { token } = storeToRefs(bookstoreApiStore)
 
 const error = ref('')
 const isLoading = ref(false)

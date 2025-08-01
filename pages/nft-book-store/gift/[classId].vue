@@ -15,7 +15,7 @@
     </UProgress>
 
     <UCard
-      v-if="bookStoreApiStore.isAuthenticated"
+      v-if="bookstoreApiStore.isAuthenticated"
       :ui="{
         body: { base: 'space-y-4' },
         footer: { base: 'flex justify-center gap-2' }
@@ -77,14 +77,14 @@ import { parse } from 'csv-parse/sync'
 import { stringify } from 'csv-stringify/sync'
 
 import { downloadBlob } from '~/utils'
-import { useBookStoreApiStore } from '~/stores/book-store-api'
+import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 
 const { LIKE_CO_API } = useRuntimeConfig().public
 const toast = useToast()
 
-const bookStoreApiStore = useBookStoreApiStore()
-const { token } = storeToRefs(bookStoreApiStore)
+const bookstoreApiStore = useBookstoreApiStore()
+const { token } = storeToRefs(bookstoreApiStore)
 
 const nftStore = useNftStore()
 const { lazyFetchClassMetadataById } = nftStore
