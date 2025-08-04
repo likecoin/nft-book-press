@@ -454,8 +454,8 @@ const error = ref('')
 const isLoading = ref(false)
 
 const mdEditorPlaceholder = ref({
-  en: $t('editor.placeholder_en'),
-  zh: $t('editor.placeholder_zh')
+  en: 'e.g.: This edition includes EPUB and PDF ebook files.',
+  zh: '例：此版本包含 EPUB 及 PDF 電子書檔'
 })
 
 const classId = computed(() => {

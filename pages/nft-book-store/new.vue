@@ -189,7 +189,7 @@
                   </ToolTips>
                 </template>
                 <UInput
-                  :placeholder="$t('form.product_name_placeholder_en')"
+                  placeholder="Product Name"
                   :value="p.nameEn"
                   @input="(e: InputEvent) => updatePrice(e, 'nameEn', index)"
                 />
@@ -219,7 +219,7 @@
                   </ToolTips>
                 </template>
                 <UInput
-                  :placeholder="$t('form.product_name_placeholder_zh')"
+                  placeholder="產品名稱"
                   :value="p.nameZh"
                   @input="(e: InputEvent) => updatePrice(e, 'nameZh', index)"
                 />
