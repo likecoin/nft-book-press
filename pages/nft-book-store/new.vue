@@ -34,7 +34,7 @@
             v-if="!isEditMode"
             v-model="classIdInput"
             class="font-mono"
-            placeholder="likenft...."
+            placeholder="0x...."
           />
           <UInput v-else :value="classId" :readonly="true" />
         </UFormGroup>
@@ -380,7 +380,7 @@
                   <UInput
                     v-model="moderatorWalletInput"
                     class="font-mono"
-                    placeholder="like1..."
+                    placeholder="0x..."
                   />
 
                   <UButton

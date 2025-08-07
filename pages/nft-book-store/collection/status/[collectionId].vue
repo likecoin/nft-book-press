@@ -313,7 +313,7 @@
                   <UInput
                     v-model="moderatorWalletInput"
                     class="font-mono"
-                    placeholder="like1..."
+                    placeholder="0x..."
                   />
 
                   <UButton
