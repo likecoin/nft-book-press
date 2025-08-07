@@ -57,6 +57,10 @@ import { useWalletStore } from '~/stores/wallet'
 import { useISCN } from '~/composables/useISCN'
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
 import { DEFAULT_MAX_SUPPLY } from '~/constant'
+// eslint-disable-next-line func-call-spacing
+const emit = defineEmits<{
+  (e: 'iscnUpdated', payload: { classId: string; metadata: Record<string, any> }): void
+}>()
 
 const nftStore = useNftStore()
 const toast = useToast()
@@ -255,6 +259,10 @@ async function handleSave () {
     })
     await nftStore.fetchClassMetadataById(props.classId)
     await refreshBookMetadata(props.classId)
+    emit('iscnUpdated', {
+      classId: props.classId,
+      metadata
+    })
     handleClickBack()
   } catch (error) {
     toast.add({

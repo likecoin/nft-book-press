@@ -674,6 +674,7 @@
     <EditISCNMetadataModal
       v-model="showEditISCNModal"
       :class-id="classId"
+      @iscn-updated="handleISCNUpdated"
     />
 
     <UModal v-model="isOpenQRCodeModal">
@@ -714,6 +715,7 @@ import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL, downloadFile, convertArrayOfObjectsToCSV, getPurchaseLink, formatShippingAddress } from '~/utils'
 import { shortenWalletAddress } from '~/utils/cosmos'
+import { getApiEndpoints } from '~/constant/api'
 const { t: $t } = useI18n()
 
 const { CHAIN_EXPLORER_URL, BOOK3_URL, LIKE_CO_API } = useRuntimeConfig().public
@@ -1403,4 +1405,30 @@ async function handleMintNFTSubmit () {
   showRestockModal.value = false
 }
 
+function isContentFingerPrintEncrypted (contentFingerprints: any[]) {
+  const apiEndpoints = getApiEndpoints()
+  const arweaveLinkEndpoint = apiEndpoints.API_GET_ARWEAVE_V2_LINK
+  return contentFingerprints.some((fingerprint) => {
+    return !!fingerprint.startsWith(arweaveLinkEndpoint) || fingerprint.includes('?key=')
+  })
+}
+
+async function handleISCNUpdated ({
+  classId,
+  metadata
+}: {
+  classId: string
+  metadata: any
+}) {
+  const { contentFingerprints } = metadata
+  if (contentFingerprints) {
+    const shouldHideDownload = isContentFingerPrintEncrypted(contentFingerprints)
+    if (shouldHideDownload !== hideDownload.value) {
+      hideDownload.value = shouldHideDownload
+    }
+    await updateBookListingSetting(classId, {
+      hideDownload: shouldHideDownload
+    })
+  }
+}
 </script>
