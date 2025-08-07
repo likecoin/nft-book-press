@@ -217,7 +217,7 @@ const nextStep = async () => {
     await initIfNecessary()
   }
   if (!wallet.value || !signer.value) {
-    showErrorToast('Please login first')
+    showErrorToast($t('auth.login_required'))
     return
   }
   try {

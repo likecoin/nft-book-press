@@ -89,11 +89,11 @@ useSeoMeta({
   titleTemplate: (titleChunk) => {
     return titleChunk ? `${titleChunk} - ${$t('app.site_title')}` : $t('app.site_title')
   },
-  ogTitle: $t('app.site_title'),
-  description: $t('app.site_description'),
-  ogDescription: $t('app.site_description'),
+  ogTitle: () => $t('app.site_title'),
+  description: () => $t('app.site_description'),
+  ogDescription: () => $t('app.site_description'),
   ogType: 'website',
-  ogSiteName: $t('app.site_title'),
+  ogSiteName: () => $t('app.site_title'),
   themeColor: '#28646e'
 })
 

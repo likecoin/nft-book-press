@@ -9,7 +9,7 @@
     >
       <template #header>
         <h2 class="font-bold font-mono">
-          ISCN Metadata
+          {{ $t('iscn.metadata_title') }}
         </h2>
 
         <UButton
@@ -33,7 +33,7 @@
       <template #footer>
         <div class="w-full flex justify-center items-center gap-2">
           <UButton color="gray" variant="soft" @click="handleClickBack">
-            Cancel
+            {{ $t('edit_iscn_modal.cancel') }}
           </UButton>
           <UButton
             color="primary"
@@ -204,7 +204,7 @@ async function handleSave () {
   await initIfNecessary()
   if (!wallet.value || !signer.value) {
     toast.add({
-      title: 'Please login first',
+      title: $t('auth.login_required'),
       color: 'red'
     })
     return

@@ -5,19 +5,19 @@
       <USelect
         v-model="formData.type"
         :options="typeOptions"
-        placeholder="Select type"
+        :placeholder="$t('iscn_form.select_type')"
       />
     </UFormGroup>
 
     <UFormGroup
       :label="$t('common.title')"
-      :error="!formData.title && 'Title is required'"
+      :error="!formData.title && $t('iscn_form.title_required')"
       class="flex-1 text-left"
       required
     >
       <UInput
         v-model="formData.title"
-        placeholder="Enter ISCN title"
+        :placeholder="$t('iscn_form.enter_iscn_title')"
       />
     </UFormGroup>
 
@@ -30,7 +30,7 @@
     >
       <UTextarea
         v-model="formData.description"
-        placeholder="Enter ISCN description"
+        :placeholder="$t('iscn_form.enter_iscn_description')"
         autoresize
       />
     </UFormGroup>
@@ -51,7 +51,7 @@
         <UInput
           v-model="formData.publicationDate"
           type="date"
-          placeholder="Select date"
+          :placeholder="$t('iscn_form.select_date')"
         />
       </UFormGroup>
 
@@ -59,7 +59,7 @@
         <USelect
           v-model="formData.language"
           :options="languageOptions"
-          placeholder="Select language"
+          :placeholder="$t('iscn_form.select_language')"
         />
       </UFormGroup>
 
@@ -74,7 +74,7 @@
       <UFormGroup :label="$t('form_labels.book_info')">
         <UInput
           v-model="formData.bookInfoUrl"
-          placeholder="Enter book info URL"
+          :placeholder="$t('iscn_form.enter_book_info_url')"
         />
       </UFormGroup>
     </div>
@@ -82,21 +82,21 @@
     <!-- Author Info -->
     <div class="grid grid-cols-2 gap-4">
       <UFormGroup
-        label="Author Name"
-        :error="!formData.author.name && 'Author name is required'"
+        :label="$t('iscn_form.author_name')"
+        :error="!formData.author.name && $t('iscn_form.author_name_required')"
         class="text-left"
         required
       >
         <UInput
           v-model="formData.author.name"
-          placeholder="Enter author name"
+          :placeholder="$t('iscn_form.enter_author_name')"
         />
       </UFormGroup>
 
-      <UFormGroup label="Author Description">
+      <UFormGroup :label="$t('iscn_form.author_description')">
         <UTextarea
           v-model="formData.author.description"
-          placeholder="Enter author description"
+          :placeholder="$t('iscn_form.enter_author_description')"
           autoresize
         />
       </UFormGroup>

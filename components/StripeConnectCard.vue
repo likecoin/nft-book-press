@@ -78,7 +78,7 @@
                 v-model="inputWallet"
                 :color="stripeConnectInputError ? 'rose' : 'white'"
                 class="font-mono w-full"
-                placeholder="like1..."
+                placeholder="0x..."
                 @input="onStripeConnectWalletInput"
               />
               <span
@@ -100,7 +100,7 @@
                 />
                 <div
                   v-if="inputAccountConnectStatus.email"
-                  v-text="`Email: ${inputAccountConnectStatus.email}`"
+                  v-text="$t('stripe_connect.email_prefix') + inputAccountConnectStatus.email"
                 />
               </div>
               <UAlert

@@ -66,9 +66,11 @@ watch(isFormValid, (val: boolean) => {
   emit('formValidChange', val)
 }, { immediate: true })
 
+const { t: $t } = useI18n()
+
 useSeoMeta({
-  title: 'Mint Liker Land NFT Book',
-  ogTitle: 'Mint Liker Land NFT Book'
+  title: () => $t('seo.mint_nft_book_title'),
+  ogTitle: () => $t('seo.mint_nft_book_title')
 })
 
 const props = defineProps({

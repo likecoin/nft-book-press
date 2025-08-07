@@ -296,8 +296,8 @@ const onFileUpload = async (event: Event) => {
                   // A cover image has already been assigned — only one cover is allowed
                   toast.add({
                     icon: 'i-heroicons-exclamation-circle',
-                    title: 'Warning',
-                    description: 'Only one cover image is allowed.',
+                    title: $t('upload_form.warning'),
+                    description: $t('upload_form.only_one_cover_image'),
                     timeout: 3000,
                     color: 'yellow'
                   })
@@ -713,8 +713,8 @@ const onSubmit = async () => {
     uploadStatus.value = ''
     toast.add({
       icon: 'i-heroicons-exclamation-circle',
-      title: 'Error during file upload',
-      description: (error as Error).message || 'An error occurred during the upload process.',
+      title: $t('upload_form.error_during_upload'),
+      description: (error as Error).message || $t('upload_form.upload_error_occurred'),
       timeout: 3000,
       color: 'red'
     })

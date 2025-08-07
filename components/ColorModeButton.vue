@@ -5,7 +5,7 @@
       :icon="isDark ? 'i-heroicons-moon-20-solid' : 'i-heroicons-sun-20-solid'"
       color="primary"
       variant="ghost"
-      aria-label="Theme"
+      :aria-label="$t('ui.theme_toggle_aria_label')"
       @click="isDark = !isDark"
     />
 
