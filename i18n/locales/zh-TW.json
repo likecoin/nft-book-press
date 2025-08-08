@@ -502,6 +502,7 @@
   "purchase_link.value": "值",
   "qr_generator.download": "下載",
   "qr_generator.pick_color": "選擇顏色",
+  "qr_generator.pick_dot": "選擇方塊樣式",
   "qr_generator.pick_icon": "選擇圖示",
   "qr_generator.save_config": "儲存設定",
   "sales_pos.checkout_url": "結帳網址",

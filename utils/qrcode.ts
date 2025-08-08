@@ -24,8 +24,20 @@ export const iconOptions = [
   }
 ]
 
+export const dotStyleOptions = [
+  {
+    value: 'square',
+    label: 'Square'
+  },
+  {
+    value: 'rounded',
+    label: 'Rounded'
+  }
+]
+
 export const DEFAULT_QR_CODE_ICON = 'likecoin'
 export const DEFAULT_QR_CODE_COLOR = '#28646e'
+export const DEFAULT_QR_CODE_DOT_STYLE = 'rounded'
 
 const iconMap: Record<string, string> = {
   likecoin: LikeCoinIcon,
@@ -36,6 +48,17 @@ export function getQRCodeIcon (value = DEFAULT_QR_CODE_ICON) {
   return iconMap[value] || iconMap[DEFAULT_QR_CODE_ICON]
 }
 
+export interface QRCodeOptions {
+  data?: string
+  width?: number
+  height?: number
+  fillColor?: string
+  bgColor?: string
+  margin?: number
+  image?: string
+  dotStyle?: string
+}
+
 export function getQRCodeOptions ({
   data = '',
   width = 300,
@@ -43,8 +66,9 @@ export function getQRCodeOptions ({
   fillColor = DEFAULT_QR_CODE_COLOR,
   bgColor = '#ffffff',
   margin = 10,
-  image = undefined as string | undefined
-}) {
+  image = undefined as string | undefined,
+  dotStyle = DEFAULT_QR_CODE_DOT_STYLE
+}: QRCodeOptions = {}) {
   return {
     width,
     height,
@@ -58,18 +82,18 @@ export function getQRCodeOptions ({
     },
     dotsOptions: {
       color: fillColor,
-      type: 'rounded' as DotType
+      type: dotStyle as DotType
     },
     backgroundOptions: {
       color: bgColor
     },
     cornersSquareOptions: {
       color: fillColor,
-      type: 'extra-rounded' as CornerSquareType
+      type: (dotStyle === 'rounded' ? 'extra-rounded' : 'square') as CornerSquareType
     },
     cornersDotOptions: {
       color: fillColor,
-      type: 'dot' as CornerDotType
+      type: (dotStyle === 'rounded' ? 'dot' : 'square') as CornerDotType
     },
     data
   }
@@ -85,13 +109,16 @@ const QRCODE_DOWNLOADABLE_FILE_TYPES: {
 
 export async function downloadQRCodes (
   items: { filename: string, url: string }[],
-  options: { zipFilename?: string } = {}
+  options: {
+    zipFilename?: string,
+    qrCodeOptions?: QRCodeOptions
+  } = {}
 ) {
   const zipFilename = `${options.zipFilename || 'QR Codes'}-${new Date().getTime()}.zip`
   try {
     const { default: QRCodeStyling } = await import('@likecoin/qr-code-styling')
     const qrCodeResults = await Promise.all(items.map((item) => {
-      const qrCode = new QRCodeStyling(getQRCodeOptions({ data: item.url }))
+      const qrCode = new QRCodeStyling(getQRCodeOptions({ ...(options.qrCodeOptions || {}), data: item.url }))
       return Promise.all(QRCODE_DOWNLOADABLE_FILE_TYPES.map(async (type) => {
         const extension = type.value
         const data = await qrCode.getRawData(extension)

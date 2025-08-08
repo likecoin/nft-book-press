@@ -18,6 +18,13 @@
         />
       </UFormGroup>
 
+      <UFormGroup :label="$t('qr_generator.pick_dot')">
+        <URadioGroup
+          v-model="selectedDotStyle"
+          :options="dotStyleOptions"
+        />
+      </UFormGroup>
+
       <UFormGroup :label="$t('qr_generator.pick_color')">
         <UInput
           v-model="selectedColor"
@@ -69,7 +76,7 @@
 <script setup lang="ts">
 import QRCodeStyling, { type FileExtension } from '@likecoin/qr-code-styling'
 
-import { getQRCodeOptions, getQRCodeIcon, iconOptions, DEFAULT_QR_CODE_ICON, DEFAULT_QR_CODE_COLOR } from '~/utils/qrcode'
+import { getQRCodeOptions, getQRCodeIcon, iconOptions, dotStyleOptions, DEFAULT_QR_CODE_ICON, DEFAULT_QR_CODE_COLOR } from '~/utils/qrcode'
 
 const props = defineProps({
   data: {
@@ -87,6 +94,10 @@ const props = defineProps({
   color: {
     type: String,
     default: DEFAULT_QR_CODE_COLOR
+  },
+  dotStyle: {
+    type: String,
+    default: DEFAULT_QR_CODE_DOT_STYLE
   },
   width: {
     type: Number,
@@ -108,22 +119,24 @@ const isConfigMode = computed(() => props.mode === 'config')
 
 const selectedIcon = ref(props.icon)
 const selectedColor = ref(props.color)
+const selectedDotStyle = ref(props.dotStyle || 'square')
 
 const downloadFileExtension = ref('svg')
 
-const emit = defineEmits(['save', 'update:icon', 'update:color'])
+const emit = defineEmits(['save', 'update:icon', 'update:color', 'update:dotStyle'])
 
 const options = computed(() => getQRCodeOptions({
   width: props.width,
   height: props.height,
   data: props.data,
   fillColor: selectedColor.value,
-  image: selectedIcon.value === 'none' ? undefined : getQRCodeIcon(selectedIcon.value)
+  image: selectedIcon.value === 'none' ? undefined : getQRCodeIcon(selectedIcon.value),
+  dotStyle: selectedDotStyle.value
 }))
 const qrCode = ref<QRCodeStyling | null>(null)
 const qrCodeRef = ref(null)
 
-watch([selectedIcon, selectedColor, () => props.data], () => {
+watch([selectedIcon, selectedColor, selectedDotStyle, () => props.data], () => {
   qrCode.value?.update(options.value)
 })
 
@@ -144,6 +157,7 @@ async function download () {
 function saveConfig () {
   emit('update:icon', selectedIcon.value)
   emit('update:color', selectedColor.value)
-  emit('save', { icon: selectedIcon.value, color: selectedColor.value })
+  emit('update:dotStyle', selectedDotStyle.value)
+  emit('save', { icon: selectedIcon.value, color: selectedColor.value, dotStyle: selectedDotStyle.value })
 }
 </script>

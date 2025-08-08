@@ -35,6 +35,7 @@
       <QRCodeGenerator
         v-model:icon="selectedQRCodeIcon"
         v-model:color="selectedQRCodeColor"
+        v-model:dot-style="selectedQRCodeDotStyle"
         :data="`${BOOK3_URL}/store`"
         :width="500"
         :height="500"
@@ -121,6 +122,7 @@ example02,https://example02.com`
 
 const selectedQRCodeIcon = ref(DEFAULT_QR_CODE_ICON)
 const selectedQRCodeColor = ref(DEFAULT_QR_CODE_COLOR)
+const selectedQRCodeDotStyle = ref(DEFAULT_QR_CODE_DOT_STYLE)
 const isEditingQRCodeConfig = ref(false)
 
 const qrCodeRef = ref<HTMLElement[] | undefined>(undefined)
@@ -168,6 +170,14 @@ onMounted(() => {
   }
 })
 
+function getQRCodeStyleOptions () {
+  return {
+    image: selectedQRCodeIcon.value === 'none' ? undefined : getQRCodeIcon(selectedQRCodeIcon.value),
+    fillColor: selectedQRCodeColor.value,
+    dotStyle: selectedQRCodeDotStyle.value
+  }
+}
+
 async function drawQRCodes () {
   try {
     let input = csvInput.value
@@ -197,8 +207,7 @@ async function drawQRCodes () {
     const qrcode = new QRCodeStyling(getQRCodeOptions({
       margin: 0,
       data: item.url,
-      image: selectedQRCodeIcon.value === 'none' ? undefined : getQRCodeIcon(selectedQRCodeIcon.value),
-      fillColor: selectedQRCodeColor.value
+      ...getQRCodeStyleOptions()
     }))
     const element = qrCodeRef.value?.[index]
     if (element) {
@@ -231,10 +240,20 @@ function handleClickPrint () {
 }
 
 function handleClickDownload () {
-  downloadQRCodes(urlItems.value.map(item => ({
-    filename: item.key,
-    url: item.url
-  })))
+  downloadQRCodes(
+    urlItems.value.map(item => ({
+      filename: item.key,
+      url: item.url
+    })),
+    {
+      qrCodeOptions: {
+        ...getQRCodeStyleOptions(),
+        margin: 40,
+        width: 1024,
+        height: 1024
+      }
+    }
+  )
 }
 </script>
 

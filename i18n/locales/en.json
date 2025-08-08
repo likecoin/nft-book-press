@@ -502,6 +502,7 @@
   "purchase_link.value": "Value",
   "qr_generator.download": "Download",
   "qr_generator.pick_color": "Pick a color",
+  "qr_generator.pick_dot": "Pick a dot style",
   "qr_generator.pick_icon": "Pick an icon",
   "qr_generator.save_config": "Save Config",
   "sales_pos.checkout_url": "Checkout URL",
