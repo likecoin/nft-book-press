@@ -3,7 +3,7 @@
     <UFormGroup
       :label="$t('form_labels.nft_mint_count')"
       class="text-left"
-      :error="(state.mintCount === undefined || state.mintCount < 0) && 'Mint count must be greater than 0'"
+      :error="(state.mintCount === undefined || state.mintCount < 0) && $t('nft_mint_form.mint_count_greater_than_zero')"
       required
     >
       <UInput
@@ -19,15 +19,15 @@
       :label="$t('form_labels.image_url')"
       name="imageUrl"
       class="text-left"
-      :error="!state.imageUrl && 'Image URL is required'"
+      :error="!state.imageUrl && $t('nft_mint_form.image_url_required')"
       required
     >
-      <UInput v-model="state.imageUrl" placeholder="ipfs:// ... or ar://...." />
+      <UInput v-model="state.imageUrl" :placeholder="$t('nft_mint_form.ipfs_placeholder')" />
     </UFormGroup>
 
     <div class="flex justify-center items-center">
       <h3 class="font-bold font-mono text-[14px]">
-        Advanced Settings
+        {{ $t('form.advanced_settings') }}
       </h3>
       <UButton
         color="gray"
@@ -47,7 +47,7 @@
           <UAlert
             class="mt-1"
             icon="i-heroicons-exclamation-triangle"
-            title="Should be more than number of NFT to mint"
+            :title="$t('nft_mint_form.more_than_mint_count')"
             color="red"
             variant="subtle"
           />

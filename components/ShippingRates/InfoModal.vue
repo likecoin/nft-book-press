@@ -30,24 +30,24 @@
             }"
           >
             <UFormGroup
-              label="Name of this shipping option"
+              :label="$t('shipping_rates.name_of_option')"
               :ui="{ container: 'space-y-2' }"
             >
               <UInput
                 :value="s.nameEn"
-                placeholder="Shipping option name"
+                :placeholder="$t('shipping_rates.shipping_option_name')"
                 :disabled="isViewMode"
                 @input="(e: InputEvent) => handleInputShippingRates(e, 'nameEn', index)"
               />
               <UInput
-                placeholder="運送選項名稱"
+                :placeholder="$t('shipping_rates.shipping_option_name_zh')"
                 :value="s.nameZh"
                 :disabled="isViewMode"
                 @input="(e: InputEvent) => handleInputShippingRates(e, 'nameZh', index)"
               />
             </UFormGroup>
 
-            <UFormGroup label="Price(USD) of this shipping option">
+            <UFormGroup :label="$t('shipping_rates.price_usd_of_option')">
               <UInput
                 :value="s.price"
                 type="number"
@@ -60,7 +60,7 @@
 
             <template v-if="hasMultipleShippingRates && isEditMode" #footer>
               <UButton
-                label="Delete"
+                :label="$t('shipping_rates.delete')"
                 variant="outline"
                 color="red"
                 @click="deleteShippingRate(index)"
@@ -71,7 +71,7 @@
         <div class="flex justify-center">
           <UButton
             v-if="isEditMode"
-            label="Add Options"
+            :label="$t('shipping_rates.add_options')"
             variant="outline"
             icon="i-heroicons-plus-20-solid"
             @click="addMoreShippingRate"
@@ -80,11 +80,11 @@
       </component>
       <div v-else class="flex justify-center items-center w-full gap-[8px] py-[36px]">
         <span>
-          No items
+          {{ $t('shipping_rates.no_items') }}
         </span>
         <UButton
           v-if="isEditMode"
-          label="Add Options"
+          :label="$t('shipping_rates.add_options')"
           variant="outline"
           icon="i-heroicons-plus-20-solid"
           @click="addMoreShippingRate"
@@ -93,10 +93,10 @@
 
       <template #footer>
         <div class="flex justify-end items-center">
-          <UButton v-if="isEditMode" label="Save" @click="handleOnSave" />
+          <UButton v-if="isEditMode" :label="$t('shipping_rates.save')" @click="handleOnSave" />
           <div v-else class="flex justify-end items-center">
             <UButton
-              label="Set Shipping Options"
+              :label="$t('shipping_rates.set_shipping_options')"
               variant="outline"
               @click="updateShippingRates"
             >
@@ -133,7 +133,7 @@ const emit = defineEmits(['update:modelValue', 'update-shipping-rates'])
 const isEditMode = computed(() => !isReadOnlyMode.value)
 const isViewMode = computed(() => isReadOnlyMode.value)
 const modalTitle = computed(() =>
-  isEditMode.value ? 'Editing Shipping Options' : 'Shipping Options Info'
+  isEditMode.value ? $t('shipping_rates.editing_shipping_options') : $t('shipping_rates.shipping_options_info')
 )
 const shippingRates = ref<any[]>(
   props.shippingInfo.length

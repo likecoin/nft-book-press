@@ -100,7 +100,7 @@
                   :max="maxSupply"
                 />
               </UFormGroup>
-              <UFormGroup label="Product Name" :ui="{ container: 'space-y-2' }">
+              <UFormGroup :label="$t('new_nft_book.product_name')" :ui="{ container: 'space-y-2' }">
                 <template #label>
                   {{ $t('nft_book_form.product_name') }}
                   <ToolTips :image-style="{ width: '250px' }">
@@ -335,7 +335,7 @@
                   <UInput
                     v-model="moderatorWalletInput"
                     class="font-mono"
-                    placeholder="like1..."
+                    placeholder="0x..."
                   />
 
                   <UButton

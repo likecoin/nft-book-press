@@ -11,14 +11,14 @@
     </template>
 
     <div v-if="!isReadonlyMode" class="grid grid-cols-2 gap-4 p-4 print:hidden">
-      <UFormGroup label="Pick an icon">
+      <UFormGroup :label="$t('qr_generator.pick_icon')">
         <URadioGroup
           v-model="selectedIcon"
           :options="iconOptions"
         />
       </UFormGroup>
 
-      <UFormGroup label="Pick a color">
+      <UFormGroup :label="$t('qr_generator.pick_color')">
         <UInput
           v-model="selectedColor"
           type="color"
@@ -48,7 +48,7 @@
         />
 
         <UButton
-          label="Download"
+          :label="$t('qr_generator.download')"
           variant="outline"
           color="primary"
           @click="download"
@@ -57,7 +57,7 @@
 
       <UButton
         v-if="isConfigMode"
-        label="Save Config"
+        :label="$t('qr_generator.save_config')"
         variant="outline"
         color="primary"
         @click="saveConfig"

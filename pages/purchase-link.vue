@@ -47,7 +47,7 @@
           <UTextarea
             v-model="productIdInputModel"
             class="font-mono"
-            :placeholder="`0x53c7243b94b3c4a4827816f00d72394ddfb974c4\n0x146736dd2ccb1dbdf266130a117609e00ad566b1`"
+            placeholder="0x53c7243b94b3c4a4827816f00d72394ddfb974c4\n0x146736dd2ccb1dbdf266130a117609e00ad566b1"
             :autoresize="true"
             name="product_id"
           />
@@ -63,7 +63,7 @@
             <UInput
               v-model="customChannelInput"
               class="grow font-mono"
-              placeholder="Channel ID(s), separated by commas (e.g. @store01, @store02)"
+              :placeholder="$t('purchase_link.channel_ids_placeholder')"
               name="channel_ids"
             />
             <UButton

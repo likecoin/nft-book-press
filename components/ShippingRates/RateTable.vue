@@ -22,8 +22,8 @@
       v-if="isEditMode"
       :columns="[
         { key: 'index' },
-        { key: 'name', label: 'Name' },
-        { key: 'price', label: 'Price (USD)' },
+        { key: 'name', label: $t('shipping_rates.name') },
+        { key: 'price', label: $t('shipping_rates.price_usd') },
       ]"
       :rows="shippingRatesTableRows"
     >
@@ -40,14 +40,14 @@
 
     <div v-else class="px-[24px] py-[12px]">
       <UFormGroup
-        label="Physical Goods"
+        :label="$t('shipping_rates.physical_goods')"
         :ui="{ label: { base: 'font-mono font-bold' } }"
       >
         <div class="flex flex-col gap-[16px]">
           <UCheckbox
             v-model="hasShipping"
             name="hasShipping"
-            label="Includes physical good that requires shipping"
+            :label="$t('shipping_rates.includes_physical_good')"
             :disabled="!shippingInfo.length"
           />
           <UAlert
@@ -55,7 +55,7 @@
             icon="i-heroicons-face-frown-solid"
             color="yellow"
             variant="solid"
-            title="Please enable this feature in the advanced settings."
+            :title="$t('shipping_rates.enable_in_advanced_settings')"
           />
         </div>
       </UFormGroup>
@@ -114,13 +114,13 @@ const buttonConfig = computed(() => {
     if (props.shippingInfo.length) {
       return {
         icon: 'i-heroicons-pencil-square',
-        text: 'Edit',
+        text: $t('shipping_rates.edit'),
         action: handleOpenShippingModal
       }
     } else {
       return {
         icon: 'i-heroicons-plus-20-solid',
-        text: 'Add',
+        text: $t('shipping_rates.add'),
         action: handleOpenShippingModal
       }
     }
@@ -128,13 +128,13 @@ const buttonConfig = computed(() => {
     if (props.shippingInfo.length) {
       return {
         icon: 'i-heroicons-eye-20-solid',
-        text: 'View Current Shipping Options',
+        text: $t('shipping_rates.view_current_options'),
         action: handleOpenShippingModal
       }
     } else {
       return {
         icon: 'i-heroicons-plus-20-solid',
-        text: 'Add Shipping Options',
+        text: $t('shipping_rates.add_shipping_options'),
         action: handleOpenEditModal
       }
     }
