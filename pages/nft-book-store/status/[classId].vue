@@ -1405,7 +1405,7 @@ async function handleMintNFTSubmit () {
   showRestockModal.value = false
 }
 
-function isContentFingerPrintEncrypted (contentFingerprints: any[]) {
+function isContentFingerprintEncrypted (contentFingerprints: any[]) {
   const apiEndpoints = getApiEndpoints()
   const arweaveLinkEndpoint = apiEndpoints.API_GET_ARWEAVE_V2_LINK
   return contentFingerprints.some((fingerprint) => {
@@ -1422,7 +1422,7 @@ async function handleISCNUpdated ({
 }) {
   const { contentFingerprints } = metadata
   if (contentFingerprints) {
-    const shouldHideDownload = isContentFingerPrintEncrypted(contentFingerprints)
+    const shouldHideDownload = isContentFingerprintEncrypted(contentFingerprints)
     if (shouldHideDownload !== hideDownload.value) {
       hideDownload.value = shouldHideDownload
     }

@@ -693,13 +693,13 @@ watch(classId, async (newClassId) => {
   if (newClassId) {
     const data = await lazyFetchClassMetadataById(newClassId as string)
     const fingerprints = data?.contentFingerprints
-    if (fingerprints && isContentFingerPrintEncrypted(fingerprints)) {
+    if (fingerprints && isContentFingerprintEncrypted(fingerprints)) {
       hideDownload.value = true
     }
   }
 }, { immediate: true })
 
-function isContentFingerPrintEncrypted (contentFingerprints: any[]) {
+function isContentFingerprintEncrypted (contentFingerprints: any[]) {
   const apiEndpoints = getApiEndpoints()
   const arweaveLinkEndpoint = apiEndpoints.API_GET_ARWEAVE_V2_LINK
   return contentFingerprints.some((fingerprint) => {
