@@ -617,7 +617,7 @@
   "upload_form.drag_files_here": "Drag files here to upload or ",
   "upload_form.drm_encrypt_disable": "Encrypt content & disable download",
   "upload_form.error_during_upload": "Error during file upload",
-  "upload_form.file_size_suggestion": "Suggested file size: < 20 MB",
+  "upload_form.file_size_suggestion": "Suggested file size: < 50 MB",
   "upload_form.only_one_cover_image": "Only one cover image is allowed.",
   "upload_form.upload_error_occurred": "An error occurred during the upload process.",
   "upload_form.warning": "Warning",
