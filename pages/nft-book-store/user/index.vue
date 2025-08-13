@@ -268,13 +268,14 @@
           >
             <template #classId-data="{ row }">
               <a :href="`${BOOK3_URL}/store/${row.classId}`" target="_blank">
-                {{ nftStore.getClassMetadataById(row.classId)?.name }}
+                {{ nftStore.getClassMetadataById(row.classId)?.name || row.classId }}
               </a>
             </template>
             <template #collectionId-data="{ row }">
               <a :href="`${LIKER_LAND_URL}/nft/collection/${row.collectionId}`" target="_blank">
                 {{ collectionStore.getCollectionById(row.collectionId)?.name?.zh
-                  || collectionStore.getCollectionById(row.collectionId)?.name?.en }}
+                  || collectionStore.getCollectionById(row.collectionId)?.name?.en
+                  || row.collectionId }}
               </a>
             </template>
           </UTable>
