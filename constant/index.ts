@@ -2,7 +2,7 @@ export const IPFS_VIEW_GATEWAY_URL = 'https://ipfs.io/ipfs'
 
 export const MINIMAL_PRICE = 0.99
 export const DEFAULT_PRICE = 4.99
-export const MAXIMUM_PRICE = 199.99
+export const MAXIMUM_PRICE = 99.99
 
 export const USD_PRICING_OPTIONS = [0, ...Array.from(
   { length: Math.round(MAXIMUM_PRICE - MINIMAL_PRICE) + 1 },
