@@ -76,8 +76,6 @@
 <script setup lang="ts">
 import QRCodeStyling, { type FileExtension } from '@likecoin/qr-code-styling'
 
-import { getQRCodeOptions, getQRCodeIcon, iconOptions, dotStyleOptions, DEFAULT_QR_CODE_ICON, DEFAULT_QR_CODE_COLOR } from '~/utils/qrcode'
-
 const props = defineProps({
   data: {
     type: String,
