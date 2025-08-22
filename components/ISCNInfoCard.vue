@@ -18,7 +18,7 @@
 
     <UFormGroup :label="$t('common.title')">
       <UInput
-        :value="iscnData?.contentMetadata?.name"
+        :model-value="iscnData?.contentMetadata?.name"
         :readonly="true"
         variant="none"
         :padded="false"
@@ -27,7 +27,7 @@
 
     <UFormGroup :label="$t('common.description')">
       <UInput
-        :value="iscnData?.contentMetadata?.description"
+        :model-value="iscnData?.contentMetadata?.description"
         :readonly="true"
         variant="none"
         :padded="false"

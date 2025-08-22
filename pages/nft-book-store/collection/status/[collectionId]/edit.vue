@@ -36,7 +36,7 @@
             </h2>
           </template>
           <UFormGroup :label="$t('form.nft_collection_id')">
-            <UInput class="font-mono" :value="collectionId" :readonly="true" :disabled="true" />
+            <UInput class="font-mono" :model-value="collectionId" :readonly="true" :disabled="true" />
           </UFormGroup>
           <UFormGroup :label="$t('form.books_in_collection')">
             <UCard :ui="{ body: { padding: '' } }">

@@ -34,14 +34,14 @@
               :ui="{ container: 'space-y-2' }"
             >
               <UInput
-                :value="s.nameEn"
+                :model-value="s.nameEn"
                 :placeholder="$t('shipping_rates.shipping_option_name')"
                 :disabled="isViewMode"
                 @input="(e: InputEvent) => handleInputShippingRates(e, 'nameEn', index)"
               />
               <UInput
                 :placeholder="$t('shipping_rates.shipping_option_name_zh')"
-                :value="s.nameZh"
+                :model-value="s.nameZh"
                 :disabled="isViewMode"
                 @input="(e: InputEvent) => handleInputShippingRates(e, 'nameZh', index)"
               />
@@ -49,7 +49,7 @@
 
             <UFormGroup :label="$t('shipping_rates.price_usd_of_option')">
               <UInput
-                :value="s.price"
+                :model-value="s.price"
                 type="number"
                 step="0.01"
                 :min="0"

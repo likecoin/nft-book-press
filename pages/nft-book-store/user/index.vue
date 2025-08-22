@@ -44,7 +44,7 @@
         </template>
 
         <UFormGroup v-if="userLikerInfo?.user" :label="$t('user_settings.affiliation_channel_id')" size="xl">
-          <UInput :placeholder="$t('user.affiliation_id_placeholder')" :value="channelId" disabled />
+          <UInput :placeholder="$t('user.affiliation_id_placeholder')" :model-value="channelId" disabled />
           <template v-if="!isStripeConnectReady" #help>
             {{ $t('user_settings.setup_stripe_notice') }}
           </template>
@@ -161,7 +161,7 @@
 
           <UFormGroup label="Liker ID Email">
             <UInput
-              :value="bookUser?.notificationEmail"
+              :model-value="bookUser?.notificationEmail"
               label="Liker ID Email"
               disabled
               :ui="{ base: 'font-mono' }"

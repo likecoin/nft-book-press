@@ -36,7 +36,7 @@
             class="font-mono"
             placeholder="0x...."
           />
-          <UInput v-else :value="classId" :readonly="true" />
+          <UInput v-else :model-value="classId" :readonly="true" />
         </UFormGroup>
 
         <UFormGroup :label="$t('form.table_of_content')">
@@ -86,7 +86,7 @@
                 :label="$t('new_listing.total_nft_for_sale', { type: hasMultiplePrices ? 'edition' : 'ebook' })"
               >
                 <UInput
-                  :value="p.stock"
+                  :model-value="p.stock"
                   type="number"
                   step="1"
                   :min="0"
@@ -116,7 +116,7 @@
                   </ToolTips>
                 </template>
                 <UInput
-                  :value="p.autoMemo"
+                  :model-value="p.autoMemo"
                   @input="(e: InputEvent) => updatePrice(e, 'autoMemo', index)"
                 />
               </UFormGroup>
@@ -189,7 +189,7 @@
                 </template>
                 <UInput
                   placeholder="Product Name"
-                  :value="p.nameEn"
+                  :model-value="p.nameEn"
                   @input="(e: InputEvent) => updatePrice(e, 'nameEn', index)"
                 />
                 <span class="block text-[14px] text-[#374151] mt-[8px]">{{ $t('form.description_optional') }}</span>
@@ -219,7 +219,7 @@
                 </template>
                 <UInput
                   placeholder="產品名稱"
-                  :value="p.nameZh"
+                  :model-value="p.nameZh"
                   @input="(e: InputEvent) => updatePrice(e, 'nameZh', index)"
                 />
                 <span class="block text-[14px] text-[#374151] mt-[8px]">{{ $t('form.description_optional') }}</span>

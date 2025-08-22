@@ -25,7 +25,7 @@
 
         <UFormGroup :label="$t('nft_book_form.nft_class_id')">
           <UInput
-            :value="classId"
+            :model-value="classId"
             disabled
             class="font-mono"
           />
