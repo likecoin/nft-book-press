@@ -254,7 +254,11 @@ const nftStore = useNftStore()
 const route = useRoute()
 const localeRoute = useLocaleRoute()
 const toast = useToast()
-const collectionId = ref(route.params.collectionId)
+const collectionId = ref(
+  Array.isArray(route.params.collectionId)
+    ? route.params.collectionId[0]
+    : route.params.collectionId
+)
 
 const isLoading = ref(false)
 
