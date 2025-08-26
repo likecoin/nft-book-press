@@ -309,7 +309,7 @@
   "nft_book_form.share_sales_data": "Share sales data to wallets",
   "nft_book_form.unit_price_label": "Unit Price in USD (Minimum {minPrice}, or 0 for free)",
   "nft_book_form.wallet_placeholder": "0x...",
-  "nft_book_store.management_title": "Liker Land Bookstore Management Page",
+  "nft_book_store.management_title": "My works",
   "nft_book_store.rows_per_page": "Rows per page",
   "nft_mint_form.image_url_required": "Image URL is required",
   "nft_mint_form.ipfs_placeholder": "ipfs:// ... or ar://....",

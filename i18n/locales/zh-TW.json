@@ -309,7 +309,7 @@
   "nft_book_form.share_sales_data": "分享銷售數據給特定地址",
   "nft_book_form.unit_price_label": "美元單價（最低 {minPrice}，或 0 免費）",
   "nft_book_form.wallet_placeholder": "0x...",
-  "nft_book_store.management_title": "Liker Land 書店管理頁面",
+  "nft_book_store.management_title": "我的作品",
   "nft_book_store.rows_per_page": "每頁行數",
   "nft_mint_form.image_url_required": "圖片網址為必填",
   "nft_mint_form.ipfs_placeholder": "ipfs:// ... 或 ar://....",

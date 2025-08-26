@@ -18,18 +18,6 @@
     </UProgress>
 
     <UCard :ui="{ header: { base: 'flex justify-between items-center gap-4' } }">
-      <template #header>
-        <h2 class="text-xl font-bold font-mono">
-          {{ $t('bookstore.liker_land_listing') }}
-        </h2>
-
-        <UButton
-          icon="i-heroicons-plus-circle"
-          :label="$t('bookstore.new_listing')"
-          :to="localeRoute({ name: 'nft-book-store-new' })"
-        />
-      </template>
-
       <UTabs
         v-if="bookstoreApiStore.isAuthenticated"
         v-model="selectedTabItemIndex"
