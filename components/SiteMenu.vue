@@ -66,23 +66,12 @@ function handleLinkClick ({ label }: { label?: string }) {
 
 const items = computed(() => [
   {
-    label: $t('menu.publish_nft_book'),
+    label: $t('menu.bookstore_listing'),
     links: [
       {
         label: $t('menu.start_publishing'),
         icon: 'i-heroicons-sparkles',
         to: localeRoute({ name: 'publish-nft-book' })
-      }
-    ]
-  },
-  {
-    label: $t('menu.bookstore_listing'),
-    links: [
-      {
-        label: $t('menu.latest_books'),
-        icon: 'i-heroicons-book-open',
-        to: localeRoute({ name: 'latest-books' }),
-        exact: true
       },
       {
         label: $t('menu.manage_book_listings'),
@@ -90,13 +79,6 @@ const items = computed(() => [
         to: localeRoute({ name: 'nft-book-store' }),
         exact: true,
         badge: getTotalPendingNFTCount.value
-      },
-      {
-        label: $t('menu.manage_collections'),
-        icon: 'i-heroicons-rectangle-stack',
-        to: localeRoute({ name: 'nft-book-store-collection' }),
-        exact: true,
-        badge: getCollectionTotalPendingNFTCount.value
       }
     ]
   },
@@ -107,6 +89,12 @@ const items = computed(() => [
         label: $t('menu.user_settings'),
         icon: 'i-heroicons-user-group',
         to: localeRoute({ name: 'nft-book-store-user' }),
+        exact: true
+      },
+      {
+        label: $t('menu.latest_books'),
+        icon: 'i-heroicons-book-open',
+        to: localeRoute({ name: 'latest-books' }),
         exact: true
       }
     ]
@@ -142,33 +130,15 @@ const items = computed(() => [
     label: $t('menu.help'),
     links: [
       {
-        label: $t('menu.publisher_guide'),
-        icon: 'i-heroicons-document-text',
-        to: 'https://docs.like.co/depub/nft-book-press',
-        target: '_blank'
-      },
-      {
         label: $t('menu.publisher_guide_zh'),
         icon: 'i-heroicons-document-text',
         to: 'https://docs.like.co/zh/depub/nft-book-press',
         target: '_blank'
       },
       {
-        label: $t('menu.listing_disclaimer'),
-        icon: 'i-heroicons-shield-exclamation',
-        to: PUBLISHING_NOTICE_URL_EN,
-        target: '_blank'
-      },
-      {
         label: $t('menu.listing_disclaimer_zh'),
         icon: 'i-heroicons-shield-exclamation',
         to: PUBLISHING_NOTICE_URL_ZH,
-        target: '_blank'
-      },
-      {
-        label: $t('menu.chat_with_us'),
-        icon: 'i-heroicons-chat-bubble-bottom-center',
-        to: 'https://cs.3ook.com',
         target: '_blank'
       }
     ]
