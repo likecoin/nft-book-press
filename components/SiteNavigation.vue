@@ -1,12 +1,7 @@
 <template>
   <nav class="flex flex-col overflow-y-auto">
     <SiteHeaderBase class="w-full px-5">
-      <UButton
-        class="font-bold"
-        variant="ghost"
-        :label="$t('app.site_title')"
-        :to="localeRoute({ name: 'index' })"
-      />
+      <AppLogo />
       <UBadge
         v-if="isTestnet"
         :label="$t('app.testnet')"
