@@ -131,8 +131,8 @@ const items = computed(() => [
     links: [
       {
         label: $t('menu.publisher_guide_zh'),
-        icon: 'i-heroicons-document-text',
-        to: 'https://docs.like.co/zh/depub/nft-book-press',
+        icon: 'i-heroicons-arrow-top-right-on-square-20-solid',
+        to: 'https://docs.3ook.com/zh-TW/collections/14176162-出版',
         target: '_blank'
       },
       {
