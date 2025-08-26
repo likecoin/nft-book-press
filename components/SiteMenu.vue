@@ -39,16 +39,13 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
-import { useCollectionStore } from '~/stores/collection'
-import { PUBLISHING_NOTICE_URL_EN, PUBLISHING_NOTICE_URL_ZH } from '~/constant'
+import { PUBLISHING_NOTICE_URL_ZH } from '~/constant'
 const { t: $t } = useI18n()
 
 const localeRoute = useLocaleRoute()
 
 const bookstoreApiStore = useBookstoreApiStore()
-const collectionStore = useCollectionStore()
 const { getTotalPendingNFTCount } = storeToRefs(bookstoreApiStore)
-const { getTotalPendingNFTCount: getCollectionTotalPendingNFTCount } = storeToRefs(collectionStore)
 
 const props = defineProps({
   isLarge: {
