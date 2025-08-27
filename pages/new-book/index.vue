@@ -105,7 +105,7 @@ const currentActionText = computed(() => {
     case 1:
       return $t('publish_button.metadata')
     case 2:
-      return $t('pages.next')
+      return $t('publish_button.mint_nft')
     default:
       return $t('publish_button.publish_now')
   }
