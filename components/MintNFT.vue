@@ -10,23 +10,12 @@
       @close="error = ''"
     />
 
-    <ISCNInfoCard
-      :iscn-id="computedISCNId"
-      :iscn-owner="iscnOwner"
-      :iscn-data="iscnData"
-      :show-edit-button="true"
-      @edit="showEditISCNModal = true"
-    />
     <LiteMintNFT
       ref="liteMintNFTRef"
       :iscn-data="iscnData"
       :should-show-submit="false"
       @form-valid-change="(valid) => (isFormValid = valid)"
       @submit="handleFinishMintNFT"
-    />
-    <EditISCNMetadataModal
-      v-model="showEditISCNModal"
-      :class-id="classId"
     />
   </div>
 </template>
@@ -48,9 +37,6 @@ const iscnData = ref<any>(null)
 const classId = ref('')
 const liteMintNFTRef = ref<any>(null)
 
-const computedISCNId = computed(() => iscnData.value?.['@id'])
-
-const showEditISCNModal = ref(false)
 const isFormValid = ref(false)
 
 const emit = defineEmits(['submit', 'formValidChange', 'loadingChange'])
