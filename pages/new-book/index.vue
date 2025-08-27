@@ -103,7 +103,7 @@ const currentActionText = computed(() => {
     case 0:
       return $t('publish_button.upload_files')
     case 1:
-      return $t('pages.next')
+      return $t('publish_button.metadata')
     case 2:
       return $t('pages.next')
     default:
