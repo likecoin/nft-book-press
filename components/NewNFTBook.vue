@@ -16,43 +16,7 @@
     />
 
     <template v-if="bookstoreApiStore.isAuthenticated">
-      <UCard :ui="{ body: { base: 'space-y-4' } }">
-        <template #header>
-          <h2 class="font-bold font-mono">
-            {{ pageTitle }}
-          </h2>
-        </template>
-
-        <UFormGroup :label="$t('nft_book_form.nft_class_id')">
-          <UInput
-            :model-value="classId"
-            disabled
-            class="font-mono"
-          />
-        </UFormGroup>
-        <UFormGroup class="flex items-center">
-          <ToolTips
-            :tool-tip-text="$t('nft_book_form.drm_tooltip')"
-          >
-            <UCheckbox
-              v-model="hideDownload"
-              name="hideDownload"
-              :disabled="true"
-              :label="$t('nft_book_form.drm_label')"
-            />
-          </ToolTips>
-        </UFormGroup>
-        <UFormGroup>
-          <UCheckbox
-            v-model="isAllowCustomPrice"
-            name="isAllowCustomPrice"
-            :label="$t('nft_book_form.accept_tipping')"
-          />
-        </UFormGroup>
-      </UCard>
-
-      <component
-        :is="hasMultiplePrices ? 'ul' : 'div'"
+      <ul
         class="flex flex-col gap-[12px]"
       >
         <UCard
@@ -61,8 +25,7 @@
             base: 'overflow-visible border-none !border-transparent',
           }"
         >
-          <component
-            :is="hasMultiplePrices ? 'li' : 'div'"
+          <li
             v-for="(p, index) in prices"
             :key="p.index"
           >
@@ -74,7 +37,7 @@
                 base: 'overflow-visible border-[4px]'
               }"
             >
-              <template v-if="hasMultiplePrices" #header>
+              <template #header>
                 <h3 class="font-bold font-mono">
                   {{ $t('nft_book_form.edition_number', { number: index + 1 }) }}
                 </h3>
@@ -183,37 +146,23 @@
                   :label="$t('nft_book_form.pause_selling')"
                 />
               </UFormGroup>
-              <div class="flex flex-col gap-2">
-                <UCheckbox
-                  v-model="p.hasShipping"
-                  name="hasShipping"
-                  :disabled="(isEditMode && !p.hasShipping)"
-                  :label="$t('nft_book_form.includes_shipping')"
-                />
-                <ShippingRatesRateTable
-                  v-if="p.hasShipping"
-                  :is-show-physical-goods-checkbox="false"
-                  :is-show-setting-modal-button="true"
-                  :shipping-info="shippingRates"
-                  @update-shipping-rates="updateShippingRate"
-                />
-              </div>
             </UCard>
 
-            <div class="flex justify-center items-center">
+            <div class="flex justify-center items-center mt-2">
               <UButton
                 v-if="hasMultiplePrices"
                 :label="$t('common.delete')"
-                color="red"
+                color="gray"
+                leading-icon="i-heroicons-trash"
                 @click="deletePrice(index)"
               />
             </div>
-          </component>
+          </li>
         </UCard>
-      </component>
+      </ul>
       <div class="flex justify-center items-center">
         <UButton
-          v-if="props.isNewClassPage"
+          v-if="props.isNewClassPage && prices.length < 2"
           :ui="{ rounded: 'rounded-full' }"
           color="gray"
           icon="i-heroicons-plus-solid"
@@ -231,7 +180,7 @@
       >
         <div class="flex justify-between items-center w-full">
           <h3 class="font-bold font-mono">
-            {{ $t('nft_book_form.advanced_settings') }}
+            {{ $t('nft_book_form.settings') }}
           </h3>
           <UButton
             color="gray"
@@ -250,62 +199,17 @@
         </div>
         <template v-if="shouldShowAdvanceSettings">
           <div class="mt-[24px] flex flex-col gap-[12px]">
-            <!-- Notification Email -->
-            <UCard
-              :ui="{
-                header: { base: 'flex justify-between items-center' },
-                body: { padding: '' },
-              }"
-            >
-              <template #header>
-                <h4 class="text-sm font-bold font-mono">
-                  {{ $t('nft_book_form.notification_email_header') }}
-                </h4>
+            <UFormGroup class="flex items-center">
+              <UTooltip class="flex items-center gap-2" :text="$t('nft_book_form.accept_tipping_tooltip')">
+                <UCheckbox
+                  v-model="isAllowCustomPrice"
+                  name="isAllowCustomPrice"
+                  :label="$t('nft_book_form.accept_tipping')"
+                />
 
-                <div class="flex gap-2">
-                  <UInput
-                    v-model="notificationEmailInput"
-                    placeholder="abc@example.com"
-                  />
-
-                  <UButton
-                    :label="$t('common.add')"
-                    :variant="notificationEmailInput ? 'outline' : 'solid'"
-                    :color="notificationEmailInput ? 'primary' : 'gray'"
-                    :disabled="!notificationEmailInput"
-                    @click="addNotificationEmail"
-                  />
-                </div>
-              </template>
-
-              <UTable
-                :columns="[
-                  { key: 'email', label: $t('common.email'), sortable: true },
-                  { key: 'action' },
-                ]"
-                :rows="notificationEmailsTableRows"
-              >
-                <template #email-data="{ row }">
-                  <UButton
-                    :label="row.email"
-                    :to="`mailto:${row.email}`"
-                    variant="link"
-                    :padded="false"
-                  />
-                </template>
-
-                <template #action-data="{ row }">
-                  <div class="flex justify-end items-center">
-                    <UButton
-                      icon="i-heroicons-x-mark"
-                      variant="soft"
-                      color="red"
-                      @click="() => notificationEmails.splice(row.index, 1)"
-                    />
-                  </div>
-                </template>
-              </UTable>
-            </UCard>
+                <UIcon name="i-heroicons-question-mark-circle" />
+              </UTooltip>
+            </UFormGroup>
 
             <!-- Stripe connect -->
             <StripeConnectCard
@@ -318,59 +222,6 @@
 
               @save="handleSaveStripeConnectWallet"
             />
-
-            <!-- Share sales data -->
-            <UCard
-              :ui="{
-                header: { base: 'flex justify-between items-center' },
-                body: { padding: '', base: 'space-y-8' },
-              }"
-            >
-              <template #header>
-                <h4 class="text-sm font-bold font-mono">
-                  {{ $t('nft_book_form.share_sales_data') }}
-                </h4>
-                <div class="flex gap-2">
-                  <UInput
-                    v-model="moderatorWalletInput"
-                    class="font-mono"
-                    placeholder="0x..."
-                  />
-
-                  <UButton
-                    :label="$t('common.add')"
-                    :variant="moderatorWalletInput ? 'outline' : 'solid'"
-                    :color="moderatorWalletInput ? 'primary' : 'gray'"
-                    :disabled="!moderatorWalletInput"
-                    @click="addModeratorWallet"
-                  />
-                </div>
-              </template>
-              <UTable
-                :columns="moderatorWalletsTableColumns"
-                :rows="moderatorWalletsTableRows"
-              >
-                <template #wallet-data="{ row }">
-                  <UButton
-                    class="font-mono"
-                    :label="row.wallet"
-                    :to="row.walletLink"
-                    variant="link"
-                    :padded="false"
-                  />
-                </template>
-                <template #remove-data="{ row }">
-                  <div class="flex justify-end items-center">
-                    <UButton
-                      icon="i-heroicons-x-mark"
-                      variant="soft"
-                      color="red"
-                      @click="() => moderatorWallets.splice(row.index, 1)"
-                    />
-                  </div>
-                </template>
-              </UTable>
-            </UCard>
           </div>
         </template>
       </UCard>
@@ -384,6 +235,7 @@
           @click="onSubmit"
         />
       </div>
+      </ul>
     </template>
 
     <UModal
@@ -418,8 +270,7 @@ import {
   DEFAULT_PRICE,
   MINIMAL_PRICE,
   USD_PRICING_OPTIONS,
-  DEFAULT_MAX_SUPPLY,
-  DEFAULT_STOCK
+  DEFAULT_MAX_SUPPLY
 } from '~/constant'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
@@ -525,35 +376,10 @@ const toolbarOptions = ref<ToolbarNames[]>([
 const isEditMode = computed(() =>
   props.isEditMode
 )
-const pageTitle = computed(() =>
-  isEditMode.value ? $t('nft_book_form.edit_title') : $t('nft_book_form.page_title')
-)
 const submitButtonText = computed(() =>
   isEditMode.value ? $t('common.save') : $t('common.submit')
 )
-const shouldShowAdvanceSettings = ref<boolean>(false)
-
-const moderatorWalletsTableColumns = computed(() => [
-  { key: 'wallet', label: $t('common.wallet'), sortable: true },
-  { key: 'remove', label: '', sortable: false }
-])
-
-const moderatorWalletsTableRows = computed(() =>
-  moderatorWallets.value.map((wallet, index) => {
-    return {
-      index,
-      wallet,
-      walletLink: getPortfolioURL(wallet)
-    }
-  })
-)
-
-const notificationEmailsTableRows = computed(() =>
-  notificationEmails.value.map((email: string, index: number) => ({
-    index,
-    email
-  }))
-)
+const shouldShowAdvanceSettings = ref<boolean>(true)
 
 const iscnDataLanguage = computed(() => {
   return iscnData.value?.contentMetadata?.inLanguage
@@ -749,10 +575,6 @@ function addMorePrice () {
 
 function deletePrice (index: number) {
   prices.value.splice(index, 1)
-}
-
-function updateShippingRate (options: any) {
-  shippingRates.value = options
 }
 
 function addModeratorWallet () {

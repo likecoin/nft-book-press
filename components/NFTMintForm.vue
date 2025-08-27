@@ -4,14 +4,11 @@
       :label="$t('form_labels.nft_mint_count')"
       class="text-left"
       :error="(state.mintCount === undefined || state.mintCount < 0) && $t('nft_mint_form.mint_count_greater_than_zero')"
-      required
     >
       <UInput
         v-model="state.mintCount"
-        placeholder="0-100"
+        disabled
         type="number"
-        :min="0"
-        :max="maxSupply"
       />
     </UFormGroup>
 
@@ -24,24 +21,6 @@
     >
       <UInput v-model="state.imageUrl" :placeholder="$t('nft_mint_form.ipfs_placeholder')" />
     </UFormGroup>
-
-    <div class="flex justify-center items-center">
-      <h3 class="font-bold font-mono text-[14px]">
-        {{ $t('form.advanced_settings') }}
-      </h3>
-      <UButton
-        color="gray"
-        variant="ghost"
-        :icon="shouldShowAdvanceSettings ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
-        @click="shouldShowAdvanceSettings = !shouldShowAdvanceSettings"
-      />
-    </div>
-
-    <template v-if="shouldShowAdvanceSettings">
-      <UFormGroup :label="$t('form_labels.external_url')">
-        <UInput v-model="state.externalUrl" placeholder="https://" />
-      </UFormGroup>
-    </template>
   </UForm>
 </template>
 
