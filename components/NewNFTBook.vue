@@ -54,13 +54,32 @@
               <UFormGroup
                 :label="$t('nft_book_form.copies_label')"
               >
-                <UInput
-                  v-model="p.stock"
-                  type="number"
-                  step="1"
-                  :min="0"
-                  :max="maxSupply"
-                />
+                <div class="space-y-3">
+                  <URadio
+                    v-model="p.stockType"
+                    value="unlimited"
+                    name="stockType"
+                    label="不限量"
+                  />
+                  <div class="space-y-2">
+                    <URadio
+                      v-model="p.stockType"
+                      value="limited"
+                      name="stockType"
+                      label="限量"
+                    />
+                    <div v-if="p.stockType === 'limited'" class="pl-6">
+                      <UInput
+                        v-model="p.stock"
+                        type="number"
+                        step="1"
+                        :min="1"
+                        :max="maxSupply"
+                        placeholder="100"
+                      />
+                    </div>
+                  </div>
+                </div>
               </UFormGroup>
               <UFormGroup :label="$t('new_nft_book.product_name')" :ui="{ container: 'space-y-2' }">
                 <template #label>
@@ -114,15 +133,22 @@
                 </div>
 
                 <!-- Manual delivery option -->
-                <div class="space-y-2">
-                  <URadio
-                    v-model="p.deliveryMethod"
-                    value="manual"
-                    :disabled="isEditMode && p.oldIsAutoDeliver"
-                    name="deliveryMethod"
-                    :label="$t('nft_book_form.manual_delivery')"
-                    @click="onClickManualDelivery(p)"
-                  />
+                <div class="flex flex-col items-start space-y-2">
+                  <UTooltip
+                    class="flex items-center gap-2"
+                    :text="$t('nft_book_form.manual_delivery_tooltip')"
+                  >
+                    <URadio
+                      v-model="p.deliveryMethod"
+                      value="manual"
+                      :disabled="isEditMode && p.oldIsAutoDeliver"
+                      name="deliveryMethod"
+                      :label="$t('nft_book_form.manual_delivery')"
+                      @click="onClickManualDelivery(p)"
+                    />
+                    <UIcon name="i-heroicons-question-mark-circle" />
+                  </UTooltip>
+
                   <div v-if="p.deliveryMethod === 'manual'" class="pl-8 space-y-2">
                     <UFormGroup>
                       <template #label>
@@ -347,6 +373,7 @@ const nftStore = useNftStore()
 const { getNFTClassConfig, getBalanceOf } = useNFTContractReader()
 
 const UPLOAD_FILESIZE_MAX = 1 * 1024 * 1024
+const DEFAULT_LIMITED_STOCK = 100
 
 const emit = defineEmits(['submit'])
 const editionIndex = computed(() => {
@@ -373,7 +400,8 @@ const prices = ref<any[]>([
     price: DEFAULT_PRICE,
     deliveryMethod: 'auto',
     autoMemo: 'Thank you for your support. It means a lot to me.',
-    stock: DEFAULT_STOCK,
+    stock: DEFAULT_LIMITED_STOCK,
+    stockType: 'limited',
     name: $t('prices.standard_edition'),
 
     nameEn: 'Standard Edition',
@@ -523,6 +551,7 @@ onMounted(async () => {
               deliveryMethod: currentEdition.isAutoDeliver ? 'auto' : 'manual',
               autoMemo: currentEdition.autoMemo,
               stock: currentEdition.stock,
+              stockType: currentEdition.stockType ? currentEdition.stockType : (currentEdition.isAutoDeliver ? 'limited' : 'unlimited'),
               name: classResData.inLanguage === 'en'
                 ? currentEdition.name.en
                 : currentEdition.name.zh,
@@ -622,7 +651,8 @@ function onImgUpload (
 }
 
 function onClickManualDelivery (price: any) {
-  price.stock = Math.min(availableManualStock.value, price.stock)
+  price.stock = DEFAULT_LIMITED_STOCK
+  price.stockType = 'limited'
 }
 
 function addMorePrice () {
@@ -632,7 +662,8 @@ function addMorePrice () {
     price: DEFAULT_PRICE,
     deliveryMethod: 'auto',
     autoMemo: '',
-    stock: 1,
+    stock: 100,
+    stockType: 'limited',
     name: iscnDataLanguage.value === 'en'
       ? `Tier ${nextPriceIndex.value}`
       : `級別 ${nextPriceIndex.value}`,
@@ -659,14 +690,6 @@ function addModeratorWallet () {
   moderatorWalletInput.value = ''
 }
 
-function addNotificationEmail () {
-  if (!notificationEmailInput.value) {
-    return
-  }
-  notificationEmails.value.push(notificationEmailInput.value)
-  notificationEmailInput.value = ''
-}
-
 function handleSaveStripeConnectWallet (wallet: any) {
   stripeConnectWallet.value = wallet
   shouldDisableStripeConnectSetting.value = true
@@ -690,7 +713,7 @@ function mapPrices (prices: any) {
         },
     priceInDecimal: Math.round(Number(p.price) * 100),
     price: Number(p.price),
-    stock: Number(p.stock),
+    stock: p.stockType === 'unlimited' ? 0 : Number(p.stock),
     isAutoDeliver: !p.isPhysicalOnly && p.deliveryMethod === 'auto',
     isAllowCustomPrice: p.isAllowCustomPrice,
     isUnlisted: p.isUnlisted ?? false,
