@@ -16,43 +16,7 @@
     />
 
     <template v-if="bookstoreApiStore.isAuthenticated">
-      <UCard :ui="{ body: { base: 'space-y-4' } }">
-        <template #header>
-          <h2 class="font-bold font-mono">
-            {{ pageTitle }}
-          </h2>
-        </template>
-
-        <UFormGroup :label="$t('nft_book_form.nft_class_id')">
-          <UInput
-            :model-value="classId"
-            disabled
-            class="font-mono"
-          />
-        </UFormGroup>
-        <UFormGroup class="flex items-center">
-          <ToolTips
-            :tool-tip-text="$t('nft_book_form.drm_tooltip')"
-          >
-            <UCheckbox
-              v-model="hideDownload"
-              name="hideDownload"
-              :disabled="true"
-              :label="$t('nft_book_form.drm_label')"
-            />
-          </ToolTips>
-        </UFormGroup>
-        <UFormGroup>
-          <UCheckbox
-            v-model="isAllowCustomPrice"
-            name="isAllowCustomPrice"
-            :label="$t('nft_book_form.accept_tipping')"
-          />
-        </UFormGroup>
-      </UCard>
-
-      <component
-        :is="hasMultiplePrices ? 'ul' : 'div'"
+      <ul
         class="flex flex-col gap-[12px]"
       >
         <UCard
@@ -183,21 +147,6 @@
                   :label="$t('nft_book_form.pause_selling')"
                 />
               </UFormGroup>
-              <div class="flex flex-col gap-2">
-                <UCheckbox
-                  v-model="p.hasShipping"
-                  name="hasShipping"
-                  :disabled="(isEditMode && !p.hasShipping)"
-                  :label="$t('nft_book_form.includes_shipping')"
-                />
-                <ShippingRatesRateTable
-                  v-if="p.hasShipping"
-                  :is-show-physical-goods-checkbox="false"
-                  :is-show-setting-modal-button="true"
-                  :shipping-info="shippingRates"
-                  @update-shipping-rates="updateShippingRate"
-                />
-              </div>
             </UCard>
 
             <div class="flex justify-center items-center">
@@ -250,62 +199,17 @@
         </div>
         <template v-if="shouldShowAdvanceSettings">
           <div class="mt-[24px] flex flex-col gap-[12px]">
-            <!-- Notification Email -->
-            <UCard
-              :ui="{
-                header: { base: 'flex justify-between items-center' },
-                body: { padding: '' },
-              }"
-            >
-              <template #header>
-                <h4 class="text-sm font-bold font-mono">
-                  {{ $t('nft_book_form.notification_email_header') }}
-                </h4>
+            <UFormGroup class="flex items-center">
+              <UTooltip class="flex items-center gap-2" :text="$t('nft_book_form.accept_tipping_tooltip')">
+                <UCheckbox
+                  v-model="isAllowCustomPrice"
+                  name="isAllowCustomPrice"
+                  :label="$t('nft_book_form.accept_tipping')"
+                />
 
-                <div class="flex gap-2">
-                  <UInput
-                    v-model="notificationEmailInput"
-                    placeholder="abc@example.com"
-                  />
-
-                  <UButton
-                    :label="$t('common.add')"
-                    :variant="notificationEmailInput ? 'outline' : 'solid'"
-                    :color="notificationEmailInput ? 'primary' : 'gray'"
-                    :disabled="!notificationEmailInput"
-                    @click="addNotificationEmail"
-                  />
-                </div>
-              </template>
-
-              <UTable
-                :columns="[
-                  { key: 'email', label: $t('common.email'), sortable: true },
-                  { key: 'action' },
-                ]"
-                :rows="notificationEmailsTableRows"
-              >
-                <template #email-data="{ row }">
-                  <UButton
-                    :label="row.email"
-                    :to="`mailto:${row.email}`"
-                    variant="link"
-                    :padded="false"
-                  />
-                </template>
-
-                <template #action-data="{ row }">
-                  <div class="flex justify-end items-center">
-                    <UButton
-                      icon="i-heroicons-x-mark"
-                      variant="soft"
-                      color="red"
-                      @click="() => notificationEmails.splice(row.index, 1)"
-                    />
-                  </div>
-                </template>
-              </UTable>
-            </UCard>
+                <UIcon name="i-heroicons-question-mark-circle" />
+              </UTooltip>
+            </UFormGroup>
 
             <!-- Stripe connect -->
             <StripeConnectCard
@@ -418,8 +322,7 @@ import {
   DEFAULT_PRICE,
   MINIMAL_PRICE,
   USD_PRICING_OPTIONS,
-  DEFAULT_MAX_SUPPLY,
-  DEFAULT_STOCK
+  DEFAULT_MAX_SUPPLY
 } from '~/constant'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
@@ -505,9 +408,6 @@ const maxSupply = computed(() => {
   }
   return classMaxSupply.value
 })
-const availableManualStock = computed(() => {
-  return Math.max(ownedCount.value - otherExistingManualStock.value, 0)
-})
 const otherExistingStock = ref(0)
 const otherExistingManualStock = ref(0)
 const classMaxSupply = ref(DEFAULT_MAX_SUPPLY)
@@ -531,9 +431,6 @@ const toolbarOptions = ref<ToolbarNames[]>([
 const isEditMode = computed(() =>
   props.isEditMode
 )
-const pageTitle = computed(() =>
-  isEditMode.value ? $t('nft_book_form.edit_title') : $t('nft_book_form.page_title')
-)
 const submitButtonText = computed(() =>
   isEditMode.value ? $t('common.save') : $t('common.submit')
 )
@@ -552,13 +449,6 @@ const moderatorWalletsTableRows = computed(() =>
       walletLink: getPortfolioURL(wallet)
     }
   })
-)
-
-const notificationEmailsTableRows = computed(() =>
-  notificationEmails.value.map((email: string, index: number) => ({
-    index,
-    email
-  }))
 )
 
 const iscnDataLanguage = computed(() => {
@@ -759,10 +649,6 @@ function addMorePrice () {
 
 function deletePrice (index: number) {
   prices.value.splice(index, 1)
-}
-
-function updateShippingRate (options: any) {
-  shippingRates.value = options
 }
 
 function addModeratorWallet () {
