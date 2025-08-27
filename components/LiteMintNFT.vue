@@ -16,7 +16,7 @@
     >
       <template #header>
         <h3 class="font-bold">
-          {{ $t('nft.mint_by_filling_info') }}
+          {{ $t('nft.mint_by_filling_info', { bookName: iscnData?.contentMetadata?.name } ) }}
         </h3>
       </template>
 

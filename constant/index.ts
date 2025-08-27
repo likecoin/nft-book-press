@@ -73,3 +73,5 @@ export const licenseOptions = [
 ]
 
 export const MAX_DESCRIPTION_LENGTH = 1000
+
+export const ARWEAVE_ENDPOINT = 'https://gateway.irys.xyz'

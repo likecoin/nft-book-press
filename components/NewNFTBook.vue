@@ -16,43 +16,7 @@
     />
 
     <template v-if="bookstoreApiStore.isAuthenticated">
-      <UCard :ui="{ body: { base: 'space-y-4' } }">
-        <template #header>
-          <h2 class="font-bold font-mono">
-            {{ pageTitle }}
-          </h2>
-        </template>
-
-        <UFormGroup :label="$t('nft_book_form.nft_class_id')">
-          <UInput
-            :model-value="classId"
-            disabled
-            class="font-mono"
-          />
-        </UFormGroup>
-        <UFormGroup class="flex items-center">
-          <ToolTips
-            :tool-tip-text="$t('nft_book_form.drm_tooltip')"
-          >
-            <UCheckbox
-              v-model="hideDownload"
-              name="hideDownload"
-              :disabled="true"
-              :label="$t('nft_book_form.drm_label')"
-            />
-          </ToolTips>
-        </UFormGroup>
-        <UFormGroup>
-          <UCheckbox
-            v-model="isAllowCustomPrice"
-            name="isAllowCustomPrice"
-            :label="$t('nft_book_form.accept_tipping')"
-          />
-        </UFormGroup>
-      </UCard>
-
-      <component
-        :is="hasMultiplePrices ? 'ul' : 'div'"
+      <ul
         class="flex flex-col gap-[12px]"
       >
         <UCard
@@ -61,8 +25,7 @@
             base: 'overflow-visible border-none !border-transparent',
           }"
         >
-          <component
-            :is="hasMultiplePrices ? 'li' : 'div'"
+          <li
             v-for="(p, index) in prices"
             :key="p.index"
           >
@@ -74,7 +37,7 @@
                 base: 'overflow-visible border-[4px]'
               }"
             >
-              <template v-if="hasMultiplePrices" #header>
+              <template #header>
                 <h3 class="font-bold font-mono">
                   {{ $t('nft_book_form.edition_number', { number: index + 1 }) }}
                 </h3>
@@ -91,13 +54,32 @@
               <UFormGroup
                 :label="$t('nft_book_form.copies_label')"
               >
-                <UInput
-                  v-model="p.stock"
-                  type="number"
-                  step="1"
-                  :min="0"
-                  :max="maxSupply"
-                />
+                <div class="space-y-3">
+                  <URadio
+                    v-model="p.stockType"
+                    value="unlimited"
+                    name="stockType"
+                    label="不限量"
+                  />
+                  <div class="space-y-2">
+                    <URadio
+                      v-model="p.stockType"
+                      value="limited"
+                      name="stockType"
+                      label="限量"
+                    />
+                    <div v-if="p.stockType === 'limited'" class="pl-6">
+                      <UInput
+                        v-model="p.stock"
+                        type="number"
+                        step="1"
+                        :min="1"
+                        :max="maxSupply"
+                        placeholder="100"
+                      />
+                    </div>
+                  </div>
+                </div>
               </UFormGroup>
               <UFormGroup :label="$t('new_nft_book.product_name')" :ui="{ container: 'space-y-2' }">
                 <template #label>
@@ -151,15 +133,22 @@
                 </div>
 
                 <!-- Manual delivery option -->
-                <div class="space-y-2">
-                  <URadio
-                    v-model="p.deliveryMethod"
-                    value="manual"
-                    :disabled="isEditMode && p.oldIsAutoDeliver"
-                    name="deliveryMethod"
-                    :label="$t('nft_book_form.manual_delivery')"
-                    @click="onClickManualDelivery(p)"
-                  />
+                <div class="flex flex-col items-start space-y-2">
+                  <UTooltip
+                    class="flex items-center gap-2"
+                    :text="$t('nft_book_form.manual_delivery_tooltip')"
+                  >
+                    <URadio
+                      v-model="p.deliveryMethod"
+                      value="manual"
+                      :disabled="isEditMode && p.oldIsAutoDeliver"
+                      name="deliveryMethod"
+                      :label="$t('nft_book_form.manual_delivery')"
+                      @click="onClickManualDelivery(p)"
+                    />
+                    <UIcon name="i-heroicons-question-mark-circle" />
+                  </UTooltip>
+
                   <div v-if="p.deliveryMethod === 'manual'" class="pl-8 space-y-2">
                     <UFormGroup>
                       <template #label>
@@ -183,37 +172,23 @@
                   :label="$t('nft_book_form.pause_selling')"
                 />
               </UFormGroup>
-              <div class="flex flex-col gap-2">
-                <UCheckbox
-                  v-model="p.hasShipping"
-                  name="hasShipping"
-                  :disabled="(isEditMode && !p.hasShipping)"
-                  :label="$t('nft_book_form.includes_shipping')"
-                />
-                <ShippingRatesRateTable
-                  v-if="p.hasShipping"
-                  :is-show-physical-goods-checkbox="false"
-                  :is-show-setting-modal-button="true"
-                  :shipping-info="shippingRates"
-                  @update-shipping-rates="updateShippingRate"
-                />
-              </div>
             </UCard>
 
-            <div class="flex justify-center items-center">
+            <div class="flex justify-center items-center mt-2">
               <UButton
                 v-if="hasMultiplePrices"
                 :label="$t('common.delete')"
-                color="red"
+                color="gray"
+                leading-icon="i-heroicons-trash"
                 @click="deletePrice(index)"
               />
             </div>
-          </component>
+          </li>
         </UCard>
-      </component>
+      </ul>
       <div class="flex justify-center items-center">
         <UButton
-          v-if="props.isNewClassPage"
+          v-if="props.isNewClassPage && prices.length < 2"
           :ui="{ rounded: 'rounded-full' }"
           color="gray"
           icon="i-heroicons-plus-solid"
@@ -231,7 +206,7 @@
       >
         <div class="flex justify-between items-center w-full">
           <h3 class="font-bold font-mono">
-            {{ $t('nft_book_form.advanced_settings') }}
+            {{ $t('nft_book_form.settings') }}
           </h3>
           <UButton
             color="gray"
@@ -250,62 +225,17 @@
         </div>
         <template v-if="shouldShowAdvanceSettings">
           <div class="mt-[24px] flex flex-col gap-[12px]">
-            <!-- Notification Email -->
-            <UCard
-              :ui="{
-                header: { base: 'flex justify-between items-center' },
-                body: { padding: '' },
-              }"
-            >
-              <template #header>
-                <h4 class="text-sm font-bold font-mono">
-                  {{ $t('nft_book_form.notification_email_header') }}
-                </h4>
+            <UFormGroup class="flex items-center">
+              <UTooltip class="flex items-center gap-2" :text="$t('nft_book_form.accept_tipping_tooltip')">
+                <UCheckbox
+                  v-model="isAllowCustomPrice"
+                  name="isAllowCustomPrice"
+                  :label="$t('nft_book_form.accept_tipping')"
+                />
 
-                <div class="flex gap-2">
-                  <UInput
-                    v-model="notificationEmailInput"
-                    placeholder="abc@example.com"
-                  />
-
-                  <UButton
-                    :label="$t('common.add')"
-                    :variant="notificationEmailInput ? 'outline' : 'solid'"
-                    :color="notificationEmailInput ? 'primary' : 'gray'"
-                    :disabled="!notificationEmailInput"
-                    @click="addNotificationEmail"
-                  />
-                </div>
-              </template>
-
-              <UTable
-                :columns="[
-                  { key: 'email', label: $t('common.email'), sortable: true },
-                  { key: 'action' },
-                ]"
-                :rows="notificationEmailsTableRows"
-              >
-                <template #email-data="{ row }">
-                  <UButton
-                    :label="row.email"
-                    :to="`mailto:${row.email}`"
-                    variant="link"
-                    :padded="false"
-                  />
-                </template>
-
-                <template #action-data="{ row }">
-                  <div class="flex justify-end items-center">
-                    <UButton
-                      icon="i-heroicons-x-mark"
-                      variant="soft"
-                      color="red"
-                      @click="() => notificationEmails.splice(row.index, 1)"
-                    />
-                  </div>
-                </template>
-              </UTable>
-            </UCard>
+                <UIcon name="i-heroicons-question-mark-circle" />
+              </UTooltip>
+            </UFormGroup>
 
             <!-- Stripe connect -->
             <StripeConnectCard
@@ -418,8 +348,7 @@ import {
   DEFAULT_PRICE,
   MINIMAL_PRICE,
   USD_PRICING_OPTIONS,
-  DEFAULT_MAX_SUPPLY,
-  DEFAULT_STOCK
+  DEFAULT_MAX_SUPPLY
 } from '~/constant'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
@@ -444,6 +373,7 @@ const nftStore = useNftStore()
 const { getNFTClassConfig, getBalanceOf } = useNFTContractReader()
 
 const UPLOAD_FILESIZE_MAX = 1 * 1024 * 1024
+const DEFAULT_LIMITED_STOCK = 100
 
 const emit = defineEmits(['submit'])
 const editionIndex = computed(() => {
@@ -470,7 +400,8 @@ const prices = ref<any[]>([
     price: DEFAULT_PRICE,
     deliveryMethod: 'auto',
     autoMemo: 'Thank you for your support. It means a lot to me.',
-    stock: DEFAULT_STOCK,
+    stock: DEFAULT_LIMITED_STOCK,
+    stockType: 'limited',
     name: $t('prices.standard_edition'),
 
     nameEn: 'Standard Edition',
@@ -505,9 +436,6 @@ const maxSupply = computed(() => {
   }
   return classMaxSupply.value
 })
-const availableManualStock = computed(() => {
-  return Math.max(ownedCount.value - otherExistingManualStock.value, 0)
-})
 const otherExistingStock = ref(0)
 const otherExistingManualStock = ref(0)
 const classMaxSupply = ref(DEFAULT_MAX_SUPPLY)
@@ -531,13 +459,10 @@ const toolbarOptions = ref<ToolbarNames[]>([
 const isEditMode = computed(() =>
   props.isEditMode
 )
-const pageTitle = computed(() =>
-  isEditMode.value ? $t('nft_book_form.edit_title') : $t('nft_book_form.page_title')
-)
 const submitButtonText = computed(() =>
   isEditMode.value ? $t('common.save') : $t('common.submit')
 )
-const shouldShowAdvanceSettings = ref<boolean>(false)
+const shouldShowAdvanceSettings = ref<boolean>(true)
 
 const moderatorWalletsTableColumns = computed(() => [
   { key: 'wallet', label: $t('common.wallet'), sortable: true },
@@ -552,13 +477,6 @@ const moderatorWalletsTableRows = computed(() =>
       walletLink: getPortfolioURL(wallet)
     }
   })
-)
-
-const notificationEmailsTableRows = computed(() =>
-  notificationEmails.value.map((email: string, index: number) => ({
-    index,
-    email
-  }))
 )
 
 const iscnDataLanguage = computed(() => {
@@ -633,6 +551,7 @@ onMounted(async () => {
               deliveryMethod: currentEdition.isAutoDeliver ? 'auto' : 'manual',
               autoMemo: currentEdition.autoMemo,
               stock: currentEdition.stock,
+              stockType: currentEdition.stockType ? currentEdition.stockType : (currentEdition.isAutoDeliver ? 'limited' : 'unlimited'),
               name: classResData.inLanguage === 'en'
                 ? currentEdition.name.en
                 : currentEdition.name.zh,
@@ -732,7 +651,8 @@ function onImgUpload (
 }
 
 function onClickManualDelivery (price: any) {
-  price.stock = Math.min(availableManualStock.value, price.stock)
+  price.stock = DEFAULT_LIMITED_STOCK
+  price.stockType = 'limited'
 }
 
 function addMorePrice () {
@@ -742,7 +662,8 @@ function addMorePrice () {
     price: DEFAULT_PRICE,
     deliveryMethod: 'auto',
     autoMemo: '',
-    stock: 1,
+    stock: 100,
+    stockType: 'limited',
     name: iscnDataLanguage.value === 'en'
       ? `Tier ${nextPriceIndex.value}`
       : `級別 ${nextPriceIndex.value}`,
@@ -761,24 +682,12 @@ function deletePrice (index: number) {
   prices.value.splice(index, 1)
 }
 
-function updateShippingRate (options: any) {
-  shippingRates.value = options
-}
-
 function addModeratorWallet () {
   if (!moderatorWalletInput.value) {
     return
   }
   moderatorWallets.value.push(moderatorWalletInput.value)
   moderatorWalletInput.value = ''
-}
-
-function addNotificationEmail () {
-  if (!notificationEmailInput.value) {
-    return
-  }
-  notificationEmails.value.push(notificationEmailInput.value)
-  notificationEmailInput.value = ''
 }
 
 function handleSaveStripeConnectWallet (wallet: any) {
@@ -804,7 +713,7 @@ function mapPrices (prices: any) {
         },
     priceInDecimal: Math.round(Number(p.price) * 100),
     price: Number(p.price),
-    stock: Number(p.stock),
+    stock: p.stockType === 'unlimited' ? 0 : Number(p.stock),
     isAutoDeliver: !p.isPhysicalOnly && p.deliveryMethod === 'auto',
     isAllowCustomPrice: p.isAllowCustomPrice,
     isUnlisted: p.isUnlisted ?? false,
