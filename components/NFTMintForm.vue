@@ -20,11 +20,22 @@
       required
     >
       <UInput v-model="state.imageUrl" :placeholder="$t('nft_mint_form.ipfs_placeholder')" />
+
+      <div v-if="state.imageUrl && imagePreviewUrl" class="flex justify-center mt-3">
+        <img
+          :src="imagePreviewUrl"
+          alt="Cover preview"
+          class="max-w-[200px] max-h-[200px] object-contain rounded-lg border border-gray-200"
+          @error="onImageError"
+        >
+      </div>
     </UFormGroup>
   </UForm>
 </template>
 
 <script setup lang="ts">
+import { ARWEAVE_ENDPOINT } from '~/constant'
+
 const { t: $t } = useI18n()
 
 interface NFTMintFormState {
@@ -48,5 +59,30 @@ const state = computed({
   get: () => props.modelValue,
   set: value => emit('update:modelValue', value)
 })
-const shouldShowAdvanceSettings = ref(false)
+
+const imagePreviewUrl = computed(() => {
+  if (!state.value.imageUrl) {
+    return null
+  }
+
+  const url = state.value.imageUrl
+  if (url.startsWith('ar://')) {
+    return `${ARWEAVE_ENDPOINT}/${url.replace('ar://', '')}`
+  }
+
+  if (url.startsWith('ipfs://')) {
+    return `https://ipfs.io/ipfs/${url.replace('ipfs://', '')}`
+  }
+
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+
+  return null
+})
+
+const onImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  img.style.display = 'none'
+}
 </script>
