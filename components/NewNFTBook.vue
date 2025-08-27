@@ -25,8 +25,7 @@
             base: 'overflow-visible border-none !border-transparent',
           }"
         >
-          <component
-            :is="hasMultiplePrices ? 'li' : 'div'"
+          <li
             v-for="(p, index) in prices"
             :key="p.index"
           >
@@ -38,7 +37,7 @@
                 base: 'overflow-visible border-[4px]'
               }"
             >
-              <template v-if="hasMultiplePrices" #header>
+              <template #header>
                 <h3 class="font-bold font-mono">
                   {{ $t('nft_book_form.edition_number', { number: index + 1 }) }}
                 </h3>
@@ -149,20 +148,21 @@
               </UFormGroup>
             </UCard>
 
-            <div class="flex justify-center items-center">
+            <div class="flex justify-center items-center mt-2">
               <UButton
                 v-if="hasMultiplePrices"
                 :label="$t('common.delete')"
-                color="red"
+                color="gray"
+                leading-icon="i-heroicons-trash"
                 @click="deletePrice(index)"
               />
             </div>
-          </component>
+          </li>
         </UCard>
-      </component>
+      </ul>
       <div class="flex justify-center items-center">
         <UButton
-          v-if="props.isNewClassPage"
+          v-if="props.isNewClassPage && prices.length < 2"
           :ui="{ rounded: 'rounded-full' }"
           color="gray"
           icon="i-heroicons-plus-solid"
@@ -180,7 +180,7 @@
       >
         <div class="flex justify-between items-center w-full">
           <h3 class="font-bold font-mono">
-            {{ $t('nft_book_form.advanced_settings') }}
+            {{ $t('nft_book_form.settings') }}
           </h3>
           <UButton
             color="gray"
@@ -434,7 +434,7 @@ const isEditMode = computed(() =>
 const submitButtonText = computed(() =>
   isEditMode.value ? $t('common.save') : $t('common.submit')
 )
-const shouldShowAdvanceSettings = ref<boolean>(false)
+const shouldShowAdvanceSettings = ref<boolean>(true)
 
 const moderatorWalletsTableColumns = computed(() => [
   { key: 'wallet', label: $t('common.wallet'), sortable: true },
