@@ -59,10 +59,9 @@
           <UButton
             v-if="shouldShowActionButton"
             :disabled="shouldDisableAction"
+            :label="currentActionText"
             @click="nextStep"
-          >
-            {{ currentActionText }}
-          </UButton>
+          />
         </div>
       </div>
     </div>
@@ -102,13 +101,13 @@ const isMintLoading = ref(false)
 const currentActionText = computed(() => {
   switch (step.value) {
     case 0:
-      return 'Start Upload'
+      return $t('publish_button.upload_files')
     case 1:
-      return 'Register ISCN'
+      return $t('pages.next')
     case 2:
-      return 'Mint NFT'
+      return $t('pages.next')
     default:
-      return 'Next'
+      return $t('publish_button.publish_now')
   }
 })
 
