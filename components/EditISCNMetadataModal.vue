@@ -56,7 +56,7 @@ import { formatISCNTxPayload, validateISCNForm } from '~/utils/iscn'
 import { useWalletStore } from '~/stores/wallet'
 import { useISCN } from '~/composables/useISCN'
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
-import { DEFAULT_MAX_SUPPLY } from '~/constant'
+
 // eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{
   (e: 'iscnUpdated', payload: { classId: string; metadata: Record<string, any> }): void
@@ -69,6 +69,7 @@ const { wallet, signer } = storeToRefs(walletStore)
 const { initIfNecessary } = walletStore
 const { writeContractAsync } = useWriteContract()
 const { checkAndGrantUpdater, waitForTransactionReceipt } = useNFTContractWriter()
+const { getNFTClassConfig } = useNFTContractReader()
 const { refreshBookMetadata } = useBookstoreApiStore()
 
 const props = defineProps<{
@@ -235,6 +236,7 @@ async function handleSave () {
       nft_meta_collection_description: 'NFT Book by Liker Land',
       recordTimestamp: new Date().toISOString()
     }
+    const bookConfig = await getNFTClassConfig(props.classId)
     await checkAndGrantUpdater({
       classId: props.classId,
       wallet: wallet.value
@@ -245,9 +247,9 @@ async function handleSave () {
       functionName: 'update',
       args: [{
         name: metadata.name,
-        symbol: 'BOOK',
+        symbol: bookConfig.symbol,
         metadata: JSON.stringify(metadata),
-        max_supply: DEFAULT_MAX_SUPPLY
+        max_supply: Number(bookConfig.max_supply)
       }]
     })
     const receipt = await waitForTransactionReceipt({ hash: txHash })

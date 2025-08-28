@@ -25,7 +25,7 @@ export const useNFTContractWriter = () => {
       const txHash = await writeContractAsync({
         abi: LIKE_NFT_CLASS_ABI,
         address: classId as `0x${string}`,
-        functionName: 'grantRole',
+        functionName: 'ownerGrantRole',
         args: [roleData, wallet]
       })
       // eslint-disable-next-line no-console

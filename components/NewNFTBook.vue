@@ -596,7 +596,7 @@ onMounted(async () => {
       getNFTClassConfig(classId.value as string),
       wallet.value ? getBalanceOf(classId.value as string, wallet.value) : 0
     ])
-    classMaxSupply.value = Number((bookConfig as any)?.max_supply) || DEFAULT_MAX_SUPPLY
+    classMaxSupply.value = Number(bookConfig.max_supply) || DEFAULT_MAX_SUPPLY
     ownedCount.value = Number(balance) || 0
 
     if (isEditMode.value || editionIndex.value !== undefined) {

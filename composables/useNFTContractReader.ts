@@ -101,12 +101,12 @@ export const useNFTContractReader = () => {
     })
   }
 
-  const getNFTClassConfig = async (classId: string) => {
+  const getNFTClassConfig = async (classId: string): Promise<{ name: string; symbol: string; metadata: string; max_supply: number }> => {
     return await readContract(config, {
       abi: LIKE_NFT_CLASS_ABI,
       address: classId as `0x${string}`,
       functionName: 'getBookConfig'
-    })
+    }) as any
   }
 
   return {
