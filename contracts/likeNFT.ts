@@ -897,6 +897,25 @@ export const LIKE_NFT_CLASS_ABI: Abi = [
     anonymous: false,
     inputs: [
       {
+        indexed: false,
+        internalType: 'uint256',
+        name: '_fromTokenId',
+        type: 'uint256'
+      },
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: '_toTokenId',
+        type: 'uint256'
+      }
+    ],
+    name: 'BatchMetadataUpdate',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: true,
         internalType: 'address',
         name: 'beacon',
@@ -923,6 +942,19 @@ export const LIKE_NFT_CLASS_ABI: Abi = [
       }
     ],
     name: 'Initialized',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: '_tokenId',
+        type: 'uint256'
+      }
+    ],
+    name: 'MetadataUpdate',
     type: 'event'
   },
   {
@@ -1528,6 +1560,24 @@ export const LIKE_NFT_CLASS_ABI: Abi = [
   {
     inputs: [
       {
+        internalType: 'bytes32',
+        name: 'role',
+        type: 'bytes32'
+      },
+      {
+        internalType: 'address',
+        name: 'account',
+        type: 'address'
+      }
+    ],
+    name: 'ownerGrantRole',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
         internalType: 'uint256',
         name: 'tokenId',
         type: 'uint256'
@@ -1542,6 +1592,24 @@ export const LIKE_NFT_CLASS_ABI: Abi = [
       }
     ],
     stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'bytes32',
+        name: 'role',
+        type: 'bytes32'
+      },
+      {
+        internalType: 'address',
+        name: 'account',
+        type: 'address'
+      }
+    ],
+    name: 'ownerRevokeRole',
+    outputs: [],
+    stateMutability: 'nonpayable',
     type: 'function'
   },
   {
@@ -1928,6 +1996,24 @@ export const LIKE_NFT_CLASS_ABI: Abi = [
       }
     ],
     name: 'update',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256'
+      },
+      {
+        internalType: 'string',
+        name: 'metadata',
+        type: 'string'
+      }
+    ],
+    name: 'updateTokenMetadata',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function'
