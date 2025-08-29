@@ -370,7 +370,7 @@ const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
 const { token } = storeToRefs(bookstoreApiStore)
 const nftStore = useNftStore()
 
-const { getNFTClassConfig, getBalanceOf } = useNFTContractReader()
+const { getBalanceOf } = useNFTContractReader()
 
 const UPLOAD_FILESIZE_MAX = 1 * 1024 * 1024
 const DEFAULT_LIMITED_STOCK = 100
@@ -430,15 +430,9 @@ const iscnData = ref<any>(null)
 
 const signatureImage = ref<File | null>(null)
 
-const maxSupply = computed(() => {
-  if (isEditMode.value || editionIndex.value !== undefined) {
-    return classMaxSupply.value - otherExistingStock.value
-  }
-  return classMaxSupply.value
-})
+const maxSupply = ref(Number(DEFAULT_MAX_SUPPLY))
 const otherExistingStock = ref(0)
 const otherExistingManualStock = ref(0)
-const classMaxSupply = ref(DEFAULT_MAX_SUPPLY)
 const ownedCount = ref(0)
 
 const toolbarOptions = ref<ToolbarNames[]>([
@@ -510,11 +504,7 @@ useSeoMeta({
 onMounted(async () => {
   try {
     isLoading.value = true
-    const [bookConfig, balance] = await Promise.all([
-      getNFTClassConfig(classId.value as string),
-      wallet.value ? getBalanceOf(classId.value as string, wallet.value) : 0
-    ])
-    classMaxSupply.value = Number(bookConfig.max_supply) || DEFAULT_MAX_SUPPLY
+    const balance = wallet.value ? (await getBalanceOf(classId.value as string, wallet.value)) : 0
     ownedCount.value = Number(balance) || 0
 
     if (isEditMode.value || editionIndex.value !== undefined) {

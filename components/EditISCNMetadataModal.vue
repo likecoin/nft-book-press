@@ -56,6 +56,7 @@ import { formatISCNTxPayload, validateISCNForm } from '~/utils/iscn'
 import { useWalletStore } from '~/stores/wallet'
 import { useISCN } from '~/composables/useISCN'
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
+import { DEFAULT_MAX_SUPPLY } from '~/constant'
 
 // eslint-disable-next-line func-call-spacing
 const emit = defineEmits<{
@@ -249,7 +250,7 @@ async function handleSave () {
         name: metadata.name,
         symbol: bookConfig.symbol,
         metadata: JSON.stringify(metadata),
-        max_supply: Number(bookConfig.max_supply)
+        max_supply: DEFAULT_MAX_SUPPLY
       }]
     })
     const receipt = await waitForTransactionReceipt({ hash: txHash })

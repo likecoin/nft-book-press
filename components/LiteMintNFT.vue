@@ -59,7 +59,7 @@ import { useWriteContract } from '@wagmi/vue'
 import { storeToRefs } from 'pinia'
 
 import { useWalletStore } from '~/stores/wallet'
-import { DEFAULT_MAX_SUPPLY, NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
+import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
 import { useToastComposable } from '~/composables/useToast'
 
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
@@ -93,8 +93,7 @@ const classId = ref<string>(route.params.classId as string || '')
 const formState = reactive({
   mintCount: NFT_DEFAULT_MINT_AMOUNT,
   imageUrl: '',
-  externalUrl: '',
-  maxSupply: DEFAULT_MAX_SUPPLY
+  externalUrl: ''
 })
 
 const emit = defineEmits(['submit', 'formValidChange'])
