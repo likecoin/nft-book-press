@@ -41,24 +41,6 @@
       <UFormGroup :label="$t('form_labels.external_url')">
         <UInput v-model="state.externalUrl" placeholder="https://" />
       </UFormGroup>
-
-      <UFormGroup v-if="showMaxSupply" :label="$t('form_labels.max_supply')">
-        <template v-if="state.maxSupply && state.maxSupply < state.mintCount" #help>
-          <UAlert
-            class="mt-1"
-            icon="i-heroicons-exclamation-triangle"
-            :title="$t('nft_mint_form.more_than_mint_count')"
-            color="red"
-            variant="subtle"
-          />
-        </template>
-        <UInput
-          v-model="state.maxSupply"
-          type="number"
-          :min="state.mintCount"
-          :placeholder="`> ${state.mintCount}`"
-        />
-      </UFormGroup>
     </template>
   </UForm>
 </template>
@@ -70,7 +52,6 @@ interface NFTMintFormState {
   mintCount: number
   imageUrl: string
   externalUrl: string
-  maxSupply?: number
 }
 
 const props = defineProps<{

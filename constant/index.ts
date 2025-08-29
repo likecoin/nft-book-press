@@ -12,9 +12,9 @@ export const USD_PRICING_OPTIONS = [0, ...Array.from(
   value
 }))
 
-export const DEFAULT_MAX_SUPPLY = 1000
+export const DEFAULT_MAX_SUPPLY = 18446744073709551615n
 
-export const DEFAULT_STOCK = DEFAULT_MAX_SUPPLY / 10
+export const DEFAULT_STOCK = 100
 
 export const NFT_DEFAULT_MINT_AMOUNT = 1
 
