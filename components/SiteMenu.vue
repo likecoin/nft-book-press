@@ -39,7 +39,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
-import { PUBLISHING_NOTICE_URL_ZH } from '~/constant'
 const { t: $t } = useI18n()
 
 const localeRoute = useLocaleRoute()
@@ -127,15 +126,15 @@ const items = computed(() => [
     label: $t('menu.help'),
     links: [
       {
-        label: $t('menu.publisher_guide_zh'),
+        label: $t('menu.publisher_guide'),
         icon: 'i-heroicons-arrow-top-right-on-square-20-solid',
         to: 'https://docs.3ook.com/zh-TW/collections/14176162-出版',
         target: '_blank'
       },
       {
-        label: $t('menu.listing_disclaimer_zh'),
+        label: $t('menu.listing_disclaimer'),
         icon: 'i-heroicons-shield-exclamation',
-        to: PUBLISHING_NOTICE_URL_ZH,
+        to: $t('menu.listing_disclaimer_url'),
         target: '_blank'
       }
     ]
