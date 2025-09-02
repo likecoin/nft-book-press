@@ -25,8 +25,6 @@
 </template>
 
 <script setup lang="ts">
-const { t: $t } = useI18n()
-
 interface NFTMintFormState {
   mintCount: number
   imageUrl: string
@@ -47,5 +45,4 @@ const state = computed({
   get: () => props.modelValue,
   set: value => emit('update:modelValue', value)
 })
-const shouldShowAdvanceSettings = ref(false)
 </script>

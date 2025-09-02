@@ -282,7 +282,7 @@
   "new_nft_book.product_name": "Product Name",
   "new_nft_book.standard_edition": "Standard Edition",
   "new_nft_book.wallet_placeholder": "0x...",
-  "nft.mint_by_filling_info": "Mint First Edition of {bookName}",
+  "nft.mint_by_filling_info": "'{bookName}' #0",
   "nft.mint_error": "Mint NFT error",
   "nft.minting": "Minting New Book",
   "nft_book_form.accept_tipping": "Accept tipping",

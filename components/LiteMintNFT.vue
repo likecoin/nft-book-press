@@ -20,9 +20,13 @@
         </h3>
       </template>
 
-      <NFTMintForm
-        v-model="formState"
-      />
+      <div v-if="imagePreviewUrl" class="flex justify-center">
+        <img
+          :src="imagePreviewUrl"
+          alt="Cover preview"
+          class="max-w-[300px] object-contain rounded-lg border border-gray-200"
+        >
+      </div>
 
       <div v-if="isLoading" class="w-full">
         <div class="space-y-3">
@@ -57,9 +61,9 @@
 <script setup lang="ts">
 import { useWriteContract } from '@wagmi/vue'
 import { storeToRefs } from 'pinia'
+import { ARWEAVE_ENDPOINT, NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
 
 import { useWalletStore } from '~/stores/wallet'
-import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
 import { useToastComposable } from '~/composables/useToast'
 
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
@@ -111,6 +115,27 @@ const formError = computed(() => {
 })
 
 const isFormValid = computed(() => !formError.value?.length)
+
+const imagePreviewUrl = computed(() => {
+  if (!formState.imageUrl) {
+    return null
+  }
+
+  const url = formState.imageUrl
+  if (url.startsWith('ar://')) {
+    return `${ARWEAVE_ENDPOINT}/${url.replace('ar://', '')}`
+  }
+
+  if (url.startsWith('ipfs://')) {
+    return `https://ipfs.io/ipfs/${url.replace('ipfs://', '')}`
+  }
+
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+
+  return null
+})
 
 watch(isFormValid, (val: boolean) => {
   emit('formValidChange', val)

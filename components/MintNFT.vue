@@ -14,7 +14,6 @@
       ref="liteMintNFTRef"
       :iscn-data="iscnData"
       :should-show-submit="false"
-      @form-valid-change="(valid) => (isFormValid = valid)"
       @submit="handleFinishMintNFT"
     />
   </div>
@@ -37,19 +36,13 @@ const iscnData = ref<any>(null)
 const classId = ref('')
 const liteMintNFTRef = ref<any>(null)
 
-const isFormValid = ref(false)
-
-const emit = defineEmits(['submit', 'formValidChange', 'loadingChange'])
+const emit = defineEmits(['submit', 'loadingChange'])
 
 watch(isLoading, (val: boolean) => {
   emit('loadingChange', val)
   if (val) {
     error.value = ''
   }
-}, { immediate: true })
-
-watch(isFormValid, (val: boolean) => {
-  emit('formValidChange', val)
 }, { immediate: true })
 
 const { t: $t } = useI18n()

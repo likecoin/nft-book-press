@@ -40,7 +40,6 @@
             ref="mintNFT"
             :iscn-id="iscnId"
             @loading-change="(isLoading) => (isMintLoading = isLoading)"
-            @form-valid-change="(valid) => (isMintFormValid = valid)"
             @submit="handleMintNFTSubmit"
           />
         </div>
@@ -95,7 +94,6 @@ const classId = ref(route.query.class_id?.toString() || '')
 const fileRecords = ref([])
 const uploadStatus = ref('')
 const isISCNFormValid = ref(false)
-const isMintFormValid = ref(false)
 const isMintLoading = ref(false)
 
 const currentActionText = computed(() => {
@@ -194,10 +192,6 @@ const nextStep = async () => {
       return
     }
     if (step.value === 2) {
-      if (!isMintFormValid.value) {
-        showErrorToast('Please fill in all required fields')
-        return
-      }
       await mintNFT.value.startNFTMintFlow()
       return
     }
