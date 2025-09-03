@@ -38,12 +38,20 @@
               }"
             >
               <template #header>
-                <h3 class="font-bold font-mono">
-                  {{ $t('nft_book_form.edition_number', { number: index + 1 }) }}
-                </h3>
+                <div class="flex items-center justify-between">
+                  <h3 class="font-bold font-mono">
+                    {{ `${$t('nft_book_form.edition_number', { number: index + 1 })} - ${p.name || $t('nft_book_form.product_name_placeholder')}` }}
+                  </h3>
+                  <div class="flex items-center gap-2">
+                    <UToggle v-model="p.isListed" />
+                    <p class="text-sm">
+                      {{ p.isListed ? $t('nft_book_form.selling') : $t('nft_book_form.pause_selling') }}
+                    </p>
+                  </div>
+                </div>
               </template>
               <UFormGroup
-                :label="$t('nft_book_form.unit_price_label', { minPrice: MINIMAL_PRICE })"
+                :label="$t('nft_book_form.unit_price_label')"
               >
                 <USelectMenu
                   v-model="p.price"
@@ -235,7 +243,6 @@
           @click="onSubmit"
         />
       </div>
-      </ul>
     </template>
 
     <UModal
@@ -268,7 +275,6 @@ import type { FormError } from '#ui/types'
 
 import {
   DEFAULT_PRICE,
-  MINIMAL_PRICE,
   USD_PRICING_OPTIONS,
   DEFAULT_MAX_SUPPLY
 } from '~/constant'
@@ -351,9 +357,7 @@ const iscnData = ref<any>(null)
 const signatureImage = ref<File | null>(null)
 
 const maxSupply = ref(Number(DEFAULT_MAX_SUPPLY))
-const availableManualStock = computed(() => {
-  return Math.max(ownedCount.value - otherExistingManualStock.value, 0)
-})
+
 const otherExistingStock = ref(0)
 const otherExistingManualStock = ref(0)
 const ownedCount = ref(0)
@@ -585,14 +589,6 @@ function addModeratorWallet () {
   moderatorWalletInput.value = ''
 }
 
-function addNotificationEmail () {
-  if (!notificationEmailInput.value) {
-    return
-  }
-  notificationEmails.value.push(notificationEmailInput.value)
-  notificationEmailInput.value = ''
-}
-
 function handleSaveStripeConnectWallet (wallet: any) {
   stripeConnectWallet.value = wallet
   shouldDisableStripeConnectSetting.value = true
@@ -709,13 +705,6 @@ async function submitNewClass () {
     }
 
     const p = mapPrices(prices.value)
-    if (
-      p.find((price: any) => price.price !== 0 && price.price < MINIMAL_PRICE)
-    ) {
-      throw new Error(
-        $t('errors.price_validation', { minPrice: MINIMAL_PRICE })
-      )
-    }
 
     const connectedWallets =
       isStripeConnectChecked.value && stripeConnectWallet.value
