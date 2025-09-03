@@ -62,15 +62,86 @@
               <UFormGroup
                 :label="$t('nft_book_form.copies_label')"
               >
-                <UInput
-                  v-model="p.stock"
-                  type="number"
-                  step="1"
-                  :min="0"
-                  :max="maxSupply"
-                />
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <!-- Auto Delivery Block -->
+                  <div
+                    class="border-2 rounded-lg p-4 cursor-pointer transition-all duration-200"
+                    :class="p.deliveryMethod === 'auto' ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'"
+                    @click="p.deliveryMethod = 'auto'"
+                  >
+                    <div class="flex items-center gap-2 mb-3">
+                      <URadio
+                        v-model="p.deliveryMethod"
+                        value="auto"
+                        name="deliveryMethod"
+                        :label="$t('nft_book_form.unlimited')"
+                      />
+                    </div>
+
+                    <div class="space-y-3">
+                      <UFormGroup
+                        :label="$t('nft_book_form.auto_delivery_memo')"
+                      >
+                        <UInput
+                          v-model="p.autoMemo"
+                          :placeholder="$t('nft_book_form.memo_placeholder')"
+                        />
+                      </UFormGroup>
+                    </div>
+                  </div>
+
+                  <!-- Manual Delivery Block -->
+                  <div
+                    class="border-2 rounded-lg p-4 cursor-pointer transition-all duration-200"
+                    :class="p.deliveryMethod === 'manual' ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'"
+                    @click="p.deliveryMethod = 'manual'"
+                  >
+                    <div class="flex items-center gap-2 mb-3">
+                      <URadio
+                        v-model="p.deliveryMethod"
+                        value="manual"
+                        name="deliveryMethod"
+                        :label="$t('nft_book_form.limited')"
+                      />
+                      <UTooltip
+                        :text="$t('nft_book_form.manual_delivery_tooltip')"
+                      >
+                        <UIcon name="i-heroicons-question-mark-circle" />
+                      </UTooltip>
+                    </div>
+
+                    <div class="space-y-3">
+                      <UFormGroup :label="$t('nft_book_form.stock')">
+                        <UInput
+                          v-model="p.stock"
+                          type="number"
+                          step="1"
+                          :min="1"
+                          :max="maxSupply"
+                          placeholder="100"
+                        />
+                      </UFormGroup>
+                      <UFormGroup :ui="{ label: {base:'w-full flex justify-between items-center'} }">
+                        <template #label>
+                          <p class="block">
+                            {{ $t('nft_book_form.autograph_image') }}
+                          </p>
+                          <span class="text-gray-500 text-[12px] block">
+                            {{ $t('nft_book_form.image_requirements') }}
+                          </span>
+                        </template>
+                        <UInput
+                          type="file"
+                          accept="image/png"
+                          @change="(e) => onImgUpload(e, 'signatureImage')"
+                        />
+                      </UFormGroup>
+                    </div>
+                  </div>
+                </div>
               </UFormGroup>
-              <UFormGroup :label="$t('new_nft_book.product_name')" :ui="{ container: 'space-y-2' }">
+
+              <UFormGroup :ui="{ container: 'space-y-2' }">
                 <template #label>
                   {{ $t('nft_book_form.product_name') }}
                   <ToolTips :image-style="{ width: '250px' }">
@@ -97,61 +168,6 @@
                   :toolbars="toolbarOptions"
                   :sanitize="sanitizeHtml"
                   :style="{ height: '200px', width: '100%', marginTop: '0px' }"
-                />
-              </UFormGroup>
-
-              <div class="flex flex-col gap-2">
-                <!-- Auto delivery option -->
-                <div class="space-y-2">
-                  <URadio
-                    v-model="p.deliveryMethod"
-                    value="auto"
-                    :disabled="isEditMode && p.oldIsAutoDeliver"
-                    name="deliveryMethod"
-                    :label="$t('nft_book_form.auto_delivery')"
-                  />
-
-                  <div v-if="p.deliveryMethod === 'auto'" class="pl-8 space-y-2">
-                    <UFormGroup :label="$t('nft_book_form.delivery_memo')">
-                      <UInput
-                        v-model="p.autoMemo"
-                        :placeholder="$t('nft_book_form.memo_placeholder')"
-                      />
-                    </UFormGroup>
-                  </div>
-                </div>
-
-                <!-- Manual delivery option -->
-                <div class="space-y-2">
-                  <URadio
-                    v-model="p.deliveryMethod"
-                    value="manual"
-                    :disabled="isEditMode && p.oldIsAutoDeliver"
-                    name="deliveryMethod"
-                    :label="$t('nft_book_form.manual_delivery')"
-                    @click="onClickManualDelivery(p)"
-                  />
-                  <div v-if="p.deliveryMethod === 'manual'" class="pl-8 space-y-2">
-                    <UFormGroup>
-                      <template #label>
-                        <p>{{ $t('nft_book_form.autograph_image') }}</p>
-                        <span class="text-gray-500 text-[12px]">{{ $t('nft_book_form.image_requirements') }}</span>
-                      </template>
-                      <UInput
-                        type="file"
-                        accept="image/png"
-                        @change="(e) => onImgUpload(e, 'signatureImage')"
-                      />
-                    </UFormGroup>
-                  </div>
-                </div>
-              </div>
-
-              <UFormGroup>
-                <UCheckbox
-                  v-model="p.isUnlisted"
-                  name="isUnlisted"
-                  :label="$t('nft_book_form.pause_selling')"
                 />
               </UFormGroup>
             </UCard>
@@ -282,7 +298,6 @@ import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
 import { useNftStore } from '~/stores/nft'
-import { getPortfolioURL } from '~/utils'
 import { escapeHtml, sanitizeHtml } from '~/utils/newClass'
 import { getApiEndpoints } from '~/constant/api'
 const { t: $t } = useI18n()
@@ -326,8 +341,8 @@ const prices = ref<any[]>([
   {
     price: DEFAULT_PRICE,
     deliveryMethod: 'auto',
-    autoMemo: 'Thank you for your support. It means a lot to me.',
-    stock: DEFAULT_STOCK,
+    autoMemo: '',
+    stock: 100,
     name: $t('prices.standard_edition'),
 
     nameEn: 'Standard Edition',
@@ -337,7 +352,7 @@ const prices = ref<any[]>([
     hasShipping: false,
     isPhysicalOnly: false,
     isAllowCustomPrice: isAllowCustomPrice.value,
-    isUnlisted: false
+    isListed: true
   }
 ])
 const shippingRates = ref<any[]>([])
@@ -464,7 +479,7 @@ onMounted(async () => {
               hasShipping: currentEdition.hasShipping,
               isPhysicalOnly: currentEdition.isPhysicalOnly,
               isAllowCustomPrice: currentEdition.isAllowCustomPrice,
-              isUnlisted: currentEdition.isUnlisted,
+              isListed: !currentEdition.isUnlisted,
               oldIsAutoDeliver: currentEdition.isAutoDeliver,
               oldStock: currentEdition.stock
             }]
@@ -551,10 +566,6 @@ function onImgUpload (
   }
 }
 
-function onClickManualDelivery (price: any) {
-  price.stock = Math.min(availableManualStock.value, price.stock)
-}
-
 function addMorePrice () {
   nextPriceIndex.value += 1
   prices.value.push({
@@ -562,31 +573,23 @@ function addMorePrice () {
     price: DEFAULT_PRICE,
     deliveryMethod: 'auto',
     autoMemo: '',
-    stock: 1,
+    stock: 100,
     name: iscnDataLanguage.value === 'en'
       ? `Tier ${nextPriceIndex.value}`
-      : `級別 ${nextPriceIndex.value}`,
+      : '增訂版',
     nameEn: `Tier ${nextPriceIndex.value}`,
-    nameZh: `級別 ${nextPriceIndex.value}`,
+    nameZh: '增訂版',
     descriptionEn: '',
     descriptionZh: '',
     hasShipping: false,
     isPhysicalOnly: false,
     isAllowCustomPrice: true,
-    isUnlisted: false
+    isListed: true
   })
 }
 
 function deletePrice (index: number) {
   prices.value.splice(index, 1)
-}
-
-function addModeratorWallet () {
-  if (!moderatorWalletInput.value) {
-    return
-  }
-  moderatorWallets.value.push(moderatorWalletInput.value)
-  moderatorWalletInput.value = ''
 }
 
 function handleSaveStripeConnectWallet (wallet: any) {
@@ -612,10 +615,10 @@ function mapPrices (prices: any) {
         },
     priceInDecimal: Math.round(Number(p.price) * 100),
     price: Number(p.price),
-    stock: Number(p.stock),
+    stock: p.deliveryMethod === 'auto' ? 0 : Number(p.stock),
     isAutoDeliver: !p.isPhysicalOnly && p.deliveryMethod === 'auto',
     isAllowCustomPrice: p.isAllowCustomPrice,
-    isUnlisted: p.isUnlisted ?? false,
+    isUnlisted: !p.isListed,
     autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
     hasShipping: p.hasShipping || false,
     isPhysicalOnly: p.isPhysicalOnly || false

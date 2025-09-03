@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import { useWriteContract } from '@wagmi/vue'
 import { storeToRefs } from 'pinia'
-import { ARWEAVE_ENDPOINT, NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
+import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
 
 import { useWalletStore } from '~/stores/wallet'
 import { useToastComposable } from '~/composables/useToast'
@@ -117,6 +117,7 @@ const formError = computed(() => {
 const isFormValid = computed(() => !formError.value?.length)
 
 const imagePreviewUrl = computed(() => {
+  const { ARWEAVE_ENDPOINT } = useRuntimeConfig().public
   if (!formState.imageUrl) {
     return null
   }
