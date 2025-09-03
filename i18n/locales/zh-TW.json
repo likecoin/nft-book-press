@@ -280,6 +280,8 @@
   "nft.mint_by_filling_info": "《{bookName}》 #0",
   "nft.mint_error": "NFT 鑄造錯誤",
   "nft.minting": "鑄造新書中",
+  "nft.minting_in_progress": "正在鑄造首刷，請勿關閉視窗",
+  "nft.minting_loading": "... 書僮正在查找卷宗 📚",
   "nft_book_form.accept_tipping": "接受額外支持",
   "nft_book_form.accept_tipping_tooltip": "讀者可在書價外作進一步支持",
   "nft_book_form.add_edition": "新增版本",

@@ -16,12 +16,19 @@
     >
       <template #header>
         <h3 class="font-bold">
-          {{ $t('nft.mint_by_filling_info') }}
+          {{ bookName ? $t('nft.mint_by_filling_info', { bookName }) : $t('nft.minting_loading') }}
         </h3>
       </template>
 
-      <div v-if="imagePreviewUrl" class="flex justify-center">
+      <div class="flex justify-center">
+        <UProgress
+          v-if="!imagePreviewUrl"
+          animation="carousel"
+          color="primary"
+          class="w-full"
+        />
         <img
+          v-else
           :src="imagePreviewUrl"
           alt="Cover preview"
           class="max-w-[300px] object-contain rounded-lg border border-gray-200"
@@ -35,7 +42,7 @@
               {{ $t('nft.minting') }}
             </UBadge>
             <p class="text-xs text-gray-500">
-              {{ $t('notifications.do_not_close_window') }}
+              {{ $t('nft.minting_in_progress') }}
             </p>
           </div>
           <UProgress
@@ -115,7 +122,7 @@ const formError = computed(() => {
 })
 
 const isFormValid = computed(() => !formError.value?.length)
-
+const bookName = computed(() => localISCNData.value?.contentMetadata?.name || '')
 const imagePreviewUrl = computed(() => {
   const { ARWEAVE_ENDPOINT } = useRuntimeConfig().public
   if (!formState.imageUrl) {
