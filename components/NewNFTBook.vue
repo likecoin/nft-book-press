@@ -39,14 +39,14 @@
             >
               <template #header>
                 <div class="flex items-center justify-between">
-                  <h3 class="font-bold font-mono">
-                    {{ `${$t('nft_book_form.edition_number', { number: index + 1 })} - ${p.name || $t('nft_book_form.product_name_placeholder')}` }}
-                  </h3>
+                  <h3
+                    class="font-bold font-mono"
+                    v-text="`${$t('nft_book_form.edition_number', { number: index + 1 })} - ${p.name || $t('nft_book_form.product_name_placeholder')}`"
+                  />
                   <div class="flex items-center gap-2">
+                    <p class="text-sm" v-text="$t('nft_book_form.pause_selling')" />
                     <UToggle v-model="p.isListed" />
-                    <p class="text-sm">
-                      {{ p.isListed ? $t('nft_book_form.selling') : $t('nft_book_form.pause_selling') }}
-                    </p>
+                    <p class="text-sm" v-text="$t('nft_book_form.selling')" />
                   </div>
                 </div>
               </template>
@@ -62,32 +62,19 @@
               <UFormGroup
                 :label="$t('nft_book_form.copies_label')"
               >
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-2">
                   <!-- Auto Delivery Block -->
                   <div
                     class="border-2 rounded-lg p-4 cursor-pointer transition-all duration-200"
                     :class="p.deliveryMethod === 'auto' ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'"
                     @click="p.deliveryMethod = 'auto'"
                   >
-                    <div class="flex items-center gap-2 mb-3">
-                      <URadio
-                        v-model="p.deliveryMethod"
-                        value="auto"
-                        name="deliveryMethod"
-                        :label="$t('nft_book_form.unlimited')"
-                      />
-                    </div>
-
-                    <div class="space-y-3">
-                      <UFormGroup
-                        :label="$t('nft_book_form.auto_delivery_memo')"
-                      >
-                        <UInput
-                          v-model="p.autoMemo"
-                          :placeholder="$t('nft_book_form.memo_placeholder')"
-                        />
-                      </UFormGroup>
-                    </div>
+                    <URadio
+                      v-model="p.deliveryMethod"
+                      value="auto"
+                      name="deliveryMethod"
+                      :label="$t('nft_book_form.unlimited')"
+                    />
                   </div>
 
                   <!-- Manual Delivery Block -->
@@ -181,7 +168,10 @@
                   v-model="p.name"
                   :placeholder="$t('nft_book_form.product_name_placeholder')"
                 />
-                <span class="block text-[14px] text-[#374151] mt-[8px]">{{ $t('nft_book_form.description_optional') }}</span>
+                <span
+                  class="block text-[14px] text-[#374151] mt-[8px]"
+                  v-text="$t('nft_book_form.description_optional')"
+                />
                 <md-editor
                   v-model="p.description"
                   language="en-US"
@@ -225,9 +215,7 @@
         }"
       >
         <div class="flex justify-between items-center w-full">
-          <h3 class="font-bold font-mono">
-            {{ $t('nft_book_form.settings') }}
-          </h3>
+          <h3 class="font-bold font-mono" v-text="$t('nft_book_form.settings')" />
           <UButton
             color="gray"
             variant="ghost"
@@ -293,9 +281,7 @@
           <UBadge variant="soft">
             {{ $t('common.loading') }}
           </UBadge>
-          <p class="text-xs text-gray-500">
-            {{ $t('nft_book_form.loading_progress_text') }}
-          </p>
+          <p class="text-xs text-gray-500" v-text="$t('nft_book_form.loading_progress_text')" />
         </div>
         <UProgress animation="carousel" color="primary" class="w-full" />
       </div>
