@@ -94,7 +94,10 @@
                   <div
                     class="border-2 rounded-lg p-4 cursor-pointer transition-all duration-200"
                     :class="p.deliveryMethod === 'manual' ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'"
-                    @click="p.deliveryMethod = 'manual'"
+                    @click="() => {
+                      p.deliveryMethod = 'manual'
+                      p.enableCustomMessagePage = true
+                    }"
                   >
                     <div class="flex items-center gap-2 mb-3">
                       <URadio
@@ -121,22 +124,41 @@
                           placeholder="100"
                         />
                       </UFormGroup>
-                      <UFormGroup :ui="{ label: {base:'w-full flex justify-between items-center'} }">
-                        <template #label>
-                          <p class="block">
-                            {{ $t('nft_book_form.autograph_image') }}
-                          </p>
-                          <span class="text-gray-500 text-[12px] block">
-                            {{ $t('nft_book_form.image_requirements') }}
-                          </span>
-                        </template>
-                        <UInput
-                          type="file"
-                          accept="image/png"
-                          @change="(e) => onImgUpload(e, 'signatureImage')"
-                        />
-                      </UFormGroup>
                     </div>
+                  </div>
+                </div>
+              </UFormGroup>
+
+              <UFormGroup :label="$t('nft_book_form.enable_custom_message_page')">
+                <div class="space-y-3 w-full">
+                  <UCheckbox
+                    v-model="p.enableCustomMessagePage"
+                    :label="$t('nft_book_form.add_custom_message_page')"
+                  />
+                  <div v-if="p.enableCustomMessagePage" class="grid grid-cols-2 gap-4 w-full">
+                    <UFormGroup
+                      :label="$t('nft_book_form.auto_delivery_memo')"
+                    >
+                      <UInput
+                        v-model="p.autoMemo"
+                        :placeholder="$t('nft_book_form.memo_placeholder')"
+                      />
+                    </UFormGroup>
+
+                    <UFormGroup :ui="{ label: {base:'w-full flex justify-between items-center'} }">
+                      <template #label>
+                        <p class="block" v-text="$t('nft_book_form.autograph_image')" />
+                        <span
+                          class="text-gray-500 text-[12px] block"
+                          v-text="$t('nft_book_form.image_requirements')"
+                        />
+                      </template>
+                      <UInput
+                        type="file"
+                        accept="image/png"
+                        @change="(e) => onImgUpload(e, 'signatureImage')"
+                      />
+                    </UFormGroup>
                   </div>
                 </div>
               </UFormGroup>
@@ -351,7 +373,8 @@ const prices = ref<any[]>([
     hasShipping: false,
     isPhysicalOnly: false,
     isAllowCustomPrice: isAllowCustomPrice.value,
-    isListed: true
+    isListed: true,
+    enableCustomMessagePage: false
   }
 ])
 const shippingRates = ref<any[]>([])
@@ -481,7 +504,8 @@ onMounted(async () => {
               isAllowCustomPrice: currentEdition.isAllowCustomPrice,
               isListed: !currentEdition.isUnlisted,
               oldIsAutoDeliver: currentEdition.isAutoDeliver,
-              oldStock: currentEdition.stock
+              oldStock: currentEdition.stock,
+              enableCustomMessagePage: currentEdition.enableCustomMessagePage || false
             }]
             isAllowCustomPrice.value = currentEdition.isAllowCustomPrice
           } else {
@@ -583,7 +607,8 @@ function addMorePrice () {
     hasShipping: false,
     isPhysicalOnly: false,
     isAllowCustomPrice: true,
-    isListed: true
+    isListed: true,
+    enableCustomMessagePage: false
   })
 }
 
@@ -620,7 +645,8 @@ function mapPrices (prices: any) {
     isUnlisted: !p.isListed,
     autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
     hasShipping: p.hasShipping || false,
-    isPhysicalOnly: p.isPhysicalOnly || false
+    isPhysicalOnly: p.isPhysicalOnly || false,
+    enableCustomMessagePage: p.enableCustomMessagePage || false
   }))
 }
 
