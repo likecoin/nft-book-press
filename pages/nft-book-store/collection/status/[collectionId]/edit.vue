@@ -264,7 +264,7 @@ const isLoading = ref(false)
 
 const collectionListingInfo = ref<any>({})
 const classIds = ref<string[]>([])
-const price = ref(DEFAULT_PRICE)
+const price = ref(DEFAULT_PRICE.toString())
 const stock = ref(1)
 const deliveryMethod = ref('auto')
 const autoMemo = ref('Thanks for purchasing this NFT ebook.')
@@ -331,7 +331,7 @@ onMounted(async () => {
       }
     }
     classIds.value = collectionListingInfo.value.classIds || []
-    price.value = collectionListingInfo.value.priceInDecimal / 100 || 0
+    price.value = (collectionListingInfo.value.priceInDecimal / 100 || 0).toString()
     stock.value = collectionListingInfo.value.stock || 0
     nameEn.value = collectionListingInfo.value.name?.en || ''
     nameZh.value = collectionListingInfo.value.name?.zh || ''

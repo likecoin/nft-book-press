@@ -1,14 +1,5 @@
 <template>
   <div class="flex flex-col gap-6">
-    <!-- Basic Info -->
-    <UFormGroup :label="$t('form.type')" class="flex-1">
-      <USelect
-        v-model="formData.type"
-        :options="typeOptions"
-        :placeholder="$t('iscn_form.select_type')"
-      />
-    </UFormGroup>
-
     <UFormGroup
       :label="$t('common.title')"
       :error="!formData.title && $t('iscn_form.title_required')"
@@ -63,7 +54,7 @@
         />
       </UFormGroup>
 
-      <UFormGroup :label="$t('form.cover_image')">
+      <UFormGroup required :label="$t('form.cover_image')">
         <UInput
           v-model="formData.coverUrl"
           placeholder="ar://{arweave_id}"
@@ -252,7 +243,7 @@
 </template>
 
 <script setup lang="ts">
-import { typeOptions, licenseOptions, languageOptions, MAX_DESCRIPTION_LENGTH } from '~/constant/index'
+import { licenseOptions, languageOptions, MAX_DESCRIPTION_LENGTH } from '~/constant/index'
 import { useFileUpload } from '~/composables/useFileUpload'
 import { getApiEndpoints } from '~/constant/api'
 const { t: $t } = useI18n()

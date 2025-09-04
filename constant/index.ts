@@ -1,16 +1,31 @@
+import pricingData from '~/assets/data/pricing_option.json'
+
 export const IPFS_VIEW_GATEWAY_URL = 'https://ipfs.io/ipfs'
 
 export const MINIMAL_PRICE = 0.99
 export const DEFAULT_PRICE = 4.99
 export const MAXIMUM_PRICE = 99.99
 
-export const USD_PRICING_OPTIONS = [0, ...Array.from(
-  { length: Math.round(MAXIMUM_PRICE - MINIMAL_PRICE) + 1 },
-  (_, i) => MINIMAL_PRICE + i
-)].map(value => ({
-  label: value.toFixed(2),
-  value
-}))
+function generatePricingOptions () {
+  const options = [{ label: '免費', value: '0' }] // Use string '0' to avoid falsy value issues in UI components
+
+  Object.entries(pricingData).forEach(([_key, data]) => {
+    const usdValue = data.USD
+    const hkdValue = data.HKD
+    const twdValue = data.TWD
+
+    const twdFormatted = `NT$${twdValue.toLocaleString()}`
+
+    options.push({
+      label: `${usdValue.toFixed(2)} (HK$${hkdValue}, ${twdFormatted})`,
+      value: usdValue.toString()
+    })
+  })
+
+  return options
+}
+
+export const USD_PRICING_OPTIONS = generatePricingOptions()
 
 export const DEFAULT_MAX_SUPPLY = 18446744073709551615n
 

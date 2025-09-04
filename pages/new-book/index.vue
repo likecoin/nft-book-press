@@ -40,7 +40,6 @@
             ref="mintNFT"
             :iscn-id="iscnId"
             @loading-change="(isLoading) => (isMintLoading = isLoading)"
-            @form-valid-change="(valid) => (isMintFormValid = valid)"
             @submit="handleMintNFTSubmit"
           />
         </div>
@@ -59,45 +58,9 @@
           <UButton
             v-if="shouldShowActionButton"
             :disabled="shouldDisableAction"
+            :label="currentActionText"
             @click="nextStep"
-          >
-            {{ currentActionText }}
-          </UButton>
-        </div>
-      </div>
-      <div v-if="step === 0" class="flex flex-col justify-center px-[12px] mt-[16px]">
-        <div class="w-full bg-gray-300 h-[1px]" />
-        <div class="flex flex-col items-center gap-4 py-4">
-          <div class="flex flex-col items-center">
-            <div v-if="hasExistingSessionData">
-              {{ $t('publish_steps.continue_last_register') }}
-              <UButton variant="ghost" class="text-primary-500 font-semibold" @click="step = 1">
-                {{ bookName }}
-              </UButton>
-            </div>
-            <div class="flex items-center">
-              <span>{{ $t('publish_steps.already_have_iscn') }}</span>
-              <UButton
-                variant="ghost"
-                @click="showIscnInput = !showIscnInput"
-              >
-                {{ $t('publish_steps.here') }}
-              </UButton>
-            </div>
-          </div>
-
-          <div v-if="showIscnInput" class="flex flex-col items-center gap-2 w-full max-w-md">
-            <UInput
-              v-model="iscnInputValue"
-              :placeholder="$t('publish_steps.enter_iscn_id')"
-            />
-            <UButton
-              :disabled="!iscnInputValue"
-              @click="handleIscnInput"
-            >
-              {{ $t('common.confirm') }}
-            </UButton>
-          </div>
+          />
         </div>
       </div>
     </div>
@@ -122,7 +85,6 @@ const step = ref(0)
 const uploadFormRef = ref()
 const registerISCN = ref()
 const mintNFT = ref()
-const showIscnInput = ref(false)
 const iscnInputValue = ref('')
 const bookName = ref('')
 
@@ -132,22 +94,18 @@ const classId = ref(route.query.class_id?.toString() || '')
 const fileRecords = ref([])
 const uploadStatus = ref('')
 const isISCNFormValid = ref(false)
-const isMintFormValid = ref(false)
 const isMintLoading = ref(false)
 
-const hasExistingSessionData = computed(() => {
-  return !!bookName.value
-})
 const currentActionText = computed(() => {
   switch (step.value) {
     case 0:
-      return 'Start Upload'
+      return $t('publish_button.upload_files')
     case 1:
-      return 'Register ISCN'
+      return $t('publish_button.metadata')
     case 2:
-      return 'Mint NFT'
+      return $t('publish_button.mint_nft')
     default:
-      return 'Next'
+      return $t('publish_button.publish_now')
   }
 })
 
@@ -234,10 +192,6 @@ const nextStep = async () => {
       return
     }
     if (step.value === 2) {
-      if (!isMintFormValid.value) {
-        showErrorToast('Please fill in all required fields')
-        return
-      }
       await mintNFT.value.startNFTMintFlow()
       return
     }
@@ -278,12 +232,6 @@ const handleMintNFTSubmit = async (res: any) => {
 
 const handleNewBookSubmit = async () => {
   await navigateTo(localeRoute({ name: 'nft-book-store' }))
-}
-
-const handleIscnInput = async () => {
-  if (iscnInputValue.value) {
-    await handleIscnSubmit({ iscnId: iscnInputValue.value, txHash: '' })
-  }
 }
 
 </script>
