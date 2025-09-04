@@ -523,7 +523,7 @@ const enableCustomMessagePage = ref(false)
 const hideDownload = ref(false)
 const prices = ref<any[]>([
   {
-    price: DEFAULT_PRICE,
+    price: DEFAULT_PRICE.toString(),
     deliveryMethod: 'auto',
     autoMemo: 'Thank you for your support. It means a lot to me.',
     stock: Number((route.query.count as string) || 1),
@@ -657,7 +657,7 @@ function addMorePrice () {
   nextPriceIndex.value += 1
   prices.value.push({
     index: uuidv4(),
-    price: DEFAULT_PRICE,
+    price: DEFAULT_PRICE.toString(),
     deliveryMethod: 'auto',
     autoMemo: '',
     stock: 1,

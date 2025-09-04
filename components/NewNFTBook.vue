@@ -347,7 +347,7 @@ const isAllowCustomPrice = ref(true)
 
 const prices = ref<any[]>([
   {
-    price: DEFAULT_PRICE,
+    price: DEFAULT_PRICE.toString(),
     deliveryMethod: 'auto',
     autoMemo: '',
     stock: 100,
@@ -580,7 +580,7 @@ function addMorePrice () {
   nextPriceIndex.value += 1
   prices.value.push({
     index: uuidv4(),
-    price: DEFAULT_PRICE,
+    price: DEFAULT_PRICE.toString(),
     deliveryMethod: 'auto',
     autoMemo: '',
     stock: 100,

@@ -452,7 +452,7 @@ const image = ref('')
 const classIdInput = ref('')
 const classIds = ref<string[]>([])
 const price = ref({
-  price: DEFAULT_PRICE,
+  price: DEFAULT_PRICE.toString(),
   stock: DEFAULT_STOCK,
   hasShipping: false,
   isPhysicalOnly: false,
@@ -644,7 +644,7 @@ async function submitNewCollection () {
       }
     }))
 
-    if (Number(price.value.price) !== 0 && price.value.price < MINIMAL_PRICE) {
+    if (Number(price.value.price) !== 0 && Number(price.value.price) < MINIMAL_PRICE) {
       throw new Error($t('errors.price_validation', { minPrice: `$${MINIMAL_PRICE}` }))
     }
 
