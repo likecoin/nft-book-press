@@ -161,7 +161,7 @@
                 />
                 <span class="block text-[14px] text-[#374151] mt-[8px]">{{ $t('nft_book_form.description_optional') }}</span>
                 <md-editor
-                  v-model="p.descriptionEn"
+                  v-model="p.description"
                   language="en-US"
                   :editor-id="`en-${index}`"
                   :placeholder="mdEditorPlaceholder.en"
@@ -347,8 +347,7 @@ const prices = ref<any[]>([
 
     nameEn: 'Standard Edition',
     nameZh: '標準版',
-    descriptionEn: '',
-    descriptionZh: '',
+    description: '',
     hasShipping: false,
     isPhysicalOnly: false,
     isAllowCustomPrice: isAllowCustomPrice.value,
@@ -474,8 +473,9 @@ onMounted(async () => {
 
               nameEn: currentEdition.name.en,
               nameZh: currentEdition.name.zh,
-              descriptionEn: currentEdition.description.en,
-              descriptionZh: currentEdition.description.zh,
+              description: classResData.inLanguage === 'en'
+                ? currentEdition.description.en
+                : currentEdition.description.zh,
               hasShipping: currentEdition.hasShipping,
               isPhysicalOnly: currentEdition.isPhysicalOnly,
               isAllowCustomPrice: currentEdition.isAllowCustomPrice,
@@ -579,8 +579,7 @@ function addMorePrice () {
       : '增訂版',
     nameEn: `Tier ${nextPriceIndex.value}`,
     nameZh: '增訂版',
-    descriptionEn: '',
-    descriptionZh: '',
+    description: '',
     hasShipping: false,
     isPhysicalOnly: false,
     isAllowCustomPrice: true,
@@ -607,10 +606,10 @@ function mapPrices (prices: any) {
     description: isEnglish
       ? {
           en: escapeHtml(p.description),
-          zh: escapeHtml(p.descriptionZh)
+          zh: escapeHtml('')
         }
       : {
-          en: escapeHtml(p.descriptionEn),
+          en: escapeHtml(''),
           zh: escapeHtml(p.description)
         },
     priceInDecimal: Math.round(Number(p.price) * 100),
