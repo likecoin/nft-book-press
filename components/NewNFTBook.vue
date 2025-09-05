@@ -353,14 +353,11 @@ const prices = ref<any[]>([
     nameEn: 'Standard Edition',
     nameZh: '標準版',
     description: '',
-    hasShipping: false,
-    isPhysicalOnly: false,
     isAllowCustomPrice: isAllowCustomPrice.value,
     isListed: true,
     enableCustomMessagePage: false
   }
 ])
-const shippingRates = ref<any[]>([])
 const hasMultiplePrices = computed(() => prices.value.length > 1)
 const moderatorWallets = ref<string[]>([
   'like1rclg677y2jqt8x4ylj0kjlqjjmnn6w63uflpgr'
@@ -458,7 +455,6 @@ onMounted(async () => {
         }
       })
       if (classResData) {
-        shippingRates.value = classResData?.shippingRates || []
         if (classResData?.ownerWallet !== wallet.value) {
           throw new Error('NOT_OWNER_OF_NFT_CLASS')
         }
@@ -482,8 +478,6 @@ onMounted(async () => {
               description: classResData.inLanguage === 'en'
                 ? currentEdition.description.en
                 : currentEdition.description.zh,
-              hasShipping: currentEdition.hasShipping,
-              isPhysicalOnly: currentEdition.isPhysicalOnly,
               isAllowCustomPrice: currentEdition.isAllowCustomPrice,
               isListed: !currentEdition.isUnlisted,
               oldIsAutoDeliver: currentEdition.isAutoDeliver,
@@ -587,8 +581,6 @@ function addMorePrice () {
     nameEn: `Tier ${nextPriceIndex.value}`,
     nameZh: '增訂版',
     description: '',
-    hasShipping: false,
-    isPhysicalOnly: false,
     isAllowCustomPrice: true,
     isListed: true,
     enableCustomMessagePage: false
@@ -627,8 +619,6 @@ function mapPrices (prices: any) {
     isAllowCustomPrice: p.isAllowCustomPrice,
     isUnlisted: !p.isListed,
     autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
-    hasShipping: p.hasShipping || false,
-    isPhysicalOnly: p.isPhysicalOnly || false,
     enableCustomMessagePage: p.enableCustomMessagePage || false
   }))
 }
@@ -640,12 +630,6 @@ function validate (prices: any[]) {
       errors.push({
         path: 'name',
         message: $t('errors.product_name_required')
-      })
-    }
-    if (price.hasShipping && !shippingRates.value.length) {
-      errors.push({
-        path: 'shipping',
-        message: $t('errors.shipping_rates_required')
       })
     }
   })
@@ -723,13 +707,6 @@ async function submitNewClass () {
             [stripeConnectWallet.value]: 100
           }
         : null
-    const s = shippingRates.value.length
-      ? shippingRates.value.map((rate: any) => ({
-        name: { en: rate.name.en, zh: rate.name.zh },
-        priceInDecimal: rate.priceInDecimal,
-        price: rate.priceInDecimal / 100
-      }))
-      : undefined
 
     const shouldEnableCustomMessagePage =
       prices.value.some((price: any) => price.deliveryMethod === 'manual')
@@ -740,7 +717,6 @@ async function submitNewClass () {
       moderatorWallets: moderatorWallets.value,
       notificationEmails: notificationEmails.value,
       prices: p,
-      shippingRates: s,
       mustClaimToView: true,
       enableCustomMessagePage: shouldEnableCustomMessagePage,
       hideDownload: hideDownload.value

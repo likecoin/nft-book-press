@@ -96,7 +96,6 @@
               </UFormGroup>
               <URadioGroup
                 v-model="p.deliveryMethod"
-                :disabled="p.isPhysicalOnly"
                 :legend="$t('form.delivery_method', { type: priceItemLabel })"
                 :options="deliverMethodOptions"
                 @change="handleDeliveryMethodChange"
@@ -118,16 +117,6 @@
                 <UInput
                   :model-value="p.autoMemo"
                   @input="(e: InputEvent) => updatePrice(e, 'autoMemo', index)"
-                />
-              </UFormGroup>
-              <UFormGroup
-                v-else
-                :label="$t('form.is_physical_only')"
-              >
-                <UCheckbox
-                  v-model="p.isPhysicalOnly"
-                  name="isPhysicalOnly"
-                  :label="$t('form.no_digital_files')"
                 />
               </UFormGroup>
 
@@ -235,12 +224,6 @@
               </UFormGroup>
             </UCard>
 
-            <ShippingRatesRateTable
-              v-model="p.hasShipping"
-              :is-show-physical-goods-checkbox="true"
-              :is-show-setting-modal-button="true"
-              :shipping-info="shippingRates"
-            />
             <div class="flex justify-center items-center">
               <UButton
                 v-if="hasMultiplePrices"
@@ -356,14 +339,6 @@
         </div>
         <template v-if="shouldShowAdvanceSettings">
           <div class="mt-[24px] flex flex-col gap-[12px]">
-            <!-- Shipping Rates -->
-            <ShippingRatesRateTable
-              :is-show-physical-goods-checkbox="false"
-              :is-show-setting-modal-button="true"
-              :shipping-info="shippingRates"
-              @update-shipping-rates="updateShippingRate"
-            />
-
             <!-- Share sales data -->
             <UCard
               :ui="{
@@ -531,13 +506,10 @@ const prices = ref<any[]>([
     nameZh: '標準版',
     descriptionEn: '',
     descriptionZh: '',
-    hasShipping: false,
-    isPhysicalOnly: false,
     isAllowCustomPrice: false,
     isUnlisted: false
   }
 ])
-const shippingRates = ref<any[]>([])
 const hasMultiplePrices = computed(() => prices.value.length > 1)
 const priceItemLabel = computed(() =>
   hasMultiplePrices.value ? 'edition' : 'book'
@@ -665,8 +637,6 @@ function addMorePrice () {
     nameZh: `級別 ${nextPriceIndex.value}`,
     descriptionEn: '',
     descriptionZh: '',
-    hasShipping: false,
-    isPhysicalOnly: false,
     isAllowCustomPrice: true,
     isUnlisted: false
   })
@@ -674,10 +644,6 @@ function addMorePrice () {
 
 function deletePrice (index: number) {
   prices.value.splice(index, 1)
-}
-
-function updateShippingRate (options: any) {
-  shippingRates.value = options
 }
 
 function addModeratorWallet () {
@@ -723,12 +689,10 @@ function mapPrices (prices: any) {
     priceInDecimal: Math.round(Number(p.price) * 100),
     price: Number(p.price),
     stock: Number(p.stock),
-    isAutoDeliver: !p.isPhysicalOnly && p.deliveryMethod === 'auto',
+    isAutoDeliver: p.deliveryMethod === 'auto',
     isAllowCustomPrice: p.isAllowCustomPrice ?? true,
     isUnlisted: p.isUnlisted ?? false,
-    autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
-    hasShipping: p.hasShipping || false,
-    isPhysicalOnly: p.isPhysicalOnly || false
+    autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : ''
   }))
 }
 
@@ -776,13 +740,6 @@ async function submitNewClass () {
             [stripeConnectWallet.value]: 100
           }
         : null
-    const s = shippingRates.value.length
-      ? shippingRates.value.map(rate => ({
-        name: { en: rate.name.en, zh: rate.name.zh },
-        priceInDecimal: rate.priceInDecimal,
-        price: rate.priceInDecimal / 100
-      }))
-      : undefined
 
     if (p.some((price: any) => price.isAutoDeliver)) {
       const ok = confirm(
@@ -800,7 +757,6 @@ async function submitNewClass () {
       moderatorWallets: moderatorWallets.value,
       notificationEmails: notificationEmails.value,
       prices: p,
-      shippingRates: s,
       mustClaimToView: mustClaimToView.value,
       enableCustomMessagePage: enableCustomMessagePage.value,
       hideDownload: hideDownload.value
