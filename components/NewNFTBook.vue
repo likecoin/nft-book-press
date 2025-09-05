@@ -81,10 +81,7 @@
                   <div
                     class="border-2 rounded-lg p-4 cursor-pointer transition-all duration-200"
                     :class="p.deliveryMethod === 'manual' ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'"
-                    @click="() => {
-                      p.deliveryMethod = 'manual'
-                      p.enableCustomMessagePage = true
-                    }"
+                    @click="handleManualDeliveryClick(index)"
                   >
                     <div class="flex items-center gap-2 mb-3">
                       <URadio
@@ -799,6 +796,12 @@ async function addNewEdition () {
   } finally {
     isLoading.value = false
   }
+}
+
+function handleManualDeliveryClick (index: number) {
+  const price = prices.value[index]
+  price.deliveryMethod = 'manual'
+  price.enableCustomMessagePage = true
 }
 
 </script>

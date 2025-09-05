@@ -130,19 +130,10 @@ const imagePreviewUrl = computed(() => {
   }
 
   const url = formState.imageUrl
-  if (url.startsWith('ar://')) {
-    return `${ARWEAVE_ENDPOINT}/${url.replace('ar://', '')}`
-  }
+    .replace('ar://', `${ARWEAVE_ENDPOINT}/`)
+    .replace('ipfs://', 'https://ipfs.io/ipfs/')
 
-  if (url.startsWith('ipfs://')) {
-    return `https://ipfs.io/ipfs/${url.replace('ipfs://', '')}`
-  }
-
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url
-  }
-
-  return null
+  return (url.startsWith('http://') || url.startsWith('https://')) ? url : null
 })
 
 watch(isFormValid, (val: boolean) => {
