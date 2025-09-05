@@ -123,17 +123,9 @@ const formError = computed(() => {
 
 const isFormValid = computed(() => !formError.value?.length)
 const bookName = computed(() => localISCNData.value?.contentMetadata?.name || '')
+
 const imagePreviewUrl = computed(() => {
-  const { ARWEAVE_ENDPOINT } = useRuntimeConfig().public
-  if (!formState.imageUrl) {
-    return null
-  }
-
-  const url = formState.imageUrl
-    .replace('ar://', `${ARWEAVE_ENDPOINT}/`)
-    .replace('ipfs://', 'https://ipfs.io/ipfs/')
-
-  return (url.startsWith('http://') || url.startsWith('https://')) ? url : null
+  return parseImageURLFromMetadata(formState.imageUrl)
 })
 
 watch(isFormValid, (val: boolean) => {
