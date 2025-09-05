@@ -242,7 +242,7 @@ import { MdEditor, config, type ToolbarNames } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
-import { DEFAULT_MAX_SUPPLY, DEFAULT_PRICE, MINIMAL_PRICE, USD_PRICING_OPTIONS } from '~/constant'
+import { DEFAULT_MAX_SUPPLY, DEFAULT_PRICE_STRING, MINIMAL_PRICE, USD_PRICING_OPTIONS } from '~/constant'
 import { useCollectionStore } from '~/stores/collection'
 import { useNftStore } from '~/stores/nft'
 import { deliverMethodOptions, parseImageURLFromMetadata } from '~/utils'
@@ -264,7 +264,7 @@ const isLoading = ref(false)
 
 const collectionListingInfo = ref<any>({})
 const classIds = ref<string[]>([])
-const price = ref(DEFAULT_PRICE.toString())
+const price = ref(DEFAULT_PRICE_STRING)
 const stock = ref(1)
 const deliveryMethod = ref('auto')
 const autoMemo = ref('Thanks for purchasing this NFT ebook.')

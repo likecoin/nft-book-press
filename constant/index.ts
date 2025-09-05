@@ -4,6 +4,7 @@ export const IPFS_VIEW_GATEWAY_URL = 'https://ipfs.io/ipfs'
 
 export const MINIMAL_PRICE = 0.99
 export const DEFAULT_PRICE = 4.99
+export const DEFAULT_PRICE_STRING = '4.99'
 export const MAXIMUM_PRICE = 99.99
 
 function generatePricingOptions () {

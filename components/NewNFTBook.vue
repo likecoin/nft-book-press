@@ -295,7 +295,7 @@ import { v4 as uuidv4 } from 'uuid'
 import type { FormError } from '#ui/types'
 
 import {
-  DEFAULT_PRICE,
+  DEFAULT_PRICE_STRING,
   USD_PRICING_OPTIONS,
   DEFAULT_MAX_SUPPLY
 } from '~/constant'
@@ -344,7 +344,7 @@ const isAllowCustomPrice = ref(true)
 
 const prices = ref<any[]>([
   {
-    price: DEFAULT_PRICE.toString(),
+    price: DEFAULT_PRICE_STRING,
     deliveryMethod: 'auto',
     autoMemo: '',
     stock: 100,
@@ -577,7 +577,7 @@ function addMorePrice () {
   nextPriceIndex.value += 1
   prices.value.push({
     index: uuidv4(),
-    price: DEFAULT_PRICE.toString(),
+    price: DEFAULT_PRICE_STRING,
     deliveryMethod: 'auto',
     autoMemo: '',
     stock: 100,

@@ -408,7 +408,7 @@ import 'md-editor-v3/lib/style.css'
 import DOMPurify from 'dompurify'
 
 import {
-  DEFAULT_PRICE,
+  DEFAULT_PRICE_STRING,
   MINIMAL_PRICE,
   USD_PRICING_OPTIONS,
   DEFAULT_STOCK,
@@ -452,7 +452,7 @@ const image = ref('')
 const classIdInput = ref('')
 const classIds = ref<string[]>([])
 const price = ref({
-  price: DEFAULT_PRICE.toString(),
+  price: DEFAULT_PRICE_STRING,
   stock: DEFAULT_STOCK,
   hasShipping: false,
   isPhysicalOnly: false,
