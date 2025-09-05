@@ -1,17 +1,14 @@
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
-import { useCollectionStore } from '~/stores/collection'
 import { SIGN_AUTHORIZATION_PERMISSIONS } from '~/utils/auth'
 
 export function useAuth () {
   const bookstoreApiStore = useBookstoreApiStore()
-  const collectionStore = useCollectionStore()
   const store = useWalletStore()
   const { wallet, signer, isConnected } = storeToRefs(store)
   const { connect, disconnect, signMessageMemo } = store
   const { authenticate, clearSession, fetchBookListing } = bookstoreApiStore
-  const { listNFTBookCollections } = collectionStore
   const toast = useToast()
 
   const isAuthenticating = ref(false)
@@ -39,10 +36,7 @@ export function useAuth () {
 
       await authenticate(wallet.value, signature)
       try {
-        await Promise.all([
-          fetchBookListing(),
-          listNFTBookCollections()
-        ])
+        await fetchBookListing()
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err)

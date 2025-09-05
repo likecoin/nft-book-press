@@ -68,8 +68,6 @@ export function clearPostAuthRedirect () {
 export const SIGN_AUTHORIZATION_PERMISSIONS = [
   'read:nftbook',
   'write:nftbook',
-  'read:nftcollection',
-  'write:nftcollection',
   'write:iscn',
   'read:iscn'
 ] as const

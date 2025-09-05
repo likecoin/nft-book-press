@@ -40,16 +40,13 @@
 import { storeToRefs } from 'pinia'
 
 import { useBookstoreApiStore } from '~/stores/book-store-api'
-import { useCollectionStore } from '~/stores/collection'
 import { useUIStore } from '~/stores/ui'
 const { t: $t } = useI18n()
 
 const { SITE_URL } = useRuntimeConfig().public
 const bookstoreApiStore = useBookstoreApiStore()
-const collectionStore = useCollectionStore()
 
 const { restoreAuthSession, fetchBookListing, clearSession } = bookstoreApiStore
-const { listNFTBookCollections } = collectionStore
 const { isRestoringSession, isAuthenticated } = storeToRefs(bookstoreApiStore)
 const uiStore = useUIStore()
 const toast = useToast()
@@ -116,10 +113,7 @@ onMounted(async () => {
 
   if (isAuthenticated.value) {
     try {
-      await Promise.all([
-        fetchBookListing(),
-        listNFTBookCollections()
-      ])
+      await fetchBookListing()
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)

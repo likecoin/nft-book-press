@@ -259,7 +259,6 @@
               { key: 'type', label: $t('user_settings.commission_type') },
               { key: 'amount', label: $t('user_settings.commission') },
               { key: 'classId', label: $t('user_settings.book_id') },
-              { key: 'collectionId', label: $t('user_settings.book_collection_id') },
               { key: 'currency', label: $t('user_settings.currency') },
               { key: 'amountTotal', label: $t('user_settings.sale_amount') },
             ]"
@@ -269,13 +268,6 @@
             <template #classId-data="{ row }">
               <a :href="`${BOOK3_URL}/store/${row.classId}`" target="_blank">
                 {{ nftStore.getClassMetadataById(row.classId)?.name || row.classId }}
-              </a>
-            </template>
-            <template #collectionId-data="{ row }">
-              <a :href="`${LIKER_LAND_URL}/nft/collection/${row.collectionId}`" target="_blank">
-                {{ collectionStore.getCollectionById(row.collectionId)?.name?.zh
-                  || collectionStore.getCollectionById(row.collectionId)?.name?.en
-                  || row.collectionId }}
               </a>
             </template>
           </UTable>
@@ -341,14 +333,12 @@ import { storeToRefs } from 'pinia'
 import { useUserStore } from '~/stores/user'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
-import { useCollectionStore } from '~/stores/collection'
 
-const { LIKER_LAND_URL, LIKE_CO_API, BOOK3_URL } = useRuntimeConfig().public
+const { LIKE_CO_API, BOOK3_URL } = useRuntimeConfig().public
 const { t: $t } = useI18n()
 
 const nftStore = useNftStore()
 const bookstoreApiStore = useBookstoreApiStore()
-const collectionStore = useCollectionStore()
 const userStore = useUserStore()
 const { token, wallet } = storeToRefs(bookstoreApiStore)
 const { bookUser, isUpdatingBookUserProfile, userLikerInfo, isFetchingUserLikerInfo } = storeToRefs(userStore)
@@ -449,11 +439,6 @@ async function loadCommissionHistory () {
       .filter((row: any) => row.classId)
       .map((row: any) => row.classId))
     classIds.forEach((classId: string) => nftStore.lazyFetchClassMetadataById(classId))
-
-    const collectionIds = new Set<string>(commissionHistory.value
-      .filter((row: any) => row.collectionId)
-      .map((row: any) => row.collectionId))
-    collectionIds.forEach((collectionId: string) => collectionStore.lazyFetchCollectionById(collectionId))
   } catch (e) {
     console.error(e)
     error.value = (e as Error).toString()
