@@ -47,7 +47,7 @@ const { SITE_URL } = useRuntimeConfig().public
 const bookstoreApiStore = useBookstoreApiStore()
 
 const { restoreAuthSession, fetchBookListing, clearSession } = bookstoreApiStore
-const { isRestoringSession, isAuthenticated } = storeToRefs(bookstoreApiStore)
+const { wallet, intercomToken, isRestoringSession, isAuthenticated } = storeToRefs(bookstoreApiStore)
 const uiStore = useUIStore()
 const toast = useToast()
 
@@ -97,6 +97,12 @@ useSeoMeta({
 onMounted(async () => {
   try {
     await restoreAuthSession()
+    if (window.Intercom && intercomToken.value) {
+      window.Intercom('update', {
+        intercom_user_jwt: intercomToken.value,
+        evm_wallet: wallet.value
+      })
+    }
   } catch (error) {
     console.error(error)
     toast.add({

@@ -9,6 +9,7 @@ export function useAuth () {
   const { wallet, signer, isConnected } = storeToRefs(store)
   const { connect, disconnect, signMessageMemo } = store
   const { authenticate, clearSession, fetchBookListing } = bookstoreApiStore
+  const { intercomToken } = storeToRefs(bookstoreApiStore)
   const toast = useToast()
 
   const isAuthenticating = ref(false)
@@ -35,6 +36,12 @@ export function useAuth () {
       }
 
       await authenticate(wallet.value, signature)
+      if (window.Intercom && intercomToken.value) {
+        window.Intercom('update', {
+          intercom_user_jwt: intercomToken.value,
+          evm_wallet: wallet.value
+        })
+      }
       try {
         await fetchBookListing()
       } catch (err) {

@@ -8,6 +8,7 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
   const { wallet: storeWallet } = storeToRefs(walletStore)
   const token = ref('')
   const sessionWallet = ref('')
+  const intercomToken = ref('')
   const isRestoringSession = ref(false)
 
   const listingList = ref([] as any[])
@@ -38,7 +39,7 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
       const session = loadAuthSession()
       if (!session) { return }
 
-      const { token: sessionToken, wallet } = session
+      const { token: sessionToken, wallet, intercomToken: sessionIntercomToken } = session
 
       if (!checkJwtTokenValidity(sessionToken)) {
         throw new Error('INVALID_TOKEN')
@@ -46,6 +47,7 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
 
       token.value = sessionToken
       sessionWallet.value = wallet
+      intercomToken.value = sessionIntercomToken
     } finally {
       isRestoringSession.value = false
     }
@@ -60,8 +62,9 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
     })
     if ((!data as any)?.token) { throw new Error('INVALID_SIGNATURE') }
     token.value = (data as any).token
+    intercomToken.value = (data as any).intercomToken
     sessionWallet.value = inputWallet
-    saveAuthSession({ wallet: inputWallet, token: token.value })
+    saveAuthSession({ wallet: inputWallet, token: token.value, intercomToken: intercomToken.value })
   }
 
   async function fetchBookListing (params: { key?: number, limit?: number } = {}) {
@@ -179,6 +182,7 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
   return {
     token,
     wallet: sessionWallet,
+    intercomToken,
     listingList,
     moderatedBookList,
     getTotalPendingNFTCount,
