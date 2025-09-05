@@ -1,6 +1,7 @@
 import { stringify as csvStringify } from 'csv-stringify/sync'
 import { useClipboard } from '@vueuse/core'
 import { importer } from 'ipfs-unixfs-importer'
+import pricingData from '~/assets/data/pricing_option.json'
 
 export function getIsTestnet () {
   const { IS_TESTNET } = useRuntimeConfig().public
@@ -294,4 +295,23 @@ export function appendUTMParamsToURL ({
   urlObj.searchParams.set('utm_medium', medium)
   urlObj.searchParams.set('utm_campaign', campaign)
   return urlObj.toString()
+}
+
+export function generatePricingOptions () {
+  const options = [{ label: '免費', value: '0' }] // Use string '0' to avoid falsy value issues in UI components
+
+  Object.entries(pricingData).forEach(([_key, data]) => {
+    const usdValue = data.USD
+    const hkdValue = data.HKD
+    const twdValue = data.TWD
+
+    const twdFormatted = `NT$${twdValue.toLocaleString()}`
+
+    options.push({
+      label: `${usdValue.toFixed(2)} (HK$${hkdValue}, ${twdFormatted})`,
+      value: usdValue.toString()
+    })
+  })
+
+  return options
 }

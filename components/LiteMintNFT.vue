@@ -16,13 +16,24 @@
     >
       <template #header>
         <h3 class="font-bold">
-          {{ $t('nft.mint_by_filling_info') }}
+          {{ bookName ? $t('nft.mint_by_filling_info', { bookName }) : $t('nft.minting_loading') }}
         </h3>
       </template>
 
-      <NFTMintForm
-        v-model="formState"
-      />
+      <div class="flex justify-center">
+        <UProgress
+          v-if="!imagePreviewUrl"
+          animation="carousel"
+          color="primary"
+          class="w-full"
+        />
+        <img
+          v-else
+          :src="imagePreviewUrl"
+          alt="Cover preview"
+          class="max-w-[300px] object-contain rounded-lg border border-gray-200"
+        >
+      </div>
 
       <div v-if="isLoading" class="w-full">
         <div class="space-y-3">
@@ -31,7 +42,7 @@
               {{ $t('nft.minting') }}
             </UBadge>
             <p class="text-xs text-gray-500">
-              {{ $t('notifications.do_not_close_window') }}
+              {{ $t('nft.minting_in_progress') }}
             </p>
           </div>
           <UProgress
@@ -57,9 +68,9 @@
 <script setup lang="ts">
 import { useWriteContract } from '@wagmi/vue'
 import { storeToRefs } from 'pinia'
+import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
 
 import { useWalletStore } from '~/stores/wallet'
-import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
 import { useToastComposable } from '~/composables/useToast'
 
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
@@ -111,6 +122,11 @@ const formError = computed(() => {
 })
 
 const isFormValid = computed(() => !formError.value?.length)
+const bookName = computed(() => localISCNData.value?.contentMetadata?.name || '')
+
+const imagePreviewUrl = computed(() => {
+  return parseImageURLFromMetadata(formState.imageUrl)
+})
 
 watch(isFormValid, (val: boolean) => {
   emit('formValidChange', val)
