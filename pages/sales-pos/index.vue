@@ -333,17 +333,14 @@
 import type { DropdownItem } from '#ui/types'
 
 import { useNftStore } from '~/stores/nft'
-import { useCollectionStore } from '~/stores/collection'
 const { t: $t } = useI18n()
 
 const route = useRoute()
 const toast = useToast()
 const { LIKER_LAND_URL } = useRuntimeConfig().public
 const nftStore = useNftStore()
-const collectionStore = useCollectionStore()
 
 const { lazyFetchClassMetadataById, lazyFetchClassListingInfoById } = nftStore
-const { lazyFetchCollectionById } = collectionStore
 
 const newProductIdInputs = ref<{ id: number; value: string, error?: Error }[]>([{ id: 0, value: '' }])
 const newProductIdInputNextId = ref(1)
@@ -411,7 +408,6 @@ const dropdownMenuItems = computed(() => {
 
 interface SaleItem {
   classId?: string;
-  collectionId?: string;
   prices?: any[];
   name: string;
   image: string;
@@ -420,14 +416,6 @@ interface SaleItem {
 
 const saleItemTableRows = computed<SaleItem[]>(() => {
   return saleItemList.value?.map((item, index) => {
-    if (item.collectionId) {
-      return {
-        collectionId: item.collectionId,
-        name: collectionStore.getCollectionById(item.collectionId)?.name,
-        image: parseImageURLFromMetadata(collectionStore.getCollectionById(item.collectionId)?.image),
-        index
-      }
-    }
     return {
       classId: item.classId,
       name: nftStore.getClassMetadataById(item.classId)?.name,
@@ -505,7 +493,6 @@ onMounted(() => {
       const items = JSON.parse(storedItemString)
       saleItemList.value = items
         .map((item: any) => ({
-          collectionId: item.collectionId,
           classId: item.classId,
           priceIndex: item.priceIndex
         }))
@@ -527,7 +514,6 @@ onMounted(() => {
       lazyFetchClassMetadataById(item.classId)
       lazyFetchClassListingInfoById(item.classId)
     }
-    if (item.collectionId) { lazyFetchCollectionById(item.collectionId) }
   })
 })
 
@@ -558,9 +544,6 @@ function addSaleItem () {
       saleItemList.value.push({ classId: productId, priceIndex: 0 })
       lazyFetchClassMetadataById(productId)
       lazyFetchClassListingInfoById(productId)
-    } else if (productId.startsWith('col_book_')) {
-      saleItemList.value.push({ collectionId: productId })
-      lazyFetchCollectionById(productId)
     } else {
       input.error = new Error('Invalid product ID')
     }

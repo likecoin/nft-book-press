@@ -402,13 +402,11 @@ import { storeToRefs } from 'pinia'
 
 import { AFFILIATION_CHANNEL_DEFAULT, AFFILIATION_CHANNELS } from '~/constant'
 
-import { useCollectionStore } from '~/stores/collection'
 import { useLikerStore } from '~/stores/liker'
 import { useStripeStore } from '~/stores/stripe'
 import { useUserStore } from '~/stores/user'
 
 const { LIKE_CO_API, SITE_URL } = useRuntimeConfig().public
-const collectionStore = useCollectionStore()
 const likerStore = useLikerStore()
 const stripeStore = useStripeStore()
 const userStore = useUserStore()
@@ -726,7 +724,6 @@ const linkTableColumns = computed(() => {
 interface AffiliationLink {
   productId: string,
   productName: string,
-  isCollection: boolean,
   selectedEditionLabel: string,
   selectedEditionIndex: number,
   channelId: string,
@@ -748,8 +745,6 @@ const linkTableRowsMapByChannel = computed(() => {
     : productDataList.value || []
 
   items.forEach(({ id, data }) => {
-    const isCollection = id.startsWith('col_')
-
     channels.forEach((channel) => {
       if (!map.has(channel.id)) {
         map.set(channel.id, [])
@@ -762,7 +757,7 @@ const linkTableRowsMapByChannel = computed(() => {
 
       const priceIndex = productEditionSelectModelValue.value[id] || 0
       const urlConfig: any = {
-        [isCollection ? 'collectionId' : 'classId']: id || '',
+        classId: id || '',
         channel: channel.id,
         priceIndex,
         customLink: isUsingCustomDestination.value ? customDestinationURLInput.value : undefined,
@@ -776,11 +771,8 @@ const linkTableRowsMapByChannel = computed(() => {
       map.get(channel.id)?.push({
         productId: id,
         productName: data.name?.zh || data.name?.en || data.name,
-        isCollection,
         selectedEditionIndex: priceIndex,
-        selectedEditionLabel: isCollection
-          ? `$${(data?.typePayload?.priceInDecimal || 0) / 100}`
-          : productEditionOptionsMap.value?.[id]?.[priceIndex]?.label || '',
+        selectedEditionLabel: productEditionOptionsMap.value?.[id]?.[priceIndex]?.label || '',
         channelId: channel.id,
         channelName: channel.name,
         utmCampaign,
@@ -815,21 +807,10 @@ const isOpenQRCodeModal = computed({
 })
 
 async function fetchProductData (id: string) {
-  if (id.startsWith('col_')) {
-    const data = await collectionStore.fetchCollectionById(id)
-    if (!data) {
-      throw new Error('Cannot fetch collection data.')
-    }
-    return {
-      id,
-      data
-    }
-  } else {
-    const classData = await $fetch<any>(`${LIKE_CO_API}/likernft/book/store/${id}`)
-    return {
-      id,
-      data: classData
-    }
+  const classData = await $fetch<any>(`${LIKE_CO_API}/likernft/book/store/${id}`)
+  return {
+    id,
+    data: classData
   }
 }
 
@@ -909,10 +890,6 @@ function getQRCodeFilename (link: AffiliationLink) {
     filenameParts.push(url.hostname)
   } else {
     filenameParts.push(`${link.productName || link.productId}`)
-
-    if (link.isCollection) {
-      filenameParts.push(`edition-${link.selectedEditionIndex}`)
-    }
   }
   if (link.channelId) {
     filenameParts.push(`channel-${link.channelId}`)
@@ -933,8 +910,7 @@ async function copyLink (text = '') {
 function downloadPurchaseLinksByTableRows (rows: AffiliationLink[] = [], channelId?: string) {
   downloadFile({
     data: rows.map(({
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      isCollection,
+
       selectedEditionIndex,
       selectedEditionLabel, ...link
     }) => ({
