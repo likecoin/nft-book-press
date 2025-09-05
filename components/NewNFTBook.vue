@@ -183,21 +183,6 @@
                   :label="$t('nft_book_form.pause_selling')"
                 />
               </UFormGroup>
-              <div class="flex flex-col gap-2">
-                <UCheckbox
-                  v-model="p.hasShipping"
-                  name="hasShipping"
-                  :disabled="(isEditMode && !p.hasShipping)"
-                  :label="$t('nft_book_form.includes_shipping')"
-                />
-                <ShippingRatesRateTable
-                  v-if="p.hasShipping"
-                  :is-show-physical-goods-checkbox="false"
-                  :is-show-setting-modal-button="true"
-                  :shipping-info="shippingRates"
-                  @update-shipping-rates="updateShippingRate"
-                />
-              </div>
             </UCard>
 
             <div class="flex justify-center items-center">
@@ -477,13 +462,10 @@ const prices = ref<any[]>([
     nameZh: '標準版',
     descriptionEn: '',
     descriptionZh: '',
-    hasShipping: false,
-    isPhysicalOnly: false,
     isAllowCustomPrice: isAllowCustomPrice.value,
     isUnlisted: false
   }
 ])
-const shippingRates = ref<any[]>([])
 const hasMultiplePrices = computed(() => prices.value.length > 1)
 const moderatorWallets = ref<string[]>([
   'like1rclg677y2jqt8x4ylj0kjlqjjmnn6w63uflpgr'
@@ -608,7 +590,6 @@ onMounted(async () => {
         }
       })
       if (classResData) {
-        shippingRates.value = classResData?.shippingRates || []
         if (classResData?.ownerWallet !== wallet.value) {
           throw new Error('NOT_OWNER_OF_NFT_CLASS')
         }
@@ -631,8 +612,6 @@ onMounted(async () => {
               nameZh: currentEdition.name.zh,
               descriptionEn: currentEdition.description.en,
               descriptionZh: currentEdition.description.zh,
-              hasShipping: currentEdition.hasShipping,
-              isPhysicalOnly: currentEdition.isPhysicalOnly,
               isAllowCustomPrice: currentEdition.isAllowCustomPrice,
               isUnlisted: currentEdition.isUnlisted,
               oldIsAutoDeliver: currentEdition.isAutoDeliver,
@@ -740,8 +719,6 @@ function addMorePrice () {
     nameZh: `級別 ${nextPriceIndex.value}`,
     descriptionEn: '',
     descriptionZh: '',
-    hasShipping: false,
-    isPhysicalOnly: false,
     isAllowCustomPrice: true,
     isUnlisted: false
   })
@@ -749,10 +726,6 @@ function addMorePrice () {
 
 function deletePrice (index: number) {
   prices.value.splice(index, 1)
-}
-
-function updateShippingRate (options: any) {
-  shippingRates.value = options
 }
 
 function addModeratorWallet () {
@@ -795,12 +768,10 @@ function mapPrices (prices: any) {
     priceInDecimal: Math.round(Number(p.price) * 100),
     price: Number(p.price),
     stock: Number(p.stock),
-    isAutoDeliver: !p.isPhysicalOnly && p.deliveryMethod === 'auto',
+    isAutoDeliver: p.deliveryMethod === 'auto',
     isAllowCustomPrice: p.isAllowCustomPrice,
     isUnlisted: p.isUnlisted ?? false,
-    autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
-    hasShipping: p.hasShipping || false,
-    isPhysicalOnly: p.isPhysicalOnly || false
+    autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : ''
   }))
 }
 
@@ -811,12 +782,6 @@ function validate (prices: any[]) {
       errors.push({
         path: 'name',
         message: $t('errors.product_name_required')
-      })
-    }
-    if (price.hasShipping && !shippingRates.value.length) {
-      errors.push({
-        path: 'shipping',
-        message: $t('errors.shipping_rates_required')
       })
     }
   })
@@ -901,13 +866,6 @@ async function submitNewClass () {
             [stripeConnectWallet.value]: 100
           }
         : null
-    const s = shippingRates.value.length
-      ? shippingRates.value.map((rate: any) => ({
-        name: { en: rate.name.en, zh: rate.name.zh },
-        priceInDecimal: rate.priceInDecimal,
-        price: rate.priceInDecimal / 100
-      }))
-      : undefined
 
     const shouldEnableCustomMessagePage =
       prices.value.some((price: any) => price.deliveryMethod === 'manual')
@@ -918,7 +876,6 @@ async function submitNewClass () {
       moderatorWallets: moderatorWallets.value,
       notificationEmails: notificationEmails.value,
       prices: p,
-      shippingRates: s,
       mustClaimToView: true,
       enableCustomMessagePage: shouldEnableCustomMessagePage,
       hideDownload: hideDownload.value
