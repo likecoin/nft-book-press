@@ -144,7 +144,6 @@ exports.randomFillSync = randomFillSync`
 
       LIKE_NFT_CONTRACT_ADDRESS: process.env.LIKE_NFT_CONTRACT_ADDRESS as `0x${string}`,
 
-      LIKER_LAND_URL: process.env.LIKER_LAND_URL,
       LIKE_CO_API: process.env.LIKE_CO_API,
       LIKE_CO_STATIC_ENDPOINT: process.env.LIKE_CO_STATIC_ENDPOINT,
 

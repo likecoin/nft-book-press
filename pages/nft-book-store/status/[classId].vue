@@ -885,7 +885,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
 
   if (purchaseListItem.status === 'completed' && purchaseListItem.txHash) {
     actionItems.push([{
-      label: $t('collection.view_transaction'),
+      label: $t('status_page.view_transaction'),
       icon: 'i-heroicons-magnifying-glass',
       to: `${CHAIN_EXPLORER_URL}/${purchaseListItem.txHash}`,
       target: '_blank'
@@ -925,7 +925,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
 
   if (purchaseListItem.status === 'paid') {
     actionItems.push([{
-      label: $t('collection.send_reminder_email'),
+      label: $t('status_page.send_reminder_email'),
       icon: 'i-heroicons-envelope',
       click: () => {
         sendReminderEmail(purchaseListItem)
@@ -935,7 +935,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
 
   if (['pendingNFT', 'paid'].includes(purchaseListItem.status)) {
     actionItems.push([{
-      label: $t('collection.mark_complete'),
+      label: $t('status_page.mark_complete'),
       icon: 'i-heroicons-check-circle',
       click: () => {
         hardSetStatusToCompleted(purchaseListItem)
@@ -956,7 +956,7 @@ function getStatusLabel (purchaseListItem: any) {
 
     case 'completed':
       if (purchaseListItem.shippingStatus === 'pending') {
-        return $t('collection.pending_shipping')
+        return $t('status_page.pending_shipping')
       }
       return $t('status.completed')
 
@@ -1203,7 +1203,7 @@ async function sendReminderEmail (purchase: any) {
 
   toast.add({
     icon: 'i-heroicons-check-circle',
-    title: $t('collection.send_reminder_email'),
+    title: $t('status_page.send_reminder_email'),
     timeout: 2000,
     color: 'green'
   })

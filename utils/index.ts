@@ -115,7 +115,6 @@ export const formatShippingAddress = function (shippingDetails: any) {
 
 export function getPurchaseLink ({
   classId,
-  collectionId,
   priceIndex = 0,
   channel,
   customLink,
@@ -124,7 +123,6 @@ export function getPurchaseLink ({
   query: queryInput
 }:{
   classId?: string
-  collectionId?: string
   priceIndex?: number
   channel?: string
   customLink?: string
@@ -142,7 +140,7 @@ export function getPurchaseLink ({
     query.utm_medium = queryInput?.utm_medium ? `${queryInput.utm_medium}-qr` : 'qrcode'
   }
 
-  const { LIKE_CO_API, LIKER_LAND_URL, BOOK3_URL } = useRuntimeConfig().public
+  const { LIKE_CO_API, BOOK3_URL } = useRuntimeConfig().public
   const searchParams = new URLSearchParams({ ...queryInput, ...query })
   if (customLink) {
     const url = new URL(customLink)
@@ -153,11 +151,6 @@ export function getPurchaseLink ({
   }
 
   const queryString = `?${searchParams.toString()}`
-  if (collectionId) {
-    return isUseLikerLandLink
-      ? `${LIKER_LAND_URL}/nft/collection/${collectionId}${queryString}`
-      : `${LIKE_CO_API}/likernft/book/collection/purchase/${collectionId}/new${queryString}`
-  }
   return isUseLikerLandLink
     ? `${BOOK3_URL}/store/${classId}${queryString}`
     : `${LIKE_CO_API}/likernft/book/purchase/${classId}/new${queryString}`

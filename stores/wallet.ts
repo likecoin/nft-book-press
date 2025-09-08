@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { useAccount, useConnect, useDisconnect, useSignMessage } from '@wagmi/vue'
 import { optimism, optimismSepolia } from '@wagmi/vue/chains'
+import { checksumAddress } from 'viem'
 import { clearUploadFileData } from '~/utils/uploadFile'
 
 export const useWalletStore = defineStore('wallet', () => {
@@ -9,7 +10,7 @@ export const useWalletStore = defineStore('wallet', () => {
   const { address, isConnected } = useAccount()
   const { signMessageAsync } = useSignMessage()
 
-  const wallet = computed(() => address.value)
+  const wallet = computed(() => address.value ? checksumAddress(address.value) : undefined)
 
   async function initIfNecessary () {
     if (!isConnected.value) {

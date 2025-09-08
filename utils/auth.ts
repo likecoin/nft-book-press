@@ -8,10 +8,11 @@ export function loadAuthSession () {
     if (window.localStorage) {
       const data = window.localStorage.getItem(AUTH_SESSION_KEY)
       if (data) {
-        const { wallet, token } = JSON.parse(data)
+        const { wallet, token, intercomToken } = JSON.parse(data)
         return {
           wallet,
-          token
+          token,
+          intercomToken
         }
       }
     }
@@ -20,7 +21,7 @@ export function loadAuthSession () {
   return null
 }
 
-export function saveAuthSession (session: { wallet: string, token: string }) {
+export function saveAuthSession (session: { wallet: string, token: string, intercomToken?: string }) {
   try {
     if (!window.localStorage) { return }
 
@@ -68,8 +69,6 @@ export function clearPostAuthRedirect () {
 export const SIGN_AUTHORIZATION_PERMISSIONS = [
   'read:nftbook',
   'write:nftbook',
-  'read:nftcollection',
-  'write:nftcollection',
   'write:iscn',
   'read:iscn'
 ] as const

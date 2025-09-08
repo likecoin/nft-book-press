@@ -40,17 +40,14 @@
 import { storeToRefs } from 'pinia'
 
 import { useBookstoreApiStore } from '~/stores/book-store-api'
-import { useCollectionStore } from '~/stores/collection'
 import { useUIStore } from '~/stores/ui'
 const { t: $t } = useI18n()
 
 const { SITE_URL } = useRuntimeConfig().public
 const bookstoreApiStore = useBookstoreApiStore()
-const collectionStore = useCollectionStore()
 
 const { restoreAuthSession, fetchBookListing, clearSession } = bookstoreApiStore
-const { listNFTBookCollections } = collectionStore
-const { isRestoringSession, isAuthenticated } = storeToRefs(bookstoreApiStore)
+const { wallet, intercomToken, isRestoringSession, isAuthenticated } = storeToRefs(bookstoreApiStore)
 const uiStore = useUIStore()
 const toast = useToast()
 
@@ -100,6 +97,13 @@ useSeoMeta({
 onMounted(async () => {
   try {
     await restoreAuthSession()
+    if (window.Intercom && intercomToken.value) {
+      window.Intercom('update', {
+        intercom_user_jwt: intercomToken.value,
+        session_duration: 2592000000, // 30d
+        evm_wallet: wallet.value
+      })
+    }
   } catch (error) {
     console.error(error)
     toast.add({
@@ -116,10 +120,7 @@ onMounted(async () => {
 
   if (isAuthenticated.value) {
     try {
-      await Promise.all([
-        fetchBookListing(),
-        listNFTBookCollections()
-      ])
+      await fetchBookListing()
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error)
