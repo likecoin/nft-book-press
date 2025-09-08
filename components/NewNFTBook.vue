@@ -72,7 +72,7 @@
                     <URadio
                       v-model="p.deliveryMethod"
                       value="auto"
-                      name="deliveryMethod"
+                      :name="`deliveryMethod-${index}`"
                       :label="$t('nft_book_form.unlimited')"
                     />
                   </div>
@@ -87,7 +87,7 @@
                       <URadio
                         v-model="p.deliveryMethod"
                         value="manual"
-                        name="deliveryMethod"
+                        :name="`deliveryMethod-${index}`"
                         :label="$t('nft_book_form.limited')"
                       />
                       <UTooltip
