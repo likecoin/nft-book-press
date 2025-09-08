@@ -732,7 +732,7 @@ async function submitNewClass () {
       : undefined
 
     const shouldEnableCustomMessagePage =
-      prices.value.some((price: any) => price.deliveryMethod === 'manual')
+      prices.value.some((price: any) => price.enableCustomMessagePage)
 
     await newBookListing(classId.value as string, {
       defaultPaymentCurrency: 'USD',
