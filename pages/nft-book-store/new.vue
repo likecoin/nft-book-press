@@ -178,12 +178,12 @@
                 </template>
                 <UInput
                   placeholder="Product Name"
-                  :model-value="p.nameEn"
-                  @input="(e: InputEvent) => updatePrice(e, 'nameEn', index)"
+                  :model-value="p.name"
+                  @input="(e: InputEvent) => updatePrice(e, 'name', index)"
                 />
                 <span class="block text-[14px] text-[#374151] mt-[8px]">{{ $t('form.description_optional') }}</span>
                 <md-editor
-                  v-model="p.descriptionEn"
+                  v-model="p.description"
                   language="en-US"
                   :editor-id="`en-${index}`"
                   :placeholder="mdEditorPlaceholder.en"
@@ -502,10 +502,8 @@ const prices = ref<any[]>([
     deliveryMethod: 'auto',
     autoMemo: 'Thank you for your support. It means a lot to me.',
     stock: Number((route.query.count as string) || 1),
-    nameEn: 'Standard Edition',
-    nameZh: '標準版',
-    descriptionEn: '',
-    descriptionZh: '',
+    name: '標準版',
+    description: '',
     isAllowCustomPrice: false,
     isUnlisted: false
   }
@@ -633,10 +631,8 @@ function addMorePrice () {
     deliveryMethod: 'auto',
     autoMemo: '',
     stock: 1,
-    nameEn: `Tier ${nextPriceIndex.value}`,
-    nameZh: `級別 ${nextPriceIndex.value}`,
-    descriptionEn: '',
-    descriptionZh: '',
+    name: '增訂版',
+    description: '',
     isAllowCustomPrice: true,
     isUnlisted: false
   })
@@ -681,10 +677,10 @@ function sanitizeHtml (html: string) {
 
 function mapPrices (prices: any) {
   return prices.map((p: any) => ({
-    name: { en: p.nameEn, zh: p.nameZh },
+    name: { en: p.name, zh: p.name },
     description: {
-      en: escapeHtml(p.descriptionEn),
-      zh: escapeHtml(p.descriptionZh)
+      en: escapeHtml(p.description),
+      zh: escapeHtml(p.description)
     },
     priceInDecimal: Math.round(Number(p.price) * 100),
     price: Number(p.price),

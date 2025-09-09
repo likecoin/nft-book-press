@@ -351,9 +351,6 @@ const prices = ref<any[]>([
     autoMemo: '',
     stock: 100,
     name: $t('prices.standard_edition'),
-
-    nameEn: 'Standard Edition',
-    nameZh: '標準版',
     description: '',
     isAllowCustomPrice: isAllowCustomPrice.value,
     isListed: true,
@@ -371,7 +368,6 @@ const isStripeConnectChecked = ref(false)
 const stripeConnectWallet = ref('')
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
-const iscnData = ref<any>(null)
 
 const signatureImage = ref<File | null>(null)
 
@@ -403,10 +399,6 @@ const submitButtonText = computed(() =>
   isEditMode.value ? $t('common.save') : $t('common.submit')
 )
 const shouldShowAdvanceSettings = ref<boolean>(true)
-
-const iscnDataLanguage = computed(() => {
-  return iscnData.value?.contentMetadata?.inLanguage
-})
 
 watch(isLoading, (val: boolean) => {
   if (val) {
@@ -471,15 +463,8 @@ onMounted(async () => {
               deliveryMethod: currentEdition.isAutoDeliver ? 'auto' : 'manual',
               autoMemo: currentEdition.autoMemo,
               stock: currentEdition.stock,
-              name: classResData.inLanguage === 'en'
-                ? currentEdition.name.en
-                : currentEdition.name.zh,
-
-              nameEn: currentEdition.name.en,
-              nameZh: currentEdition.name.zh,
-              description: classResData.inLanguage === 'en'
-                ? currentEdition.description.en
-                : currentEdition.description.zh,
+              name: currentEdition.name.zh,
+              description: currentEdition.description.zh,
               isAllowCustomPrice: currentEdition.isAllowCustomPrice,
               isListed: !currentEdition.isUnlisted,
               oldIsAutoDeliver: currentEdition.isAutoDeliver,
@@ -579,11 +564,7 @@ function addMorePrice () {
     deliveryMethod: 'auto',
     autoMemo: '',
     stock: 100,
-    name: iscnDataLanguage.value === 'en'
-      ? `Tier ${nextPriceIndex.value}`
-      : '增訂版',
-    nameEn: `Tier ${nextPriceIndex.value}`,
-    nameZh: '增訂版',
+    name: '增訂版',
     description: '',
     isAllowCustomPrice: true,
     isListed: true,
@@ -601,21 +582,15 @@ function handleSaveStripeConnectWallet (wallet: any) {
 }
 
 function mapPrices (prices: any) {
-  const isEnglish = iscnDataLanguage.value === 'en'
-
   return prices.map((p: any) => ({
-    name: isEnglish
-      ? { en: p.name, zh: p.nameZh }
-      : { en: p.nameEn, zh: p.name },
-    description: isEnglish
-      ? {
-          en: escapeHtml(p.description),
-          zh: escapeHtml('')
-        }
-      : {
-          en: escapeHtml(''),
-          zh: escapeHtml(p.description)
-        },
+    name: {
+      en: escapeHtml(p.name),
+      zh: escapeHtml(p.name)
+    },
+    description: {
+      en: escapeHtml(p.description),
+      zh: escapeHtml(p.description)
+    },
     priceInDecimal: Math.round(Number(p.price) * 100),
     price: Number(p.price),
     stock: p.deliveryMethod === 'auto' ? 0 : Number(p.stock),
