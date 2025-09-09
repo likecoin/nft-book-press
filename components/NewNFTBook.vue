@@ -297,7 +297,9 @@ import type { FormError } from '#ui/types'
 import {
   DEFAULT_PRICE_STRING,
   USD_PRICING_OPTIONS,
-  DEFAULT_MAX_SUPPLY
+  DEFAULT_MAX_SUPPLY,
+  DEFAULT_PRICE,
+  MINIMAL_PRICE
 } from '~/constant'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useWalletStore } from '~/stores/wallet'
@@ -344,7 +346,7 @@ const isAllowCustomPrice = ref(true)
 
 const prices = ref<any[]>([
   {
-    price: DEFAULT_PRICE_STRING,
+    price: -1,
     deliveryMethod: 'auto',
     autoMemo: '',
     stock: 100,
@@ -353,14 +355,11 @@ const prices = ref<any[]>([
     nameEn: 'Standard Edition',
     nameZh: '標準版',
     description: '',
-    hasShipping: false,
-    isPhysicalOnly: false,
     isAllowCustomPrice: isAllowCustomPrice.value,
     isListed: true,
     enableCustomMessagePage: false
   }
 ])
-const shippingRates = ref<any[]>([])
 const hasMultiplePrices = computed(() => prices.value.length > 1)
 const moderatorWallets = ref<string[]>([
   'like1rclg677y2jqt8x4ylj0kjlqjjmnn6w63uflpgr'
@@ -458,7 +457,6 @@ onMounted(async () => {
         }
       })
       if (classResData) {
-        shippingRates.value = classResData?.shippingRates || []
         if (classResData?.ownerWallet !== wallet.value) {
           throw new Error('NOT_OWNER_OF_NFT_CLASS')
         }
@@ -482,8 +480,6 @@ onMounted(async () => {
               description: classResData.inLanguage === 'en'
                 ? currentEdition.description.en
                 : currentEdition.description.zh,
-              hasShipping: currentEdition.hasShipping,
-              isPhysicalOnly: currentEdition.isPhysicalOnly,
               isAllowCustomPrice: currentEdition.isAllowCustomPrice,
               isListed: !currentEdition.isUnlisted,
               oldIsAutoDeliver: currentEdition.isAutoDeliver,
@@ -494,6 +490,8 @@ onMounted(async () => {
           } else {
             throw new Error('No prices found')
           }
+        } else {
+          prices.value[0].price = DEFAULT_PRICE
         }
         otherExistingStock.value = classResData.prices.reduce((acc: number, price: any) => {
           if (price.index.toString() !== editionIndex.value) {
@@ -587,8 +585,6 @@ function addMorePrice () {
     nameEn: `Tier ${nextPriceIndex.value}`,
     nameZh: '增訂版',
     description: '',
-    hasShipping: false,
-    isPhysicalOnly: false,
     isAllowCustomPrice: true,
     isListed: true,
     enableCustomMessagePage: false
@@ -623,12 +619,10 @@ function mapPrices (prices: any) {
     priceInDecimal: Math.round(Number(p.price) * 100),
     price: Number(p.price),
     stock: p.deliveryMethod === 'auto' ? 0 : Number(p.stock),
-    isAutoDeliver: !p.isPhysicalOnly && p.deliveryMethod === 'auto',
+    isAutoDeliver: p.deliveryMethod === 'auto',
     isAllowCustomPrice: p.isAllowCustomPrice,
     isUnlisted: !p.isListed,
     autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
-    hasShipping: p.hasShipping || false,
-    isPhysicalOnly: p.isPhysicalOnly || false,
     enableCustomMessagePage: p.enableCustomMessagePage || false
   }))
 }
@@ -636,16 +630,16 @@ function mapPrices (prices: any) {
 function validate (prices: any[]) {
   const errors: FormError[] = []
   prices.forEach((price: any) => {
+    if (price.price !== 0 && price.price < MINIMAL_PRICE) {
+      errors.push({
+        path: 'price',
+        message: $t('errors.price_validation', { minPrice: MINIMAL_PRICE })
+      })
+    }
     if (!price.name.en || !price.name.zh) {
       errors.push({
         path: 'name',
         message: $t('errors.product_name_required')
-      })
-    }
-    if (price.hasShipping && !shippingRates.value.length) {
-      errors.push({
-        path: 'shipping',
-        message: $t('errors.shipping_rates_required')
       })
     }
   })
@@ -723,13 +717,6 @@ async function submitNewClass () {
             [stripeConnectWallet.value]: 100
           }
         : null
-    const s = shippingRates.value.length
-      ? shippingRates.value.map((rate: any) => ({
-        name: { en: rate.name.en, zh: rate.name.zh },
-        priceInDecimal: rate.priceInDecimal,
-        price: rate.priceInDecimal / 100
-      }))
-      : undefined
 
     const shouldEnableCustomMessagePage =
       prices.value.some((price: any) => price.enableCustomMessagePage)
@@ -740,7 +727,6 @@ async function submitNewClass () {
       moderatorWallets: moderatorWallets.value,
       notificationEmails: notificationEmails.value,
       prices: p,
-      shippingRates: s,
       mustClaimToView: true,
       enableCustomMessagePage: shouldEnableCustomMessagePage,
       hideDownload: hideDownload.value

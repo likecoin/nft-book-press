@@ -200,7 +200,7 @@ async function onStripeConnectWalletInput (input: any) {
   inputWallet.value = inputValue
   stripeConnectInputError.value = ''
 
-  if (!LIKE_ADDRESS_REGEX.test(inputValue)) {
+  if (!(LIKE_ADDRESS_REGEX.test(inputValue) || inputValue.startsWith('0x'))) {
     stripeConnectInputError.value = $t('stripe_connect.invalid_wallet')
     return
   }

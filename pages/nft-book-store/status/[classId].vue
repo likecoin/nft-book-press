@@ -416,14 +416,6 @@
               <UTextarea v-model="tableOfContents" />
             </UFormGroup>
 
-            <!-- Shipping Rates -->
-            <ShippingRatesRateTable
-              :is-show-physical-goods-checkbox="false"
-              :is-loading="isUpdatingShippingRates"
-              :shipping-info="classListingInfo.shippingRates"
-              @update-shipping-rates="updateShippingRates"
-            />
-
             <!-- Share sales data -->
             <UCard
               :ui="{
@@ -713,7 +705,7 @@ import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useWalletStore } from '~/stores/wallet'
 import { useStripeStore } from '~/stores/stripe'
-import { getPortfolioURL, downloadFile, convertArrayOfObjectsToCSV, getPurchaseLink, formatShippingAddress } from '~/utils'
+import { getPortfolioURL, downloadFile, convertArrayOfObjectsToCSV, getPurchaseLink } from '~/utils'
 import { shortenWalletAddress } from '~/utils/cosmos'
 import { getApiEndpoints } from '~/constant/api'
 const { t: $t } = useI18n()
@@ -743,7 +735,6 @@ const classListingInfo = ref<any>({})
 const prices = ref<any[]>([])
 const isUpdatingPricesOrder = ref(false)
 const ordersData = ref<any>({})
-const isUpdatingShippingRates = ref(false)
 const shouldShowAdvanceSettings = ref<boolean>(false)
 const showEditISCNModal = ref(false)
 
@@ -773,7 +764,6 @@ const iscnId = ref('')
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
-const orderHasShipping = computed(() => purchaseList.value.find((p: any) => !!p.shippingStatus))
 const userIsOwner = computed(() => wallet.value && ownerWallet.value === wallet.value)
 const userCanSendNFT = computed(() => userIsOwner.value)
 const purchaseLinks = computed(() =>
@@ -848,9 +838,6 @@ const orderTableColumns = computed(() => {
     { key: 'orderDate', label: $t('table.order_date'), sortable: true },
     { key: 'status', label: $t('table.status'), sortable: true }
   ]
-  if (orderHasShipping.value) {
-    columns.push({ key: 'shippingStatus', label: $t('table.shipping_status'), sortable: true })
-  }
   columns.push(
     { key: 'from', label: $t('table.sales_channel'), sortable: true },
     { key: 'price', label: $t('form.price'), sortable: true },
@@ -862,12 +849,6 @@ const orderTableColumns = computed(() => {
     { key: 'wallet', label: $t('table.reader_wallet'), sortable: true },
     { key: 'message', label: $t('table.reader_message'), sortable: false }
   )
-  if (orderHasShipping.value) {
-    columns.push({ key: 'buyerPhone', label: $t('table.buyer_phone'), sortable: true })
-    columns.push({ key: 'shippingName', label: $t('table.shipping_name'), sortable: true })
-    columns.push({ key: 'shippingAddress', label: $t('table.shipping_address'), sortable: true })
-    columns.push({ key: 'shippingCountry', label: $t('table.shipping_country'), sortable: true })
-  }
 
   return columns
 })
@@ -907,22 +888,6 @@ function getOrdersTableActionItems (purchaseListItem: any) {
     }])
   }
 
-  if (purchaseListItem.shippingStatus) {
-    actionItems.push([{
-      label: 'Handle Shipping',
-      icon: 'i-heroicons-truck',
-      to: localeRoute({
-        name: 'nft-book-store-send-shipping-classId',
-        params: {
-          classId: purchaseListItem.classId
-        },
-        query: {
-          payment_id: purchaseListItem.id
-        }
-      })
-    }])
-  }
-
   if (purchaseListItem.status === 'paid') {
     actionItems.push([{
       label: $t('status_page.send_reminder_email'),
@@ -955,9 +920,6 @@ function getStatusLabel (purchaseListItem: any) {
       return 'Pending NFT'
 
     case 'completed':
-      if (purchaseListItem.shippingStatus === 'pending') {
-        return $t('status_page.pending_shipping')
-      }
       return $t('status.completed')
 
     default:
@@ -974,9 +936,6 @@ function getStatusLabelColor (purchaseListItem: any) {
       return 'amber'
 
     case 'completed':
-      if (purchaseListItem.shippingStatus === 'pending') {
-        return 'amber'
-      }
       return 'green'
 
     default:
@@ -993,10 +952,6 @@ const ordersTableRows = computed(() => purchaseList.value?.map((p: any, index: n
   statusLabel: getStatusLabel(p),
   statusLabelColor: getStatusLabelColor(p),
   orderDate: p.formattedDate,
-  shippingStatus: p.shippingStatus || '',
-  shippingCountry: p.shippingDetails?.address?.country || '',
-  shippingAddress: formatShippingAddress(p.shippingDetails) || '',
-  shippingName: p.shippingDetails?.name || '',
   wallet: p.wallet || '',
   walletLink: getPortfolioURL(p.wallet),
   shortenWallet: shortenWalletAddress(p.wallet),
@@ -1307,29 +1262,6 @@ async function updateSettings () {
   } finally {
     isLoading.value = false
     shouldDisableStripeConnectSetting.value = false
-  }
-}
-
-async function updateShippingRates (value: any) {
-  isUpdatingShippingRates.value = true
-  try {
-    await updateBookListingSetting(classId.value as string, {
-      shippingRates: value
-    })
-    const classData = await $fetch(
-      `${LIKE_CO_API}/likernft/book/store/${classId.value}`,
-      {
-        headers: {
-          authorization: `Bearer ${token.value}`
-        }
-      }
-    )
-    classListingInfo.value = classData
-  } catch (err) {
-    const errorData = (err as any).data || err
-    error.value = errorData
-  } finally {
-    isUpdatingShippingRates.value = false
   }
 }
 
