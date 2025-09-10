@@ -43,7 +43,7 @@ const isLoading = ref(false)
 async function handleNewBookSubmit () {
   try {
     await navigateTo(localeRoute({
-      name: 'nft-book-store-status-classId',
+      name: 'my-books-status-classId',
       params: { classId: classId.value }
     }))
   } catch (err) {
@@ -66,7 +66,7 @@ async function handleNewBookSubmit () {
 
 async function handleClickBack () {
   await navigateTo(localeRoute({
-    name: 'nft-book-store-status-classId',
+    name: 'my-books-status-classId',
     params: { classId: classId.value }
   }))
 }

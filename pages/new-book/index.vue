@@ -231,7 +231,7 @@ const handleMintNFTSubmit = async (res: any) => {
 }
 
 const handleNewBookSubmit = async () => {
-  await navigateTo(localeRoute({ name: 'nft-book-store' }))
+  await navigateTo(localeRoute({ name: 'my-books' }))
 }
 
 </script>

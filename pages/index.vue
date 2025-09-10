@@ -16,6 +16,6 @@ const { t: $t } = useI18n()
 const localeRoute = useLocaleRoute()
 
 onMounted(async () => {
-  await navigateTo(localeRoute({ name: 'nft-book-store' }), { replace: true })
+  await navigateTo(localeRoute({ name: 'my-books' }), { replace: true })
 })
 </script>

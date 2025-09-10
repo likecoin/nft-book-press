@@ -10,7 +10,7 @@
       <template #footer>
         <UButton
           label="Go Back"
-          :to="localeRoute({ name: 'nft-book-store-user' })"
+          :to="localeRoute({ name: 'my-books-user' })"
         />
       </template>
     </UCard>

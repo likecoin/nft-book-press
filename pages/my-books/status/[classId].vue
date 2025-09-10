@@ -11,7 +11,7 @@
           :label="$t('buttons.gift_books')"
           icon="i-heroicons-gift"
           :to="localeRoute({
-            name: 'nft-book-store-gift-classId',
+            name: 'my-books-gift-classId',
             params: { classId }
           })"
           color="pink"
@@ -266,7 +266,7 @@
                   <UButton
                     icon="i-heroicons-document-magnifying-glass"
                     :to="localeRoute({
-                      name: 'nft-book-store-status-classId-edit-editionIndex',
+                      name: 'my-books-status-classId-edit-editionIndex',
                       params: { classId, editionIndex: element.index }
                     })"
                     variant="soft"
@@ -283,7 +283,7 @@
             class="mb-[12px]"
             :label="$t('form.add_edition')"
             :to="localeRoute({
-              name: 'nft-book-store-status-classId-edit-new',
+              name: 'my-books-status-classId-edit-new',
               params: { classId },
               query: { price_index: prices.length }
             })"
@@ -876,7 +876,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
       label: 'Send NFT',
       icon: 'i-heroicons-paper-airplane',
       to: localeRoute({
-        name: 'nft-book-store-send-classId',
+        name: 'my-books-send-classId',
         params: {
           classId: purchaseListItem.classId
         },
@@ -1253,7 +1253,7 @@ async function updateSettings () {
       enableCustomMessagePage: enableCustomMessagePage.value
     })
     await navigateTo(localeRoute({
-      name: 'nft-book-store'
+      name: 'my-books'
     }))
   } catch (err) {
     const errorData = (err as any).data || err

@@ -59,14 +59,14 @@ const pageTitle = computed(() =>
 
 async function handleClickBack () {
   await navigateTo(localeRoute({
-    name: 'nft-book-store-status-classId',
+    name: 'my-books-status-classId',
     params: { classId: classId.value }
   }))
 }
 
 async function handleSubmit () {
   await navigateTo(localeRoute({
-    name: 'nft-book-store-status-classId',
+    name: 'my-books-status-classId',
     params: { classId: classId.value }
   }))
 }

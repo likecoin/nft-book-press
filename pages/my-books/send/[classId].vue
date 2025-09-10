@@ -376,7 +376,7 @@ async function onSendNFTStart () {
         })
 
       await navigateTo(localeRoute({
-        name: 'nft-book-store-status-classId',
+        name: 'my-books-status-classId',
         params: {
           classId: classId.value
         }

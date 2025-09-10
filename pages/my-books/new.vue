@@ -757,7 +757,7 @@ async function submitNewClass () {
       enableCustomMessagePage: enableCustomMessagePage.value,
       hideDownload: hideDownload.value
     })
-    await navigateTo(localeRoute({ name: 'nft-book-store' }))
+    await navigateTo(localeRoute({ name: 'my-books' }))
   } catch (err) {
     const errorData = (err as any).data || err
     console.error(errorData)
@@ -805,7 +805,7 @@ async function submitEditedClass () {
       price
     })
 
-    await navigateTo(localeRoute({ name: 'nft-book-store' }))
+    await navigateTo(localeRoute({ name: 'my-books' }))
   } catch (err) {
     const errorData = (err as any).data || err
     console.error(errorData)

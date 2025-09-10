@@ -56,7 +56,7 @@
               <UButton
                 class="mt-2"
                 :label="$t('stripe_connect.create_one_here')"
-                :to="localeRoute({ name: 'nft-book-store-user' })"
+                :to="localeRoute({ name: 'my-books-user' })"
                 target="_blank"
                 variant="outline"
               />

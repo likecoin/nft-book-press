@@ -314,7 +314,7 @@
                 size="sm"
                 color="gray"
                 :to="localeRoute({
-                  name: 'nft-book-store-user-payouts-payoutId',
+                  name: 'my-books-user-payouts-payoutId',
                   params: {
                     payoutId: row.id
                   }
