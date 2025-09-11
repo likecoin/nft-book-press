@@ -475,7 +475,7 @@ const productIds = computed(() => {
       input = url.pathname.split('/').pop()
     }
 
-    if (input?.startsWith('col_') || input?.startsWith('likenft')) {
+    if (input?.startsWith('0x')) {
       return input
     }
 
