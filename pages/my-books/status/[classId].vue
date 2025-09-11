@@ -663,12 +663,6 @@
       />
     </template>
 
-    <EditISCNMetadataModal
-      v-model="showEditISCNModal"
-      :class-id="classId"
-      @iscn-updated="handleISCNUpdated"
-    />
-
     <UModal v-model="isOpenQRCodeModal">
       <QRCodeGenerator
         v-if="selectedPurchaseLink"
