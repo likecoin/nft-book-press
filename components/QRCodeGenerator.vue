@@ -11,25 +11,10 @@
     </template>
 
     <div v-if="!isReadonlyMode" class="grid grid-cols-2 gap-4 p-4 print:hidden">
-      <UFormGroup :label="$t('qr_generator.pick_icon')">
-        <URadioGroup
-          v-model="selectedIcon"
-          :options="iconOptions"
-        />
-      </UFormGroup>
-
       <UFormGroup :label="$t('qr_generator.pick_dot')">
         <URadioGroup
           v-model="selectedDotStyle"
           :options="dotStyleOptions"
-        />
-      </UFormGroup>
-
-      <UFormGroup :label="$t('qr_generator.pick_color')">
-        <UInput
-          v-model="selectedColor"
-          type="color"
-          :placeholder="DEFAULT_QR_CODE_COLOR"
         />
       </UFormGroup>
     </div>

@@ -7,12 +7,12 @@ import type {
 } from '@likecoin/qr-code-styling'
 
 import NFCIcon from '~/assets/images/nfc.png'
-import LikeCoinIcon from '~/assets/images/logo.png'
+import BookStoreIcon from '~/assets/images/3ook-store.png'
 
 export const iconOptions = [
   {
-    value: 'likecoin',
-    label: 'LikeCoin'
+    value: 'bookStore',
+    label: '3ookStore'
   },
   {
     value: 'nfc',
@@ -35,12 +35,12 @@ export const dotStyleOptions = [
   }
 ]
 
-export const DEFAULT_QR_CODE_ICON = 'likecoin'
-export const DEFAULT_QR_CODE_COLOR = '#28646e'
+export const DEFAULT_QR_CODE_ICON = 'bookStore'
+export const DEFAULT_QR_CODE_COLOR = '#131313'
 export const DEFAULT_QR_CODE_DOT_STYLE = 'rounded'
 
 const iconMap: Record<string, string> = {
-  likecoin: LikeCoinIcon,
+  bookStore: BookStoreIcon,
   nfc: NFCIcon
 }
 
