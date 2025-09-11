@@ -1,34 +1,5 @@
 <template>
   <PageBody class="space-y-10 pb-10">
-    <div class="flex justify-between gap-4">
-      <h1 class="text-lg font-bold font-mono flex-wrap">
-        {{ $t('pages.nft_book_status') }} "{{ nftClassName || classId }}"
-      </h1>
-
-      <div class="flex justify-center items-center gap-2 flex-wrap">
-        <UButton
-          class="font-mono break-all"
-          :label="$t('buttons.gift_books')"
-          icon="i-heroicons-gift"
-          :to="localeRoute({
-            name: 'my-books-gift-classId',
-            params: { classId }
-          })"
-          color="pink"
-          variant="outline"
-          target="_blank"
-        />
-
-        <UButton
-          :label="$t('buttons.view_in_3ook')"
-          icon="i-heroicons-arrow-top-right-on-square"
-          variant="outline"
-          :to="`${BOOK3_URL}/store/${classId}`"
-          target="_blank"
-        />
-      </div>
-    </div>
-
     <UAlert
       v-if="error"
       icon="i-heroicons-exclamation-triangle"
@@ -50,52 +21,151 @@
         :ui="{
           header: { base: 'flex justify-between items-center' },
           body: { padding: '12px' },
+          ring: showEditISCN ? 'ring-2 ring-gray-500' : 'ring-1 ring-gray-200',
         }"
       >
         <div class="flex justify-between items-center w-full">
-          <h3 class="font-bold font-mono">
-            {{ $t('pages.book_details_metadata') }}
-          </h3>
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold font-mono" v-text="nftClassName || classId" />
+            <ULink
+              :to="`${BOOK3_URL}/store/${classId}`"
+              class="flex items-center"
+              target="_blank"
+            >
+              <UIcon
+                name="i-heroicons-arrow-top-right-on-square"
+                size="xl"
+              />
+            </ULink>
+          </div>
           <UButton
-            :label="$t('buttons.view_edit')"
-            @click="showEditISCNModal = true"
+            color="gray"
+            variant="ghost"
+            trailing
+            :label="$t('form.edit_iscn_metadata')"
+            :icon="
+              showEditISCN
+                ? 'i-heroicons-chevron-up'
+                : 'i-heroicons-chevron-down'
+            "
+            @click="
+              () => {showEditISCN = !showEditISCN}
+            "
           />
         </div>
+        <template v-if="showEditISCN">
+          <EditISCNMetadata
+            :class-id="classId"
+            @iscn-updated="handleISCNUpdated"
+          />
+        </template>
       </UCard>
 
       <UCard :ui="{ body: { padding: '' } }">
         <template #header>
-          <h3 class="font-bold font-mono">
-            {{ $t('pages.book_listing_status') }}
-          </h3>
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold font-mono" v-text="$t('pages.editions')" />
+            <div class="flex justify-between items-center gap-4">
+              <UButton
+                icon="i-heroicons-plus"
+                class="mb-[12px]"
+                variant="outline"
+                :color="prices.length >= MAX_EDITION_COUNT ? 'gray' : 'primary'"
+                :disabled="prices.length >= MAX_EDITION_COUNT"
+                :label="$t('form.add_edition')"
+                :to="localeRoute({
+                  name: 'my-books-status-classId-edit-new',
+                  params: { classId },
+                  query: { price_index: prices.length }
+                })"
+              />
+            </div>
+          </div>
         </template>
 
-        <UTable
-          :columns="[
-            { key: 'pendingAction', label: $t('table.pending_action') },
-            { key: 'sold', label: $t('table.sold') },
-            { key: 'stock', label: $t('table.stock') },
-          ]"
-          :rows="[
-            {
-              pendingAction: classListingInfo.pendingNFTCount || 0,
-              sold: classListingInfo.sold || 0,
-              stock: classListingInfo.stock || 0
-            },
-          ]"
-        >
-          <template #pendingAction-data="{ row }">
-            <UBadge
-              v-if="row.pendingAction"
-              :label="`${row.pendingAction}`"
-              color="red"
-              :ui="{ rounded: 'rounded-full' }"
-            />
-            <template v-else>
-              {{ row.pendingAction }}
+        <table class="w-full divide-y text-sm">
+          <thead class="border-b-2">
+            <tr class="text-left">
+              <th v-if="userIsOwner && prices.length > 1" class="px-3 py-4 text-center">
+                {{ $t('table.sort') }}
+              </th>
+              <th class="px-3 py-4">
+                {{ $t('table.name') }}
+              </th>
+              <th class="px-3 py-4">
+                {{ $t('table.delivery') }}
+              </th>
+              <th class="px-3 py-4 text-right">
+                {{ $t('table.stock') }}
+              </th>
+              <th class="px-3 py-4 text-right">
+                {{ $t('table.price_usd') }}
+              </th>
+              <th v-if="userIsOwner" class="px-3 py-4 text-center">
+                {{ $t('table.details') }}
+              </th>
+            </tr>
+          </thead>
+          <Draggable
+            v-model="prices"
+            tag="tbody"
+            item-key="index"
+            handle="td.cursor-grab"
+            drag-class="bg-white"
+            ghost-class="opacity-20"
+            :disabled="!userIsOwner || isUpdatingPricesOrder"
+            @end="handlePriceReorder"
+          >
+            <template #item="{ element }">
+              <tr>
+                <td
+                  v-if="userIsOwner && prices.length > 1"
+                  class="px-3 py-4 text-center cursor-grab"
+                >
+                  <UIcon
+                    name="i-heroicons-arrows-up-down"
+                    color="gray"
+                  />
+                </td>
+                <td class="px-3 py-4">
+                  <h4 class="font-medium" v-text="element.name.zh" />
+                </td>
+                <td class="px-3 py-4">
+                  <h4
+                    class="font-medium"
+                    v-text="element.isAutoDeliver ? $t('form.auto_delivery') : $t('form.manual_delivery')"
+                  />
+                </td>
+                <td :class="['px-3', 'py-4', 'text-right']">
+                  {{ element.isAutoDeliver ? $t('form.auto_stock') : element.stock }}
+                </td>
+                <td class="px-3 py-4 text-right">
+                  {{ element.price }}
+                </td>
+                <td class="text-center">
+                  <UButton
+                    icon="i-heroicons-document"
+                    :to="localeRoute({
+                      name: 'my-books-status-classId-edit-editionIndex',
+                      params: { classId, editionIndex: element.index }
+                    })"
+                    variant="soft"
+                    color="gray"
+                  />
+                </td>
+              </tr>
             </template>
-          </template>
-        </UTable>
+          </Draggable>
+        </table>
+        <template #footer>
+          <div class="flex justify-end items-center ">
+            <UButton
+              icon="i-heroicons-plus"
+              :label="$t('buttons.mint_new_stock')"
+              @click="handleOpenRestockModal"
+            />
+          </div>
+        </template>
       </UCard>
 
       <UCard
@@ -105,9 +175,7 @@
         }"
       >
         <template #header>
-          <h3 class="font-bold font-mono">
-            {{ $t('pages.orders') }}
-          </h3>
+          <h3 class="font-bold font-mono" v-text="$t('pages.orders')" />
 
           <UInput v-model="searchInput" icon="i-heroicons-magnifying-glass-20-solid" :placeholder="$t('status_page.search_placeholder')" />
         </template>
@@ -166,225 +234,6 @@
         </UTable>
       </UCard>
 
-      <UCard :ui="{ body: { padding: '' } }">
-        <template #header>
-          <div class="flex justify-between items-center">
-            <h3 class="font-bold font-mono">
-              {{ $t('pages.editions') }}
-            </h3>
-            <div class="flex justify-between items-center gap-4">
-              <div>
-                {{ $t('table.unassigned_stock') }} : {{ unassignedStock }}
-              </div>
-              <UButton
-                icon="i-heroicons-plus-circle"
-                :label="$t('buttons.mint_new_stock')"
-                @click="handleOpenRestockModal"
-              />
-            </div>
-          </div>
-        </template>
-
-        <table class="w-full divide-y text-sm">
-          <thead class="border-b-2">
-            <tr class="text-left">
-              <th class="px-3 py-4">
-                {{ $t('table.order') }}
-              </th>
-              <th class="px-3 py-4">
-                {{ $t('table.name') }}
-              </th>
-              <th class="px-3 py-4 text-right">
-                {{ $t('table.stock') }}
-              </th>
-              <th class="px-3 py-4 text-right">
-                {{ $t('table.price_usd') }}
-              </th>
-              <th v-if="userIsOwner && prices.length > 1" class="px-3 py-4 text-center">
-                {{ $t('table.sort') }}
-              </th>
-              <th v-if="userIsOwner" class="px-3 py-4 text-center">
-                {{ $t('table.details') }}
-              </th>
-            </tr>
-          </thead>
-          <Draggable
-            v-model="prices"
-            tag="tbody"
-            item-key="index"
-            handle="td.cursor-grab"
-            drag-class="bg-white"
-            ghost-class="opacity-20"
-            :disabled="!userIsOwner || isUpdatingPricesOrder"
-            @end="handlePriceReorder"
-          >
-            <template #item="{ element, index }">
-              <tr>
-                <td class="px-3 py-4">
-                  {{ index + 1 }}
-                </td>
-                <td class="px-3 py-4">
-                  <template v-if="typeof element.name === 'object'">
-                    <UCard :ui="{ body: { padding: '' } }">
-                      <UTable
-                        :columns="[{ key: 'locale', label: $t('table.locale') }, { key: 'content', label: $t('table.content') }]"
-                        :rows="Object.entries(element.name).map(([locale, content]) => ({ locale, content }))"
-                      >
-                        <template #locale-data="{ row }">
-                          <UBadge
-                            :label="row.locale"
-                            variant="subtle"
-                            :ui="{
-                              font: 'font-mono',
-                              rounded: 'rounded-full',
-                            }"
-                          />
-                        </template>
-                      </UTable>
-                    </UCard>
-                  </template>
-                  <template v-else>
-                    {{ element.name }}
-                  </template>
-                </td>
-                <td :class="['px-3', 'py-4', 'text-right', { 'text-red-500': element.stock <= 3 }]">
-                  {{ element.stock }}
-                </td>
-                <td class="px-3 py-4 text-right">
-                  {{ element.price }}
-                </td>
-                <td
-                  v-if="userIsOwner && prices.length > 1"
-                  class="px-3 py-4 text-center cursor-grab"
-                >
-                  <UIcon
-                    name="i-heroicons-arrows-up-down"
-                    color="gray"
-                  />
-                </td>
-                <td class="text-center">
-                  <UButton
-                    icon="i-heroicons-document-magnifying-glass"
-                    :to="localeRoute({
-                      name: 'my-books-status-classId-edit-editionIndex',
-                      params: { classId, editionIndex: element.index }
-                    })"
-                    variant="soft"
-                    color="gray"
-                  />
-                </td>
-              </tr>
-            </template>
-          </Draggable>
-        </table>
-        <div class="flex justify-center items-center ">
-          <UButton
-            icon="i-heroicons-plus-circle"
-            class="mb-[12px]"
-            :label="$t('form.add_edition')"
-            :to="localeRoute({
-              name: 'my-books-status-classId-edit-new',
-              params: { classId },
-              query: { price_index: prices.length }
-            })"
-          />
-        </div>
-      </UCard>
-
-      <StripeConnectCard
-        v-if="userIsOwner"
-        v-model:is-stripe-connect-checked="isStripeConnectChecked"
-        v-model:is-using-default-account="isUsingDefaultAccount"
-        :stripe-connect-wallet="stripeConnectWallet"
-        :should-disable-setting="shouldDisableStripeConnectSetting"
-        :login-address="wallet"
-
-        @save="handleSaveStripeConnectWallet"
-      />
-
-      <UCard
-        :ui="{
-          header: { base: 'flex justify-between items-center' },
-          body: { padding: '' }
-        }"
-      >
-        <template #header>
-          <h4 class="text-sm font-bold font-mono">
-            {{ $t('form.email_notifications') }}
-          </h4>
-
-          <div class="flex gap-2">
-            <UInput
-              v-model="notificationEmailInput"
-              placeholder="abc@example.com"
-            />
-
-            <UButton
-              label="Add"
-              :variant="notificationEmailInput ? 'outline' : 'solid'"
-              :color="notificationEmailInput ? 'primary' : 'gray'"
-              :disabled="!notificationEmailInput"
-              @click="addNotificationEmail"
-            />
-          </div>
-        </template>
-
-        <UTable
-          :columns="[{ key: 'email', label: $t('common.email'), sortable: true }, { key: 'action' }]"
-          :rows="notificationEmailsTableRows"
-        >
-          <template #email-data="{ row }">
-            <UButton
-              :label="row.email"
-              :to="`mailto:${row.email}`"
-              variant="link"
-              :padded="false"
-            />
-          </template>
-
-          <template #action-data="{ row }">
-            <div class="flex justify-end items-center">
-              <UButton
-                icon="i-heroicons-x-mark"
-                variant="soft"
-                color="red"
-                @click="() => notificationEmails.splice(row.index, 1)"
-              />
-            </div>
-          </template>
-        </UTable>
-      </UCard>
-
-      <UCard :ui="{ body: { padding: '' } }">
-        <template #header>
-          <h3 class="font-bold font-mono">
-            {{ $t('pages.sales_channel_summary') }}
-          </h3>
-        </template>
-
-        <UTable
-          :columns="[
-            { key: 'id', label: $t('table.channel_id'), sortable: true },
-            { key: 'count', label: $t('table.count'), sortable: true },
-            { key: 'totalUSD', label: $t('table.total_usd'), sortable: true },
-          ]"
-          :rows="salesChannelTableRows"
-        >
-          <template #id-data="{ row }">
-            <span
-              v-if="row.id !== 'empty'"
-              class="font-bold font-mono"
-            >{{ row.idLabel }}</span>
-            <UBadge
-              v-else
-              :label="row.idLabel"
-              :ui="{ rounded: 'rounded-full' }"
-              color="gray"
-            />
-          </template>
-        </UTable>
-      </UCard>
-
       <UCard
         :ui="{
           header: { base: 'flex justify-between items-center' },
@@ -392,9 +241,7 @@
         }"
       >
         <div class="flex justify-between items-center w-full">
-          <h3 class="font-bold font-mono">
-            {{ $t('nft_book_form.advanced_settings') }}
-          </h3>
+          <h3 class="font-bold font-mono" v-text="$t('nft_book_form.advanced_settings')" />
           <UButton
             color="gray"
             variant="ghost"
@@ -412,9 +259,34 @@
         </div>
         <template v-if="shouldShowAdvanceSettings">
           <div class="mt-[24px] flex flex-col gap-[12px]">
-            <UFormGroup :label="$t('form.table_of_content')">
-              <UTextarea v-model="tableOfContents" />
-            </UFormGroup>
+            <!-- Share channel summary -->
+            <UCard :ui="{ body: { padding: '' } }">
+              <template #header>
+                <h3 class="font-bold font-mono" v-text="$t('pages.sales_channel_summary')" />
+              </template>
+
+              <UTable
+                :columns="[
+                  { key: 'id', label: $t('table.channel_id'), sortable: true },
+                  { key: 'count', label: $t('table.count'), sortable: true },
+                  { key: 'totalUSD', label: $t('table.total_usd'), sortable: true },
+                ]"
+                :rows="salesChannelTableRows"
+              >
+                <template #id-data="{ row }">
+                  <span
+                    v-if="row.id !== 'empty'"
+                    class="font-bold font-mono"
+                  >{{ row.idLabel }}</span>
+                  <UBadge
+                    v-else
+                    :label="row.idLabel"
+                    :ui="{ rounded: 'rounded-full' }"
+                    color="gray"
+                  />
+                </template>
+              </UTable>
+            </UCard>
 
             <!-- Share sales data -->
             <UCard
@@ -424,9 +296,7 @@
               }"
             >
               <template #header>
-                <h4 class="text-sm font-bold font-mono">
-                  {{ $t('form.share_sales_data') }}
-                </h4>
+                <h4 class="text-sm font-bold font-mono" v-text="$t('form.share_sales_data')" />
                 <div class="flex gap-2">
                   <UInput
                     v-model="moderatorWalletInput"
@@ -471,84 +341,28 @@
               </UTable>
             </UCard>
 
-            <!-- DRM -->
-            <UCard :ui="{ body: { base: 'space-y-8' } }">
-              <template #header>
-                <h3 class="font-bold font-mono">
-                  DRM Options / 數位版權管理選項
-                </h3>
-              </template>
-
-              <div class="grid md:grid-cols-2 gap-4">
-                <UFormGroup
-                  :label="$t('form.force_nft_claim')"
-                  :ui="{ label: { base: 'font-mono font-bold' } }"
-                >
-                  <UCheckbox
-                    v-model="mustClaimToView"
-                    name="mustClaimToView"
-                    :label="$t('form.must_claim_to_view')"
-                  />
-                </UFormGroup>
-
-                <UFormGroup
-                  :label="$t('form.disable_file_download')"
-                  :ui="{ label: { base: 'font-mono font-bold' } }"
-                >
-                  <UCheckbox
-                    v-model="hideDownload"
-                    name="hideDownload"
-                    :label="$t('form.disable_download')"
-                  />
-                </UFormGroup>
-
-                <UFormGroup
-                  :label="$t('form.custom_message_page')"
-                  :ui="{ label: { base: 'font-mono font-bold' } }"
-                >
-                  <UCheckbox
-                    v-model="enableCustomMessagePage"
-                    name="enableCustomMessagePage"
-                    :label="$t('form.enable_custom_message')"
-                  />
-                </UFormGroup>
-              </div>
-            </UCard>
-
             <!-- Copy Purchase Link -->
             <UCard
               :ui="{ body: { base: 'space-y-4' } }"
             >
               <template #header>
-                <h3 class="font-bold font-mono">
-                  {{ $t('form.copy_purchase_link') }}
-                </h3>
+                <h3 class="font-bold font-mono" v-text="$t('form.copy_purchase_link')" />
               </template>
 
-              <div>
-                <UToggle v-model="useLikerLandPurchaseLink" />
-                {{ $t('form.use_liker_land_link') }}
-              </div>
-
-              <UFormGroup :label="$t('form.price')" :required="true">
+              <UFormGroup :label="$t('form.edition')">
                 <USelect v-model="priceIndex" :options="priceIndexOptions" />
               </UFormGroup>
 
-              <UFormGroup :label="$t('form.sales_channel_for_links')" :hint="$t('common.optional')">
+              <UFormGroup :label="$t('form.sales_channel_for_links')">
                 <UInput v-model="fromChannelInput" placeholder="Channel ID(s), separated by commas (e.g. store01, store02)" />
               </UFormGroup>
 
               <UCard
                 v-if="purchaseLinks.length > 1"
-                :ui="{
-                  header: { base: 'flex justify-between items-center' },
-                  body: { padding: '' },
-                }"
+                :ui="{ header: { base: 'flex justify-between items-center' }, body: { padding: '' } }"
               >
                 <template #header>
-                  <h4 class="text-sm font-bold font-mono">
-                    {{ $t('purchase_link.download_all_links') }}
-                  </h4>
+                  <h4 class="text-sm font-bold font-mono" v-text="$t('purchase_link.download_all_links')" />
 
                   <UDropdown
                     :items="[
@@ -652,15 +466,17 @@
               </div>
             </UCard>
           </div>
+          <div class="flex items-center justify-center w-full mt-4">
+            <UButton
+              :label="$t('common.save')"
+              :loading="isLoading"
+              size="lg"
+              :disabled="isLoading"
+              @click="updateSettings"
+            />
+          </div>
         </template>
       </UCard>
-      <UButton
-        :label="$t('common.save')"
-        :loading="isLoading"
-        size="lg"
-        :disabled="isLoading"
-        @click="updateSettings"
-      />
     </template>
 
     <UModal v-model="isOpenQRCodeModal">
@@ -672,9 +488,7 @@
         :height="500"
       >
         <template #header>
-          <h3 class="font-bold font-mono">
-            {{ $t('purchase_link.download_qr_modal') }}
-          </h3>
+          <h3 class="font-bold font-mono" v-text="$t('purchase_link.download_qr_modal')" />
           <UButton
             icon="i-heroicons-x-mark"
             color="gray"
@@ -704,6 +518,8 @@ import { shortenWalletAddress } from '~/utils/cosmos'
 import { getApiEndpoints } from '~/constant/api'
 const { t: $t } = useI18n()
 
+const MAX_EDITION_COUNT = 2
+
 const { CHAIN_EXPLORER_URL, BOOK3_URL, LIKE_CO_API } = useRuntimeConfig().public
 const store = useWalletStore()
 const bookstoreApiStore = useBookstoreApiStore()
@@ -730,7 +546,7 @@ const prices = ref<any[]>([])
 const isUpdatingPricesOrder = ref(false)
 const ordersData = ref<any>({})
 const shouldShowAdvanceSettings = ref<boolean>(false)
-const showEditISCNModal = ref(false)
+const showEditISCN = ref(false)
 
 // Search
 const searchInput = ref('')
@@ -911,7 +727,7 @@ function getStatusLabel (purchaseListItem: any) {
       return 'Paid'
 
     case 'pendingNFT':
-      return 'Pending NFT'
+      return $t('status.pendingNFT')
 
     case 'completed':
       return $t('status.completed')
@@ -991,11 +807,6 @@ const moderatorWalletsTableRows = computed(() => moderatorWallets.value.map((wal
     walletLink: getPortfolioURL(wallet)
   }
 }))
-
-const notificationEmailsTableRows = computed(() => notificationEmails.value?.map((email, index) => ({
-  index,
-  email
-})))
 
 function normalizeChannelId (channelId: string) {
   switch (channelId) {
@@ -1199,29 +1010,6 @@ function addModeratorWallet () {
   if (!moderatorWalletInput.value) { return }
   moderatorWallets.value.push(moderatorWalletInput.value)
   moderatorWalletInput.value = ''
-}
-
-function addNotificationEmail () {
-  if (!notificationEmailInput.value) { return }
-  notificationEmails.value.push(notificationEmailInput.value)
-  notificationEmailInput.value = ''
-}
-
-async function handleSaveStripeConnectWallet (wallet: any) {
-  connectedWallets.value = {
-    [wallet]: 100
-  }
-  stripeConnectWallet.value = wallet
-  try {
-    await updateBookListingSetting(classId.value as string, {
-      connectedWallets: connectedWallets.value
-    })
-  } catch (err) {
-    const errorData = (err as any).data || err
-    error.value = errorData
-  } finally {
-    shouldDisableStripeConnectSetting.value = true
-  }
 }
 
 async function updateSettings () {

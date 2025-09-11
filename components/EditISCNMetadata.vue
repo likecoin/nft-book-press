@@ -222,7 +222,6 @@ async function handleSave () {
       }]
     })
     const receipt = await waitForTransactionReceipt({ hash: txHash })
-    console.log(receipt)
     if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
     toast.add({
       title: 'ISCN updated successfully',
@@ -234,7 +233,6 @@ async function handleSave () {
       classId: props.classId,
       metadata
     })
-    handleClickBack()
   } catch (error) {
     toast.add({
       title: 'Failed to update ISCN',
