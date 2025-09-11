@@ -298,7 +298,6 @@ import {
   DEFAULT_PRICE_STRING,
   USD_PRICING_OPTIONS,
   DEFAULT_MAX_SUPPLY,
-  DEFAULT_PRICE,
   MINIMAL_PRICE
 } from '~/constant'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
@@ -459,7 +458,7 @@ onMounted(async () => {
               throw new Error('Edition not found')
             }
             prices.value = [{
-              price: currentEdition.price,
+              price: currentEdition.price?.toString(),
               deliveryMethod: currentEdition.isAutoDeliver ? 'auto' : 'manual',
               autoMemo: currentEdition.autoMemo,
               stock: currentEdition.stock,
@@ -476,7 +475,7 @@ onMounted(async () => {
             throw new Error('No prices found')
           }
         } else {
-          prices.value[0].price = DEFAULT_PRICE
+          prices.value[0].price = DEFAULT_PRICE_STRING
         }
         otherExistingStock.value = classResData.prices.reduce((acc: number, price: any) => {
           if (price.index.toString() !== editionIndex.value) {
