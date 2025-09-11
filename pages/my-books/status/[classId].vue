@@ -106,56 +106,55 @@
               </th>
             </tr>
           </thead>
-          <Draggable
-            v-model="prices"
-            tag="tbody"
-            item-key="index"
-            handle="td.cursor-grab"
-            drag-class="bg-white"
-            ghost-class="opacity-20"
-            :disabled="!userIsOwner || isUpdatingPricesOrder"
-            @end="handlePriceReorder"
-          >
-            <template #item="{ element }">
-              <tr>
-                <td
-                  v-if="userIsOwner && prices.length > 1"
-                  class="px-3 py-4 text-center cursor-grab"
-                >
-                  <UIcon
-                    name="i-heroicons-arrows-up-down"
-                    color="gray"
-                  />
-                </td>
-                <td class="px-3 py-4">
-                  <h4 class="font-medium" v-text="element.name.zh" />
-                </td>
-                <td class="px-3 py-4">
-                  <h4
-                    class="font-medium"
-                    v-text="element.isAutoDeliver ? $t('form.auto_delivery') : $t('form.manual_delivery')"
-                  />
-                </td>
-                <td :class="['px-3', 'py-4', 'text-right']">
-                  {{ element.isAutoDeliver ? $t('form.auto_stock') : element.stock }}
-                </td>
-                <td class="px-3 py-4 text-right">
-                  {{ element.price }}
-                </td>
-                <td class="text-center">
+          <tbody>
+            <tr v-for="(element, index) in prices" :key="element.index">
+              <td
+                v-if="userIsOwner && prices.length > 1"
+                class="px-3 py-4 text-center"
+              >
+                <div class="flex flex-col gap-1">
                   <UButton
-                    icon="i-heroicons-document"
-                    :to="localeRoute({
-                      name: 'my-books-status-classId-edit-editionIndex',
-                      params: { classId, editionIndex: element.index }
-                    })"
-                    variant="soft"
+                    class="justify-center"
+                    :icon="index === 0 ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-up'"
+                    variant="ghost"
                     color="gray"
+                    size="xs"
+                    :label="String(index + 1)"
+                    :disabled="isUpdatingPricesOrder || (index === 0 && index === prices.length - 1)"
+                    :loading="isUpdatingPricesOrder"
+                    trailing
+                    @click="index === 0 ? movePriceDown(index) : movePriceUp(index)"
                   />
-                </td>
-              </tr>
-            </template>
-          </Draggable>
+                </div>
+              </td>
+              <td class="px-3 py-4">
+                <h4 class="font-medium" v-text="element.name.zh" />
+              </td>
+              <td class="px-3 py-4">
+                <h4
+                  class="font-medium"
+                  v-text="element.isAutoDeliver ? $t('form.auto_delivery') : $t('form.manual_delivery')"
+                />
+              </td>
+              <td :class="['px-3', 'py-4', 'text-right']">
+                {{ element.isAutoDeliver ? $t('form.auto_stock') : element.stock }}
+              </td>
+              <td class="px-3 py-4 text-right">
+                {{ element.price }}
+              </td>
+              <td class="text-center">
+                <UButton
+                  icon="i-heroicons-document"
+                  :to="localeRoute({
+                    name: 'my-books-status-classId-edit-editionIndex',
+                    params: { classId, editionIndex: element.index }
+                  })"
+                  variant="soft"
+                  color="gray"
+                />
+              </td>
+            </tr>
+          </tbody>
         </table>
         <template #footer>
           <div class="flex justify-end items-center ">
@@ -508,7 +507,6 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import Draggable from 'vuedraggable'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useWalletStore } from '~/stores/wallet'
@@ -912,31 +910,39 @@ async function calculateStock () {
   unassignedStock.value = Math.max((Number(count) - manuallyDeliveredNFTs - pendingNFTCount) || 0, 0)
 }
 
-async function handlePriceReorder ({
-  newIndex: newOrder,
-  oldIndex: oldOrder
-}: any) {
-  if (newOrder === oldOrder) {
-    return
-  }
+async function movePriceUp (index: number) {
+  if (index === 0) { return }
+  await movePrice(index, index - 1)
+}
+
+async function movePriceDown (index: number) {
+  if (index === prices.value.length - 1) { return }
+  await movePrice(index, index + 1)
+}
+
+async function movePrice (fromIndex: number, toIndex: number) {
   try {
     isUpdatingPricesOrder.value = true
-    const priceIndex = prices.value[newOrder].index
+
+    const newPrices = [...prices.value]
+    const [movedItem] = newPrices.splice(fromIndex, 1)
+    newPrices.splice(toIndex, 0, movedItem)
+    const priceIndex = prices.value[fromIndex].index
     await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}/price/${priceIndex}/order`, {
       method: 'PUT',
       headers: {
         authorization: `Bearer ${token.value}`
       },
       body: {
-        order: newOrder
+        order: toIndex
       }
     })
-    prices.value = prices.value.map((p, order) => ({ ...p, order }))
+    prices.value = newPrices.map((p, order) => ({ ...p, order }))
     classListingInfo.value.prices = prices.value
     toast.add({
       icon: 'i-heroicons-check-circle',
       title: 'Updated editions order successfully',
-      timeout: 0,
+      timeout: 2000,
       color: 'green'
     })
   } catch (err) {
