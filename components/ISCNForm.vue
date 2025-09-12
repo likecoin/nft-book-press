@@ -243,6 +243,8 @@
 </template>
 
 <script setup lang="ts">
+import type { ISCNFormData } from '~/utils/iscn.type'
+
 import { licenseOptions, languageOptions, MAX_DESCRIPTION_LENGTH } from '~/constant/index'
 import { useFileUpload } from '~/composables/useFileUpload'
 import { getApiEndpoints } from '~/constant/api'
@@ -254,32 +256,6 @@ const downloadTypeOptions = [
   { label: 'Image', value: 'image' },
   { label: 'Other', value: 'other' }
 ]
-
-interface ISCNFormData {
-  type: string
-  title: string
-  description: string
-  isbn: string
-  publisher: string
-  publicationDate: string
-  author: {
-    name: string
-    description: string
-    url?: string
-  }
-  license: string
-  customLicense: string
-  contentFingerprints: Array<{ url: string }>
-  downloadableUrls: Array<{
-    url: string
-    type: string
-    fileName: string
-  }>
-  language: string
-  bookInfoUrl: string
-  tags: string[]
-  coverUrl: string
-}
 
 const shouldShowUploadModal = ref(false)
 const uploadFormRef = ref()

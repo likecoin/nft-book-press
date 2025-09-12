@@ -17,3 +17,29 @@ export interface ISCNRegisterPayload {
   thumbnailUrl?: string;
   isbn?: string;
 }
+
+export interface ISCNFormData {
+  type: string
+  title: string
+  description: string
+  isbn: string
+  publisher: string
+  publicationDate: string
+  author: {
+    name: string
+    description: string
+    url?: string
+  }
+  license: string
+  customLicense: string
+  contentFingerprints: Array<{ url: string }>
+  downloadableUrls: Array<{
+    url: string
+    type: string
+    fileName: string
+  }>
+  language: string
+  bookInfoUrl: string
+  tags: string[]
+  coverUrl: string
+}

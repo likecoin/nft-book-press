@@ -25,6 +25,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useWriteContract } from '@wagmi/vue'
+import type { ISCNFormData } from '~/utils/iscn.type'
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
 import { DEFAULT_MAX_SUPPLY } from '~/constant'
 
@@ -51,7 +52,7 @@ const classData = ref({} as any)
 const isSaving = ref(false)
 const isISCNLoading = ref(false)
 
-const iscnFormData = ref({
+const iscnFormData = ref<ISCNFormData>({
   type: 'Book',
   title: '',
   description: '',
