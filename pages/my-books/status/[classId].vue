@@ -83,79 +83,56 @@
           </div>
         </template>
 
-        <table class="w-full divide-y text-sm">
-          <thead class="border-b-2">
-            <tr class="text-left">
-              <th v-if="userIsOwner && prices.length > 1" class="px-3 py-4 text-center">
-                {{ $t('table.sort') }}
-              </th>
-              <th class="px-3 py-4">
-                {{ $t('table.name') }}
-              </th>
-              <th class="px-3 py-4">
-                {{ $t('table.delivery') }}
-              </th>
-              <th class="px-3 py-4 text-right">
-                {{ $t('table.stock') }}
-              </th>
-              <th class="px-3 py-4 text-right">
-                {{ $t('table.price_usd') }}
-              </th>
-              <th v-if="userIsOwner" class="px-3 py-4 text-center">
-                {{ $t('table.details') }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(element, index) in prices" :key="element.index">
-              <td
-                v-if="userIsOwner && prices.length > 1"
-                class="px-3 py-4 text-center"
-              >
-                <div class="flex flex-col gap-1">
-                  <UButton
-                    class="justify-center"
-                    :icon="index === 0 ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-up'"
-                    variant="ghost"
-                    color="gray"
-                    size="xs"
-                    :label="String(index + 1)"
-                    :disabled="isUpdatingPricesOrder || (index === 0 && index === prices.length - 1)"
-                    :loading="isUpdatingPricesOrder"
-                    trailing
-                    @click="index === 0 ? movePriceDown(index) : movePriceUp(index)"
-                  />
-                </div>
-              </td>
-              <td class="px-3 py-4">
-                <h4 class="font-medium" v-text="element.name.zh" />
-              </td>
-              <td class="px-3 py-4">
-                <h4
-                  class="font-medium"
-                  v-text="element.isAutoDeliver ? $t('form.auto_delivery') : $t('form.manual_delivery')"
-                />
-              </td>
-              <td :class="['px-3', 'py-4', 'text-right']">
-                {{ element.isAutoDeliver ? $t('form.auto_stock') : element.stock }}
-              </td>
-              <td class="px-3 py-4 text-right">
-                {{ element.price }}
-              </td>
-              <td class="text-center">
-                <UButton
-                  icon="i-heroicons-document"
-                  :to="localeRoute({
-                    name: 'my-books-status-classId-edit-editionIndex',
-                    params: { classId, editionIndex: element.index }
-                  })"
-                  variant="soft"
-                  color="gray"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <UTable
+          :columns="editionsTableColumns"
+          :rows="editionsTableRows"
+        >
+          <template #sort-data="{ row }">
+            <div v-if="userIsOwner && prices.length > 1" class="flex flex-col gap-1">
+              <UButton
+                :icon="row.originalIndex === 0 ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-up'"
+                variant="ghost"
+                color="gray"
+                size="xs"
+                :label="String(row.originalIndex + 1)"
+                :disabled="isUpdatingPricesOrder || (row.originalIndex === 0 && row.originalIndex === prices.length - 1)"
+                :loading="isUpdatingPricesOrder"
+                trailing
+                @click="row.originalIndex === 0 ? movePriceDown(row.originalIndex) : movePriceUp(row.originalIndex)"
+              />
+            </div>
+          </template>
+          <template #name-data="{ row }">
+            <h4 class="font-medium" v-text="row.name.zh" />
+          </template>
+          <template #delivery-data="{ row }">
+            <h4
+              class="font-medium"
+              v-text="row.isAutoDeliver ? $t('form.auto_delivery') : $t('form.manual_delivery')"
+            />
+          </template>
+          <template #stock-data="{ row }">
+            <span class="text-right">
+              {{ row.isAutoDeliver ? $t('form.auto_stock') : row.stock }}
+            </span>
+          </template>
+          <template #price-data="{ row }">
+            <span class="text-right">
+              {{ row.price }}
+            </span>
+          </template>
+          <template #details-data="{ row }">
+            <UButton
+              icon="i-heroicons-document"
+              :to="localeRoute({
+                name: 'my-books-status-classId-edit-editionIndex',
+                params: { classId, editionIndex: row.index }
+              })"
+              variant="soft"
+              color="gray"
+            />
+          </template>
+        </UTable>
         <template #footer>
           <div class="flex justify-end items-center ">
             <UButton
@@ -827,6 +804,32 @@ const priceIndexOptions = computed(() => classListingInfo.value.prices?.map((p: 
   label: `${p.name.en || p.name} - $${p.price}`,
   value: index,
   disabled: index === priceIndex.value
+})))
+
+const editionsTableColumns = computed(() => {
+  const columns = []
+
+  if (userIsOwner.value && prices.value.length > 1) {
+    columns.push({ key: 'sort', label: $t('table.sort'), sortable: false })
+  }
+
+  columns.push(
+    { key: 'name', label: $t('table.name'), sortable: false },
+    { key: 'delivery', label: $t('table.delivery'), sortable: false },
+    { key: 'stock', label: $t('table.stock'), sortable: false },
+    { key: 'price', label: $t('table.price_usd'), sortable: false }
+  )
+
+  if (userIsOwner.value) {
+    columns.push({ key: 'details', label: $t('table.details'), sortable: false })
+  }
+
+  return columns
+})
+
+const editionsTableRows = computed(() => prices.value.map((element: any, index: number) => ({
+  ...element,
+  originalIndex: index
 })))
 
 watch(isLoading, (newIsLoading) => {
