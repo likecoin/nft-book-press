@@ -83,6 +83,8 @@
   "common.yes": "Yes",
   "copy.description_template": "Copy #{copyNumber} of {nftName}",
   "copy.name_template": "{nftName} #{copyNumber}",
+  "edit_iscn.update_failed": "An error occurred while updating metadata",
+  "edit_iscn.update_success": "Metadata updated successfully",
   "edit_iscn_modal.cancel": "Cancel",
   "errors.add_moderator_wallet": "Please press Add button to add moderator wallet",
   "errors.add_notification_email": "Please press Add button to add notification email",

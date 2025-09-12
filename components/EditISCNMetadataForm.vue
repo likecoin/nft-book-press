@@ -220,7 +220,7 @@ async function handleSave () {
     const receipt = await waitForTransactionReceipt({ hash: txHash })
     if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
     toast.add({
-      title: 'ISCN updated successfully',
+      title: $t('edit_iscn.update_success'),
       color: 'blue'
     })
     await nftStore.fetchClassMetadataById(props.classId)
@@ -231,7 +231,7 @@ async function handleSave () {
     })
   } catch (error) {
     toast.add({
-      title: 'Failed to update ISCN',
+      title: $t('edit_iscn.update_failed'),
       description: (error as Error).message,
       color: 'red'
     })
