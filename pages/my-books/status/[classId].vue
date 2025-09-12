@@ -54,7 +54,7 @@
           />
         </div>
         <template v-if="showEditISCN">
-          <EditISCNMetadata
+          <EditISCNMetadataForm
             :class-id="classId"
             @iscn-updated="handleISCNUpdated"
           />
