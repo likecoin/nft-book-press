@@ -1,34 +1,5 @@
 <template>
   <PageBody class="space-y-10 pb-10">
-    <div class="flex justify-between gap-4">
-      <h1 class="text-lg font-bold font-mono flex-wrap">
-        {{ $t('pages.nft_book_status') }} "{{ nftClassName || classId }}"
-      </h1>
-
-      <div class="flex justify-center items-center gap-2 flex-wrap">
-        <UButton
-          class="font-mono break-all"
-          :label="$t('buttons.gift_books')"
-          icon="i-heroicons-gift"
-          :to="localeRoute({
-            name: 'nft-book-store-gift-classId',
-            params: { classId }
-          })"
-          color="pink"
-          variant="outline"
-          target="_blank"
-        />
-
-        <UButton
-          :label="$t('buttons.view_in_3ook')"
-          icon="i-heroicons-arrow-top-right-on-square"
-          variant="outline"
-          :to="`${BOOK3_URL}/store/${classId}`"
-          target="_blank"
-        />
-      </div>
-    </div>
-
     <UAlert
       v-if="error"
       icon="i-heroicons-exclamation-triangle"
@@ -50,52 +21,127 @@
         :ui="{
           header: { base: 'flex justify-between items-center' },
           body: { padding: '12px' },
+          ring: showEditISCN ? 'ring-2 ring-gray-500' : 'ring-1 ring-gray-200',
         }"
       >
         <div class="flex justify-between items-center w-full">
-          <h3 class="font-bold font-mono">
-            {{ $t('pages.book_details_metadata') }}
-          </h3>
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold font-mono" v-text="nftClassName || classId" />
+            <ULink
+              :to="`${BOOK3_URL}/store/${classId}`"
+              class="flex items-center"
+              target="_blank"
+            >
+              <UIcon
+                name="i-heroicons-arrow-top-right-on-square"
+                size="xl"
+              />
+            </ULink>
+          </div>
           <UButton
-            :label="$t('buttons.view_edit')"
-            @click="showEditISCNModal = true"
+            color="gray"
+            variant="ghost"
+            trailing
+            :label="$t('form.edit_iscn_metadata')"
+            :icon="
+              showEditISCN
+                ? 'i-heroicons-chevron-up'
+                : 'i-heroicons-chevron-down'
+            "
+            @click="
+              () => {showEditISCN = !showEditISCN}
+            "
           />
         </div>
+        <template v-if="showEditISCN">
+          <EditISCNMetadataForm
+            :class-id="classId"
+            @iscn-updated="handleISCNUpdated"
+          />
+        </template>
       </UCard>
 
       <UCard :ui="{ body: { padding: '' } }">
         <template #header>
-          <h3 class="font-bold font-mono">
-            {{ $t('pages.book_listing_status') }}
-          </h3>
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold font-mono" v-text="$t('pages.editions')" />
+            <div class="flex justify-between items-center gap-4">
+              <UButton
+                icon="i-heroicons-plus"
+                class="mb-[12px]"
+                variant="outline"
+                :color="prices.length >= MAX_EDITION_COUNT ? 'gray' : 'primary'"
+                :disabled="prices.length >= MAX_EDITION_COUNT"
+                :label="$t('form.add_edition')"
+                :to="localeRoute({
+                  name: 'my-books-status-classId-edit-new',
+                  params: { classId },
+                  query: { price_index: prices.length }
+                })"
+              />
+            </div>
+          </div>
         </template>
 
         <UTable
-          :columns="[
-            { key: 'pendingAction', label: $t('table.pending_action') },
-            { key: 'sold', label: $t('table.sold') },
-            { key: 'stock', label: $t('table.stock') },
-          ]"
-          :rows="[
-            {
-              pendingAction: classListingInfo.pendingNFTCount || 0,
-              sold: classListingInfo.sold || 0,
-              stock: classListingInfo.stock || 0
-            },
-          ]"
+          :columns="editionsTableColumns"
+          :rows="editionsTableRows"
         >
-          <template #pendingAction-data="{ row }">
-            <UBadge
-              v-if="row.pendingAction"
-              :label="`${row.pendingAction}`"
-              color="red"
-              :ui="{ rounded: 'rounded-full' }"
+          <template #sort-data="{ row }">
+            <div v-if="userIsOwner && prices.length > 1" class="flex flex-col gap-1">
+              <UButton
+                :icon="row.originalIndex === 0 ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-up'"
+                variant="ghost"
+                color="gray"
+                size="xs"
+                :label="String(row.originalIndex + 1)"
+                :disabled="isUpdatingPricesOrder || (row.originalIndex <= 0 && row.originalIndex >= prices.length - 1)"
+                :loading="isUpdatingPricesOrder"
+                trailing
+                @click="row.originalIndex === 0 ? movePriceDown(row.originalIndex) : movePriceUp(row.originalIndex)"
+              />
+            </div>
+          </template>
+          <template #name-data="{ row }">
+            <h4 class="font-medium" v-text="row.name.zh" />
+          </template>
+          <template #delivery-data="{ row }">
+            <h4
+              class="font-medium"
+              v-text="row.isAutoDeliver ? $t('form.auto_delivery') : $t('form.manual_delivery')"
             />
-            <template v-else>
-              {{ row.pendingAction }}
-            </template>
+          </template>
+          <template #stock-data="{ row }">
+            <span class="text-right">
+              {{ row.isAutoDeliver ? $t('form.auto_stock') : row.stock }}
+            </span>
+          </template>
+          <template #price-data="{ row }">
+            <span class="text-right">
+              {{ row.price }}
+            </span>
+          </template>
+          <template #details-data="{ row }">
+            <UButton
+              icon="i-heroicons-document"
+              :to="localeRoute({
+                name: 'my-books-status-classId-edit-editionIndex',
+                params: { classId, editionIndex: row.index }
+              })"
+              variant="soft"
+              color="gray"
+            />
           </template>
         </UTable>
+        <template #footer>
+          <div class="flex justify-end items-center ">
+            <UButton
+              icon="i-heroicons-plus"
+              :label="$t('buttons.mint_new_stock')"
+              @click="handleOpenRestockModal"
+            />
+          </div>
+        </template>
       </UCard>
 
       <UCard
@@ -105,9 +151,7 @@
         }"
       >
         <template #header>
-          <h3 class="font-bold font-mono">
-            {{ $t('pages.orders') }}
-          </h3>
+          <h3 class="font-bold font-mono" v-text="$t('pages.orders')" />
 
           <UInput v-model="searchInput" icon="i-heroicons-magnifying-glass-20-solid" :placeholder="$t('status_page.search_placeholder')" />
         </template>
@@ -166,225 +210,6 @@
         </UTable>
       </UCard>
 
-      <UCard :ui="{ body: { padding: '' } }">
-        <template #header>
-          <div class="flex justify-between items-center">
-            <h3 class="font-bold font-mono">
-              {{ $t('pages.editions') }}
-            </h3>
-            <div class="flex justify-between items-center gap-4">
-              <div>
-                {{ $t('table.unassigned_stock') }} : {{ unassignedStock }}
-              </div>
-              <UButton
-                icon="i-heroicons-plus-circle"
-                :label="$t('buttons.mint_new_stock')"
-                @click="handleOpenRestockModal"
-              />
-            </div>
-          </div>
-        </template>
-
-        <table class="w-full divide-y text-sm">
-          <thead class="border-b-2">
-            <tr class="text-left">
-              <th class="px-3 py-4">
-                {{ $t('table.order') }}
-              </th>
-              <th class="px-3 py-4">
-                {{ $t('table.name') }}
-              </th>
-              <th class="px-3 py-4 text-right">
-                {{ $t('table.stock') }}
-              </th>
-              <th class="px-3 py-4 text-right">
-                {{ $t('table.price_usd') }}
-              </th>
-              <th v-if="userIsOwner && prices.length > 1" class="px-3 py-4 text-center">
-                {{ $t('table.sort') }}
-              </th>
-              <th v-if="userIsOwner" class="px-3 py-4 text-center">
-                {{ $t('table.details') }}
-              </th>
-            </tr>
-          </thead>
-          <Draggable
-            v-model="prices"
-            tag="tbody"
-            item-key="index"
-            handle="td.cursor-grab"
-            drag-class="bg-white"
-            ghost-class="opacity-20"
-            :disabled="!userIsOwner || isUpdatingPricesOrder"
-            @end="handlePriceReorder"
-          >
-            <template #item="{ element, index }">
-              <tr>
-                <td class="px-3 py-4">
-                  {{ index + 1 }}
-                </td>
-                <td class="px-3 py-4">
-                  <template v-if="typeof element.name === 'object'">
-                    <UCard :ui="{ body: { padding: '' } }">
-                      <UTable
-                        :columns="[{ key: 'locale', label: $t('table.locale') }, { key: 'content', label: $t('table.content') }]"
-                        :rows="Object.entries(element.name).map(([locale, content]) => ({ locale, content }))"
-                      >
-                        <template #locale-data="{ row }">
-                          <UBadge
-                            :label="row.locale"
-                            variant="subtle"
-                            :ui="{
-                              font: 'font-mono',
-                              rounded: 'rounded-full',
-                            }"
-                          />
-                        </template>
-                      </UTable>
-                    </UCard>
-                  </template>
-                  <template v-else>
-                    {{ element.name }}
-                  </template>
-                </td>
-                <td :class="['px-3', 'py-4', 'text-right', { 'text-red-500': element.stock <= 3 }]">
-                  {{ element.stock }}
-                </td>
-                <td class="px-3 py-4 text-right">
-                  {{ element.price }}
-                </td>
-                <td
-                  v-if="userIsOwner && prices.length > 1"
-                  class="px-3 py-4 text-center cursor-grab"
-                >
-                  <UIcon
-                    name="i-heroicons-arrows-up-down"
-                    color="gray"
-                  />
-                </td>
-                <td class="text-center">
-                  <UButton
-                    icon="i-heroicons-document-magnifying-glass"
-                    :to="localeRoute({
-                      name: 'nft-book-store-status-classId-edit-editionIndex',
-                      params: { classId, editionIndex: element.index }
-                    })"
-                    variant="soft"
-                    color="gray"
-                  />
-                </td>
-              </tr>
-            </template>
-          </Draggable>
-        </table>
-        <div class="flex justify-center items-center ">
-          <UButton
-            icon="i-heroicons-plus-circle"
-            class="mb-[12px]"
-            :label="$t('form.add_edition')"
-            :to="localeRoute({
-              name: 'nft-book-store-status-classId-edit-new',
-              params: { classId },
-              query: { price_index: prices.length }
-            })"
-          />
-        </div>
-      </UCard>
-
-      <StripeConnectCard
-        v-if="userIsOwner"
-        v-model:is-stripe-connect-checked="isStripeConnectChecked"
-        v-model:is-using-default-account="isUsingDefaultAccount"
-        :stripe-connect-wallet="stripeConnectWallet"
-        :should-disable-setting="shouldDisableStripeConnectSetting"
-        :login-address="wallet"
-
-        @save="handleSaveStripeConnectWallet"
-      />
-
-      <UCard
-        :ui="{
-          header: { base: 'flex justify-between items-center' },
-          body: { padding: '' }
-        }"
-      >
-        <template #header>
-          <h4 class="text-sm font-bold font-mono">
-            {{ $t('form.email_notifications') }}
-          </h4>
-
-          <div class="flex gap-2">
-            <UInput
-              v-model="notificationEmailInput"
-              placeholder="abc@example.com"
-            />
-
-            <UButton
-              label="Add"
-              :variant="notificationEmailInput ? 'outline' : 'solid'"
-              :color="notificationEmailInput ? 'primary' : 'gray'"
-              :disabled="!notificationEmailInput"
-              @click="addNotificationEmail"
-            />
-          </div>
-        </template>
-
-        <UTable
-          :columns="[{ key: 'email', label: $t('common.email'), sortable: true }, { key: 'action' }]"
-          :rows="notificationEmailsTableRows"
-        >
-          <template #email-data="{ row }">
-            <UButton
-              :label="row.email"
-              :to="`mailto:${row.email}`"
-              variant="link"
-              :padded="false"
-            />
-          </template>
-
-          <template #action-data="{ row }">
-            <div class="flex justify-end items-center">
-              <UButton
-                icon="i-heroicons-x-mark"
-                variant="soft"
-                color="red"
-                @click="() => notificationEmails.splice(row.index, 1)"
-              />
-            </div>
-          </template>
-        </UTable>
-      </UCard>
-
-      <UCard :ui="{ body: { padding: '' } }">
-        <template #header>
-          <h3 class="font-bold font-mono">
-            {{ $t('pages.sales_channel_summary') }}
-          </h3>
-        </template>
-
-        <UTable
-          :columns="[
-            { key: 'id', label: $t('table.channel_id'), sortable: true },
-            { key: 'count', label: $t('table.count'), sortable: true },
-            { key: 'totalUSD', label: $t('table.total_usd'), sortable: true },
-          ]"
-          :rows="salesChannelTableRows"
-        >
-          <template #id-data="{ row }">
-            <span
-              v-if="row.id !== 'empty'"
-              class="font-bold font-mono"
-            >{{ row.idLabel }}</span>
-            <UBadge
-              v-else
-              :label="row.idLabel"
-              :ui="{ rounded: 'rounded-full' }"
-              color="gray"
-            />
-          </template>
-        </UTable>
-      </UCard>
-
       <UCard
         :ui="{
           header: { base: 'flex justify-between items-center' },
@@ -392,9 +217,7 @@
         }"
       >
         <div class="flex justify-between items-center w-full">
-          <h3 class="font-bold font-mono">
-            {{ $t('nft_book_form.advanced_settings') }}
-          </h3>
+          <h3 class="font-bold font-mono" v-text="$t('nft_book_form.advanced_settings')" />
           <UButton
             color="gray"
             variant="ghost"
@@ -412,9 +235,34 @@
         </div>
         <template v-if="shouldShowAdvanceSettings">
           <div class="mt-[24px] flex flex-col gap-[12px]">
-            <UFormGroup :label="$t('form.table_of_content')">
-              <UTextarea v-model="tableOfContents" />
-            </UFormGroup>
+            <!-- Share channel summary -->
+            <UCard :ui="{ body: { padding: '' } }">
+              <template #header>
+                <h3 class="font-bold font-mono" v-text="$t('pages.sales_channel_summary')" />
+              </template>
+
+              <UTable
+                :columns="[
+                  { key: 'id', label: $t('table.channel_id'), sortable: true },
+                  { key: 'count', label: $t('table.count'), sortable: true },
+                  { key: 'totalUSD', label: $t('table.total_usd'), sortable: true },
+                ]"
+                :rows="salesChannelTableRows"
+              >
+                <template #id-data="{ row }">
+                  <span
+                    v-if="row.id !== 'empty'"
+                    class="font-bold font-mono"
+                  >{{ row.idLabel }}</span>
+                  <UBadge
+                    v-else
+                    :label="row.idLabel"
+                    :ui="{ rounded: 'rounded-full' }"
+                    color="gray"
+                  />
+                </template>
+              </UTable>
+            </UCard>
 
             <!-- Share sales data -->
             <UCard
@@ -424,9 +272,7 @@
               }"
             >
               <template #header>
-                <h4 class="text-sm font-bold font-mono">
-                  {{ $t('form.share_sales_data') }}
-                </h4>
+                <h4 class="text-sm font-bold font-mono" v-text="$t('form.share_sales_data')" />
                 <div class="flex gap-2">
                   <UInput
                     v-model="moderatorWalletInput"
@@ -471,84 +317,28 @@
               </UTable>
             </UCard>
 
-            <!-- DRM -->
-            <UCard :ui="{ body: { base: 'space-y-8' } }">
-              <template #header>
-                <h3 class="font-bold font-mono">
-                  DRM Options / 數位版權管理選項
-                </h3>
-              </template>
-
-              <div class="grid md:grid-cols-2 gap-4">
-                <UFormGroup
-                  :label="$t('form.force_nft_claim')"
-                  :ui="{ label: { base: 'font-mono font-bold' } }"
-                >
-                  <UCheckbox
-                    v-model="mustClaimToView"
-                    name="mustClaimToView"
-                    :label="$t('form.must_claim_to_view')"
-                  />
-                </UFormGroup>
-
-                <UFormGroup
-                  :label="$t('form.disable_file_download')"
-                  :ui="{ label: { base: 'font-mono font-bold' } }"
-                >
-                  <UCheckbox
-                    v-model="hideDownload"
-                    name="hideDownload"
-                    :label="$t('form.disable_download')"
-                  />
-                </UFormGroup>
-
-                <UFormGroup
-                  :label="$t('form.custom_message_page')"
-                  :ui="{ label: { base: 'font-mono font-bold' } }"
-                >
-                  <UCheckbox
-                    v-model="enableCustomMessagePage"
-                    name="enableCustomMessagePage"
-                    :label="$t('form.enable_custom_message')"
-                  />
-                </UFormGroup>
-              </div>
-            </UCard>
-
             <!-- Copy Purchase Link -->
             <UCard
               :ui="{ body: { base: 'space-y-4' } }"
             >
               <template #header>
-                <h3 class="font-bold font-mono">
-                  {{ $t('form.copy_purchase_link') }}
-                </h3>
+                <h3 class="font-bold font-mono" v-text="$t('form.copy_purchase_link')" />
               </template>
 
-              <div>
-                <UToggle v-model="useLikerLandPurchaseLink" />
-                {{ $t('form.use_liker_land_link') }}
-              </div>
-
-              <UFormGroup :label="$t('form.price')" :required="true">
+              <UFormGroup :label="$t('form.edition')">
                 <USelect v-model="priceIndex" :options="priceIndexOptions" />
               </UFormGroup>
 
-              <UFormGroup :label="$t('form.sales_channel_for_links')" :hint="$t('common.optional')">
+              <UFormGroup :label="$t('form.sales_channel_for_links')">
                 <UInput v-model="fromChannelInput" placeholder="Channel ID(s), separated by commas (e.g. store01, store02)" />
               </UFormGroup>
 
               <UCard
                 v-if="purchaseLinks.length > 1"
-                :ui="{
-                  header: { base: 'flex justify-between items-center' },
-                  body: { padding: '' },
-                }"
+                :ui="{ header: { base: 'flex justify-between items-center' }, body: { padding: '' } }"
               >
                 <template #header>
-                  <h4 class="text-sm font-bold font-mono">
-                    {{ $t('purchase_link.download_all_links') }}
-                  </h4>
+                  <h4 class="text-sm font-bold font-mono" v-text="$t('purchase_link.download_all_links')" />
 
                   <UDropdown
                     :items="[
@@ -652,22 +442,18 @@
               </div>
             </UCard>
           </div>
+          <div class="flex items-center justify-center w-full mt-4">
+            <UButton
+              :label="$t('common.save')"
+              :loading="isLoading"
+              size="lg"
+              :disabled="isLoading"
+              @click="updateSettings"
+            />
+          </div>
         </template>
       </UCard>
-      <UButton
-        :label="$t('common.save')"
-        :loading="isLoading"
-        size="lg"
-        :disabled="isLoading"
-        @click="updateSettings"
-      />
     </template>
-
-    <EditISCNMetadataModal
-      v-model="showEditISCNModal"
-      :class-id="classId"
-      @iscn-updated="handleISCNUpdated"
-    />
 
     <UModal v-model="isOpenQRCodeModal">
       <QRCodeGenerator
@@ -678,9 +464,7 @@
         :height="500"
       >
         <template #header>
-          <h3 class="font-bold font-mono">
-            {{ $t('purchase_link.download_qr_modal') }}
-          </h3>
+          <h3 class="font-bold font-mono" v-text="$t('purchase_link.download_qr_modal')" />
           <UButton
             icon="i-heroicons-x-mark"
             color="gray"
@@ -700,7 +484,6 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import Draggable from 'vuedraggable'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
 import { useWalletStore } from '~/stores/wallet'
@@ -709,6 +492,8 @@ import { getPortfolioURL, downloadFile, convertArrayOfObjectsToCSV, getPurchaseL
 import { shortenWalletAddress } from '~/utils/cosmos'
 import { getApiEndpoints } from '~/constant/api'
 const { t: $t } = useI18n()
+
+const MAX_EDITION_COUNT = 2
 
 const { CHAIN_EXPLORER_URL, BOOK3_URL, LIKE_CO_API } = useRuntimeConfig().public
 const store = useWalletStore()
@@ -736,7 +521,7 @@ const prices = ref<any[]>([])
 const isUpdatingPricesOrder = ref(false)
 const ordersData = ref<any>({})
 const shouldShowAdvanceSettings = ref<boolean>(false)
-const showEditISCNModal = ref(false)
+const showEditISCN = ref(false)
 
 // Search
 const searchInput = ref('')
@@ -876,7 +661,7 @@ function getOrdersTableActionItems (purchaseListItem: any) {
       label: 'Send NFT',
       icon: 'i-heroicons-paper-airplane',
       to: localeRoute({
-        name: 'nft-book-store-send-classId',
+        name: 'my-books-send-classId',
         params: {
           classId: purchaseListItem.classId
         },
@@ -917,7 +702,7 @@ function getStatusLabel (purchaseListItem: any) {
       return 'Paid'
 
     case 'pendingNFT':
-      return 'Pending NFT'
+      return $t('status.pendingNFT')
 
     case 'completed':
       return $t('status.completed')
@@ -998,11 +783,6 @@ const moderatorWalletsTableRows = computed(() => moderatorWallets.value.map((wal
   }
 }))
 
-const notificationEmailsTableRows = computed(() => notificationEmails.value?.map((email, index) => ({
-  index,
-  email
-})))
-
 function normalizeChannelId (channelId: string) {
   switch (channelId) {
     case 'empty':
@@ -1024,6 +804,32 @@ const priceIndexOptions = computed(() => classListingInfo.value.prices?.map((p: 
   label: `${p.name.en || p.name} - $${p.price}`,
   value: index,
   disabled: index === priceIndex.value
+})))
+
+const editionsTableColumns = computed(() => {
+  const columns = []
+
+  if (userIsOwner.value && prices.value.length > 1) {
+    columns.push({ key: 'sort', label: $t('table.sort'), sortable: false })
+  }
+
+  columns.push(
+    { key: 'name', label: $t('table.name'), sortable: false },
+    { key: 'delivery', label: $t('table.delivery'), sortable: false },
+    { key: 'stock', label: $t('table.stock'), sortable: false },
+    { key: 'price', label: $t('table.price_usd'), sortable: false }
+  )
+
+  if (userIsOwner.value) {
+    columns.push({ key: 'details', label: $t('table.details'), sortable: false })
+  }
+
+  return columns
+})
+
+const editionsTableRows = computed(() => prices.value.map((element: any, index: number) => ({
+  ...element,
+  originalIndex: index
 })))
 
 watch(isLoading, (newIsLoading) => {
@@ -1107,31 +913,39 @@ async function calculateStock () {
   unassignedStock.value = Math.max((Number(count) - manuallyDeliveredNFTs - pendingNFTCount) || 0, 0)
 }
 
-async function handlePriceReorder ({
-  newIndex: newOrder,
-  oldIndex: oldOrder
-}: any) {
-  if (newOrder === oldOrder) {
-    return
-  }
+async function movePriceUp (index: number) {
+  if (index <= 0) { return }
+  await movePrice(index, index - 1)
+}
+
+async function movePriceDown (index: number) {
+  if (index >= prices.value.length - 1) { return }
+  await movePrice(index, index + 1)
+}
+
+async function movePrice (fromIndex: number, toIndex: number) {
   try {
     isUpdatingPricesOrder.value = true
-    const priceIndex = prices.value[newOrder].index
+
+    const newPrices = [...prices.value]
+    const [movedItem] = newPrices.splice(fromIndex, 1)
+    newPrices.splice(toIndex, 0, movedItem)
+    const priceIndex = prices.value[fromIndex].index
     await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}/price/${priceIndex}/order`, {
       method: 'PUT',
       headers: {
         authorization: `Bearer ${token.value}`
       },
       body: {
-        order: newOrder
+        order: toIndex
       }
     })
-    prices.value = prices.value.map((p, order) => ({ ...p, order }))
+    prices.value = newPrices.map((p, order) => ({ ...p, order }))
     classListingInfo.value.prices = prices.value
     toast.add({
       icon: 'i-heroicons-check-circle',
       title: 'Updated editions order successfully',
-      timeout: 0,
+      timeout: 2000,
       color: 'green'
     })
   } catch (err) {
@@ -1207,29 +1021,6 @@ function addModeratorWallet () {
   moderatorWalletInput.value = ''
 }
 
-function addNotificationEmail () {
-  if (!notificationEmailInput.value) { return }
-  notificationEmails.value.push(notificationEmailInput.value)
-  notificationEmailInput.value = ''
-}
-
-async function handleSaveStripeConnectWallet (wallet: any) {
-  connectedWallets.value = {
-    [wallet]: 100
-  }
-  stripeConnectWallet.value = wallet
-  try {
-    await updateBookListingSetting(classId.value as string, {
-      connectedWallets: connectedWallets.value
-    })
-  } catch (err) {
-    const errorData = (err as any).data || err
-    error.value = errorData
-  } finally {
-    shouldDisableStripeConnectSetting.value = true
-  }
-}
-
 async function updateSettings () {
   try {
     if (moderatorWalletInput.value) {
@@ -1253,7 +1044,7 @@ async function updateSettings () {
       enableCustomMessagePage: enableCustomMessagePage.value
     })
     await navigateTo(localeRoute({
-      name: 'nft-book-store'
+      name: 'my-books'
     }))
   } catch (err) {
     const errorData = (err as any).data || err

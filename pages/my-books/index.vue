@@ -36,70 +36,24 @@
             }"
           >
             <template #header>
-              <h2 class="font-bold font-mono">
-                {{ item.label }}
-              </h2>
-              <UInput v-model="searchInput" icon="i-heroicons-magnifying-glass-20-solid" :placeholder="$t('table.search_placeholder')" />
-            </template>
-
-            <!-- Header and Action buttons -->
-            <div class="flex justify-between items-center w-full px-4 py-3">
-              <div class="flex items-center gap-1.5">
-                <span class="text-sm">{{ $t('table.rows_per_page') }}</span>
-
-                <USelect
-                  v-model="tableRowsPerPage"
-                  :options="tableRowsPerPageOptions"
-                  class="me-2 w-20"
-                  size="xs"
-                />
-              </div>
-
-              <div class="flex gap-1.5 items-center">
-                <USelectMenu
-                  v-model="selectedTableColumns"
-                  :options="tableColumns"
-                  multiple
-                >
-                  <UButton
-                    class="min-w-[180px]"
-                    :label="$t('table.columns')"
-                    icon="i-heroicons-view-columns"
-                    color="gray"
-                    size="xs"
+              <div class="flex justify-between items-center w-full">
+                <div class="flex gap-2 items-center">
+                  <UPagination
+                    v-model="tablePage"
+                    :page-count="tableRowsPerPage"
+                    :total="tableRows.length"
                   />
-                </USelectMenu>
-
-                <UButton
-                  icon="i-heroicons-funnel"
-                  :label="$t('table.reset')"
-                  color="gray"
-                  size="xs"
-                  :disabled="!searchInput"
-                  @click="searchInput = ''"
-                />
+                  <span class="text-sm leading-5">
+                    {{ $t('table.showing_rows', { from: tablePageRowFrom, to: tablePageRowTo, total: tableRows.length }) }}
+                  </span>
+                </div>
+                <UInput v-model="searchInput" icon="i-heroicons-magnifying-glass-20-solid" :placeholder="$t('table.search_placeholder')" />
               </div>
-            </div>
-
-            <!-- Number of rows & Pagination -->
-            <div class="flex flex-wrap justify-between items-center w-full px-4 py-3">
-              <div>
-                <span class="text-sm leading-5">
-                  {{ $t('table.showing_rows', { from: tablePageRowFrom, to: tablePageRowTo, total: tableRows.length }) }}
-                </span>
-              </div>
-
-              <UPagination
-                v-model="tablePage"
-                :page-count="tableRowsPerPage"
-                :total="tableRows.length"
-              />
-            </div>
-
+            </template>
             <!-- Table -->
             <UTable
               v-model:sort="sort"
-              :columns="selectedTableColumns"
+              :columns="tableColumns"
               :rows="paginatedTableRows"
               @select="selectTableRow"
             >
@@ -183,8 +137,7 @@ const sort = ref({
 })
 
 // Pagination
-const tableRowsPerPageOptions = [5, 10, 20, 50]
-const tableRowsPerPage = ref(tableRowsPerPageOptions[1])
+const tableRowsPerPage = ref(50)
 
 const tablePage = ref(1)
 const tablePageRowFrom = computed(() => (tablePage.value - 1) * tableRowsPerPage.value + 1)
@@ -224,10 +177,9 @@ const paginatedTableRows = computed(() => {
 // Columns
 const tableColumns = computed(() => [
   {
-    key: 'classId',
-    label: $t('bookstore.class_id'),
-    sortable: true,
-    class: 'font-mono'
+    key: 'pendingAction',
+    label: $t('table.pending_action'),
+    sortable: true
   },
   {
     key: 'className',
@@ -240,18 +192,17 @@ const tableColumns = computed(() => [
     sortable: true
   },
   {
-    key: 'pendingAction',
-    label: $t('table.pending_action'),
-    sortable: true
-  },
-  {
     key: 'sold',
     label: $t('table.sold'),
     sortable: true
+  },
+  {
+    key: 'classId',
+    label: $t('bookstore.class_id'),
+    sortable: true,
+    class: 'font-mono'
   }
 ])
-
-const selectedTableColumns = ref(tableColumns.value.slice(1, tableColumns.value.length))
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
@@ -279,7 +230,7 @@ onMounted(async () => {
 
 async function selectTableRow (row: any) {
   await navigateTo(localeRoute({
-    name: 'nft-book-store-status-classId',
+    name: 'my-books-status-classId',
     params: { classId: row.classId }
   }))
 }

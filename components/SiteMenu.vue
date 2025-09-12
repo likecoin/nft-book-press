@@ -72,7 +72,7 @@ const items = computed(() => [
       {
         label: $t('menu.manage_book_listings'),
         icon: 'i-heroicons-rectangle-stack',
-        to: localeRoute({ name: 'nft-book-store' }),
+        to: localeRoute({ name: 'my-books' }),
         exact: true,
         badge: getTotalPendingNFTCount.value
       }
@@ -84,7 +84,7 @@ const items = computed(() => [
       {
         label: $t('menu.user_settings'),
         icon: 'i-heroicons-user-group',
-        to: localeRoute({ name: 'nft-book-store-user' }),
+        to: localeRoute({ name: 'my-books-user' }),
         exact: true
       },
       {
