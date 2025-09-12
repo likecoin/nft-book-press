@@ -95,7 +95,7 @@
                 color="gray"
                 size="xs"
                 :label="String(row.originalIndex + 1)"
-                :disabled="isUpdatingPricesOrder || (row.originalIndex === 0 && row.originalIndex === prices.length - 1)"
+                :disabled="isUpdatingPricesOrder || (row.originalIndex <= 0 && row.originalIndex >= prices.length - 1)"
                 :loading="isUpdatingPricesOrder"
                 trailing
                 @click="row.originalIndex === 0 ? movePriceDown(row.originalIndex) : movePriceUp(row.originalIndex)"
@@ -914,12 +914,12 @@ async function calculateStock () {
 }
 
 async function movePriceUp (index: number) {
-  if (index === 0) { return }
+  if (index <= 0) { return }
   await movePrice(index, index - 1)
 }
 
 async function movePriceDown (index: number) {
-  if (index === prices.value.length - 1) { return }
+  if (index >= prices.value.length - 1) { return }
   await movePrice(index, index + 1)
 }
 
