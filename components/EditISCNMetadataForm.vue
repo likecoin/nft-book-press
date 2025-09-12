@@ -85,14 +85,13 @@ const { payload, getFileTypeFromMime } = useISCN({ iscnFormData, iscnChainData }
 const formError = computed(() => validateISCNForm(iscnFormData.value))
 const isFormValid = computed(() => !formError.value?.length)
 
-watchEffect(async () => {
-  if (props.classId) {
-    try {
-      isISCNLoading.value = true
-      if (props.classId) {
-        classData.value = await nftStore.lazyFetchClassMetadataById(
-          props.classId
-        )
+watch(
+  () => props.classId,
+  async (newClassId: string) => {
+    if (newClassId) {
+      try {
+        isISCNLoading.value = true
+        classData.value = await nftStore.lazyFetchClassMetadataById(newClassId)
         const metadata = classData.value
 
         // Parse sameAs URLs into downloadableUrls
@@ -132,7 +131,7 @@ watchEffect(async () => {
             description: metadata.author?.description || ''
           },
           license: metadata.usageInfo || 'All Rights Reserved',
-          contentFingerprints: metadata.contentFingerprints.map((url: string) => ({
+          contentFingerprints: metadata.contentFingerprints?.map((url: string) => ({
             url
           })) || [{ url: '' }],
           downloadableUrls,
@@ -142,14 +141,15 @@ watchEffect(async () => {
           tags,
           coverUrl: metadata.thumbnailUrl || ''
         }
+      } catch (error) {
+        console.error('Error fetching ISCN data:', error)
+      } finally {
+        isISCNLoading.value = false
       }
-    } catch (error) {
-      console.error('Error fetching ISCN data:', error)
-    } finally {
-      isISCNLoading.value = false
     }
-  }
-})
+  },
+  { immediate: true }
+)
 
 function parseDownloadableUrl (url: string) {
   try {
