@@ -6,14 +6,12 @@
       'top-0',
 
       'flex',
-      'items-center',
+      'items-end',
       'gap-4',
 
       'min-h-[64px]',
 
       'bg-white dark:bg-gray-900',
-      'border-b',
-      'border-gray-200 dark:border-gray-800',
     ]"
   >
     <slot />
