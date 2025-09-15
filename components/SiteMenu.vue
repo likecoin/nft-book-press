@@ -96,33 +96,6 @@ const items = computed(() => [
     ]
   },
   {
-    label: $t('menu.sales_tools'),
-    links: [
-      {
-        label: $t('menu.create_purchase_link'),
-        icon: 'i-heroicons-link',
-        to: localeRoute({ name: 'purchase-link' }),
-        exact: true
-      },
-      {
-        label: $t('menu.bookstore_pos'),
-        icon: 'i-heroicons-shopping-cart',
-        to: localeRoute({ name: 'sales-pos' }),
-        exact: true
-      },
-      {
-        label: $t('menu.batch_create_qr_codes'),
-        icon: 'i-heroicons-qr-code',
-        to: localeRoute({ name: 'batch-qrcode' }),
-        target: '_blank'
-      },
-      {
-        label: $t('menu.batch_create_short_links'),
-        icon: 'i-heroicons-link',
-        to: localeRoute({ name: 'batch-short-links' })
-      }
-    ]
-  }, {
     label: $t('menu.help'),
     links: [
       {
