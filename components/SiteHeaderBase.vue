@@ -6,7 +6,7 @@
       'top-0',
 
       'flex',
-      'items-end',
+      'items-center',
       'gap-4',
 
       'min-h-[64px]',
