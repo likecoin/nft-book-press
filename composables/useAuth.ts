@@ -14,13 +14,13 @@ export function useAuth () {
 
   const isAuthenticating = ref(false)
 
-  const onAuthenticate = async (method = 0) => {
+  const onAuthenticate = async (connectorId = 'magic') => {
     try {
       isAuthenticating.value = true
       setupPostAuthRedirect()
 
       if (!wallet.value || !signer.value) {
-        await connect(method)
+        await connect(connectorId)
       }
       if (!wallet.value || !signer.value) {
         return

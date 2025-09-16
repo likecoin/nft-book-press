@@ -18,10 +18,13 @@ export const useWalletStore = defineStore('wallet', () => {
     }
   }
 
-  async function connect (index = 0) {
+  async function connect (connectorId = 'magic') {
     const { IS_TESTNET } = useRuntimeConfig().public
     const chainId = IS_TESTNET ? optimismSepolia.id : optimism.id
-    const connector = connectors[index]
+    const connector = connectors.find(
+      (c: { id: string }) => c.id === connectorId
+    )
+    if (!connector) { return }
     await wagmiConnect({ connector, chainId })
   }
 

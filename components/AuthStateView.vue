@@ -36,51 +36,16 @@
     <div v-else class="flex flex-col gap-4">
       <div class="flex gap-2">
         <UButton
-          class="w-1/2"
+          class="w-full"
           :label="$t('auth_state.login')"
-          icon="i-heroicons-envelope"
           color="primary"
           size="lg"
           :loading="isAuthenticating"
           :disabled="isRestoringSession"
           block
-          @click="onAuthenticate(0)"
-        />
-        <UButton
-          class="w-1/2"
-          :label="$t('auth_state.wallet')"
-          icon="i-heroicons-wallet"
-          color="primary"
-          size="lg"
-          :loading="isAuthenticating"
-          :disabled="isRestoringSession"
-          block
-          @click="onAuthenticate(1)"
+          @click="showLoginPanel = true"
         />
       </div>
-
-      <UAlert
-        v-if="showMigrateAlert"
-        :ui="{ actions: 'justify-end' }"
-        icon="i-heroicons-exclamation-circle"
-        color="orange"
-        variant="soft"
-        :description="$t('auth_state.migration_notice')"
-        :actions="[
-          {
-            label: $t('auth_state.close'),
-            color: 'gray',
-            variant: 'ghost',
-            click: closeMigrateAlert,
-          },
-          {
-            label: $t('auth_state.migrate'),
-            color: 'orange',
-            variant: 'outline',
-            click: onClickMigrate,
-          }
-        ]"
-      />
     </div>
     <UModal
       v-model="showLoginPanel"
@@ -111,7 +76,6 @@ const bookstoreApiStore = useBookstoreApiStore()
 const { clearSession } = bookstoreApiStore
 const { isRestoringSession } = storeToRefs(bookstoreApiStore)
 const { isAuthenticating, onAuthenticate } = useAuth()
-const { show: showMigrateAlert, close: closeMigrateAlert } = useOneTimePopup('bookPressMigrateAlert:v3')
 
 const { LIKECOIN_V3_BOOK_MIGRATION_SITE_URL } = useRuntimeConfig().public
 const migrationURL = appendUTMParamsToURL({
@@ -121,6 +85,14 @@ const migrationURL = appendUTMParamsToURL({
 })
 
 const portfolioURL = computed(() => getPortfolioURL(wallet.value))
+const showLoginPanel = ref(false)
+
+// Auto close modal when authenticated
+watch(() => bookstoreApiStore.isAuthenticated, (isAuthenticated: boolean) => {
+  if (isAuthenticated && showLoginPanel.value) {
+    showLoginPanel.value = false
+  }
+})
 
 function onClickDisconnect () {
   disconnect()
@@ -131,9 +103,5 @@ function onClickCopy () {
   if (wallet.value) {
     copyToClipboard(wallet.value)
   }
-}
-
-function onClickMigrate () {
-  window.open(migrationURL, '_blank', 'noopener noreferrer')
 }
 </script>
