@@ -33,17 +33,47 @@
     </USlideover>
 
     <slot />
+
+    <UModal
+      v-model="bookstoreApiStore.showLoginPanel"
+      :close="{ onClick: () => bookstoreApiStore.closeLoginPanel() }"
+      :ui="{ width: '!max-w-[348px]' }"
+    >
+      <LoginPanel
+        :migration-url="migrationURL"
+        @connect="onAuthenticate"
+      />
+    </UModal>
   </div>
 </template>
 
 <script setup>
+import { useBookstoreApiStore } from '~/stores/book-store-api'
+import { useAuth } from '~/composables/useAuth'
+import { appendUTMParamsToURL } from '~/utils/index'
+
 const { isNavigationCollapsed } = useAppLayout()
+const bookstoreApiStore = useBookstoreApiStore()
+const { onAuthenticate } = useAuth()
 
 const colorMode = useColorMode()
 if (colorMode.value !== 'light') {
   colorMode.preference = 'light'
 }
 
+const { LIKECOIN_V3_BOOK_MIGRATION_SITE_URL } = useRuntimeConfig().public
+const migrationURL = appendUTMParamsToURL({
+  url: LIKECOIN_V3_BOOK_MIGRATION_SITE_URL,
+  medium: 'login',
+  campaign: 'migration'
+})
+
 const isSlideoverOpen = ref(false)
 
+// Auto close modal when authenticated
+watch(() => bookstoreApiStore.isAuthenticated, (isAuthenticated) => {
+  if (isAuthenticated && bookstoreApiStore.showLoginPanel) {
+    bookstoreApiStore.closeLoginPanel()
+  }
+})
 </script>
