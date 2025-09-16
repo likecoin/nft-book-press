@@ -82,6 +82,16 @@
         ]"
       />
     </div>
+    <UModal
+      v-model="showLoginPanel"
+      :close="{ onClick: () => showLoginPanel = false }"
+      :ui="{ width: '!max-w-[348px]' }"
+    >
+      <LoginPanel
+        :migration-url="migrationURL"
+        @connect="onAuthenticate"
+      />
+    </UModal>
   </div>
 </template>
 

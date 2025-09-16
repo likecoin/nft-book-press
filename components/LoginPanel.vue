@@ -1,0 +1,98 @@
+<template>
+  <div class="p-6 pt-8 rounded-[20px] bg-white shadow-[0_4px_4px_0_rgba(0,0,0,0.02)]">
+    <div class="flex flex-col items-center">
+      <AppLogo class="h-8" />
+      <h2
+        class="mt-[48px] text-theme-500 text-2xl font-bold"
+        v-text="$t('login_panel_title')"
+      />
+    </div>
+    <UButton
+      class="mt-6"
+      icon="i-material-symbols-mail-outline-rounded"
+      size="lg"
+      block
+      color="black"
+      @click="handleConnect('magic')"
+    >
+      <span class="grow mr-[28px]" v-text="$t('login_panel_continue_with_email')" />
+    </UButton>
+
+    <template v-if="othersConnectors.length">
+      <UDivider
+        class="my-4"
+        :label="$t('login_panel_or_separator')"
+        :ui="{ label: 'text-neutral-400' }"
+      />
+
+      <ul class="flex flex-col gap-2">
+        <li
+          v-for="connector in othersConnectors"
+          :key="connector.id"
+          type="button"
+        >
+          <UButton
+            variant="soft"
+            color="black"
+            size="lg"
+            block
+            :ui="{ base: 'border border-neutral-300' }"
+            @click="handleConnect(connector.id)"
+          >
+            <template #leading>
+              <LoginConnectorIcon
+                class="w-5 h-5"
+                :connector-id="connector.id"
+                :alt="connector.name"
+              />
+            </template>
+            <span class="grow mr-[28px]" v-text="connector.name" />
+          </UButton>
+        </li>
+      </ul>
+    </template>
+
+    <i18n-t
+      class="mt-6 text-sm text-center font-bold"
+      keypath="login_panel_migration_notice"
+      tag="p"
+    >
+      <template #here>
+        <ULink
+          class="text-primary-600 border-b border-[currentColor]"
+          :to="props.migrationUrl"
+          target="_blank"
+        >
+          {{ $t('login_panel_migration_notice_here') }}
+        </ULink>
+      </template>
+    </i18n-t>
+
+    <UAlert
+      v-if="error"
+      class="mt-4"
+      :description="error?.message"
+      variant="subtle"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useConnect } from '@wagmi/vue'
+
+const emit = defineEmits<{ connect: [any] }>()
+
+const props = defineProps<{
+  migrationUrl?: string
+}>()
+
+const { t: $t } = useI18n()
+const { connectors, error } = useConnect()
+
+const othersConnectors = computed(() => connectors.filter(c => !['magic', 'injected'].includes(c.id)))
+
+function handleConnect (connectorId = '') {
+  emit('connect', connectorId)
+}
+
+</script>
