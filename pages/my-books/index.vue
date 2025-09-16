@@ -1,5 +1,9 @@
 <template>
-  <PageBody :ui="{ constrained: '' }">
+  <PageBody
+    :ui="{
+      constrained: '',
+      base: !bookstoreApiStore.isAuthenticated ? 'bg-[#131313]' : '' }"
+  >
     <UAlert
       v-if="error"
       class="mt-4"
@@ -17,9 +21,11 @@
       </template>
     </UProgress>
 
-    <UCard :ui="{ header: { base: 'flex justify-between items-center gap-4' } }">
+    <UCard
+      v-if="bookstoreApiStore.isAuthenticated"
+      :ui="{ header: { base: 'flex justify-between items-center gap-4' } }"
+    >
       <UTabs
-        v-if="bookstoreApiStore.isAuthenticated"
         v-model="selectedTabItemIndex"
         class="w-full"
         :items="tabItems"
@@ -88,6 +94,38 @@
         </template>
       </UTabs>
     </UCard>
+    <div v-if="!bookstoreApiStore.isAuthenticated" class="flex flex-col justify-center items-center h-full bg-[#131313] space-y-12 max-w-[480px] mx-auto">
+      <img
+        src="~/assets/images/3ook-no-padding.png"
+        alt="3ook full logo"
+        class="w-full object-contain"
+      >
+      <i18n-t
+        class="text-center text-lg text-gray-300"
+        keypath="my_books_login_to_view"
+        tag="h3"
+      >
+        <template #link>
+          <ULink
+            class="text-gray-400"
+            :to="BOOK3_URL"
+          >
+            {{ $t('my_books_3ook') }}
+          </ULink>
+        </template>
+      </i18n-t>
+      <div class="flex justify-center w-[120px]">
+        <UButton
+          :label="$t('auth_state.login')"
+          color="gray"
+          size="lg"
+          block
+          :loading="isAuthenticating"
+          :disabled="isRestoringSession"
+          @click="bookstoreApiStore.openLoginPanel()"
+        />
+      </div>
+    </div>
   </PageBody>
 </template>
 
@@ -95,15 +133,18 @@
 import { storeToRefs } from 'pinia'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useNftStore } from '~/stores/nft'
+import { useAuth } from '~/composables/useAuth'
 
 const route = useRoute()
 const localeRoute = useLocaleRoute()
 const { t: $t } = useI18n()
 const bookstoreApiStore = useBookstoreApiStore()
 const nftStore = useNftStore()
-const { listingList: bookList, moderatedBookList, token } = storeToRefs(bookstoreApiStore)
+const { listingList: bookList, moderatedBookList, token, isRestoringSession } = storeToRefs(bookstoreApiStore)
 const { lazyFetchClassMetadataById } = nftStore
 const { fetchBookListing, fetchModeratedBookList } = bookstoreApiStore
+const { isAuthenticating } = useAuth()
+const { BOOK3_URL } = useRuntimeConfig().public
 
 const error = ref('')
 const isLoading = ref(false)

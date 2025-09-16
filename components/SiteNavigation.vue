@@ -1,6 +1,6 @@
 <template>
   <nav class="flex flex-col overflow-y-auto">
-    <SiteHeaderBase class="w-full px-5">
+    <SiteHeaderBase class="w-full px-5 py-4">
       <AppLogo />
       <UBadge
         v-if="isTestnet"
@@ -11,11 +11,11 @@
         :ui="{ rounded: 'rounded-full', font: 'font-mono' }"
       />
     </SiteHeaderBase>
-    <div class="flex flex-col gap-4 grow w-full p-5 overflow-y-auto">
+    <div class="flex flex-col gap-4 grow w-full p-3 overflow-y-auto">
       <SiteMenu />
     </div>
 
-    <AuthStateView class="p-5 border-t border-gray-200 dark:border-gray-800" />
+    <AuthStateView class="p-5 dark:border-gray-800" />
   </nav>
 </template>
 
