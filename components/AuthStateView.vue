@@ -42,7 +42,7 @@ const { userLikerInfo, isFetchingUserLikerInfo } = storeToRefs(userStore)
 
 onMounted(async () => {
   if (bookstoreApiStore.isAuthenticated) {
-    await userStore.fetchUserLikerInfo({ nocache: true })
+    await userStore.fetchUserLikerInfo()
   }
 })
 
