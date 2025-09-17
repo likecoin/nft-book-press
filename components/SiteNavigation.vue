@@ -1,7 +1,7 @@
 <template>
   <nav class="flex flex-col overflow-y-auto">
-    <SiteHeaderBase class="w-full px-5 py-4">
-      <AppLogo />
+    <SiteHeaderBase class="w-full px-5 py-2 justify-start">
+      <AppLogo :height="32" />
       <UBadge
         v-if="isTestnet"
         :label="$t('app.testnet')"

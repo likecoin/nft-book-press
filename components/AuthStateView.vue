@@ -8,10 +8,10 @@
           <USkeleton class="h-4 w-[200px]" />
         </div>
       </div>
-      <div v-else class="flex flex-col justify-center items-center gap-2">
-        <UAvatar v-if="userLikerInfo" :src="userLikerInfo?.avatar" size="md" />
+      <div v-else class="flex flex-col justify-center items-center gap-1">
+        <UAvatar v-if="userLikerInfo" :src="userLikerInfo?.avatar" size="sm" />
         <p
-          class="font-mono text-sm truncate font-semibold text-gray-600"
+          class="font-mono text-sm truncate text-gray-600"
           v-text="userLikerInfo?.displayName || userLikerInfo?.user || wallet"
         />
       </div>
@@ -25,20 +25,6 @@
         @click="onClickDisconnect"
       />
     </template>
-    <div v-else class="flex flex-col gap-4">
-      <div class="flex gap-2">
-        <UButton
-          class="w-full"
-          :label="$t('auth_state.login')"
-          color="black"
-          size="lg"
-          :loading="isAuthenticating"
-          :disabled="isRestoringSession"
-          block
-          @click="bookstoreApiStore.openLoginPanel()"
-        />
-      </div>
-    </div>
   </div>
 </template>
 
@@ -47,7 +33,6 @@ import { storeToRefs } from 'pinia'
 import { useWalletStore } from '~/stores/wallet'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { useUserStore } from '~/stores/user'
-import { useAuth } from '~/composables/useAuth'
 const { t: $t } = useI18n()
 
 const store = useWalletStore()
@@ -55,8 +40,6 @@ const { wallet } = storeToRefs(store)
 const { disconnect } = store
 const bookstoreApiStore = useBookstoreApiStore()
 const { clearSession } = bookstoreApiStore
-const { isRestoringSession } = storeToRefs(bookstoreApiStore)
-const { isAuthenticating } = useAuth()
 const userStore = useUserStore()
 const { userLikerInfo, isFetchingUserLikerInfo } = storeToRefs(userStore)
 
