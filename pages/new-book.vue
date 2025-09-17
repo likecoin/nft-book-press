@@ -11,8 +11,8 @@ const { t: $t } = useI18n()
 const route = useRoute()
 
 useSeoMeta({
-  title: () => $t('latest_books.title'),
-  ogTitle: () => $t('latest_books.title')
+  title: () => $t('seo_titles.publish_nft_book'),
+  ogTitle: () => $t('seo_titles.publish_nft_book')
 })
 
 </script>

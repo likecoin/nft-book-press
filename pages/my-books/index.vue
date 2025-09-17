@@ -17,9 +17,10 @@
       </template>
     </UProgress>
 
-    <UCard :ui="{ header: { base: 'flex justify-between items-center gap-4' } }">
+    <UCard
+      :ui="{ header: { base: 'flex justify-between items-center gap-4' } }"
+    >
       <UTabs
-        v-if="bookstoreApiStore.isAuthenticated"
         v-model="selectedTabItemIndex"
         class="w-full"
         :items="tabItems"

@@ -1,26 +1,40 @@
 <template>
   <PageBody
     v-if="!bookstoreApiStore.isAuthenticated"
-    :ui="{ base: 'flex flex-col justify-center items-center grow w-auto' }"
+    :ui="{ base: 'flex flex-col justify-center items-center grow w-screen bg-[#131313] !max-w-full' }"
   >
-    <UAlert
-      icon="i-heroicons-light-bulb"
-      color="amber"
-      variant="subtle"
-      :title="$t('auth.signin_required')"
-      :description="$t('auth.signin_description')"
-      :ui="{ wrapper: 'w-auto', inner: 'w-auto', title: 'font-bold' }"
-    />
-    <UButton
-      class="block lg:hidden"
-      :label="$t('auth.signin')"
-      icon="i-heroicons-arrow-right-on-rectangle"
-      color="primary"
-      :loading="isAuthenticating"
-      :disabled="isRestoringSession"
-      block
-      @click="onAuthenticate"
-    />
+    <div class="flex flex-col justify-center items-center h-full space-y-12 max-w-[480px] mx-auto">
+      <img
+        src="~/assets/images/3ook-no-padding.png"
+        alt="3ook full logo"
+        class="w-full object-contain"
+      >
+      <i18n-t
+        class="text-center text-lg text-gray-300"
+        keypath="my_books_login_to_view"
+        tag="h3"
+      >
+        <template #link>
+          <ULink
+            class="text-gray-400"
+            :to="BOOK3_URL"
+          >
+            {{ $t('my_books_3ook') }}
+          </ULink>
+        </template>
+      </i18n-t>
+      <div class="flex justify-center w-[120px]">
+        <UButton
+          :ui="{base:'!bg-[#50E3C2] !text-black hover:!bg-[#40caa8]'}"
+          :label="$t('auth_state.login')"
+          size="lg"
+          block
+          :loading="isAuthenticating"
+          :disabled="isRestoringSession"
+          @click="bookstoreApiStore.openLoginPanel()"
+        />
+      </div>
+    </div>
   </PageBody>
   <slot v-else />
 </template>
@@ -33,6 +47,7 @@ const { t: $t } = useI18n()
 
 const bookstoreApiStore = useBookstoreApiStore()
 const { isRestoringSession } = storeToRefs(bookstoreApiStore)
-const { isAuthenticating, onAuthenticate } = useAuth()
+const { isAuthenticating } = useAuth()
+const { BOOK3_URL } = useRuntimeConfig().public
 
 </script>

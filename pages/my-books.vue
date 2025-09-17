@@ -1,7 +1,5 @@
 <template>
   <PageContainer :key="route.path">
-    <PageHeader :title="$t('publish_nft_book.page_title')" />
-
     <AuthRequiredView>
       <NuxtPage />
     </AuthRequiredView>
@@ -13,8 +11,8 @@ const { t: $t } = useI18n()
 const route = useRoute()
 
 useSeoMeta({
-  title: () => $t('seo_titles.publish_nft_book'),
-  ogTitle: () => $t('seo_titles.publish_nft_book')
+  title: () => $t('seo_titles.book_listing_management'),
+  ogTitle: () => $t('seo_titles.book_listing_management')
 })
 
 </script>
