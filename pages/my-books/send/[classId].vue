@@ -158,6 +158,7 @@
         <img
           v-if="nftImage"
           class="max-w-[180px] w-full h-full object-contain"
+          alt="preview"
           :src="nftImage"
         >
       </PlaceholderCard>

@@ -2,6 +2,7 @@
   <img
     v-if="src"
     :src="src"
+    :alt="`${connectorId} Icon`"
   >
   <span v-else />
 </template>

@@ -11,6 +11,7 @@
   >
     <img
       v-if="mimeType.startsWith('image/')"
+      alt="File preview"
       :class="['w-full', 'h-auto', 'object-contain', 'rounded-[8px]']"
       :src="props.fileData"
     >

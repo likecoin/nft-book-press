@@ -53,6 +53,7 @@
                 v-if="row.image"
                 class="w-[64px] object-contain rounded-sm"
                 :src="row.image"
+                alt="Item image"
               >
 
               <div class="flex flex-col justify-start">
