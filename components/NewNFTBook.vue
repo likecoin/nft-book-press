@@ -353,7 +353,6 @@ const hasMultiplePrices = computed(() => prices.value.length > 1)
 const moderatorWallets = ref<string[]>([
   'like1rclg677y2jqt8x4ylj0kjlqjjmnn6w63uflpgr'
 ])
-const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
@@ -688,7 +687,6 @@ async function submitNewClass () {
       defaultPaymentCurrency: 'USD',
       connectedWallets,
       moderatorWallets: moderatorWallets.value,
-      notificationEmails: notificationEmails.value,
       prices: p,
       mustClaimToView: true,
       enableCustomMessagePage: shouldEnableCustomMessagePage,
