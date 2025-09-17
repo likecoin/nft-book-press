@@ -32,7 +32,9 @@
       <SiteNavigation class="h-full" />
     </USlideover>
 
-    <slot />
+    <AuthRequiredView>
+      <slot />
+    </AuthRequiredView>
 
     <UModal
       v-model="bookstoreApiStore.showLoginPanel"

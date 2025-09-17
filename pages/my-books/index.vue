@@ -109,6 +109,11 @@ const { fetchBookListing, fetchModeratedBookList } = bookstoreApiStore
 const error = ref('')
 const isLoading = ref(false)
 
+useSeoMeta({
+  title: () => $t('seo_titles.book_listing_management'),
+  ogTitle: () => $t('seo_titles.book_listing_management')
+})
+
 // Tabs
 const tabItems = computed(() => [
   { label: $t('bookstore.current_listing'), key: 'current' },
