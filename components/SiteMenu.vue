@@ -39,7 +39,6 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useBookstoreApiStore } from '~/stores/book-store-api'
 const { t: $t } = useI18n()
 
 const localeRoute = useLocaleRoute()

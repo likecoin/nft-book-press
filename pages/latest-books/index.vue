@@ -61,10 +61,6 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useBookstoreApiStore } from '~/stores/book-store-api'
-import { useUserStore } from '~/stores/user'
-import { useStripeStore } from '~/stores/stripe'
-import { useWalletStore } from '~/stores/wallet'
 const { t: $t } = useI18n()
 
 const { BOOK3_URL, LIKE_CO_API } = useRuntimeConfig().public

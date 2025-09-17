@@ -41,8 +41,6 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useBookstoreApiStore } from '~/stores/book-store-api'
-import { useAuth } from '~/composables/useAuth'
 const { t: $t } = useI18n()
 
 const bookstoreApiStore = useBookstoreApiStore()

@@ -30,9 +30,6 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useWalletStore } from '~/stores/wallet'
-import { useBookstoreApiStore } from '~/stores/book-store-api'
-import { useUserStore } from '~/stores/user'
 const { t: $t } = useI18n()
 
 const store = useWalletStore()

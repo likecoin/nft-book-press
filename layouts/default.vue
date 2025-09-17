@@ -48,10 +48,6 @@
 </template>
 
 <script setup>
-import { useBookstoreApiStore } from '~/stores/book-store-api'
-import { useAuth } from '~/composables/useAuth'
-import { appendUTMParamsToURL } from '~/utils/index'
-
 const { isNavigationCollapsed } = useAppLayout()
 const bookstoreApiStore = useBookstoreApiStore()
 const { onAuthenticate } = useAuth()
