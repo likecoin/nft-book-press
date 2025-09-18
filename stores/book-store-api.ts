@@ -10,7 +10,7 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
   const sessionWallet = ref('')
   const intercomToken = ref('')
   const isRestoringSession = ref(false)
-  const showLoginPanel = ref(false)
+  const isShowLoginPanel = ref(false)
 
   const listingList = ref([] as any[])
   const moderatedBookList = ref([] as any[])
@@ -31,16 +31,16 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
   function clearSession () {
     token.value = ''
     sessionWallet.value = ''
-    showLoginPanel.value = false
+    isShowLoginPanel.value = false
     clearAuthSession()
   }
 
   function openLoginPanel () {
-    showLoginPanel.value = true
+    isShowLoginPanel.value = true
   }
 
   function closeLoginPanel () {
-    showLoginPanel.value = false
+    isShowLoginPanel.value = false
   }
 
   function restoreAuthSession () {
@@ -198,7 +198,7 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
     getTotalPendingNFTCount,
     isAuthenticated,
     isRestoringSession,
-    showLoginPanel,
+    isShowLoginPanel,
     clearSession,
     openLoginPanel,
     closeLoginPanel,

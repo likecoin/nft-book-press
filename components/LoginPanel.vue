@@ -52,22 +52,6 @@
       </ul>
     </template>
 
-    <i18n-t
-      class="mt-6 text-sm text-center font-bold"
-      keypath="login_panel_migration_notice"
-      tag="p"
-    >
-      <template #here>
-        <ULink
-          class="text-primary-600 border-b border-[currentColor]"
-          :to="props.migrationUrl"
-          target="_blank"
-        >
-          {{ $t('login_panel_migration_notice_here') }}
-        </ULink>
-      </template>
-    </i18n-t>
-
     <UAlert
       v-if="error"
       class="mt-4"
@@ -81,10 +65,6 @@
 import { useConnect } from '@wagmi/vue'
 
 const emit = defineEmits<{ connect: [any] }>()
-
-const props = defineProps<{
-  migrationUrl?: string
-}>()
 
 const { t: $t } = useI18n()
 const { connectors, error } = useConnect()

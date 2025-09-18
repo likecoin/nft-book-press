@@ -37,12 +37,11 @@
     </AuthRequiredView>
 
     <UModal
-      v-model="bookstoreApiStore.showLoginPanel"
+      v-model="bookstoreApiStore.isShowLoginPanel"
       :close="{ onClick: () => bookstoreApiStore.closeLoginPanel() }"
       :ui="{ width: '!max-w-[348px]' }"
     >
       <LoginPanel
-        :migration-url="migrationURL"
         @connect="onAuthenticate"
       />
     </UModal>
@@ -59,18 +58,11 @@ if (colorMode.value !== 'light') {
   colorMode.preference = 'light'
 }
 
-const { LIKECOIN_V3_BOOK_MIGRATION_SITE_URL } = useRuntimeConfig().public
-const migrationURL = appendUTMParamsToURL({
-  url: LIKECOIN_V3_BOOK_MIGRATION_SITE_URL,
-  medium: 'login',
-  campaign: 'migration'
-})
-
 const isSlideoverOpen = ref(false)
 
 // Auto close modal when authenticated
 watch(() => bookstoreApiStore.isAuthenticated, (isAuthenticated) => {
-  if (isAuthenticated && bookstoreApiStore.showLoginPanel) {
+  if (isAuthenticated && bookstoreApiStore.isShowLoginPanel) {
     bookstoreApiStore.closeLoginPanel()
   }
 })
