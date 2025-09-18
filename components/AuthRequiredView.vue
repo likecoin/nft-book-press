@@ -26,7 +26,7 @@
       <div class="flex justify-center w-[120px]">
         <UButton
           :ui="{base:'!bg-[#50E3C2] !text-black hover:!bg-[#40caa8]'}"
-          :label="$t('auth_state.login')"
+          :label="isRestoringSession ? $t('auth_state.restore') : $t('auth_state.login')"
           size="lg"
           block
           :loading="isAuthenticating"
