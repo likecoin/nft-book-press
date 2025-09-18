@@ -157,6 +157,7 @@
         </template>
 
         <UTable
+          :ui="{ th: { base: 'whitespace-nowrap'}}"
           :columns="orderTableColumns"
           :rows="ordersTableRows"
         >
@@ -618,14 +619,12 @@ const purchaseList = computed(() => {
 })
 
 const orderTableColumns = computed(() => {
-  const columns = [
+  return [
     { key: 'actions', label: $t('table.actions'), sortable: false },
     { key: 'orderDate', label: $t('table.order_date'), sortable: true },
-    { key: 'status', label: $t('table.status'), sortable: true }
-  ]
-  columns.push(
+    { key: 'status', label: $t('table.status'), sortable: true },
     { key: 'from', label: $t('table.sales_channel'), sortable: true },
-    { key: 'price', label: $t('form.price'), sortable: true },
+    { key: 'price', label: $t('form.price'), sortable: true, class: 'w-[120px]' },
     { key: 'priceName', label: $t('table.price_name'), sortable: false },
     { key: 'quantity', label: $t('table.quantity'), sortable: true },
     { key: 'coupon', label: $t('table.coupon_applied'), sortable: false },
@@ -633,9 +632,7 @@ const orderTableColumns = computed(() => {
     { key: 'readerEmail', label: $t('table.reader_email'), sortable: true },
     { key: 'wallet', label: $t('table.reader_wallet'), sortable: true },
     { key: 'message', label: $t('table.reader_message'), sortable: false }
-  )
-
-  return columns
+  ]
 })
 
 function getQRCodeFilename (channel = '') {
