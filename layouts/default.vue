@@ -29,7 +29,9 @@
     </USlideover>
 
     <AuthRequiredView>
-      <slot />
+      <main class="flex-1 overflow-y-scroll">
+        <slot />
+      </main>
     </AuthRequiredView>
 
     <UModal

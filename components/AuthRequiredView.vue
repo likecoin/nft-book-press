@@ -1,7 +1,7 @@
 <template>
   <PageBody
     v-if="!bookstoreApiStore.isAuthenticated"
-    :ui="{ base: 'flex flex-col justify-center items-center grow w-screen bg-[#131313] !max-w-full' }"
+    :ui="{ base: 'flex flex-col justify-center items-center bg-[#131313]' }"
   >
     <div class="flex flex-col justify-center items-center h-full space-y-12 max-w-[480px] mx-auto">
       <img
