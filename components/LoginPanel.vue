@@ -1,7 +1,7 @@
 <template>
   <div class="p-6 pt-8 rounded-[20px] bg-white shadow-[0_4px_4px_0_rgba(0,0,0,0.02)]">
     <div class="flex flex-col items-center">
-      <AppLogo class="h-8" />
+      <AppLogo />
       <h2
         class="mt-[48px] text-theme-500 text-2xl font-bold"
         v-text="$t('login_panel_title')"

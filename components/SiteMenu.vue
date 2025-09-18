@@ -132,12 +132,6 @@ const items = computed(() => {
           icon: 'i-heroicons-arrow-top-right-on-square-20-solid',
           to: 'https://docs.3ook.com/zh-TW/collections/14176162-出版',
           target: '_blank'
-        },
-        {
-          label: $t('menu.listing_disclaimer'),
-          icon: 'i-heroicons-shield-exclamation',
-          to: $t('menu.listing_disclaimer_url'),
-          target: '_blank'
         }
       ]
     }
