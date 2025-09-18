@@ -6,7 +6,7 @@
     <div class="flex flex-col justify-center items-center h-full space-y-12 max-w-[480px] mx-auto">
       <img
         src="~/assets/images/3ook-no-padding.png"
-        alt="3ook full logo"
+        alt="3ook.com"
         class="w-full object-contain"
       >
       <i18n-t
