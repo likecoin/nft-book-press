@@ -88,19 +88,19 @@
           :rows="editionsTableRows"
         >
           <template #sort-data="{ row }">
-            <div v-if="userIsOwner && prices.length > 1" class="flex flex-col gap-1">
-              <UButton
-                :icon="row.originalIndex === 0 ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-up'"
-                variant="ghost"
-                color="gray"
-                size="xs"
-                :label="String(row.originalIndex + 1)"
-                :disabled="isUpdatingPricesOrder || (row.originalIndex <= 0 && row.originalIndex >= prices.length - 1)"
-                :loading="isUpdatingPricesOrder"
-                trailing
-                @click="row.originalIndex === 0 ? movePriceDown(row.originalIndex) : movePriceUp(row.originalIndex)"
-              />
-            </div>
+            <UButton
+              v-if="userIsOwner && prices.length > 1"
+              :icon="row.originalIndex === 0 ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-up'"
+              variant="ghost"
+              color="gray"
+              size="xs"
+              :label="String(row.originalIndex + 1)"
+              :disabled="isUpdatingPricesOrder || (row.originalIndex <= 0 && row.originalIndex >= prices.length - 1)"
+              :loading="isUpdatingPricesOrder"
+              trailing
+              @click="row.originalIndex === 0 ? movePriceDown(row.originalIndex) : movePriceUp(row.originalIndex)"
+            />
+            <span v-else v-text="String(row.originalIndex + 1)" />
           </template>
           <template #name-data="{ row }">
             <h4 class="font-medium" v-text="row.name.zh" />
@@ -809,19 +809,21 @@ const priceIndexOptions = computed(() => classListingInfo.value.prices?.map((p: 
 const editionsTableColumns = computed(() => {
   const columns = []
 
-  if (userIsOwner.value && prices.value.length > 1) {
-    columns.push({ key: 'sort', label: $t('table.sort'), sortable: false })
-  }
-
   columns.push(
+    { key: 'sort', label: $t('table.sort'), sortable: false, class: 'w-[60px]' },
     { key: 'name', label: $t('table.name'), sortable: false },
-    { key: 'delivery', label: $t('table.delivery'), sortable: false },
-    { key: 'stock', label: $t('table.stock'), sortable: false },
-    { key: 'price', label: $t('table.price_usd'), sortable: false }
+    {
+      key: 'delivery',
+      label: $t('table.delivery'),
+      sortable: false,
+      class: 'w-[120px]'
+    },
+    { key: 'stock', label: $t('table.stock'), sortable: false, class: 'w-[120px]' },
+    { key: 'price', label: $t('table.price_usd'), sortable: false, class: 'w-[120px]' }
   )
 
   if (userIsOwner.value) {
-    columns.push({ key: 'details', label: $t('table.details'), sortable: false })
+    columns.push({ key: 'details', label: $t('table.details'), sortable: false, class: 'w-[80px]' })
   }
 
   return columns
