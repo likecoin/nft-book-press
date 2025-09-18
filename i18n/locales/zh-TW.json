@@ -13,6 +13,7 @@
   "auth_state.login": "登入",
   "auth_state.migrate": "遷移",
   "auth_state.migration_notice": "liker.land 現在是 3ook.com",
+  "auth_state.restore": "載入中...",
   "auth_state.sign_out": "登出",
   "auth_state.wallet": "錢包",
   "batch_qrcode.download": "下載",

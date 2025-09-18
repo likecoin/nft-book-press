@@ -31,7 +31,7 @@
       </h3>
       <UVerticalNavigation
         :links="item.links"
-        :ui="{ label: 'font-bold' }"
+        :ui="{ label: 'font-bold', badge: { base: 'rounded-[10px] bg-[#50E3C2] font-bold' }}"
       />
     </div>
   </div>
@@ -44,7 +44,7 @@ const { t: $t } = useI18n()
 const localeRoute = useLocaleRoute()
 
 const bookstoreApiStore = useBookstoreApiStore()
-const { getTotalPendingNFTCount } = storeToRefs(bookstoreApiStore)
+const { getTotalPendingNFTCount, isAuthenticated } = storeToRefs(bookstoreApiStore)
 
 const props = defineProps({
   isLarge: {
@@ -60,63 +60,93 @@ function handleLinkClick ({ label }: { label?: string }) {
   emit('click-link')
 }
 
-const items = computed(() => [
-  {
-    label: $t('menu.bookstore_listing'),
-    links: [
+const items = computed(() => {
+  if (!isAuthenticated.value) {
+    return [
       {
-        label: $t('menu.start_publishing'),
-        icon: 'i-heroicons-sparkles',
-        to: localeRoute({ name: 'new-book' })
-      },
-      {
-        label: $t('menu.manage_book_listings'),
-        icon: 'i-heroicons-rectangle-stack',
-        to: localeRoute({ name: 'my-books' }),
-        exact: true,
-        badge: getTotalPendingNFTCount.value
+        label: $t('menu.help'),
+        links: [
+          {
+            label: $t('menu.publisher_guide'),
+            icon: 'i-heroicons-arrow-top-right-on-square-20-solid',
+            to: 'https://docs.3ook.com/zh-TW/collections/14176162-出版',
+            target: '_blank'
+          },
+          {
+            label: $t('menu.listing_disclaimer'),
+            icon: 'i-heroicons-shield-exclamation',
+            to: $t('menu.listing_disclaimer_url'),
+            target: '_blank'
+          }
+        ]
       }
-    ]
-  },
-  {
-    label: $t('menu.authors_affiliates'),
-    links: [
-      {
-        label: $t('menu.user_settings'),
-        icon: 'i-heroicons-user-group',
-        to: localeRoute({ name: 'my-books-user' }),
-        exact: true
-      },
-      {
-        label: $t('menu.latest_books'),
-        icon: 'i-heroicons-book-open',
-        to: localeRoute({ name: 'latest-books' }),
-        exact: true
-      }
-    ]
-  },
-  {
-    label: $t('menu.help'),
-    links: [
-      {
-        label: $t('menu.publisher_guide'),
-        icon: 'i-heroicons-arrow-top-right-on-square-20-solid',
-        to: 'https://docs.3ook.com/zh-TW/collections/14176162-出版',
-        target: '_blank'
-      },
-      {
-        label: $t('menu.listing_disclaimer'),
-        icon: 'i-heroicons-shield-exclamation',
-        to: $t('menu.listing_disclaimer_url'),
-        target: '_blank'
-      }
-    ]
+    ].map(item => ({
+      ...item,
+      links: item.links.map(link => ({
+        ...link,
+        click: () => handleLinkClick({ label: link.label })
+      }))
+    }))
   }
-].map(item => ({
-  ...item,
-  links: item.links.map(link => ({
-    ...link,
-    click: () => handleLinkClick({ label: link.label })
+
+  return [
+    {
+      label: $t('menu.bookstore_listing'),
+      links: [
+        {
+          label: $t('menu.start_publishing'),
+          icon: 'i-heroicons-sparkles',
+          to: localeRoute({ name: 'new-book' })
+        },
+        {
+          label: $t('menu.manage_book_listings'),
+          icon: 'i-heroicons-rectangle-stack',
+          to: localeRoute({ name: 'my-books' }),
+          exact: true,
+          badge: getTotalPendingNFTCount.value
+        }
+      ]
+    },
+    {
+      label: $t('menu.authors_affiliates'),
+      links: [
+        {
+          label: $t('menu.user_settings'),
+          icon: 'i-heroicons-user-group',
+          to: localeRoute({ name: 'my-books-user' }),
+          exact: true
+        },
+        {
+          label: $t('menu.latest_books'),
+          icon: 'i-heroicons-book-open',
+          to: localeRoute({ name: 'latest-books' }),
+          exact: true
+        }
+      ]
+    },
+    {
+      label: $t('menu.help'),
+      links: [
+        {
+          label: $t('menu.publisher_guide'),
+          icon: 'i-heroicons-arrow-top-right-on-square-20-solid',
+          to: 'https://docs.3ook.com/zh-TW/collections/14176162-出版',
+          target: '_blank'
+        },
+        {
+          label: $t('menu.listing_disclaimer'),
+          icon: 'i-heroicons-shield-exclamation',
+          to: $t('menu.listing_disclaimer_url'),
+          target: '_blank'
+        }
+      ]
+    }
+  ].map(item => ({
+    ...item,
+    links: item.links.map(link => ({
+      ...link,
+      click: () => handleLinkClick({ label: link.label })
+    }))
   }))
-})))
+})
 </script>

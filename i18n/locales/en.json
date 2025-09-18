@@ -13,6 +13,7 @@
   "auth_state.login": "Login",
   "auth_state.migrate": "Migrate",
   "auth_state.migration_notice": "liker.land is now 3ook.com",
+  "auth_state.restore": "loading",
   "auth_state.sign_out": "Sign out",
   "auth_state.wallet": "Wallet",
   "batch_qrcode.download": "Download",

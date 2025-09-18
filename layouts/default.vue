@@ -12,15 +12,11 @@
     />
 
     <UButton
-      icon="i-heroicons-chevron-double-right"
-      size="lg"
+      icon="i-heroicons-bars-3-16-solid"
+      size="xl"
       color="gray"
-      variant="soft"
-      :class="[
-        'fixed bottom-[76px] left-3 z-50',
-        'lg:hidden',
-        'shadow-sm',
-      ]"
+      variant="link"
+      class="fixed top-[12px] left-1 z-50 lg:hidden"
       @click="isSlideoverOpen = true"
     />
 
@@ -49,7 +45,6 @@
 </template>
 
 <script setup>
-const { isNavigationCollapsed } = useAppLayout()
 const bookstoreApiStore = useBookstoreApiStore()
 const { onAuthenticate } = useAuth()
 
