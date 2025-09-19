@@ -18,6 +18,7 @@ export const DEFAULT_MAX_SUPPLY = 18446744073709551615n
 export const DEFAULT_STOCK = 100
 
 export const NFT_DEFAULT_MINT_AMOUNT = 1
+export const NFT_DEFAULT_RESTOCK_AMOUNT = 50
 
 export const LIKE_ADDRESS_REGEX = /^like1[ac-hj-np-z02-9]{38}$/
 

@@ -74,7 +74,7 @@
 <script setup lang="ts">
 import { useWriteContract } from '@wagmi/vue'
 import { storeToRefs } from 'pinia'
-import { NFT_DEFAULT_MINT_AMOUNT } from '~/constant'
+import { NFT_DEFAULT_MINT_AMOUNT, NFT_DEFAULT_RESTOCK_AMOUNT } from '~/constant'
 
 import { useWalletStore } from '~/stores/wallet'
 import { useToastComposable } from '~/composables/useToast'
@@ -197,7 +197,7 @@ watch(() => props.isRestock, (isRestock: boolean) => {
     if (props.restockCount < 0) {
       formState.mintCount = Math.abs(props.restockCount)
     } else {
-      formState.mintCount = 100
+      formState.mintCount = NFT_DEFAULT_RESTOCK_AMOUNT
     }
   }
 }, { immediate: true })
