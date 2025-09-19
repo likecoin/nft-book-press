@@ -100,6 +100,7 @@
                 trailing
                 @click="row.originalIndex === 0 ? movePriceDown(row.originalIndex) : movePriceUp(row.originalIndex)"
               />
+              <span v-if="row.originalIndex >= 0 && prices.length === 1" v-text="String(row.originalIndex + 1)" />
             </div>
           </template>
           <template #name-data="{ row }">
