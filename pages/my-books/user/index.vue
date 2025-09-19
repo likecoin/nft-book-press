@@ -187,18 +187,6 @@
           </UFormGroup>
 
           <UFormGroup label="Email Notification Settings">
-            <div class="flex items-center gap-2">
-              <UToggle
-                v-if="isAllowChangingNotificationEmailSettings"
-                v-model="isEnableNotificationEmails"
-              />
-              <UToggle v-else :model-value="false" :disabled="true" />
-
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-200">
-                Receive email notifications about commissions
-              </span>
-            </div>
-
             <template v-if="!bookUser?.notificationEmail || !bookUser?.isEmailVerified" #help>
               <UAlert
                 v-if="!bookUser?.notificationEmail"
@@ -218,15 +206,6 @@
               />
             </template>
           </UFormGroup>
-
-          <template v-if="isAllowChangingNotificationEmailSettings" #footer>
-            <UButton
-              label="Update"
-              :disabled="bookUser?.isEnableNotificationEmails === isEnableNotificationEmails"
-              :loading="isUpdatingBookUserProfile"
-              @click="updateUserProfile"
-            />
-          </template>
         </UCard>
         <UCard
           :ui="{
@@ -341,8 +320,7 @@ const nftStore = useNftStore()
 const bookstoreApiStore = useBookstoreApiStore()
 const userStore = useUserStore()
 const { token, wallet } = storeToRefs(bookstoreApiStore)
-const { bookUser, isUpdatingBookUserProfile, userLikerInfo, isFetchingUserLikerInfo } = storeToRefs(userStore)
-const toast = useToast()
+const { bookUser, userLikerInfo, isFetchingUserLikerInfo } = storeToRefs(userStore)
 const localeRoute = useLocaleRoute()
 
 const error = ref('')
@@ -350,7 +328,6 @@ const isLoading = ref(false)
 const connectStatus = ref<any>({})
 const commissionHistory = ref<any>([])
 const payoutHistory = ref<any>([])
-const isEnableNotificationEmails = ref(true)
 
 const channelId = computed(() => {
   if (userLikerInfo.value?.user) {
@@ -359,17 +336,9 @@ const channelId = computed(() => {
   return ''
 })
 
-watch(bookUser, (user) => {
-  isEnableNotificationEmails.value = user?.isEnableNotificationEmails || false
-})
-
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
 })
-
-const isAllowChangingNotificationEmailSettings = computed(() =>
-  !!(bookUser.value?.notificationEmail && bookUser.value?.isEmailVerified)
-)
 
 onMounted(async () => {
   await Promise.all([
@@ -570,34 +539,4 @@ async function onSetupStripe () {
     isLoading.value = false
   }
 }
-
-async function updateUserProfile () {
-  if (!isAllowChangingNotificationEmailSettings.value) {
-    return
-  }
-
-  try {
-    await userStore.updateBookUserProfile({
-      isEnableNotificationEmails: isEnableNotificationEmails.value
-    })
-    toast.add({
-      icon: 'i-heroicons-check-circle',
-      title: 'User profile updated'
-    })
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error(e)
-    toast.add({
-      icon: 'i-heroicons-exclamation-circle',
-      title: 'Unable to update user profile',
-      description: (e as Error).toString(),
-      timeout: 0,
-      color: 'red',
-      ui: {
-        title: 'text-red-400 dark:text-red-400'
-      }
-    })
-  }
-}
-
 </script>

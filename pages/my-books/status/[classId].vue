@@ -530,7 +530,6 @@ const searchInput = ref('')
 const tableOfContents = ref('')
 
 const moderatorWallets = ref<string[]>([])
-const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
@@ -848,7 +847,6 @@ onMounted(async () => {
     prices.value = classListingInfo.value.prices
     const {
       moderatorWallets: classModeratorWallets,
-      notificationEmails: classNotificationEmails,
       connectedWallets: classConnectedWallets,
       mustClaimToView: classMustClaimToView,
       tableOfContents: classTableOfContent,
@@ -856,7 +854,6 @@ onMounted(async () => {
       hideDownload: classHideDownload
     } = classData as any
     moderatorWallets.value = classModeratorWallets
-    notificationEmails.value = classNotificationEmails
     isStripeConnectChecked.value = !!(classConnectedWallets && Object.keys(classConnectedWallets).length)
     connectedWallets.value = classConnectedWallets
 
@@ -1035,7 +1032,6 @@ async function updateSettings () {
       : null
     await updateBookListingSetting(classId.value as string, {
       moderatorWallets: moderatorWallets.value,
-      notificationEmails: notificationEmails.value,
       connectedWallets: newConnectedWallets,
       hideDownload: hideDownload.value,
       mustClaimToView: mustClaimToView.value,

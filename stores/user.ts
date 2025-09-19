@@ -11,7 +11,6 @@ export const useUserStore = defineStore('user', () => {
   const likerStore = useLikerStore()
 
   const bookUser = ref<any>(null)
-  const isUpdatingBookUserProfile = ref(false)
   const userLikerInfo = computed(() => {
     if (isAuthenticated.value && wallet.value) {
       return likerStore.getLikerInfoByWallet(wallet.value)
@@ -45,23 +44,6 @@ export const useUserStore = defineStore('user', () => {
         // eslint-disable-next-line no-console
         console.error(e)
       }
-    }
-  }
-
-  async function updateBookUserProfile (payload: any) {
-    try {
-      isUpdatingBookUserProfile.value = true
-      await $fetch(`${LIKE_CO_API}/likernft/book/user/profile`, {
-        method: 'POST',
-        body: payload,
-        headers: {
-          authorization: `Bearer ${token.value}`
-        }
-      })
-      bookUser.value = { ...bookUser.value, ...payload }
-      return bookUser.value
-    } finally {
-      isUpdatingBookUserProfile.value = false
     }
   }
 
@@ -100,12 +82,10 @@ export const useUserStore = defineStore('user', () => {
 
   return {
     bookUser,
-    isUpdatingBookUserProfile,
     userLikerInfo,
     isFetchingUserLikerInfo,
     fetchBookUserProfile,
     lazyFetchBookUserProfile,
-    updateBookUserProfile,
     fetchUserLikerInfo,
     lazyFetchUserLikerInfo
   }
