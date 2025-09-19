@@ -124,7 +124,7 @@
                     />
                   </UFormGroup>
 
-                  <UFormGroup :ui="{ label: {base:'w-full flex justify-between items-center'} }">
+                  <UFormGroup :ui="{ label: { base: 'w-full flex justify-between items-center'} }">
                     <template #label>
                       <p class="block" v-text="$t('nft_book_form.autograph_image')" />
                       <span
