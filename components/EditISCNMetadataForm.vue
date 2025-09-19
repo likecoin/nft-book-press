@@ -140,7 +140,7 @@ watch(
           language: metadata.inLanguage || '',
           bookInfoUrl: metadata.url || '',
           tags,
-          coverUrl: metadata.thumbnailUrl || ''
+          coverUrl: metadata.thumbnailUrl || metadata.image || ''
         }
       } catch (error) {
         console.error('Error fetching ISCN data:', error)
@@ -195,7 +195,6 @@ async function handleSave () {
       description: contentMetadata.description,
       ...contentMetadata,
       symbol: 'BOOK',
-      image: contentMetadata?.thumbnailUrl || '',
       external_link: contentMetadata?.url || '',
       nft_meta_collection_id: 'nft_book',
       nft_meta_collection_name: 'NFT Book',
