@@ -48,7 +48,7 @@
               {{ isRestock ? $t('nft.minting_restock') : $t('nft.minting') }}
             </UBadge>
             <p class="text-xs text-gray-500">
-              {{ isRestock? $t('nft.minting_restock_in_progress',{ count: formState.mintCount }) : $t('nft.minting_in_progress') }}
+              {{ isRestock ? $t('nft.minting_restock_in_progress',{ count: formState.mintCount }) : $t('nft.minting_in_progress') }}
             </p>
           </div>
           <UProgress

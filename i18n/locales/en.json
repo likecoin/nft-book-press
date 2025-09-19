@@ -244,7 +244,7 @@
   "nft.minting_in_progress": "Minting first edition, please don’t close this window.",
   "nft.minting_loading": "Our little book boy is digging through the archives 📚",
   "nft.minting_restock": "Printing new stock",
-  "nft.minting_restock_in_progress": "Printing {mintCount} This...please wait",
+  "nft.minting_restock_in_progress": "Printing {count} copies...please wait",
   "nft_book_form.accept_tipping": "Accept tipping",
   "nft_book_form.accept_tipping_tooltip": "Readers can provide additional support beyond the book price",
   "nft_book_form.add_custom_message_page": "Add the custom page",
