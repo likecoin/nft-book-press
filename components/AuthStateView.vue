@@ -11,7 +11,7 @@
       <div v-else class="flex flex-col justify-center items-center gap-1">
         <UAvatar v-if="userLikerInfo" :src="userLikerInfo?.avatar" size="sm" />
         <p
-          class="font-mono text-sm truncate text-gray-600"
+          class="font-mono text-center text-sm truncate text-gray-600 w-full"
           v-text="userLikerInfo?.displayName || userLikerInfo?.user || wallet"
         />
       </div>
