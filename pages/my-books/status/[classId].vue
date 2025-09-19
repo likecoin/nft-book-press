@@ -1047,7 +1047,7 @@ async function updateSettings () {
     }))
   } catch (err) {
     const errorData = (err as any).data || err
-
+    console.error(errorData)
     error.value = errorData
   } finally {
     isLoading.value = false
