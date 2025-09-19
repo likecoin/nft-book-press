@@ -937,10 +937,10 @@ onMounted(async () => {
 async function calculateStock () {
   const pendingNFTCount = classListingInfo.value.pendingNFTCount || 0
   const count = await getBalanceOf(classId.value, wallet.value as string)
-  const manuallyAssignedNFTs = prices.value
+  const manuallyAssignedNFTCount = prices.value
     .filter(price => !price.isAutoDeliver)
     .reduce((total, price) => total + (price.stock || 0), 0)
-  stockBalance.value = (Number(count) - manuallyAssignedNFTs - AUTHOR_RESERVED_NFT_COUNT - pendingNFTCount) || 0
+  stockBalance.value = (Number(count) - manuallyAssignedNFTCount - AUTHOR_RESERVED_NFT_COUNT - pendingNFTCount) || 0
 }
 
 async function movePriceUp (index: number) {
