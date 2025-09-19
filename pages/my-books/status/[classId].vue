@@ -475,7 +475,11 @@
       </QRCodeGenerator>
     </UModal>
     <UModal v-model="showRestockModal">
-      <LiteMintNFT :iscn-id="iscnId" @submit="handleMintNFTSubmit" />
+      <LiteMintNFT
+        :is-restock="true"
+        :iscn-id="iscnId"
+        @submit="handleMintNFTSubmit"
+      />
     </UModal>
 
     <NuxtPage :transition="false" />

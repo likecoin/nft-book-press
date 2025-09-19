@@ -15,9 +15,7 @@
       :ui="{ body: { base: 'space-y-4' } }"
     >
       <template #header>
-        <h3 class="font-bold">
-          {{ bookName ? $t('nft.mint_by_filling_info', { bookName }) : $t('nft.minting_loading') }}
-        </h3>
+        <h3 class="font-bold text-center" v-text="headerText" />
       </template>
 
       <div class="flex justify-center">
@@ -31,18 +29,26 @@
           v-else
           :src="imagePreviewUrl"
           alt="Cover preview"
-          class="max-w-[300px] object-contain rounded-lg border border-gray-200"
+          :class="[isRestock ? 'max-w-[150px]' : 'max-w-[300px]', 'object-contain', 'rounded-lg', 'border', 'border-gray-200']"
         >
       </div>
 
-      <div v-if="isLoading" class="w-full">
+      <UInput
+        v-if="isRestock && bookName"
+        v-model="formState.mintCount"
+        type="number"
+        class="w-full max-w-[180px] mx-auto"
+        :placeholder="$t('nft.mint_count_placeholder')"
+      />
+
+      <div v-if="isLoading && bookName" class="w-full">
         <div class="space-y-3">
           <div class="flex justify-between items-center">
             <UBadge variant="soft">
-              {{ $t('nft.minting') }}
+              {{ isRestock ? $t('nft.minting_restock') : $t('nft.minting') }}
             </UBadge>
             <p class="text-xs text-gray-500">
-              {{ $t('nft.minting_in_progress') }}
+              {{ isRestock? $t('nft.minting_restock_in_progress',{ count: formState.mintCount }) : $t('nft.minting_in_progress') }}
             </p>
           </div>
           <UProgress
@@ -54,7 +60,7 @@
       </div>
       <div v-if="shouldShowSubmit" class="flex justify-center">
         <UButton
-          :label="$t('common.submit')"
+          :label="bookName ? $t('common.submit') : $t('loading.progress')"
           :loading="isLoading"
           size="lg"
           :disabled="isLoading"
@@ -128,6 +134,16 @@ const imagePreviewUrl = computed(() => {
   return parseImageURLFromMetadata(formState.imageUrl)
 })
 
+const headerText = computed(() => {
+  if (!bookName.value) {
+    return $t('nft.minting_loading')
+  }
+  if (props.isRestock) {
+    return bookName.value
+  }
+  return $t('nft.mint_by_filling_info', { bookName: bookName.value })
+})
+
 watch(isFormValid, (val: boolean) => {
   emit('formValidChange', val)
 }, { immediate: true })
@@ -150,6 +166,10 @@ const props = defineProps({
   iscnId: {
     type: String,
     default: ''
+  },
+  isRestock: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -164,9 +184,15 @@ watchEffect(async () => {
   }
 })
 
-watch(isLoading, (newIsLoading) => {
+watch(isLoading, (newIsLoading: boolean) => {
   if (newIsLoading) { error.value = '' }
 })
+
+watch(() => props.isRestock, (isRestock: boolean) => {
+  if (isRestock) {
+    formState.mintCount = 100
+  }
+}, { immediate: true })
 
 function generateNFTMintListData ({
   nftMintCount,
