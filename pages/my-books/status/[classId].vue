@@ -794,7 +794,7 @@ const salesChannelTableRows = computed(() => Object.entries(salesChannelMap.valu
   id,
   idLabel: normalizeChannelId(id),
   count: value.count || 0,
-  totalUSD: value.totalUSD || 0
+  totalUSD: (value.totalUSD || 0).toFixed(2)
 })))
 
 const priceIndexOptions = computed(() => classListingInfo.value.prices?.map((p: any, index: number) => ({
@@ -1047,7 +1047,7 @@ async function updateSettings () {
     }))
   } catch (err) {
     const errorData = (err as any).data || err
-    console.error(errorData)
+
     error.value = errorData
   } finally {
     isLoading.value = false
