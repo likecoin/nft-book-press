@@ -115,35 +115,29 @@
 
               <UFormGroup :label="$t('nft_book_form.enable_custom_message_page')">
                 <div class="space-y-3 w-full">
-                  <UCheckbox
-                    v-model="p.enableCustomMessagePage"
-                    :label="$t('nft_book_form.add_custom_message_page')"
-                  />
-                  <div v-if="p.enableCustomMessagePage" class="grid grid-cols-2 gap-4 w-full">
-                    <UFormGroup
-                      :label="$t('nft_book_form.auto_delivery_memo')"
-                    >
-                      <UInput
-                        v-model="p.autoMemo"
-                        :placeholder="$t('nft_book_form.memo_placeholder')"
-                      />
-                    </UFormGroup>
+                  <UFormGroup
+                    :label="$t('nft_book_form.auto_delivery_memo')"
+                  >
+                    <UInput
+                      v-model="p.autoMemo"
+                      :placeholder="$t('nft_book_form.memo_placeholder')"
+                    />
+                  </UFormGroup>
 
-                    <UFormGroup :ui="{ label: {base:'w-full flex justify-between items-center'} }">
-                      <template #label>
-                        <p class="block" v-text="$t('nft_book_form.autograph_image')" />
-                        <span
-                          class="text-gray-500 text-[12px] block"
-                          v-text="$t('nft_book_form.image_requirements')"
-                        />
-                      </template>
-                      <UInput
-                        type="file"
-                        accept="image/png"
-                        @change="(e) => onImgUpload(e, 'signatureImage')"
+                  <UFormGroup :ui="{ label: { base: 'w-full flex justify-between items-center'} }">
+                    <template #label>
+                      <p class="block" v-text="$t('nft_book_form.autograph_image')" />
+                      <span
+                        class="text-gray-500 text-[12px] block"
+                        v-text="$t('nft_book_form.image_requirements')"
                       />
-                    </UFormGroup>
-                  </div>
+                    </template>
+                    <UInput
+                      type="file"
+                      accept="image/png"
+                      @change="(e) => onImgUpload(e, 'signatureImage')"
+                    />
+                  </UFormGroup>
                 </div>
               </UFormGroup>
 
@@ -352,8 +346,7 @@ const prices = ref<any[]>([
     name: $t('prices.standard_edition'),
     description: '',
     isAllowCustomPrice: isAllowCustomPrice.value,
-    isListed: true,
-    enableCustomMessagePage: false
+    isListed: true
   }
 ])
 const hasMultiplePrices = computed(() => prices.value.length > 1)
@@ -467,8 +460,7 @@ onMounted(async () => {
               isAllowCustomPrice: currentEdition.isAllowCustomPrice,
               isListed: !currentEdition.isUnlisted,
               oldIsAutoDeliver: currentEdition.isAutoDeliver,
-              oldStock: currentEdition.stock,
-              enableCustomMessagePage: currentEdition.enableCustomMessagePage || false
+              oldStock: currentEdition.stock
             }]
             isAllowCustomPrice.value = currentEdition.isAllowCustomPrice
           } else {
@@ -566,8 +558,7 @@ function addMorePrice () {
     name: '增訂版',
     description: '',
     isAllowCustomPrice: true,
-    isListed: true,
-    enableCustomMessagePage: false
+    isListed: true
   })
 }
 
@@ -596,8 +587,7 @@ function mapPrices (prices: any) {
     isAutoDeliver: p.deliveryMethod === 'auto',
     isAllowCustomPrice: p.isAllowCustomPrice,
     isUnlisted: !p.isListed,
-    autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : '',
-    enableCustomMessagePage: p.enableCustomMessagePage || false
+    autoMemo: p.deliveryMethod === 'auto' ? p.autoMemo || '' : ''
   }))
 }
 
@@ -692,8 +682,7 @@ async function submitNewClass () {
           }
         : null
 
-    const shouldEnableCustomMessagePage =
-      prices.value.some((price: any) => price.enableCustomMessagePage)
+    const shouldEnableCustomMessagePage = p.some((price: any) => !price.isAutoDeliver || price.autoMemo)
 
     await newBookListing(classId.value as string, {
       defaultPaymentCurrency: 'USD',

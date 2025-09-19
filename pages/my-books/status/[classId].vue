@@ -168,6 +168,7 @@
         </template>
 
         <UTable
+          :ui="{ th: { base: 'whitespace-nowrap'}}"
           :columns="orderTableColumns"
           :rows="ordersTableRows"
         >
@@ -634,14 +635,12 @@ const purchaseList = computed(() => {
 })
 
 const orderTableColumns = computed(() => {
-  const columns = [
+  return [
     { key: 'actions', label: $t('table.actions'), sortable: false },
     { key: 'orderDate', label: $t('table.order_date'), sortable: true },
-    { key: 'status', label: $t('table.status'), sortable: true }
-  ]
-  columns.push(
+    { key: 'status', label: $t('table.status'), sortable: true },
     { key: 'from', label: $t('table.sales_channel'), sortable: true },
-    { key: 'price', label: $t('form.price'), sortable: true },
+    { key: 'price', label: $t('form.price'), sortable: true, class: 'w-[120px]' },
     { key: 'priceName', label: $t('table.price_name'), sortable: false },
     { key: 'quantity', label: $t('table.quantity'), sortable: true },
     { key: 'coupon', label: $t('table.coupon_applied'), sortable: false },
@@ -649,9 +648,7 @@ const orderTableColumns = computed(() => {
     { key: 'readerEmail', label: $t('table.reader_email'), sortable: true },
     { key: 'wallet', label: $t('table.reader_wallet'), sortable: true },
     { key: 'message', label: $t('table.reader_message'), sortable: false }
-  )
-
-  return columns
+  ]
 })
 
 function getQRCodeFilename (channel = '') {
@@ -813,7 +810,7 @@ const salesChannelTableRows = computed(() => Object.entries(salesChannelMap.valu
   id,
   idLabel: normalizeChannelId(id),
   count: value.count || 0,
-  totalUSD: value.totalUSD || 0
+  totalUSD: (value.totalUSD || 0).toFixed(2)
 })))
 
 const priceIndexOptions = computed(() => classListingInfo.value.prices?.map((p: any, index: number) => ({
@@ -825,19 +822,21 @@ const priceIndexOptions = computed(() => classListingInfo.value.prices?.map((p: 
 const editionsTableColumns = computed(() => {
   const columns = []
 
-  if (userIsOwner.value) {
-    columns.push({ key: 'sort', label: $t('table.sort'), sortable: false })
-  }
-
   columns.push(
+    { key: 'sort', label: $t('table.sort'), sortable: false, class: 'w-[60px]' },
     { key: 'name', label: $t('table.name'), sortable: false },
-    { key: 'delivery', label: $t('table.delivery'), sortable: false },
-    { key: 'stock', label: $t('table.stock'), sortable: false },
-    { key: 'price', label: $t('table.price_usd'), sortable: false }
+    {
+      key: 'delivery',
+      label: $t('table.delivery'),
+      sortable: false,
+      class: 'w-[120px]'
+    },
+    { key: 'stock', label: $t('table.stock'), sortable: false, class: 'w-[120px]' },
+    { key: 'price', label: $t('table.price_usd'), sortable: false, class: 'w-[120px]' }
   )
 
   if (userIsOwner.value) {
-    columns.push({ key: 'details', label: $t('table.details'), sortable: false })
+    columns.push({ key: 'details', label: $t('table.details'), sortable: false, class: 'w-[80px]' })
   }
 
   return columns

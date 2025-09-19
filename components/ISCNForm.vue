@@ -318,7 +318,7 @@ const startUpload = async () => {
 const { getFileType } = useFileUpload()
 
 const handleUploadSubmit = (uploadData: any) => {
-  const { fileRecords } = uploadData
+  const { fileRecords, epubMetadata } = uploadData
   if (!fileRecords.length) {
     return
   }
@@ -349,6 +349,9 @@ const handleUploadSubmit = (uploadData: any) => {
   formData.value.downloadableUrls = downloadableUrls
   formData.value.contentFingerprints = contentFingerprints
 
+  if (epubMetadata?.thumbnailArweaveId) {
+    formData.value.coverUrl = `ar://${epubMetadata?.thumbnailArweaveId}`
+  }
   shouldShowUploadModal.value = false
 }
 </script>

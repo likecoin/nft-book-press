@@ -37,7 +37,7 @@
             }"
           >
             <template #header>
-              <div class="flex justify-between items-center w-full">
+              <div v-if="tableRows.length > 0" class="flex justify-between items-center w-full">
                 <div class="flex gap-2 items-center">
                   <UPagination
                     v-model="tablePage"
