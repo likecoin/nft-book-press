@@ -41,7 +41,7 @@
                 <div class="flex items-center justify-between">
                   <h3
                     class="font-bold font-mono"
-                    v-text="`${$t('nft_book_form.edition_number', { number: index + 1 })} - ${p.name || $t('nft_book_form.product_name_placeholder')}`"
+                    v-text="`${$t('nft_book_form.edition_number', { number: (displayEditIndex || (index + 1)) })} - ${p.name || $t('nft_book_form.product_name_placeholder')}`"
                   />
                   <div class="flex items-center gap-2">
                     <p class="text-sm" v-text="$t('nft_book_form.pause_selling')" />
@@ -416,6 +416,13 @@ const props = defineProps({
   classId: { type: String, default: '' },
   editionIndex: { type: [String, Number], default: undefined },
   isEditMode: { type: Boolean, default: false }
+})
+
+const displayEditIndex = computed(() => {
+  if (props.editionIndex !== undefined) {
+    return Number(props.editionIndex) + 1
+  }
+  return undefined
 })
 
 useSeoMeta({
