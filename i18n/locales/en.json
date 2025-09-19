@@ -542,6 +542,7 @@
   "table.reader_wallet": "Reader Wallet",
   "table.remove": "Remove",
   "table.reset": "Reset",
+  "table.stock_balance": "Stock Balance: {count}",
   "table.rows_per_page": "Rows per page",
   "table.sales_channel": "Channel",
   "table.search_placeholder": "Search...",

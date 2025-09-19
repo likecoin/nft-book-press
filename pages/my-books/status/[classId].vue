@@ -100,8 +100,8 @@
                 trailing
                 @click="row.originalIndex === 0 ? movePriceDown(row.originalIndex) : movePriceUp(row.originalIndex)"
               />
-              <span v-if="row.originalIndex >= 0 && prices.length === 1" v-text="String(row.originalIndex + 1)" />
             </div>
+            <span v-else-if="row.originalIndex >= 0 && prices.length === 1" v-text="String(row.originalIndex + 1)" />
           </template>
           <template #name-data="{ row }">
             <h4 class="font-medium" v-text="row.name.zh" />
@@ -825,7 +825,7 @@ const priceIndexOptions = computed(() => classListingInfo.value.prices?.map((p: 
 const editionsTableColumns = computed(() => {
   const columns = []
 
-  if (userIsOwner.value && prices.value.length > 1) {
+  if (userIsOwner.value) {
     columns.push({ key: 'sort', label: $t('table.sort'), sortable: false })
   }
 
@@ -853,7 +853,7 @@ const editionsTableRows = computed(() => {
     rows.push({
       name: '',
       isAutoDeliver: false,
-      stock: stockBalance.value,
+      stock: $t('table.stock_balance', { count: stockBalance.value }),
       price: '',
       originalIndex: -1,
       index: -1
