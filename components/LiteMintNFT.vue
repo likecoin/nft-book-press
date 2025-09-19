@@ -170,6 +170,10 @@ const props = defineProps({
   isRestock: {
     type: Boolean,
     default: false
+  },
+  restockCount: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -190,7 +194,11 @@ watch(isLoading, (newIsLoading: boolean) => {
 
 watch(() => props.isRestock, (isRestock: boolean) => {
   if (isRestock) {
-    formState.mintCount = 100
+    if (props.restockCount < 0) {
+      formState.mintCount = Math.abs(props.restockCount)
+    } else {
+      formState.mintCount = 100
+    }
   }
 }, { immediate: true })
 

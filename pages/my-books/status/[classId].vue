@@ -88,7 +88,7 @@
           :rows="editionsTableRows"
         >
           <template #sort-data="{ row }">
-            <div v-if="userIsOwner && prices.length > 1" class="flex flex-col gap-1">
+            <div v-if="row.originalIndex >= 0 && userIsOwner && prices.length > 1" class="flex flex-col gap-1">
               <UButton
                 :icon="row.originalIndex === 0 ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-up'"
                 variant="ghost"
@@ -107,12 +107,21 @@
           </template>
           <template #delivery-data="{ row }">
             <h4
+              v-if="row.originalIndex >= 0"
               class="font-medium"
               v-text="row.isAutoDeliver ? $t('form.auto_delivery') : $t('form.manual_delivery')"
             />
           </template>
           <template #stock-data="{ row }">
-            <span class="text-right">
+            <span
+              :class="[
+                'text-right',
+                {
+                  'text-green-600 font-semibold': row.originalIndex === -1 && row.stock >= 0,
+                  'text-red-600 font-semibold': row.originalIndex === -1 && row.stock < 0
+                }
+              ]"
+            >
               {{ row.isAutoDeliver ? $t('form.auto_stock') : row.stock }}
             </span>
           </template>
@@ -123,6 +132,7 @@
           </template>
           <template #details-data="{ row }">
             <UButton
+              v-if="row.originalIndex >= 0"
               icon="i-heroicons-document"
               :to="localeRoute({
                 name: 'my-books-status-classId-edit-editionIndex',
@@ -477,6 +487,7 @@
     <UModal v-model="showRestockModal">
       <LiteMintNFT
         :is-restock="true"
+        :restock-count="stockBalance"
         :iscn-id="iscnId"
         @submit="handleMintNFTSubmit"
       />
@@ -498,6 +509,7 @@ import { getApiEndpoints } from '~/constant/api'
 const { t: $t } = useI18n()
 
 const MAX_EDITION_COUNT = 2
+const AUTHOR_RESERVED_NFT_COUNT = 1
 
 const { CHAIN_EXPLORER_URL, BOOK3_URL, LIKE_CO_API } = useRuntimeConfig().public
 const store = useWalletStore()
@@ -546,8 +558,7 @@ const useLikerLandPurchaseLink = ref(true)
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
 
-// Restock
-const unassignedStock = ref(0)
+const stockBalance = ref(0)
 const showRestockModal = ref(false)
 const iscnId = ref('')
 
@@ -831,10 +842,25 @@ const editionsTableColumns = computed(() => {
   return columns
 })
 
-const editionsTableRows = computed(() => prices.value.map((element: any, index: number) => ({
-  ...element,
-  originalIndex: index
-})))
+const editionsTableRows = computed(() => {
+  const rows = prices.value.map((element: any, index: number) => ({
+    ...element,
+    originalIndex: index
+  }))
+
+  if (prices.value.some(price => !price.isAutoDeliver)) {
+    rows.push({
+      name: '',
+      isAutoDeliver: false,
+      stock: stockBalance.value,
+      price: '',
+      originalIndex: -1,
+      index: -1
+    })
+  }
+
+  return rows
+})
 
 watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
@@ -901,7 +927,6 @@ onMounted(async () => {
     }
     lazyFetchClassMetadataById(classId.value as string)
   } catch (err) {
-    console.error(err)
     error.value = (err as Error).toString()
   } finally {
     isLoading.value = false
@@ -911,10 +936,10 @@ onMounted(async () => {
 async function calculateStock () {
   const pendingNFTCount = classListingInfo.value.pendingNFTCount || 0
   const count = await getBalanceOf(classId.value, wallet.value as string)
-  const manuallyDeliveredNFTs = prices.value
+  const manuallyAssignedNFTs = prices.value
     .filter(price => !price.isAutoDeliver)
     .reduce((total, price) => total + (price.stock || 0), 0)
-  unassignedStock.value = Math.max((Number(count) - manuallyDeliveredNFTs - pendingNFTCount) || 0, 0)
+  stockBalance.value = (Number(count) - manuallyAssignedNFTs - AUTHOR_RESERVED_NFT_COUNT - pendingNFTCount) || 0
 }
 
 async function movePriceUp (index: number) {

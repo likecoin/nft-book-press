@@ -551,6 +551,7 @@
   "table.sort": "Sort",
   "table.status": "Status",
   "table.stock": "Stock",
+  "table.stock_balance": "Stock Balance",
   "table.total_usd": "Sales",
   "table.unassigned_stock": "Unassigned Stock",
   "table.value": "Value",
