@@ -88,7 +88,7 @@
           :rows="editionsTableRows"
         >
           <template #sort-data="{ row }">
-            <div v-if="row.originalIndex >= 0 && userIsOwner && prices.length > 1" class="flex flex-col gap-1">
+            <div v-if="!row.isStockBalancePlaceholderRow && prices.length > 1" class="flex flex-col gap-1">
               <UButton
                 :icon="row.originalIndex === 0 ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-up'"
                 variant="ghost"
@@ -101,28 +101,20 @@
                 @click="row.originalIndex === 0 ? movePriceDown(row.originalIndex) : movePriceUp(row.originalIndex)"
               />
             </div>
-            <span v-else-if="row.originalIndex >= 0 && prices.length === 1" v-text="String(row.originalIndex + 1)" />
+            <span v-if="!row.isStockBalancePlaceholderRow && prices.length === 1" v-text="String(row.originalIndex + 1)" />
           </template>
           <template #name-data="{ row }">
             <h4 class="font-medium" v-text="row.name.zh" />
           </template>
           <template #delivery-data="{ row }">
             <h4
-              v-if="row.originalIndex >= 0"
+              v-if="!row.isStockBalancePlaceholderRow"
               class="font-medium"
               v-text="row.isAutoDeliver ? $t('form.auto_delivery') : $t('form.manual_delivery')"
             />
           </template>
           <template #stock-data="{ row }">
-            <span
-              :class="[
-                'text-right',
-                {
-                  'text-green-600 font-semibold': row.originalIndex === -1 && row.stock >= 0,
-                  'text-red-600 font-semibold': row.originalIndex === -1 && row.stock < 0
-                }
-              ]"
-            >
+            <span class="text-right">
               {{ row.isAutoDeliver ? $t('form.auto_stock') : row.stock }}
             </span>
           </template>
@@ -133,7 +125,7 @@
           </template>
           <template #details-data="{ row }">
             <UButton
-              v-if="row.originalIndex >= 0"
+              v-if="!row.isStockBalancePlaceholderRow"
               icon="i-heroicons-document"
               :to="localeRoute({
                 name: 'my-books-status-classId-edit-editionIndex',
@@ -845,17 +837,18 @@ const editionsTableColumns = computed(() => {
 const editionsTableRows = computed(() => {
   const rows = prices.value.map((element: any, index: number) => ({
     ...element,
-    originalIndex: index
+    originalIndex: index,
+    isStockBalancePlaceholderRow: false
   }))
 
+  // If it’s a manual edition, add a row for stock balance.
   if (prices.value.some(price => !price.isAutoDeliver)) {
     rows.push({
       name: '',
       isAutoDeliver: false,
       stock: $t('table.stock_balance', { count: stockBalance.value }),
       price: '',
-      originalIndex: -1,
-      index: -1
+      isStockBalancePlaceholderRow: true
     })
   }
 
