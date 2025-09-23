@@ -165,13 +165,13 @@ async function onSetupStripe () {
   }
 }
 
-function handleClickStripeButton () {
+async function handleClickStripeButton () {
   isLoading.value = true
   try {
     if (!isStripeConnectReady.value) {
-      onSetupStripe()
+      await onSetupStripe()
     } else {
-      onLoginToStripe()
+      await onLoginToStripe()
     }
   } catch (e) {
     // eslint-disable-next-line no-console
