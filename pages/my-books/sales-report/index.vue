@@ -27,9 +27,10 @@
       }"
     >
       <template #header>
-        <h1 class="text-center font-bold font-mono">
-          Book Sales Commission History
-        </h1>
+        <h1
+          class="text-center font-bold font-mono"
+          v-text="$t('user_settings.commission_history')"
+        />
 
         <UTooltip
           text="Refresh Status"
@@ -71,9 +72,10 @@
       }"
     >
       <template #header>
-        <h1 class="text-center font-bold font-mono">
-          Commission Payout History
-        </h1>
+        <h1
+          class="text-center font-bold font-mono"
+          v-text="$t('user_settings.payout_history')"
+        />
 
         <UTooltip
           text="Refresh Status"

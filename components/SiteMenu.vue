@@ -111,7 +111,7 @@ const items = computed(() => {
       label: $t('menu.authors_affiliates'),
       links: [
         {
-          label: $t('menu.sales-report'),
+          label: $t('menu.sales_report'),
           icon: 'i-heroicons-user-group',
           to: localeRoute({ name: 'my-books-sales-report' }),
           exact: true
