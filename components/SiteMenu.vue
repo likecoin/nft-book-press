@@ -111,9 +111,9 @@ const items = computed(() => {
       label: $t('menu.authors_affiliates'),
       links: [
         {
-          label: $t('menu.user_settings'),
+          label: $t('menu.sales-report'),
           icon: 'i-heroicons-user-group',
-          to: localeRoute({ name: 'my-books-user' }),
+          to: localeRoute({ name: 'my-books-sales-report' }),
           exact: true
         },
         {
@@ -132,6 +132,12 @@ const items = computed(() => {
           icon: 'i-heroicons-arrow-top-right-on-square-20-solid',
           to: 'https://docs.3ook.com/zh-TW/collections/14176162-出版',
           target: '_blank'
+        },
+        {
+          label: $t('menu.settings'),
+          icon: 'i-heroicons-cog-8-tooth',
+          to: localeRoute({ name: 'my-books-settings' }),
+          exact: true
         }
       ]
     }

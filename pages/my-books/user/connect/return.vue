@@ -56,7 +56,7 @@
       <template #footer>
         <UButton
           label="Go Back"
-          :to="localeRoute({ name: 'my-books-user' })"
+          :to="localeRoute({ name: 'my-books-settings' })"
         />
       </template>
     </UCard>
@@ -99,7 +99,7 @@ onMounted(async () => {
     isDone.value = (data as any).isReady || false
 
     setTimeout(async () => {
-      await navigateTo(localeRoute({ name: 'my-books-user' }), { replace: true })
+      await navigateTo(localeRoute({ name: 'my-books-settings' }), { replace: true })
     }, 3000)
   } catch (e) {
     console.error(e)

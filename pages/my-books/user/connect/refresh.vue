@@ -10,7 +10,7 @@
       <template #footer>
         <UButton
           label="Go Back"
-          :to="localeRoute({ name: 'my-books-user' })"
+          :to="localeRoute({ name: 'my-books-settings' })"
         />
       </template>
     </UCard>
