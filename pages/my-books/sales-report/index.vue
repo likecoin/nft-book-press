@@ -107,7 +107,7 @@
             size="sm"
             color="gray"
             :to="localeRoute({
-              name: 'my-books-user-payouts-payoutId',
+              name: 'my-books-sales-report-payouts-payoutId',
               params: {
                 payoutId: row.id
               }
