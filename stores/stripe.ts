@@ -67,7 +67,6 @@ export const useStripeStore = defineStore('stripe-connect', () => {
           ...currentStatus,
           isReady: true
         }
-        await fetchStripeConnectStatusByWallet(wallet)
       }
     }
     return stripeConnectStatusWalletMap.value[wallet]
