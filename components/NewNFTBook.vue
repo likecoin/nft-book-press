@@ -41,7 +41,7 @@
                 <div class="flex items-center justify-between">
                   <h3
                     class="font-bold font-mono"
-                    v-text="`${$t('nft_book_form.edition_number', { number: index + 1 })} - ${p.name || $t('nft_book_form.product_name_placeholder')}`"
+                    v-text="`${$t('nft_book_form.edition_number', { number: (displayEditIndex || (index + 1)) })} - ${p.name || $t('nft_book_form.product_name_placeholder')}`"
                   />
                   <div class="flex items-center gap-2">
                     <p class="text-sm" v-text="$t('nft_book_form.pause_selling')" />
@@ -353,7 +353,6 @@ const hasMultiplePrices = computed(() => prices.value.length > 1)
 const moderatorWallets = ref<string[]>([
   'like1rclg677y2jqt8x4ylj0kjlqjjmnn6w63uflpgr'
 ])
-const notificationEmails = ref<string[]>([])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
@@ -409,6 +408,13 @@ const props = defineProps({
   classId: { type: String, default: '' },
   editionIndex: { type: [String, Number], default: undefined },
   isEditMode: { type: Boolean, default: false }
+})
+
+const displayEditIndex = computed(() => {
+  if (props.editionIndex !== undefined) {
+    return Number(props.editionIndex) + 1
+  }
+  return undefined
 })
 
 useSeoMeta({
@@ -688,7 +694,6 @@ async function submitNewClass () {
       defaultPaymentCurrency: 'USD',
       connectedWallets,
       moderatorWallets: moderatorWallets.value,
-      notificationEmails: notificationEmails.value,
       prices: p,
       mustClaimToView: true,
       enableCustomMessagePage: shouldEnableCustomMessagePage,
