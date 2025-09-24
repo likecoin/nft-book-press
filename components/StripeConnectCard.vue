@@ -56,7 +56,7 @@
               <UButton
                 class="mt-2"
                 :label="$t('stripe_connect.create_one_here')"
-                :to="localeRoute({ name: 'my-books-settings' })"
+                :to="localeRoute({ name: 'settings' })"
                 target="_blank"
                 variant="outline"
               />

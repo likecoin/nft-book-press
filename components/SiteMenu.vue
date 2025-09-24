@@ -113,7 +113,7 @@ const items = computed(() => {
         {
           label: $t('menu.sales_report'),
           icon: 'i-heroicons-user-group',
-          to: localeRoute({ name: 'my-books-sales-report' }),
+          to: localeRoute({ name: 'sales-report' }),
           exact: true
         },
         {
@@ -136,7 +136,7 @@ const items = computed(() => {
         {
           label: $t('menu.settings'),
           icon: 'i-heroicons-cog-8-tooth',
-          to: localeRoute({ name: 'my-books-settings' }),
+          to: localeRoute({ name: 'settings' }),
           exact: true
         }
       ]

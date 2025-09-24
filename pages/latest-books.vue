@@ -201,7 +201,7 @@ async function fetchUserStripeInfo () {
 
 function handleAffiliationSetupButtonClick () {
   useTrackEvent('latest_books_click_affiliation_setup')
-  navigateTo(localeRoute({ name: 'my-books-settings' }))
+  navigateTo(localeRoute({ name: 'settings' }))
 }
 
 function selectTableRow (row: any) {
