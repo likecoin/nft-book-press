@@ -196,6 +196,7 @@ async function handleSave () {
       ...contentMetadata,
       symbol: 'BOOK',
       external_link: contentMetadata?.url || '',
+      image: contentMetadata?.thumbnailUrl || '',
       nft_meta_collection_id: 'nft_book',
       nft_meta_collection_name: 'NFT Book',
       nft_meta_collection_description: 'NFT Book by Liker Land',
