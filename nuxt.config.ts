@@ -26,7 +26,8 @@ export default defineNuxtConfig({
     'nuxt-gtag',
     'nuxt-security',
     '@nuxt/scripts',
-    '@nuxtjs/i18n'
+    '@nuxtjs/i18n',
+    'nuxt-auth-utils'
   ],
 
   scripts: {
