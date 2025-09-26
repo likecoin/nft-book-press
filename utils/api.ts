@@ -9,6 +9,7 @@ export interface FetchLikerInfoResult {
   isSubscribedCivicLiker: boolean
   civicLikerSince: number
   description: string
+  isLikerPlus?: boolean
 }
 
 export async function useFetchLikerInfoById (likerId: string) {
@@ -24,4 +25,35 @@ export async function useFetchLikerInfoByWallet (wallet: string, { nocache = fal
   const url = `${LIKE_CO_API}/users/addr/${wallet}/min${timestamp}`
   const result = await $fetch<FetchLikerInfoResult>(url)
   return result
+}
+
+export async function fetchUserRegisterCheck ({
+  accountId,
+  walletAddress,
+  email,
+  magicDIDToken
+}: {
+  accountId?: string
+  walletAddress?: string
+  email?: string
+  magicDIDToken?: string
+}) {
+  const { LIKE_CO_API } = useRuntimeConfig().public
+  const url = `${LIKE_CO_API}/users/new/check`
+
+  const result = await $fetch(url, {
+    method: 'POST',
+    body: {
+      accountId,
+      walletAddress,
+      email,
+      magicDIDToken
+    }
+  })
+  return result
+}
+
+export function getLikeCoinAPIFetch () {
+  const config = useRuntimeConfig()
+  return $fetch.create({ baseURL: config.public.LIKE_CO_API })
 }
