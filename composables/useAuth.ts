@@ -8,19 +8,23 @@ export function useAuth () {
   const store = useWalletStore()
   const { wallet, signer, isConnected } = storeToRefs(store)
   const { connect, disconnect, signMessageMemo } = store
-  const { authenticate, clearSession, fetchBookListing } = bookstoreApiStore
-  const { intercomToken } = storeToRefs(bookstoreApiStore)
+  const { fetch: refreshSession } = useUserSession()
+
+  const { authenticate, fetchBookListing } = bookstoreApiStore
   const toast = useToast()
 
   const isAuthenticating = ref(false)
+  const email = ref<string | undefined>('')
+  const loginMethod = ref<string | undefined>('')
 
   const onAuthenticate = async (connectorId = 'magic') => {
     try {
       isAuthenticating.value = true
-      setupPostAuthRedirect()
 
       if (!wallet.value || !signer.value) {
-        await connect(connectorId)
+        const data = await connect(connectorId)
+        email.value = data?.email
+        loginMethod.value = data?.loginMethod
       }
       if (!wallet.value || !signer.value) {
         return
@@ -35,14 +39,36 @@ export function useAuth () {
         return
       }
 
-      await authenticate(wallet.value, signature)
-      if (window.Intercom && intercomToken.value) {
+      if (!wallet.value) {
+        throw new Error('Wallet not available')
+      }
+
+      const { jwtid, intercomToken, token } = await authenticate(signature)
+      if (window.Intercom && intercomToken) {
         window.Intercom('update', {
-          intercom_user_jwt: intercomToken.value,
+          intercom_user_jwt: intercomToken,
           session_duration: 2592000000, // 30d
           evm_wallet: wallet.value
         })
       }
+
+      await $fetch('/api/login', {
+        method: 'POST',
+        body: {
+          walletAddress: signature.wallet,
+          signature,
+          message: signature.message,
+          loginMethod: loginMethod.value,
+          email: email.value,
+          intercomToken,
+          token,
+          jwtid,
+          expiresIn: '30d'
+        }
+      })
+
+      await refreshSession()
+
       try {
         await fetchBookListing()
       } catch (err) {
@@ -50,7 +76,6 @@ export function useAuth () {
         console.error(err)
       }
     } catch (err) {
-      clearSession()
       if (isConnected.value) {
         await disconnect()
       }
@@ -67,7 +92,6 @@ export function useAuth () {
       })
     } finally {
       isAuthenticating.value = false
-      clearPostAuthRedirect()
     }
   }
 
