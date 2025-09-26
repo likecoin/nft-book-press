@@ -41,7 +41,7 @@
     "multiformats": "^13.3.2",
     "pinia": "^3.0.1",
     "uuid": "^9.0.0",
-    "viem": "2.x",
+    "viem": "2.31.6",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
