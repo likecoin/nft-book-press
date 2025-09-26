@@ -20,19 +20,12 @@
       <SiteNavigation />
     </USlideover>
 
-    <UModal
-      :model-value="isRestoringSession"
-      :prevent-close="true"
-      :ui="{ base: 'p-4 items-center gap-2' }"
-    >
-      <span>{{ $t('app.restoring_session') }}</span>
-      <UProgress animation="carousel" />
-    </UModal>
     <WelcomeModal />
 
     <NuxtLoadingIndicator />
 
     <UNotifications />
+    <UModals />
   </div>
 </template>
 
@@ -45,9 +38,10 @@ const { t: $t } = useI18n()
 
 const { SITE_URL } = useRuntimeConfig().public
 const bookstoreApiStore = useBookstoreApiStore()
+const { loggedIn: hasLoggedIn } = useUserSession()
 
-const { restoreAuthSession, fetchBookListing, clearSession } = bookstoreApiStore
-const { wallet, intercomToken, isRestoringSession, isAuthenticated } = storeToRefs(bookstoreApiStore)
+const { fetchBookListing } = bookstoreApiStore
+const { wallet, intercomToken } = storeToRefs(bookstoreApiStore)
 const uiStore = useUIStore()
 const toast = useToast()
 
@@ -96,7 +90,6 @@ useSeoMeta({
 
 onMounted(async () => {
   try {
-    await restoreAuthSession()
     if (window.Intercom && intercomToken.value) {
       window.Intercom('update', {
         intercom_user_jwt: intercomToken.value,
@@ -105,7 +98,6 @@ onMounted(async () => {
       })
     }
   } catch (error) {
-    console.error(error)
     toast.add({
       icon: 'i-heroicons-exclamation-circle',
       title: `${(error as Error).toString()}, please re-login`,
@@ -115,10 +107,9 @@ onMounted(async () => {
         title: 'text-red-400 dark:text-red-400'
       }
     })
-    clearSession()
   }
 
-  if (isAuthenticated.value) {
+  if (hasLoggedIn.value) {
     try {
       await fetchBookListing()
     } catch (error) {
