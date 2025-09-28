@@ -5,8 +5,8 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
   const { LIKE_CO_API } = useRuntimeConfig().public
   const { fetch: refreshSession, loggedIn: hasLoggedIn, user } = useUserSession()
 
-  const token = computed(() => user.value?.token)
-  const sessionWallet = computed(() => user.value?.evmWallet || user.value?.likeWallet)
+  const token = computed(() => user.value?.token || '')
+  const sessionWallet = computed(() => user.value?.evmWallet || user.value?.likeWallet || '')
   const intercomToken = computed(() => user.value?.intercomToken)
 
   const isRestoringSession = ref(false)
