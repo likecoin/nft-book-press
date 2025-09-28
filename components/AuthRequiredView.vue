@@ -29,7 +29,6 @@
           :label="isRestoringSession ? $t('auth_state.restore') : $t('auth_state.login')"
           size="lg"
           block
-          :loading="isAuthenticating"
           @click="bookstoreApiStore.openLoginPanel()"
         />
       </div>
@@ -45,7 +44,6 @@ const { t: $t } = useI18n()
 const { loggedIn: hasLoggedIn } = useUserSession()
 const bookstoreApiStore = useBookstoreApiStore()
 const { isRestoringSession } = storeToRefs(bookstoreApiStore)
-const { isAuthenticating } = useAuth()
 const { BOOK3_URL } = useRuntimeConfig().public
 
 </script>

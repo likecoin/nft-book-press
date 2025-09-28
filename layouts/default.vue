@@ -41,12 +41,19 @@
     >
       <LoginPanel @connect="onAuthenticate" />
     </UModal>
+    <UModal
+      v-model="shouldShowBlockingModal"
+      prevent-close
+      :ui="{ width: '!min-w-[200px]' }"
+    >
+      <BlockingModal :title="loginStatus" />
+    </UModal>
   </div>
 </template>
 
 <script setup>
 const bookstoreApiStore = useBookstoreApiStore()
-const { onAuthenticate } = useAuth()
+const { onAuthenticate, shouldShowBlockingModal, loginStatus } = useAuth()
 
 const colorMode = useColorMode()
 if (colorMode.value !== 'light') {

@@ -11,6 +11,7 @@ export function useAuth () {
   const { wallet, signer, isConnected } = storeToRefs(store)
   const { connect, disconnect, signMessageMemo } = store
   const { fetch: refreshSession } = useUserSession()
+  const { t: $t } = useI18n()
 
   const { authenticate, fetchBookListing } = bookstoreApiStore
   const toast = useToast()
@@ -19,9 +20,13 @@ export function useAuth () {
   const email = ref<string | undefined>('')
   const loginMethod = ref<string | undefined>('')
 
+  const shouldShowBlockingModal = ref(false)
+  const loginStatus = ref<string | undefined>('')
+
   const onAuthenticate = async (connectorId = 'magic') => {
     try {
-      isAuthenticating.value = true
+      shouldShowBlockingModal.value = true
+      loginStatus.value = $t('auth_state.connecting')
 
       if (!wallet.value || !signer.value) {
         const data = await connect(connectorId)
@@ -68,6 +73,7 @@ export function useAuth () {
           expiresIn: '30d'
         }
       })
+      loginStatus.value = $t('auth_state.success')
 
       await refreshSession()
 
@@ -95,12 +101,15 @@ export function useAuth () {
         })
       }
     } finally {
+      shouldShowBlockingModal.value = false
       isAuthenticating.value = false
     }
   }
 
   return {
     isAuthenticating,
-    onAuthenticate
+    onAuthenticate,
+    shouldShowBlockingModal,
+    loginStatus
   }
 }

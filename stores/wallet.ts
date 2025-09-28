@@ -10,6 +10,7 @@ import { RegistrationModal } from '#components'
 export const useWalletStore = defineStore('wallet', () => {
   const { connectors, connectAsync: wagmiConnect, status } = useConnect()
   const { disconnectAsync: wagmiDisconnect } = useDisconnect()
+  const bookstoreApiStore = useBookstoreApiStore()
   const { address, isConnected } = useAccount()
   const { signMessageAsync } = useSignMessage()
   const { LIKECOIN_V3_BOOK_MIGRATION_SITE_URL } = useRuntimeConfig().public
@@ -17,8 +18,6 @@ export const useWalletStore = defineStore('wallet', () => {
   const toast = useToast()
 
   const REGISTER_TIME_LIMIT_IN_TS = 15 * 60 * 1000 // 15 minutes
-
-  const isLoginLoading = ref(false)
 
   const wallet = computed(() => address.value ? checksumAddress(address.value) : undefined)
 
@@ -57,8 +56,7 @@ export const useWalletStore = defineStore('wallet', () => {
       )
       if (!connector) { return }
       await wagmiConnect({ connector, chainId })
-
-      isLoginLoading.value = true
+      bookstoreApiStore.closeLoginPanel()
 
       const walletAddress = address.value
       if (status.value !== 'success' || !walletAddress) {
@@ -424,7 +422,6 @@ export const useWalletStore = defineStore('wallet', () => {
     wallet,
     signer: ref({}),
     isConnected,
-    isLoginLoading,
     initIfNecessary,
     connect,
     disconnect,
