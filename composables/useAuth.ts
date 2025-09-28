@@ -1,4 +1,6 @@
 import { storeToRefs } from 'pinia'
+import { FetchError } from 'ofetch'
+
 import { useWalletStore } from '~/stores/wallet'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
 import { SIGN_AUTHORIZATION_PERMISSIONS } from '~/utils/auth'
@@ -79,17 +81,19 @@ export function useAuth () {
       if (isConnected.value) {
         await disconnect()
       }
-      // eslint-disable-next-line no-console
-      console.error(err)
-      toast.add({
-        icon: 'i-heroicons-exclamation-circle',
-        title: (err as Error).toString(),
-        timeout: 0,
-        color: 'red',
-        ui: {
-          title: 'text-red-400 dark:text-red-400'
-        }
-      })
+      if (err instanceof FetchError) {
+        // eslint-disable-next-line no-console
+        console.error(err)
+        toast.add({
+          icon: 'i-heroicons-exclamation-circle',
+          title: err.data?.message || err.data,
+          timeout: 0,
+          color: 'red',
+          ui: {
+            title: 'text-red-400 dark:text-red-400'
+          }
+        })
+      }
     } finally {
       isAuthenticating.value = false
     }

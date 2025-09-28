@@ -5,7 +5,7 @@ import { optimism, optimismSepolia } from '@wagmi/vue/chains'
 import { checksumAddress, UserRejectedRequestError } from 'viem'
 import type { Magic } from 'magic-sdk'
 import { clearUploadFileData } from '~/utils/uploadFile'
-import { RegistrationModal, ErrorModal } from '#components'
+import { RegistrationModal } from '#components'
 
 export const useWalletStore = defineStore('wallet', () => {
   const { connectors, connectAsync: wagmiConnect, status } = useConnect()
@@ -14,6 +14,7 @@ export const useWalletStore = defineStore('wallet', () => {
   const { signMessageAsync } = useSignMessage()
   const { LIKECOIN_V3_BOOK_MIGRATION_SITE_URL } = useRuntimeConfig().public
   const modal = useModal()
+  const toast = useToast()
 
   const REGISTER_TIME_LIMIT_IN_TS = 15 * 60 * 1000 // 15 minutes
 
@@ -195,13 +196,21 @@ export const useWalletStore = defineStore('wallet', () => {
 
               }
             }
-            modal.open(ErrorModal, getEmailAlreadyUsedErrorData({
-              email: email as string,
-              walletAddress,
-              boundEVMWallet: error.data?.evmWallet,
-              boundLikeWallet: error.data?.likeWallet,
-              loginMethod
-            }))
+            toast.add({
+              icon: 'i-heroicons-exclamation-circle',
+              title: getEmailAlreadyUsedErrorData({
+                email: email as string,
+                walletAddress,
+                boundEVMWallet: error.data?.evmWallet,
+                boundLikeWallet: error.data?.likeWallet,
+                loginMethod
+              })?.data.description || error.data?.message || error.data,
+              timeout: 0,
+              color: 'red',
+              ui: {
+                title: 'text-red-400 dark:text-red-400'
+              }
+            })
             break
 
           case 'EVM_WALLET_ALREADY_EXIST':
@@ -373,17 +382,33 @@ export const useWalletStore = defineStore('wallet', () => {
         if (error instanceof FetchError) {
           switch (error.data?.message) {
             case 'INVALID_USER_ID': {
-              await modal.open(ErrorModal, { description: $t('account_register_error_invalid_account_id', { id: payload?.accountId }) })
+              toast.add({
+                icon: 'i-heroicons-exclamation-circle',
+                title: $t('account_register_error_invalid_account_id', { id: payload?.accountId }),
+                timeout: 0,
+                color: 'red',
+                ui: {
+                  title: 'text-red-400 dark:text-red-400'
+                }
+              })
               continue
             }
             case 'EMAIL_ALREADY_USED': {
-              await modal.open(ErrorModal, getEmailAlreadyUsedErrorData({
-                email: payload?.email as string,
-                walletAddress,
-                boundEVMWallet: error.data?.evmWallet,
-                boundLikeWallet: error.data?.likeWallet,
-                loginMethod
-              }))
+              toast.add({
+                icon: 'i-heroicons-exclamation-circle',
+                title: getEmailAlreadyUsedErrorData({
+                  email: payload?.email as string,
+                  walletAddress,
+                  boundEVMWallet: error.data?.evmWallet,
+                  boundLikeWallet: error.data?.likeWallet,
+                  loginMethod
+                })?.data.description || error.data?.message || error.data,
+                timeout: 0,
+                color: 'red',
+                ui: {
+                  title: 'text-red-400 dark:text-red-400'
+                }
+              })
               continue
             }
             default:
