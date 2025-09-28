@@ -16,448 +16,446 @@
       </template>
     </UProgress>
 
-    <template v-if="bookstoreApiStore.isAuthenticated">
-      <UCard
-        :ui="{
-          header: { base: 'flex justify-between items-center' },
-          body: { padding: '12px' },
-          ring: showEditISCN ? 'ring-2 ring-gray-500' : 'ring-1 ring-gray-200',
-        }"
-      >
-        <div class="flex justify-between items-center w-full">
-          <div class="flex items-center gap-2">
-            <h3 class="font-bold font-mono" v-text="nftClassName || classId" />
-            <ULink
-              :to="`${BOOK3_URL}/store/${classId}`"
-              class="flex items-center"
-              target="_blank"
-            >
-              <UIcon
-                name="i-heroicons-arrow-top-right-on-square"
-                size="xl"
-              />
-            </ULink>
-          </div>
-          <UButton
-            color="gray"
-            variant="ghost"
-            trailing
-            :label="$t('form.edit_iscn_metadata')"
-            :icon="
-              showEditISCN
-                ? 'i-heroicons-chevron-up'
-                : 'i-heroicons-chevron-down'
-            "
-            @click="
-              () => {showEditISCN = !showEditISCN}
-            "
-          />
+    <UCard
+      :ui="{
+        header: { base: 'flex justify-between items-center' },
+        body: { padding: '12px' },
+        ring: showEditISCN ? 'ring-2 ring-gray-500' : 'ring-1 ring-gray-200',
+      }"
+    >
+      <div class="flex justify-between items-center w-full">
+        <div class="flex items-center gap-2">
+          <h3 class="font-bold font-mono" v-text="nftClassName || classId" />
+          <ULink
+            :to="`${BOOK3_URL}/store/${classId}`"
+            class="flex items-center"
+            target="_blank"
+          >
+            <UIcon
+              name="i-heroicons-arrow-top-right-on-square"
+              size="xl"
+            />
+          </ULink>
         </div>
-        <template v-if="showEditISCN">
-          <EditISCNMetadataForm
-            :class-id="classId"
-            @iscn-updated="handleISCNUpdated"
-          />
-        </template>
-      </UCard>
+        <UButton
+          color="gray"
+          variant="ghost"
+          trailing
+          :label="$t('form.edit_iscn_metadata')"
+          :icon="
+            showEditISCN
+              ? 'i-heroicons-chevron-up'
+              : 'i-heroicons-chevron-down'
+          "
+          @click="
+            () => {showEditISCN = !showEditISCN}
+          "
+        />
+      </div>
+      <template v-if="showEditISCN">
+        <EditISCNMetadataForm
+          :class-id="classId"
+          @iscn-updated="handleISCNUpdated"
+        />
+      </template>
+    </UCard>
 
-      <UCard :ui="{ body: { padding: '' } }">
-        <template #header>
-          <div class="flex justify-between items-center">
-            <h3 class="font-bold font-mono" v-text="$t('pages.editions')" />
-            <div class="flex justify-between items-center gap-4">
-              <UButton
-                icon="i-heroicons-plus"
-                class="mb-[12px]"
-                variant="outline"
-                :color="prices.length >= MAX_EDITION_COUNT ? 'gray' : 'primary'"
-                :disabled="prices.length >= MAX_EDITION_COUNT"
-                :label="$t('form.add_edition')"
-                :to="localeRoute({
-                  name: 'my-books-status-classId-edit-new',
-                  params: { classId },
-                  query: { price_index: prices.length }
-                })"
-              />
-            </div>
-          </div>
-        </template>
-
-        <UTable
-          :columns="editionsTableColumns"
-          :rows="editionsTableRows"
-        >
-          <template #sort-data="{ row }">
-            <div v-if="!row.isStockBalancePlaceholderRow && prices.length > 1" class="flex flex-col gap-1">
-              <UButton
-                :icon="row.originalIndex === 0 ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-up'"
-                variant="ghost"
-                color="gray"
-                size="xs"
-                :label="String(row.originalIndex + 1)"
-                :disabled="isUpdatingPricesOrder || (row.originalIndex <= 0 && row.originalIndex >= prices.length - 1)"
-                :loading="isUpdatingPricesOrder"
-                trailing
-                @click="row.originalIndex === 0 ? movePriceDown(row.originalIndex) : movePriceUp(row.originalIndex)"
-              />
-            </div>
-            <span v-if="!row.isStockBalancePlaceholderRow && prices.length === 1" v-text="String(row.originalIndex + 1)" />
-          </template>
-          <template #name-data="{ row }">
-            <h4 class="font-medium" v-text="row.name.zh" />
-          </template>
-          <template #delivery-data="{ row }">
-            <h4
-              v-if="!row.isStockBalancePlaceholderRow"
-              class="font-medium"
-              v-text="row.isAutoDeliver ? $t('form.auto_delivery') : $t('form.manual_delivery')"
-            />
-          </template>
-          <template #stock-data="{ row }">
-            <span class="text-right">
-              {{ row.isAutoDeliver ? $t('form.auto_stock') : row.stock }}
-            </span>
-          </template>
-          <template #price-data="{ row }">
-            <span class="text-right">
-              {{ row.price }}
-            </span>
-          </template>
-          <template #details-data="{ row }">
-            <UButton
-              v-if="!row.isStockBalancePlaceholderRow"
-              icon="i-heroicons-document"
-              :to="localeRoute({
-                name: 'my-books-status-classId-edit-editionIndex',
-                params: { classId, editionIndex: row.index }
-              })"
-              variant="soft"
-              color="gray"
-            />
-          </template>
-        </UTable>
-        <template #footer>
-          <div class="flex justify-end items-center ">
+    <UCard :ui="{ body: { padding: '' } }">
+      <template #header>
+        <div class="flex justify-between items-center">
+          <h3 class="font-bold font-mono" v-text="$t('pages.editions')" />
+          <div class="flex justify-between items-center gap-4">
             <UButton
               icon="i-heroicons-plus"
-              :label="$t('buttons.mint_new_stock')"
-              @click="handleOpenRestockModal"
+              class="mb-[12px]"
+              variant="outline"
+              :color="prices.length >= MAX_EDITION_COUNT ? 'gray' : 'primary'"
+              :disabled="prices.length >= MAX_EDITION_COUNT"
+              :label="$t('form.add_edition')"
+              :to="localeRoute({
+                name: 'my-books-status-classId-edit-new',
+                params: { classId },
+                query: { price_index: prices.length }
+              })"
             />
           </div>
-        </template>
-      </UCard>
+        </div>
+      </template>
 
-      <UCard
-        :ui="{
-          header: { base: 'flex justify-between items-center gap-4' },
-          body: { padding: '' },
-        }"
+      <UTable
+        :columns="editionsTableColumns"
+        :rows="editionsTableRows"
       >
-        <template #header>
-          <h3 class="font-bold font-mono" v-text="$t('pages.orders')" />
-
-          <UInput v-model="searchInput" icon="i-heroicons-magnifying-glass-20-solid" :placeholder="$t('status_page.search_placeholder')" />
+        <template #sort-data="{ row }">
+          <div v-if="!row.isStockBalancePlaceholderRow && prices.length > 1" class="flex flex-col gap-1">
+            <UButton
+              :icon="row.originalIndex === 0 ? 'i-heroicons-chevron-down' : 'i-heroicons-chevron-up'"
+              variant="ghost"
+              color="gray"
+              size="xs"
+              :label="String(row.originalIndex + 1)"
+              :disabled="isUpdatingPricesOrder || (row.originalIndex <= 0 && row.originalIndex >= prices.length - 1)"
+              :loading="isUpdatingPricesOrder"
+              trailing
+              @click="row.originalIndex === 0 ? movePriceDown(row.originalIndex) : movePriceUp(row.originalIndex)"
+            />
+          </div>
+          <span v-if="!row.isStockBalancePlaceholderRow && prices.length === 1" v-text="String(row.originalIndex + 1)" />
         </template>
-
-        <UTable
-          :ui="{ th: { base: 'whitespace-nowrap'}}"
-          :columns="orderTableColumns"
-          :rows="ordersTableRows"
-        >
-          <template #buyerEmail-data="{ row }">
-            <UButton
-              :label="row.buyerEmail"
-              :to="`mailto:${row.buyerEmail}`"
-              variant="link"
-              :padded="false"
-            />
-          </template>
-          <template #readerEmail-data="{ row }">
-            <UButton
-              :label="row.readerEmail"
-              :to="`mailto:${row.readerEmail}`"
-              variant="link"
-              :padded="false"
-            />
-          </template>
-          <template #wallet-data="{ row }">
-            <UTooltip :text="row.wallet">
-              <UButton
-                class="font-mono"
-                :label="row.shortenWallet"
-                :to="row.walletLink"
-                variant="link"
-                :padded="false"
-                size="xs"
-                target="_blank"
-              />
-            </UTooltip>
-          </template>
-          <template #status-data="{ row }">
-            <UBadge
-              :color="row.statusLabelColor"
-              :label="row.statusLabel"
-              variant="outline"
-              :ui="{ rounded: 'rounded-full' }"
-            />
-          </template>
-          <template #actions-data="{ row }">
-            <UDropdown :items="row.actions">
-              <UButton
-                :class="{ hidden: !row.actions.length }"
-                icon="i-heroicons-ellipsis-horizontal-20-solid"
-                color="gray"
-                variant="ghost"
-              />
-            </UDropdown>
-          </template>
-        </UTable>
-      </UCard>
-
-      <UCard
-        :ui="{
-          header: { base: 'flex justify-between items-center' },
-          body: { padding: '12px' },
-        }"
-      >
-        <div class="flex justify-between items-center w-full">
-          <h3 class="font-bold font-mono" v-text="$t('nft_book_form.advanced_settings')" />
+        <template #name-data="{ row }">
+          <h4 class="font-medium" v-text="row.name.zh" />
+        </template>
+        <template #delivery-data="{ row }">
+          <h4
+            v-if="!row.isStockBalancePlaceholderRow"
+            class="font-medium"
+            v-text="row.isAutoDeliver ? $t('form.auto_delivery') : $t('form.manual_delivery')"
+          />
+        </template>
+        <template #stock-data="{ row }">
+          <span class="text-right">
+            {{ row.isAutoDeliver ? $t('form.auto_stock') : row.stock }}
+          </span>
+        </template>
+        <template #price-data="{ row }">
+          <span class="text-right">
+            {{ row.price }}
+          </span>
+        </template>
+        <template #details-data="{ row }">
           <UButton
+            v-if="!row.isStockBalancePlaceholderRow"
+            icon="i-heroicons-document"
+            :to="localeRoute({
+              name: 'my-books-status-classId-edit-editionIndex',
+              params: { classId, editionIndex: row.index }
+            })"
+            variant="soft"
             color="gray"
-            variant="ghost"
-            :icon="
-              shouldShowAdvanceSettings
-                ? 'i-heroicons-chevron-up'
-                : 'i-heroicons-chevron-down'
-            "
-            @click="
-              () => {
-                shouldShowAdvanceSettings = !shouldShowAdvanceSettings;
-              }
-            "
+          />
+        </template>
+      </UTable>
+      <template #footer>
+        <div class="flex justify-end items-center ">
+          <UButton
+            icon="i-heroicons-plus"
+            :label="$t('buttons.mint_new_stock')"
+            @click="handleOpenRestockModal"
           />
         </div>
-        <template v-if="shouldShowAdvanceSettings">
-          <div class="mt-[24px] flex flex-col gap-[12px]">
-            <!-- Share channel summary -->
-            <UCard :ui="{ body: { padding: '' } }">
+      </template>
+    </UCard>
+
+    <UCard
+      :ui="{
+        header: { base: 'flex justify-between items-center gap-4' },
+        body: { padding: '' },
+      }"
+    >
+      <template #header>
+        <h3 class="font-bold font-mono" v-text="$t('pages.orders')" />
+
+        <UInput v-model="searchInput" icon="i-heroicons-magnifying-glass-20-solid" :placeholder="$t('status_page.search_placeholder')" />
+      </template>
+
+      <UTable
+        :ui="{ th: { base: 'whitespace-nowrap'}}"
+        :columns="orderTableColumns"
+        :rows="ordersTableRows"
+      >
+        <template #buyerEmail-data="{ row }">
+          <UButton
+            :label="row.buyerEmail"
+            :to="`mailto:${row.buyerEmail}`"
+            variant="link"
+            :padded="false"
+          />
+        </template>
+        <template #readerEmail-data="{ row }">
+          <UButton
+            :label="row.readerEmail"
+            :to="`mailto:${row.readerEmail}`"
+            variant="link"
+            :padded="false"
+          />
+        </template>
+        <template #wallet-data="{ row }">
+          <UTooltip :text="row.wallet">
+            <UButton
+              class="font-mono"
+              :label="row.shortenWallet"
+              :to="row.walletLink"
+              variant="link"
+              :padded="false"
+              size="xs"
+              target="_blank"
+            />
+          </UTooltip>
+        </template>
+        <template #status-data="{ row }">
+          <UBadge
+            :color="row.statusLabelColor"
+            :label="row.statusLabel"
+            variant="outline"
+            :ui="{ rounded: 'rounded-full' }"
+          />
+        </template>
+        <template #actions-data="{ row }">
+          <UDropdown :items="row.actions">
+            <UButton
+              :class="{ hidden: !row.actions.length }"
+              icon="i-heroicons-ellipsis-horizontal-20-solid"
+              color="gray"
+              variant="ghost"
+            />
+          </UDropdown>
+        </template>
+      </UTable>
+    </UCard>
+
+    <UCard
+      :ui="{
+        header: { base: 'flex justify-between items-center' },
+        body: { padding: '12px' },
+      }"
+    >
+      <div class="flex justify-between items-center w-full">
+        <h3 class="font-bold font-mono" v-text="$t('nft_book_form.advanced_settings')" />
+        <UButton
+          color="gray"
+          variant="ghost"
+          :icon="
+            shouldShowAdvanceSettings
+              ? 'i-heroicons-chevron-up'
+              : 'i-heroicons-chevron-down'
+          "
+          @click="
+            () => {
+              shouldShowAdvanceSettings = !shouldShowAdvanceSettings;
+            }
+          "
+        />
+      </div>
+      <template v-if="shouldShowAdvanceSettings">
+        <div class="mt-[24px] flex flex-col gap-[12px]">
+          <!-- Share channel summary -->
+          <UCard :ui="{ body: { padding: '' } }">
+            <template #header>
+              <h3 class="font-bold font-mono" v-text="$t('pages.sales_channel_summary')" />
+            </template>
+
+            <UTable
+              :columns="[
+                { key: 'id', label: $t('table.channel_id'), sortable: true },
+                { key: 'count', label: $t('table.count'), sortable: true },
+                { key: 'totalUSD', label: $t('table.total_usd'), sortable: true },
+              ]"
+              :rows="salesChannelTableRows"
+            >
+              <template #id-data="{ row }">
+                <span
+                  v-if="row.id !== 'empty'"
+                  class="font-bold font-mono"
+                >{{ row.idLabel }}</span>
+                <UBadge
+                  v-else
+                  :label="row.idLabel"
+                  :ui="{ rounded: 'rounded-full' }"
+                  color="gray"
+                />
+              </template>
+            </UTable>
+          </UCard>
+
+          <!-- Share sales data -->
+          <UCard
+            :ui="{
+              header: { base: 'flex justify-between items-center' },
+              body: { padding: '', base: 'space-y-8' }
+            }"
+          >
+            <template #header>
+              <h4 class="text-sm font-bold font-mono" v-text="$t('form.share_sales_data')" />
+              <div class="flex gap-2">
+                <UInput
+                  v-model="moderatorWalletInput"
+                  class="font-mono"
+                  placeholder="0x..."
+                />
+                <UButton
+                  :label="$t('common.add')"
+                  :variant="moderatorWalletInput ? 'outline' : 'solid'"
+                  :color="moderatorWalletInput ? 'primary' : 'gray'"
+                  :disabled="!moderatorWalletInput"
+                  @click="addModeratorWallet"
+                />
+              </div>
+            </template>
+            <UTable
+              :columns="moderatorWalletsTableColumns"
+              :rows="moderatorWalletsTableRows"
+            >
+              <template #wallet-data="{ row }">
+                <UTooltip :text="row.wallet">
+                  <UButton
+                    class="font-mono"
+                    :label="row.shortenWallet"
+                    :to="row.walletLink"
+                    variant="link"
+                    :padded="false"
+                    size="xs"
+                  />
+                </UTooltip>
+              </template>
+              <template #remove-data="{ row }">
+                <div class="flex justify-end items-center">
+                  <UButton
+                    icon="i-heroicons-x-mark"
+                    variant="soft"
+                    color="red"
+                    @click="() => moderatorWallets.splice(row.index, 1)"
+                  />
+                </div>
+              </template>
+            </UTable>
+          </UCard>
+
+          <!-- Copy Purchase Link -->
+          <UCard
+            :ui="{ body: { base: 'space-y-4' } }"
+          >
+            <template #header>
+              <h3 class="font-bold font-mono" v-text="$t('form.copy_purchase_link')" />
+            </template>
+
+            <UFormGroup :label="$t('form.edition')">
+              <USelect v-model="priceIndex" :options="priceIndexOptions" />
+            </UFormGroup>
+
+            <UFormGroup :label="$t('form.sales_channel_for_links')">
+              <UInput v-model="fromChannelInput" placeholder="Channel ID(s), separated by commas (e.g. store01, store02)" />
+            </UFormGroup>
+
+            <UCard
+              v-if="purchaseLinks.length > 1"
+              :ui="{ header: { base: 'flex justify-between items-center' }, body: { padding: '' } }"
+            >
               <template #header>
-                <h3 class="font-bold font-mono" v-text="$t('pages.sales_channel_summary')" />
+                <h4 class="text-sm font-bold font-mono" v-text="$t('purchase_link.download_all_links')" />
+
+                <UDropdown
+                  :items="[
+                    [
+                      {
+                        label: $t('buttons.print_all_qr'),
+                        icon: 'i-heroicons-qr-code',
+                        click: printAllQRCodes,
+                      },
+                      {
+                        label: $t('buttons.download_all_links'),
+                        icon: 'i-heroicons-arrow-down-on-square-stack',
+                        click: downloadAllPurchaseLinks,
+                      },
+                      {
+                        label: $t('buttons.shorten_all_links'),
+                        icon: 'i-heroicons-sparkles',
+                        click: shortenAllLinks,
+                      },
+                    ]
+                  ]"
+                  :popper="{ placement: 'top-end' }"
+                >
+                  <UButton
+                    icon="i-heroicons-ellipsis-horizontal-20-solid"
+                    color="gray"
+                    variant="soft"
+                  />
+                </UDropdown>
               </template>
 
               <UTable
                 :columns="[
-                  { key: 'id', label: $t('table.channel_id'), sortable: true },
-                  { key: 'count', label: $t('table.count'), sortable: true },
-                  { key: 'totalUSD', label: $t('table.total_usd'), sortable: true },
+                  { key: 'index', label: '#' },
+                  { key: 'channel', label: $t('table.channel_id') },
+                  { key: 'link', label: $t('purchase_link.download_links') },
                 ]"
-                :rows="salesChannelTableRows"
+                :rows="purchaseLinks"
+                :ui="{ thead: 'whitespace-nowrap' }"
               >
-                <template #id-data="{ row }">
-                  <span
-                    v-if="row.id !== 'empty'"
-                    class="font-bold font-mono"
-                  >{{ row.idLabel }}</span>
-                  <UBadge
-                    v-else
-                    :label="row.idLabel"
-                    :ui="{ rounded: 'rounded-full' }"
-                    color="gray"
-                  />
+                <template #index-data="{ index }">
+                  {{ index + 1 }}
                 </template>
-              </UTable>
-            </UCard>
-
-            <!-- Share sales data -->
-            <UCard
-              :ui="{
-                header: { base: 'flex justify-between items-center' },
-                body: { padding: '', base: 'space-y-8' }
-              }"
-            >
-              <template #header>
-                <h4 class="text-sm font-bold font-mono" v-text="$t('form.share_sales_data')" />
-                <div class="flex gap-2">
-                  <UInput
-                    v-model="moderatorWalletInput"
-                    class="font-mono"
-                    placeholder="0x..."
-                  />
-                  <UButton
-                    :label="$t('common.add')"
-                    :variant="moderatorWalletInput ? 'outline' : 'solid'"
-                    :color="moderatorWalletInput ? 'primary' : 'gray'"
-                    :disabled="!moderatorWalletInput"
-                    @click="addModeratorWallet"
-                  />
-                </div>
-              </template>
-              <UTable
-                :columns="moderatorWalletsTableColumns"
-                :rows="moderatorWalletsTableRows"
-              >
-                <template #wallet-data="{ row }">
-                  <UTooltip :text="row.wallet">
+                <template #link-data="{ row }">
+                  <div class="flex items-center gap-2">
                     <UButton
-                      class="font-mono"
-                      :label="row.shortenWallet"
-                      :to="row.walletLink"
-                      variant="link"
-                      :padded="false"
+                      icon="i-heroicons-qr-code"
+                      variant="outline"
                       size="xs"
+                      @click="selectedPurchaseLink = row"
                     />
-                  </UTooltip>
-                </template>
-                <template #remove-data="{ row }">
-                  <div class="flex justify-end items-center">
                     <UButton
-                      icon="i-heroicons-x-mark"
-                      variant="soft"
-                      color="red"
-                      @click="() => moderatorWallets.splice(row.index, 1)"
+                      icon="i-heroicons-document-duplicate"
+                      size="xs"
+                      variant="outline"
+                      :disabled="!row.url"
+                      @click="copyPurchaseLink(row.url)"
+                    />
+                    <UButton
+                      class="font-mono break-all"
+                      :label="row.url"
+                      :to="row.url"
+                      color="gray"
+                      variant="outline"
+                      size="xs"
+                      target="_blank"
                     />
                   </div>
                 </template>
               </UTable>
             </UCard>
-
-            <!-- Copy Purchase Link -->
-            <UCard
-              :ui="{ body: { base: 'space-y-4' } }"
-            >
-              <template #header>
-                <h3 class="font-bold font-mono" v-text="$t('form.copy_purchase_link')" />
-              </template>
-
-              <UFormGroup :label="$t('form.edition')">
-                <USelect v-model="priceIndex" :options="priceIndexOptions" />
-              </UFormGroup>
-
-              <UFormGroup :label="$t('form.sales_channel_for_links')">
-                <UInput v-model="fromChannelInput" placeholder="Channel ID(s), separated by commas (e.g. store01, store02)" />
-              </UFormGroup>
-
-              <UCard
-                v-if="purchaseLinks.length > 1"
-                :ui="{ header: { base: 'flex justify-between items-center' }, body: { padding: '' } }"
-              >
-                <template #header>
-                  <h4 class="text-sm font-bold font-mono" v-text="$t('purchase_link.download_all_links')" />
-
-                  <UDropdown
-                    :items="[
-                      [
-                        {
-                          label: $t('buttons.print_all_qr'),
-                          icon: 'i-heroicons-qr-code',
-                          click: printAllQRCodes,
-                        },
-                        {
-                          label: $t('buttons.download_all_links'),
-                          icon: 'i-heroicons-arrow-down-on-square-stack',
-                          click: downloadAllPurchaseLinks,
-                        },
-                        {
-                          label: $t('buttons.shorten_all_links'),
-                          icon: 'i-heroicons-sparkles',
-                          click: shortenAllLinks,
-                        },
-                      ]
-                    ]"
-                    :popper="{ placement: 'top-end' }"
-                  >
-                    <UButton
-                      icon="i-heroicons-ellipsis-horizontal-20-solid"
-                      color="gray"
-                      variant="soft"
-                    />
-                  </UDropdown>
-                </template>
-
-                <UTable
-                  :columns="[
-                    { key: 'index', label: '#' },
-                    { key: 'channel', label: $t('table.channel_id') },
-                    { key: 'link', label: $t('purchase_link.download_links') },
-                  ]"
-                  :rows="purchaseLinks"
-                  :ui="{ thead: 'whitespace-nowrap' }"
-                >
-                  <template #index-data="{ index }">
-                    {{ index + 1 }}
-                  </template>
-                  <template #link-data="{ row }">
-                    <div class="flex items-center gap-2">
-                      <UButton
-                        icon="i-heroicons-qr-code"
-                        variant="outline"
-                        size="xs"
-                        @click="selectedPurchaseLink = row"
-                      />
-                      <UButton
-                        icon="i-heroicons-document-duplicate"
-                        size="xs"
-                        variant="outline"
-                        :disabled="!row.url"
-                        @click="copyPurchaseLink(row.url)"
-                      />
-                      <UButton
-                        class="font-mono break-all"
-                        :label="row.url"
-                        :to="row.url"
-                        color="gray"
-                        variant="outline"
-                        size="xs"
-                        target="_blank"
-                      />
-                    </div>
-                  </template>
-                </UTable>
-              </UCard>
-              <div v-else-if="purchaseLinks[0]" class="flex items-center gap-2">
-                <UButton
-                  icon="i-heroicons-qr-code"
-                  variant="outline"
-                  size="xs"
-                  @click="selectedPurchaseLink = purchaseLinks[0]"
-                />
-                <UButton
-                  icon="i-heroicons-document-duplicate"
-                  size="xs"
-                  variant="outline"
-                  :disabled="!purchaseLinks[0]?.url"
-                  @click="copyPurchaseLink(purchaseLinks[0]?.url)"
-                />
-                <UButton
-                  icon="i-heroicons-arrow-top-right-on-square"
-                  :to="purchaseLinks[0].url"
-                  target="_blank"
-                  size="xs"
-                  variant="outline"
-                />
-                <UInput
-                  class="grow font-mono"
-                  :model-value="purchaseLinks[0].url"
-                  :disabled="true"
-                  color="gray"
-                  variant="outline"
-                  size="xs"
-                />
-              </div>
-            </UCard>
-          </div>
-          <div class="flex items-center justify-center w-full mt-4">
-            <UButton
-              :label="$t('common.save')"
-              :loading="isLoading"
-              size="lg"
-              :disabled="isLoading"
-              @click="updateSettings"
-            />
-          </div>
-        </template>
-      </UCard>
-    </template>
+            <div v-else-if="purchaseLinks[0]" class="flex items-center gap-2">
+              <UButton
+                icon="i-heroicons-qr-code"
+                variant="outline"
+                size="xs"
+                @click="selectedPurchaseLink = purchaseLinks[0]"
+              />
+              <UButton
+                icon="i-heroicons-document-duplicate"
+                size="xs"
+                variant="outline"
+                :disabled="!purchaseLinks[0]?.url"
+                @click="copyPurchaseLink(purchaseLinks[0]?.url)"
+              />
+              <UButton
+                icon="i-heroicons-arrow-top-right-on-square"
+                :to="purchaseLinks[0].url"
+                target="_blank"
+                size="xs"
+                variant="outline"
+              />
+              <UInput
+                class="grow font-mono"
+                :model-value="purchaseLinks[0].url"
+                :disabled="true"
+                color="gray"
+                variant="outline"
+                size="xs"
+              />
+            </div>
+          </UCard>
+        </div>
+        <div class="flex items-center justify-center w-full mt-4">
+          <UButton
+            :label="$t('common.save')"
+            :loading="isLoading"
+            size="lg"
+            :disabled="isLoading"
+            @click="updateSettings"
+          />
+        </div>
+      </template>
+    </UCard>
 
     <UModal v-model="isOpenQRCodeModal">
       <QRCodeGenerator

@@ -1,15 +1,16 @@
-import { defineStore, storeToRefs } from 'pinia'
+import { defineStore } from 'pinia'
 import { jwtDecode } from 'jwt-decode'
-import { useWalletStore } from './wallet'
 
 export const useBookstoreApiStore = defineStore('book-api', () => {
   const { LIKE_CO_API } = useRuntimeConfig().public
-  const walletStore = useWalletStore()
-  const { wallet: storeWallet } = storeToRefs(walletStore)
-  const token = ref('')
-  const sessionWallet = ref('')
-  const intercomToken = ref('')
+  const { fetch: refreshSession, loggedIn: hasLoggedIn, user } = useUserSession()
+
+  const token = computed(() => user.value?.token)
+  const sessionWallet = computed(() => user.value?.evmWallet || user.value?.likeWallet)
+  const intercomToken = computed(() => user.value?.intercomToken)
+
   const isRestoringSession = ref(false)
+
   const isShowLoginPanel = ref(false)
 
   const listingList = ref([] as any[])
@@ -17,9 +18,9 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
   const getTotalPendingNFTCount = computed(() => listingList.value.reduce((acc, item) => acc + (item.pendingNFTCount || 0), 0))
 
   const isAuthenticated = computed(() => {
-    const isWalletMatch = storeWallet.value === sessionWallet.value
+    if (!hasLoggedIn.value) { return false }
     const tokenExists = !!token.value
-    if (!isWalletMatch || !tokenExists) { return false }
+    if (!tokenExists) { return false }
     const decoded = jwtDecode(token.value)
     if (!decoded) {
       return false
@@ -27,13 +28,6 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
     const isExpired = decoded.exp && decoded.exp * 1000 < Date.now()
     return !isExpired
   })
-
-  function clearSession () {
-    token.value = ''
-    sessionWallet.value = ''
-    isShowLoginPanel.value = false
-    clearAuthSession()
-  }
 
   function openLoginPanel () {
     isShowLoginPanel.value = true
@@ -43,27 +37,11 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
     isShowLoginPanel.value = false
   }
 
-  function restoreAuthSession () {
-    try {
-      isRestoringSession.value = true
-      const session = loadAuthSession()
-      if (!session) { return }
-
-      const { token: sessionToken, wallet, intercomToken: sessionIntercomToken } = session
-
-      if (!checkJwtTokenValidity(sessionToken)) {
-        throw new Error('INVALID_TOKEN')
-      }
-
-      token.value = sessionToken
-      sessionWallet.value = wallet
-      intercomToken.value = sessionIntercomToken
-    } finally {
-      isRestoringSession.value = false
-    }
+  async function restoreAuthSession () {
+    await refreshSession()
   }
 
-  async function authenticate (inputWallet: string, signature: any) {
+  async function authenticate (signature: any) {
     const data = await $fetch(`${LIKE_CO_API}/wallet/authorize`, {
       method: 'POST',
       body: {
@@ -71,10 +49,11 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
       }
     })
     if ((!data as any)?.token) { throw new Error('INVALID_SIGNATURE') }
-    token.value = (data as any).token
-    intercomToken.value = (data as any).intercomToken
-    sessionWallet.value = inputWallet
-    saveAuthSession({ wallet: inputWallet, token: token.value, intercomToken: intercomToken.value })
+    const authorizeToken = (data as any).token
+    const authorizeIntercomToken = (data as any).intercomToken
+    const authorizeJwtid = (data as any).jwtid
+
+    return { jwtid: authorizeJwtid, intercomToken: authorizeIntercomToken, token: authorizeToken }
   }
 
   async function fetchBookListing (params: { key?: number, limit?: number } = {}) {
@@ -199,7 +178,6 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
     isAuthenticated,
     isRestoringSession,
     isShowLoginPanel,
-    clearSession,
     openLoginPanel,
     closeLoginPanel,
     restoreAuthSession,

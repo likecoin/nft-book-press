@@ -1,6 +1,6 @@
 <template>
   <PageBody
-    v-if="!bookstoreApiStore.isAuthenticated"
+    v-if="!hasLoggedIn"
     :ui="{ base: 'flex flex-col justify-center items-center bg-[#131313]' }"
   >
     <div class="flex flex-col justify-center items-center h-full space-y-12 max-w-[480px] mx-auto">
@@ -30,7 +30,6 @@
           size="lg"
           block
           :loading="isAuthenticating"
-          :disabled="isRestoringSession"
           @click="bookstoreApiStore.openLoginPanel()"
         />
       </div>
@@ -43,6 +42,7 @@
 import { storeToRefs } from 'pinia'
 const { t: $t } = useI18n()
 
+const { loggedIn: hasLoggedIn } = useUserSession()
 const bookstoreApiStore = useBookstoreApiStore()
 const { isRestoringSession } = storeToRefs(bookstoreApiStore)
 const { isAuthenticating } = useAuth()

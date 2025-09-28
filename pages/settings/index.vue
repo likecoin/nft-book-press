@@ -19,51 +19,49 @@
       :description="$t('user_settings.stripe_express_description')"
     />
 
-    <template v-if="bookstoreApiStore.isAuthenticated">
-      <UCard
-        :ui="{
-          header: { base: 'flex justify-between items-center' },
-          body: { padding: '' },
-          footer: { base: 'text-center' },
-        }"
-      >
-        <template #header>
-          <h1 class="text-center font-bold font-mono">
-            {{ $t('user_settings.stripe_payout_status') }}
-          </h1>
+    <UCard
+      :ui="{
+        header: { base: 'flex justify-between items-center' },
+        body: { padding: '' },
+        footer: { base: 'text-center' },
+      }"
+    >
+      <template #header>
+        <h1 class="text-center font-bold font-mono">
+          {{ $t('user_settings.stripe_payout_status') }}
+        </h1>
 
-          <UTooltip
-            text="Refresh Status"
-            :popper="{ placement: 'left' }"
-          >
-            <UButton
-              icon="i-heroicons-arrow-path"
-              variant="outline"
-              :disabled="isLoading"
-              @click="refreshStripeConnectStatus"
-            />
-          </UTooltip>
-        </template>
+        <UTooltip
+          text="Refresh Status"
+          :popper="{ placement: 'left' }"
+        >
+          <UButton
+            icon="i-heroicons-arrow-path"
+            variant="outline"
+            :disabled="isLoading"
+            @click="refreshStripeConnectStatus"
+          />
+        </UTooltip>
+      </template>
 
-        <template #footer>
-          <div class="flex justify-center items-center gap-4">
-            <span
-              v-if="currentStripeAccount?.hasAccount && isStripeConnectReady"
-              class="text-sm text-gray-500"
-              v-text="currentStripeAccount.email"
-            />
-            <UButton
-              :label="buttonText"
-              size="md"
-              :loading="isLoading"
-              :disabled="isLoading"
-              color="black"
-              @click="handleClickStripeButton"
-            />
-          </div>
-        </template>
-      </UCard>
-    </template>
+      <template #footer>
+        <div class="flex justify-center items-center gap-4">
+          <span
+            v-if="currentStripeAccount?.hasAccount && isStripeConnectReady"
+            class="text-sm text-gray-500"
+            v-text="currentStripeAccount.email"
+          />
+          <UButton
+            :label="buttonText"
+            size="md"
+            :loading="isLoading"
+            :disabled="isLoading"
+            color="black"
+            @click="handleClickStripeButton"
+          />
+        </div>
+      </template>
+    </UCard>
   </PageBody>
 </template>
 

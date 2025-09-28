@@ -21,7 +21,6 @@
     </UProgress>
 
     <UCard
-      v-if="bookstoreApiStore.isAuthenticated"
       :ui="{
         body: { base: 'space-y-4' },
         footer: { base: 'flex justify-center gap-2' }

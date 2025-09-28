@@ -39,9 +39,7 @@
       :close="{ onClick: () => bookstoreApiStore.closeLoginPanel() }"
       :ui="{ width: '!max-w-[348px]' }"
     >
-      <LoginPanel
-        @connect="onAuthenticate"
-      />
+      <LoginPanel @connect="onAuthenticate" />
     </UModal>
   </div>
 </template>
@@ -63,4 +61,5 @@ watch(() => bookstoreApiStore.isAuthenticated, (isAuthenticated) => {
     bookstoreApiStore.closeLoginPanel()
   }
 })
+
 </script>

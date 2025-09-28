@@ -15,252 +15,250 @@
       @close="error = ''"
     />
 
-    <template v-if="bookstoreApiStore.isAuthenticated">
-      <ul
-        class="flex flex-col gap-[12px]"
-      >
-        <UCard
-          :ui="{
-            body: { base: 'space-y-5 relative' },
-            base: 'overflow-visible border-none !border-transparent',
-          }"
-        >
-          <li
-            v-for="(p, index) in prices"
-            :key="p.index"
-          >
-            <UCard
-              :ui="{
-                body: {
-                  base: 'flex flex-col gap-[20px]',
-                },
-                base: 'overflow-visible border-[4px]'
-              }"
-            >
-              <template #header>
-                <div class="flex items-center justify-between">
-                  <h3
-                    class="font-bold font-mono"
-                    v-text="`${$t('nft_book_form.edition_number', { number: (displayEditIndex || (index + 1)) })} - ${p.name || $t('nft_book_form.product_name_placeholder')}`"
-                  />
-                  <div class="flex items-center gap-2">
-                    <p class="text-sm" v-text="$t('nft_book_form.pause_selling')" />
-                    <UToggle v-model="p.isListed" />
-                    <p class="text-sm" v-text="$t('nft_book_form.selling')" />
-                  </div>
-                </div>
-              </template>
-              <UFormGroup
-                :label="$t('nft_book_form.unit_price_label')"
-              >
-                <USelectMenu
-                  v-model="p.price"
-                  :options="USD_PRICING_OPTIONS"
-                  value-attribute="value"
-                />
-              </UFormGroup>
-              <UFormGroup
-                :label="$t('nft_book_form.copies_label')"
-              >
-                <div class="flex flex-col gap-2">
-                  <!-- Auto Delivery Block -->
-                  <div
-                    class="border-2 rounded-lg p-4 cursor-pointer transition-all duration-200"
-                    :class="p.deliveryMethod === 'auto' ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'"
-                    @click="p.deliveryMethod = 'auto'"
-                  >
-                    <URadio
-                      v-model="p.deliveryMethod"
-                      value="auto"
-                      :name="`deliveryMethod-${index}`"
-                      :label="$t('nft_book_form.unlimited')"
-                    />
-                  </div>
-
-                  <!-- Manual Delivery Block -->
-                  <div
-                    class="border-2 rounded-lg p-4 cursor-pointer transition-all duration-200"
-                    :class="p.deliveryMethod === 'manual' ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'"
-                    @click="handleManualDeliveryClick(index)"
-                  >
-                    <div class="flex items-center gap-2 mb-3">
-                      <URadio
-                        v-model="p.deliveryMethod"
-                        value="manual"
-                        :name="`deliveryMethod-${index}`"
-                        :label="$t('nft_book_form.limited')"
-                      />
-                      <UTooltip
-                        :text="$t('nft_book_form.manual_delivery_tooltip')"
-                      >
-                        <UIcon name="i-heroicons-question-mark-circle" />
-                      </UTooltip>
-                    </div>
-
-                    <div class="space-y-3">
-                      <UFormGroup :label="$t('nft_book_form.stock')">
-                        <UInput
-                          v-model="p.stock"
-                          type="number"
-                          step="1"
-                          :min="1"
-                          :max="maxSupply"
-                          placeholder="100"
-                        />
-                      </UFormGroup>
-                    </div>
-                  </div>
-                </div>
-              </UFormGroup>
-
-              <UFormGroup :label="$t('nft_book_form.enable_custom_message_page')">
-                <div class="space-y-3 w-full">
-                  <UFormGroup
-                    :label="$t('nft_book_form.auto_delivery_memo')"
-                  >
-                    <UInput
-                      v-model="p.autoMemo"
-                      :placeholder="$t('nft_book_form.memo_placeholder')"
-                    />
-                  </UFormGroup>
-
-                  <UFormGroup :ui="{ label: { base: 'w-full flex justify-between items-center'} }">
-                    <template #label>
-                      <p class="block" v-text="$t('nft_book_form.autograph_image')" />
-                      <span
-                        class="text-gray-500 text-[12px] block"
-                        v-text="$t('nft_book_form.image_requirements')"
-                      />
-                    </template>
-                    <UInput
-                      type="file"
-                      accept="image/png"
-                      @change="(e) => onImgUpload(e, 'signatureImage')"
-                    />
-                  </UFormGroup>
-                </div>
-              </UFormGroup>
-
-              <UFormGroup :ui="{ container: 'space-y-2' }">
-                <template #label>
-                  {{ $t('nft_book_form.product_name') }}
-                  <ToolTips :image-style="{ width: '250px' }">
-                    <template #image>
-                      <img
-                        src="~/assets/images/hint/editionInfo-en.png"
-                        class="object-cover"
-                        alt=""
-                      >
-                    </template>
-                    <UIcon name="i-heroicons-question-mark-circle" />
-                  </ToolTips>
-                </template>
-                <UInput
-                  v-model="p.name"
-                  :placeholder="$t('nft_book_form.product_name_placeholder')"
-                />
-                <span
-                  class="block text-[14px] text-[#374151] mt-[8px]"
-                  v-text="$t('nft_book_form.description_optional')"
-                />
-                <md-editor
-                  v-model="p.description"
-                  language="en-US"
-                  :editor-id="`en-${index}`"
-                  :placeholder="mdEditorPlaceholder.en"
-                  :toolbars="toolbarOptions"
-                  :sanitize="sanitizeHtml"
-                  :style="{ height: '200px', width: '100%', marginTop: '0px' }"
-                />
-              </UFormGroup>
-            </UCard>
-
-            <div class="flex justify-center items-center mt-2">
-              <UButton
-                v-if="hasMultiplePrices"
-                :label="$t('common.delete')"
-                color="gray"
-                leading-icon="i-heroicons-trash"
-                @click="deletePrice(index)"
-              />
-            </div>
-          </li>
-        </UCard>
-      </ul>
-      <div class="flex justify-center items-center">
-        <UButton
-          v-if="props.isNewClassPage && prices.length < 2"
-          :ui="{ rounded: 'rounded-full' }"
-          color="gray"
-          icon="i-heroicons-plus-solid"
-          :label="$t('nft_book_form.add_edition')"
-          @click="addMorePrice"
-        />
-      </div>
-
-      <!-- Advanced settings -->
+    <ul
+      class="flex flex-col gap-[12px]"
+    >
       <UCard
         :ui="{
-          header: { base: 'flex justify-between items-center' },
-          body: { padding: '12px' },
+          body: { base: 'space-y-5 relative' },
+          base: 'overflow-visible border-none !border-transparent',
         }"
       >
-        <div class="flex justify-between items-center w-full">
-          <h3 class="font-bold font-mono" v-text="$t('nft_book_form.settings')" />
-          <UButton
-            color="gray"
-            variant="ghost"
-            :icon="
-              shouldShowAdvanceSettings
-                ? 'i-heroicons-chevron-up'
-                : 'i-heroicons-chevron-down'
-            "
-            @click="
-              () => {
-                shouldShowAdvanceSettings = !shouldShowAdvanceSettings;
-              }
-            "
-          />
-        </div>
-        <template v-if="shouldShowAdvanceSettings">
-          <div class="mt-[24px] flex flex-col gap-[12px]">
-            <UFormGroup class="flex items-center">
-              <UTooltip class="flex items-center gap-2" :text="$t('nft_book_form.accept_tipping_tooltip')">
-                <UCheckbox
-                  v-model="isAllowCustomPrice"
-                  name="isAllowCustomPrice"
-                  :label="$t('nft_book_form.accept_tipping')"
+        <li
+          v-for="(p, index) in prices"
+          :key="p.index"
+        >
+          <UCard
+            :ui="{
+              body: {
+                base: 'flex flex-col gap-[20px]',
+              },
+              base: 'overflow-visible border-[4px]'
+            }"
+          >
+            <template #header>
+              <div class="flex items-center justify-between">
+                <h3
+                  class="font-bold font-mono"
+                  v-text="`${$t('nft_book_form.edition_number', { number: (displayEditIndex || (index + 1)) })} - ${p.name || $t('nft_book_form.product_name_placeholder')}`"
                 />
+                <div class="flex items-center gap-2">
+                  <p class="text-sm" v-text="$t('nft_book_form.pause_selling')" />
+                  <UToggle v-model="p.isListed" />
+                  <p class="text-sm" v-text="$t('nft_book_form.selling')" />
+                </div>
+              </div>
+            </template>
+            <UFormGroup
+              :label="$t('nft_book_form.unit_price_label')"
+            >
+              <USelectMenu
+                v-model="p.price"
+                :options="USD_PRICING_OPTIONS"
+                value-attribute="value"
+              />
+            </UFormGroup>
+            <UFormGroup
+              :label="$t('nft_book_form.copies_label')"
+            >
+              <div class="flex flex-col gap-2">
+                <!-- Auto Delivery Block -->
+                <div
+                  class="border-2 rounded-lg p-4 cursor-pointer transition-all duration-200"
+                  :class="p.deliveryMethod === 'auto' ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'"
+                  @click="p.deliveryMethod = 'auto'"
+                >
+                  <URadio
+                    v-model="p.deliveryMethod"
+                    value="auto"
+                    :name="`deliveryMethod-${index}`"
+                    :label="$t('nft_book_form.unlimited')"
+                  />
+                </div>
 
-                <UIcon name="i-heroicons-question-mark-circle" />
-              </UTooltip>
+                <!-- Manual Delivery Block -->
+                <div
+                  class="border-2 rounded-lg p-4 cursor-pointer transition-all duration-200"
+                  :class="p.deliveryMethod === 'manual' ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-gray-300'"
+                  @click="handleManualDeliveryClick(index)"
+                >
+                  <div class="flex items-center gap-2 mb-3">
+                    <URadio
+                      v-model="p.deliveryMethod"
+                      value="manual"
+                      :name="`deliveryMethod-${index}`"
+                      :label="$t('nft_book_form.limited')"
+                    />
+                    <UTooltip
+                      :text="$t('nft_book_form.manual_delivery_tooltip')"
+                    >
+                      <UIcon name="i-heroicons-question-mark-circle" />
+                    </UTooltip>
+                  </div>
+
+                  <div class="space-y-3">
+                    <UFormGroup :label="$t('nft_book_form.stock')">
+                      <UInput
+                        v-model="p.stock"
+                        type="number"
+                        step="1"
+                        :min="1"
+                        :max="maxSupply"
+                        placeholder="100"
+                      />
+                    </UFormGroup>
+                  </div>
+                </div>
+              </div>
             </UFormGroup>
 
-            <!-- Stripe connect -->
-            <StripeConnectCard
-              v-if="isEditMode"
-              v-model:is-stripe-connect-checked="isStripeConnectChecked"
-              v-model:is-using-default-account="isUsingDefaultAccount"
-              :stripe-connect-wallet="stripeConnectWallet"
-              :should-disable-setting="shouldDisableStripeConnectSetting"
-              :login-address="wallet"
+            <UFormGroup :label="$t('nft_book_form.enable_custom_message_page')">
+              <div class="space-y-3 w-full">
+                <UFormGroup
+                  :label="$t('nft_book_form.auto_delivery_memo')"
+                >
+                  <UInput
+                    v-model="p.autoMemo"
+                    :placeholder="$t('nft_book_form.memo_placeholder')"
+                  />
+                </UFormGroup>
 
-              @save="handleSaveStripeConnectWallet"
+                <UFormGroup :ui="{ label: { base: 'w-full flex justify-between items-center'} }">
+                  <template #label>
+                    <p class="block" v-text="$t('nft_book_form.autograph_image')" />
+                    <span
+                      class="text-gray-500 text-[12px] block"
+                      v-text="$t('nft_book_form.image_requirements')"
+                    />
+                  </template>
+                  <UInput
+                    type="file"
+                    accept="image/png"
+                    @change="(e) => onImgUpload(e, 'signatureImage')"
+                  />
+                </UFormGroup>
+              </div>
+            </UFormGroup>
+
+            <UFormGroup :ui="{ container: 'space-y-2' }">
+              <template #label>
+                {{ $t('nft_book_form.product_name') }}
+                <ToolTips :image-style="{ width: '250px' }">
+                  <template #image>
+                    <img
+                      src="~/assets/images/hint/editionInfo-en.png"
+                      class="object-cover"
+                      alt=""
+                    >
+                  </template>
+                  <UIcon name="i-heroicons-question-mark-circle" />
+                </ToolTips>
+              </template>
+              <UInput
+                v-model="p.name"
+                :placeholder="$t('nft_book_form.product_name_placeholder')"
+              />
+              <span
+                class="block text-[14px] text-[#374151] mt-[8px]"
+                v-text="$t('nft_book_form.description_optional')"
+              />
+              <md-editor
+                v-model="p.description"
+                language="en-US"
+                :editor-id="`en-${index}`"
+                :placeholder="mdEditorPlaceholder.en"
+                :toolbars="toolbarOptions"
+                :sanitize="sanitizeHtml"
+                :style="{ height: '200px', width: '100%', marginTop: '0px' }"
+              />
+            </UFormGroup>
+          </UCard>
+
+          <div class="flex justify-center items-center mt-2">
+            <UButton
+              v-if="hasMultiplePrices"
+              :label="$t('common.delete')"
+              color="gray"
+              leading-icon="i-heroicons-trash"
+              @click="deletePrice(index)"
             />
           </div>
-        </template>
+        </li>
       </UCard>
+    </ul>
+    <div class="flex justify-center items-center">
+      <UButton
+        v-if="props.isNewClassPage && prices.length < 2"
+        :ui="{ rounded: 'rounded-full' }"
+        color="gray"
+        icon="i-heroicons-plus-solid"
+        :label="$t('nft_book_form.add_edition')"
+        @click="addMorePrice"
+      />
+    </div>
 
-      <div class="w-full flex justify-center">
+    <!-- Advanced settings -->
+    <UCard
+      :ui="{
+        header: { base: 'flex justify-between items-center' },
+        body: { padding: '12px' },
+      }"
+    >
+      <div class="flex justify-between items-center w-full">
+        <h3 class="font-bold font-mono" v-text="$t('nft_book_form.settings')" />
         <UButton
-          :label="submitButtonText"
-          :loading="isLoading"
-          size="lg"
-          :disabled="isLoading"
-          @click="onSubmit"
+          color="gray"
+          variant="ghost"
+          :icon="
+            shouldShowAdvanceSettings
+              ? 'i-heroicons-chevron-up'
+              : 'i-heroicons-chevron-down'
+          "
+          @click="
+            () => {
+              shouldShowAdvanceSettings = !shouldShowAdvanceSettings;
+            }
+          "
         />
       </div>
-    </template>
+      <template v-if="shouldShowAdvanceSettings">
+        <div class="mt-[24px] flex flex-col gap-[12px]">
+          <UFormGroup class="flex items-center">
+            <UTooltip class="flex items-center gap-2" :text="$t('nft_book_form.accept_tipping_tooltip')">
+              <UCheckbox
+                v-model="isAllowCustomPrice"
+                name="isAllowCustomPrice"
+                :label="$t('nft_book_form.accept_tipping')"
+              />
+
+              <UIcon name="i-heroicons-question-mark-circle" />
+            </UTooltip>
+          </UFormGroup>
+
+          <!-- Stripe connect -->
+          <StripeConnectCard
+            v-if="isEditMode"
+            v-model:is-stripe-connect-checked="isStripeConnectChecked"
+            v-model:is-using-default-account="isUsingDefaultAccount"
+            :stripe-connect-wallet="stripeConnectWallet"
+            :should-disable-setting="shouldDisableStripeConnectSetting"
+            :login-address="wallet"
+
+            @save="handleSaveStripeConnectWallet"
+          />
+        </div>
+      </template>
+    </UCard>
+
+    <div class="w-full flex justify-center">
+      <UButton
+        :label="submitButtonText"
+        :loading="isLoading"
+        size="lg"
+        :disabled="isLoading"
+        @click="onSubmit"
+      />
+    </div>
 
     <UModal
       :model-value="!!isLoading"

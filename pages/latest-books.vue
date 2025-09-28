@@ -64,8 +64,8 @@ import { storeToRefs } from 'pinia'
 const { t: $t } = useI18n()
 
 const { BOOK3_URL, LIKE_CO_API } = useRuntimeConfig().public
+const { user } = useUserSession()
 
-const userStore = useUserStore()
 const stripeStore = useStripeStore()
 const bookstoreApiStore = useBookstoreApiStore()
 const walletStore = useWalletStore()
@@ -74,7 +74,6 @@ const localeRoute = useLocaleRoute()
 const route = useRoute()
 
 const { wallet } = storeToRefs(walletStore)
-const { userLikerInfo } = storeToRefs(userStore)
 const { isAuthenticated } = storeToRefs(bookstoreApiStore)
 
 const tabItems = computed(() => [
@@ -90,8 +89,8 @@ const selectedTabItemIndex = ref(0)
 const q = ref(route.query.q as string || '')
 
 const channelId = computed(() => {
-  if (userLikerInfo.value?.user) {
-    return convertLikerIdToChannelId(userLikerInfo.value?.user)
+  if (user.value?.likerId) {
+    return convertLikerIdToChannelId(user.value?.likerId)
   }
   return ''
 })

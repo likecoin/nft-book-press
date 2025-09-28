@@ -67,7 +67,7 @@
               name="channel_ids"
             />
             <UButton
-              v-show="!customChannelInput && userLikerInfo"
+              v-show="!customChannelInput && user?.likerId"
               class="relative"
               :label="$t('purchase_link.prefill_from_account')"
               color="gray"
@@ -398,19 +398,15 @@
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-
 import { AFFILIATION_CHANNEL_DEFAULT, AFFILIATION_CHANNELS } from '~/constant'
 
 import { useLikerStore } from '~/stores/liker'
 import { useStripeStore } from '~/stores/stripe'
-import { useUserStore } from '~/stores/user'
 
 const { LIKE_CO_API, SITE_URL } = useRuntimeConfig().public
 const likerStore = useLikerStore()
 const stripeStore = useStripeStore()
-const userStore = useUserStore()
-const { userLikerInfo } = storeToRefs(userStore)
+const { user } = useUserSession()
 const route = useRoute()
 const localeRoute = useLocaleRoute()
 const toast = useToast()
@@ -1023,8 +1019,8 @@ function downloadQRCodesByChannelId (channelId: string) {
 }
 
 function prefillChannelIdIfPossible () {
-  if (!customChannelInput.value && userLikerInfo.value) {
-    customChannelInput.value = convertLikerIdToChannelId(userLikerInfo.value.user)
+  if (!customChannelInput.value && user.value?.likerId) {
+    customChannelInput.value = convertLikerIdToChannelId(user.value?.likerId)
   }
 }
 
@@ -1046,8 +1042,8 @@ watch(isSharingMode, (value) => {
   }
 })
 
-watch(userLikerInfo, () => {
-  if (userLikerInfo.value) {
+watch(() => user.value?.likerId, (id: any) => {
+  if (id) {
     prefillChannelIdIfPossible()
   }
 })
