@@ -47,9 +47,11 @@ const { SITE_URL } = useRuntimeConfig().public
 const bookstoreApiStore = useBookstoreApiStore()
 
 const { restoreAuthSession, fetchBookListing, clearSession } = bookstoreApiStore
-const { wallet, intercomToken, isRestoringSession, isAuthenticated } = storeToRefs(bookstoreApiStore)
+const { wallet, intercomToken, isAuthenticated } = storeToRefs(bookstoreApiStore)
 const uiStore = useUIStore()
 const toast = useToast()
+
+const isRestoringSession = ref(false)
 
 const isMobileMenuOpen = computed({
   get: () => uiStore.isSiteMenuOpen,
@@ -95,6 +97,7 @@ useSeoMeta({
 })
 
 onMounted(async () => {
+  isRestoringSession.value = true
   try {
     await restoreAuthSession()
     if (window.Intercom && intercomToken.value) {
@@ -116,6 +119,8 @@ onMounted(async () => {
       }
     })
     clearSession()
+  } finally {
+    isRestoringSession.value = false
   }
 
   if (isAuthenticated.value) {
