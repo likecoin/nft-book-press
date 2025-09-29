@@ -1,6 +1,8 @@
 <template>
   <UModal
     :ui="{ width: 'w-full !max-w-[390px]' }"
+    :prevent-close="false"
+    :overlay="true"
   >
     <UCard>
       <template #header>

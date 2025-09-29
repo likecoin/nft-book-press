@@ -13,7 +13,10 @@ export const useWalletStore = defineStore('wallet', () => {
   const { disconnectAsync: wagmiDisconnect } = useDisconnect()
   const { address, isConnected } = useAccount()
   const { signMessageAsync } = useSignMessage()
+  const bookstoreApiStore = useBookstoreApiStore()
+
   const { LIKECOIN_V3_BOOK_MIGRATION_SITE_URL } = useRuntimeConfig().public
+  const { t: $t } = useI18n()
   const modal = useModal()
   const toast = useToast()
 
@@ -95,6 +98,7 @@ export const useWalletStore = defineStore('wallet', () => {
       if (!isRegistered) {
         isRegistered = await register({ walletAddress, email, loginMethod, magicUserId, magicDIDToken })
         if (!isRegistered) {
+          return false
         // User canceled the registration
         }
       }
@@ -112,7 +116,7 @@ export const useWalletStore = defineStore('wallet', () => {
         return
       }
       console.error('Failed to connect wallet', error)
-      return connect()
+      return false
     }
   }
 
@@ -173,7 +177,7 @@ export const useWalletStore = defineStore('wallet', () => {
       return false
     } catch (error) {
       if (error instanceof FetchError) {
-        switch (error.data?.error) {
+        switch (error.data) {
           case 'EMAIL_ALREADY_USED':
             if (!error.data?.evmWallet && error.data?.likeWallet) {
               try {
@@ -272,6 +276,24 @@ export const useWalletStore = defineStore('wallet', () => {
     }
   }
 
+  function getEmailAlreadyUsedErrorMessage ({
+    email,
+    evmWallet,
+    likeWallet
+  }: {
+    email: string
+    evmWallet?: string
+    likeWallet?: string
+  }) {
+    if (evmWallet) {
+      return $t('account_register_error_email_already_used_with_evm_wallet', { email, evmWallet })
+    }
+    if (likeWallet) {
+      return $t('account_register_error_email_already_used_with_like_wallet', { email, likeWallet })
+    }
+    return $t('account_register_error_email_already_used', { email })
+  }
+
   async function register ({
     walletAddress,
     email: prefilledEmail,
@@ -318,8 +340,9 @@ export const useWalletStore = defineStore('wallet', () => {
         if (!payload.email || hasError) {
           type ModalResult = { accountId: string; email: string; displayName?: string }
           let modalResult: ModalResult | null = null
-          let userCanceled = false
-
+          // Close login panel first to avoid focus trap
+          bookstoreApiStore.closeLoginPanel()
+          await nextTick()
           await new Promise<void>((resolve) => {
             modal.open(RegistrationModal, {
               email: payload?.email,
@@ -332,14 +355,12 @@ export const useWalletStore = defineStore('wallet', () => {
                 resolve()
               },
               onClose: () => {
-                userCanceled = true
                 modal.close()
                 resolve()
               }
             })
           })
-
-          if (userCanceled || !modalResult) {
+          if (!modalResult) {
             // User canceled the registration, return false immediately
             return false
           }
@@ -362,7 +383,6 @@ export const useWalletStore = defineStore('wallet', () => {
         )
 
         const signature = await signMessageAsync({ message })
-
         try {
           await getLikeCoinAPIFetch()('/users/new', {
             method: 'POST',
@@ -378,17 +398,43 @@ export const useWalletStore = defineStore('wallet', () => {
             }
           })
         } catch (error) {
-          let errorMessage = 'REGISTER_FAILED'
+          hasError = true
           if (error instanceof FetchError) {
-            errorMessage = error.data?.error || error.data || error.message
-          } else if (error instanceof Error) {
-            errorMessage = error.message
+            switch (error.data) {
+              case 'INVALID_USER_ID': {
+                toast.add({
+                  icon: 'i-heroicons-exclamation-circle',
+                  title: $t('account_register_error_invalid_account_id', { id: payload?.accountId }),
+                  timeout: 0,
+                  color: 'red',
+                  ui: {
+                    title: 'text-red-400 dark:text-red-400'
+                  }
+                })
+                continue
+              }
+              case 'EMAIL_ALREADY_USED': {
+                toast.add({
+                  icon: 'i-heroicons-exclamation-circle',
+                  title: getEmailAlreadyUsedErrorData({
+                    email: payload?.email as string,
+                    walletAddress,
+                    boundEVMWallet: error.data?.evmWallet,
+                    boundLikeWallet: error.data?.likeWallet,
+                    loginMethod
+                  })?.data.description || error.data?.message,
+                  timeout: 0,
+                  color: 'red',
+                  ui: {
+                    title: 'text-red-400 dark:text-red-400'
+                  }
+                })
+                continue
+              }
+              default:
+            }
           }
-
-          throw createError({
-            status: 401,
-            message: errorMessage
-          })
+          throw error
         }
 
         // Fetch user info after registration
@@ -415,41 +461,6 @@ export const useWalletStore = defineStore('wallet', () => {
         return true
       } catch (error) {
         hasError = true
-        if (error instanceof FetchError) {
-          switch (error.data?.message) {
-            case 'INVALID_USER_ID': {
-              toast.add({
-                icon: 'i-heroicons-exclamation-circle',
-                title: $t('account_register_error_invalid_account_id', { id: payload?.accountId }),
-                timeout: 0,
-                color: 'red',
-                ui: {
-                  title: 'text-red-400 dark:text-red-400'
-                }
-              })
-              continue
-            }
-            case 'EMAIL_ALREADY_USED': {
-              toast.add({
-                icon: 'i-heroicons-exclamation-circle',
-                title: getEmailAlreadyUsedErrorData({
-                  email: payload?.email as string,
-                  walletAddress,
-                  boundEVMWallet: error.data?.evmWallet,
-                  boundLikeWallet: error.data?.likeWallet,
-                  loginMethod
-                })?.data.description || error.data?.message,
-                timeout: 0,
-                color: 'red',
-                ui: {
-                  title: 'text-red-400 dark:text-red-400'
-                }
-              })
-              continue
-            }
-            default:
-          }
-        }
         throw error
       }
     } while (hasError)
