@@ -28,6 +28,22 @@
       <span>{{ $t('app.restoring_session') }}</span>
       <UProgress animation="carousel" />
     </UModal>
+    <UModal
+      v-model="isAuthenticating"
+      prevent-close
+      :ui="{ width: '!max-w-[200px]' }"
+    >
+      <BlockingModal :title="loginStatus" />
+    </UModal>
+    <UModal
+      v-model="bookstoreApiStore.isShowLoginPanel"
+      :close="{ onClick: () => bookstoreApiStore.closeLoginPanel() }"
+      :ui="{ width: '!max-w-[348px]' }"
+    >
+      <LoginPanel
+        @connect="onAuthenticate"
+      />
+    </UModal>
     <WelcomeModal />
 
     <NuxtLoadingIndicator />
@@ -48,6 +64,7 @@ const bookstoreApiStore = useBookstoreApiStore()
 
 const { restoreAuthSession, fetchBookListing, clearSession } = bookstoreApiStore
 const { wallet, intercomToken, isAuthenticated } = storeToRefs(bookstoreApiStore)
+const { isAuthenticating, loginStatus, onAuthenticate } = useAuth()
 const uiStore = useUIStore()
 const toast = useToast()
 
@@ -67,6 +84,12 @@ watch(
     isMobileMenuOpen.value = false
   }
 )
+
+watch(() => bookstoreApiStore.isAuthenticated, (isAuthenticated) => {
+  if (isAuthenticated && bookstoreApiStore.isShowLoginPanel) {
+    bookstoreApiStore.closeLoginPanel()
+  }
+})
 
 useHead({
   htmlAttrs: {
