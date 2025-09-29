@@ -87,3 +87,51 @@ export function checkJwtTokenValidity (token: string) {
       )
   return !isExpired && isMatchPermissions
 }
+
+export function getEmailAlreadyUsedErrorMessage ({
+  email,
+  evmWallet,
+  likeWallet
+}: {
+    email: string
+    evmWallet?: string
+    likeWallet?: string
+  }) {
+  if (evmWallet) {
+    return $t('account_register_error_email_already_used_with_evm_wallet', { email, evmWallet })
+  }
+  if (likeWallet) {
+    return $t('account_register_error_email_already_used_with_like_wallet', { email, likeWallet })
+  }
+  return $t('account_register_error_email_already_used', { email })
+}
+
+export interface MigrateMagicEmailUserResponseData {
+  isMigratedBookUser: boolean
+  isMigratedBookOwner: boolean
+  isMigratedLikerId: boolean
+  isMigratedLikerLand: boolean
+}
+
+export async function migrateMagicEmailUser ({
+  wallet,
+  signature,
+  message
+}: {
+    wallet: string
+    signature: string
+    message: string
+  }) {
+  const { LIKE_CO_API } = useRuntimeConfig().public
+
+  const url = `${LIKE_CO_API}/users/new/migrate`
+  const result = await $fetch<MigrateMagicEmailUserResponseData>(url, {
+    method: 'POST',
+    body: {
+      wallet,
+      signature,
+      message
+    }
+  })
+  return result
+}
