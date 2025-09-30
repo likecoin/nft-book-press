@@ -72,6 +72,7 @@ export function useAuth () {
       })
     } finally {
       isAuthenticating.value = false
+      loginStatus.value = ''
       clearPostAuthRedirect()
     }
   }

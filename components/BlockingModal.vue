@@ -6,7 +6,7 @@
     >
     <div
       class="mt-6 font-bold"
-      v-text="props.title"
+      v-text="props.title || $t('blocking_modal_default_title')"
     />
     <div
       v-if="props.description"
