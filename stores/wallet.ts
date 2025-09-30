@@ -9,6 +9,11 @@ export const useWalletStore = defineStore('wallet', () => {
   const { disconnectAsync: wagmiDisconnect } = useDisconnect()
   const { address, isConnected } = useAccount()
   const { signMessageAsync } = useSignMessage()
+  const bookstoreApiStore = useBookstoreApiStore()
+  const { wallet: sessionWallet } = storeToRefs(bookstoreApiStore)
+
+  const { t: $t } = useI18n()
+  const toast = useToast()
 
   const wallet = computed(() => address.value ? checksumAddress(address.value) : undefined)
 
@@ -16,6 +21,32 @@ export const useWalletStore = defineStore('wallet', () => {
     if (!isConnected.value) {
       await connect()
     }
+  }
+
+  async function validateWalletConsistency () {
+    await initIfNecessary()
+
+    if (wallet.value && sessionWallet.value && wallet.value !== sessionWallet.value) {
+      toast.add({
+        icon: 'i-heroicons-exclamation-triangle',
+        title: $t('wallet_changed_warning', {
+          current: wallet.value.slice(0, 6) + '...',
+          session: sessionWallet.value.slice(0, 6) + '...'
+        }),
+        timeout: 3000,
+        color: 'amber',
+        ui: {
+          title: 'text-amber-600 dark:text-amber-400'
+        }
+      })
+
+      bookstoreApiStore.clearSession()
+      await disconnect()
+
+      throw new Error('WALLET_CHANGED')
+    }
+
+    return true
   }
 
   async function connect (connectorId = 'magic') {
@@ -62,6 +93,7 @@ export const useWalletStore = defineStore('wallet', () => {
     signer: ref({}),
     isConnected,
     initIfNecessary,
+    validateWalletConsistency,
     connect,
     disconnect,
     signMessageMemo

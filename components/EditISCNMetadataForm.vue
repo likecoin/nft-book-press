@@ -38,7 +38,7 @@ const nftStore = useNftStore()
 const toast = useToast()
 const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
-const { initIfNecessary } = walletStore
+const { validateWalletConsistency } = walletStore
 const { writeContractAsync } = useWriteContract()
 const { checkAndGrantUpdater, waitForTransactionReceipt } = useNFTContractWriter()
 const { getNFTClassConfig } = useNFTContractReader()
@@ -172,7 +172,7 @@ function parseDownloadableUrl (url: string) {
 }
 
 async function handleSave () {
-  await initIfNecessary()
+  await validateWalletConsistency()
   if (!wallet.value || !signer.value) {
     toast.add({
       title: $t('auth.login_required'),

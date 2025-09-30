@@ -632,6 +632,7 @@
   "validation.png_file_only": "PNG files only",
   "validation.unable_to_submit_edit": "Unable to submit edit: Missing edition index or class ID",
   "validation.unsupported_file_type": "Unsupported file type",
+  "wallet_changed_warning": "Wallet address changed. Please log in again.",
   "welcome.title": "🎉 Welcome!",
   "welcome_modal.click_here": "click here",
   "welcome_modal.first_time_message": "If this is your first time visiting from publish.liker.land, please ",

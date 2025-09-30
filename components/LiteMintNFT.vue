@@ -94,7 +94,7 @@ const { checkAndGrantMinter, waitForTransactionReceipt } = useNFTContractWriter(
 
 const store = useWalletStore()
 const { wallet } = storeToRefs(store)
-const { initIfNecessary } = store
+const { validateWalletConsistency } = store
 
 const error = ref('')
 const isLoading = ref(false)
@@ -274,7 +274,7 @@ async function mintNFTs () {
   try {
     isLoading.value = true
     if (!wallet.value) {
-      await initIfNecessary()
+      await validateWalletConsistency()
     }
     if (!wallet.value) { return }
     if (!nftMintDefaultData.value) { throw new Error($t('errors.no_mint_data')) }
