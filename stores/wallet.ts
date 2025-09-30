@@ -210,7 +210,7 @@ export const useWalletStore = defineStore('wallet', () => {
                 boundLikeWallet: error.data?.likeWallet,
                 loginMethod
               })?.data.description || error.data?.message,
-              timeout: 0,
+              timeout: 10000,
               color: 'red',
               ui: {
                 title: 'text-red-400 dark:text-red-400'
@@ -405,7 +405,7 @@ export const useWalletStore = defineStore('wallet', () => {
                 toast.add({
                   icon: 'i-heroicons-exclamation-circle',
                   title: $t('account_register_error_invalid_account_id', { id: payload?.accountId }),
-                  timeout: 0,
+                  timeout: 10000,
                   color: 'red',
                   ui: {
                     title: 'text-red-400 dark:text-red-400'
@@ -423,7 +423,7 @@ export const useWalletStore = defineStore('wallet', () => {
                     boundLikeWallet: error.data?.likeWallet,
                     loginMethod
                   })?.data.description || error.data?.message,
-                  timeout: 0,
+                  timeout: 10000,
                   color: 'red',
                   ui: {
                     title: 'text-red-400 dark:text-red-400'
