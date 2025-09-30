@@ -44,6 +44,4 @@ if (colorMode.value !== 'light') {
 }
 
 const isSlideoverOpen = ref(false)
-
-// Auto close modal when authenticated
 </script>
