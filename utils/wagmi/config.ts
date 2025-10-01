@@ -5,26 +5,25 @@ import { dedicatedWalletConnector } from '@likecoin/wagmi-connector'
 
 export function createWagmiConfig ({
   apiKey,
-  rpcURL = '',
-  chainId,
   customLogoURL,
-  isServer = false
+  isServer = false,
+  isTestnet = false
 }: {
   apiKey: string
-  rpcURL?: string
-  chainId?: number
   customLogoURL?: string
   isServer?: boolean
+  isTestnet?: boolean
 }) {
+  const chain = isTestnet ? optimismSepolia : optimism
   return createConfig({
-    chains: [optimismSepolia, optimism],
+    chains: [chain],
     connectors: [
       // NOTE: @magiclabs/wagmi-connector is not compatible with SSR
       // https://github.com/magiclabs/wagmi-magic-connector/issues/42#issuecomment-2771613002
       ...(isServer
         ? []
         : [dedicatedWalletConnector({
-            chains: [optimismSepolia, optimism],
+            chains: [chain],
             options: {
               apiKey,
               accentColor: '#131313',
@@ -33,8 +32,8 @@ export function createWagmiConfig ({
               isDarkMode: false,
               magicSdkConfiguration: {
                 network: {
-                  rpcUrl: rpcURL,
-                  chainId
+                  rpcUrl: chain.rpcUrls.default.http[0],
+                  chainId: chain.id
                 }
               }
             }

@@ -10,9 +10,8 @@ export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig()
   const wagmiConfig = createWagmiConfig({
     apiKey: config.public.MAGIC_LINK_API_KEY,
-    chainId: config.public.MAGIC_LINK_CHAIN_ID,
-    rpcURL: config.public.MAGIC_LINK_RPC_URL,
-    isServer: !!nuxtApp.ssrContext
+    isServer: !!nuxtApp.ssrContext,
+    isTestnet: !!config.public.IS_TESTNET
   })
 
   nuxtApp.vueApp
