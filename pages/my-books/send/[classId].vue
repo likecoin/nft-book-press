@@ -145,11 +145,10 @@
             OR
           </UDivider>
           <UButton
-            :label="`Auto-fetch NFT ID for ${orderInfo.quantity} NFTs`"
+            :label="$t('button.check_all_nft_ids')"
             :disabled="isLoading || isEditingNFTId"
-            :loading="isAutoFetchingNFTId"
             variant="outline"
-            @click="onClickFetchNextNFTId"
+            @click="onCheckOwnedIds"
           />
         </div>
       </UFormGroup>
@@ -225,7 +224,8 @@ const nftIdInputRef = ref<any[] | undefined>(undefined)
 const orderInfo = ref<any>({})
 const nftImage = ref('')
 
-const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || isAutoFetchingNFTId.value || !!nftIdError.value || isLimitReached.value)
+const { OPENSEA_ITEM_URL } = useRuntimeConfig().public
+const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || !!nftIdError.value || isLimitReached.value)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 
@@ -325,8 +325,8 @@ async function fetchNextNFTId (_count = 1) {
   }
 }
 
-function onClickFetchNextNFTId () {
-  fetchNextNFTId(orderInfo.value.quantity || 1)
+function onCheckOwnedIds () {
+  window.open(`${OPENSEA_ITEM_URL}/${classId.value}`, '_blank', 'noopener')
 }
 
 async function onSendNFTStart () {
