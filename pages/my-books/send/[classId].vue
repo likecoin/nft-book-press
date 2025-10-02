@@ -118,7 +118,7 @@
         <div class="flex flex-wrap items-center justify-center gap-2 w-full">
           <div
             v-if="orderInfo.quantity"
-            :class="[orderInfo.quantity > 1 ? 'w-full' : 'flex-grow', 'space-y-1','relative']"
+            :class="[orderInfo.quantity > 1 ? 'w-full' : 'flex-grow', 'space-y-1', 'relative']"
           >
             <UInput
               v-for="i in orderInfo.quantity"
@@ -418,7 +418,7 @@ async function onSendNFTStart () {
     }
   } catch (err) {
     console.error(err)
-    error.value = (err as Error).toString()
+    error.value.message = (err as Error).toString()
   } finally {
     isLoading.value = false
   }
