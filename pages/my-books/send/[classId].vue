@@ -110,8 +110,7 @@
       </UFormGroup>
 
       <UFormGroup
-        label="Specify NFT ID"
-        description="Leave empty to auto-fetch NFT ID"
+        :label="$t('form.nft_id_label')"
         class="mb-4"
         :error="nftIdError"
         :ui="{ description: 'text-gray-400 dark:text-gray-600' }"

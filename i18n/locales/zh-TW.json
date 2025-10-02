@@ -140,6 +140,7 @@
   "form.memo_delivery": "自動發書留言",
   "form.must_claim_to_view": "必須領取 NFT 才能檢視",
   "form.nft_class_id": "NFT 類別 ID",
+  "form.nft_id_label": "欲發送的 ID",
   "form.no_digital_files": "此版本不包含數位檔案/NFT",
   "form.pause_selling_edition": "暫停此版本的銷售",
   "form.price": "美元售價",
