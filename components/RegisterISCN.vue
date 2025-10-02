@@ -40,7 +40,7 @@ const {
 } = useRuntimeConfig().public
 
 const { wallet, signer } = storeToRefs(walletStore)
-const { initIfNecessary } = walletStore
+const { validateWalletConsistency } = walletStore
 const { assertPositiveWalletBalance, waitForTransactionReceipt } = useNFTContractWriter()
 const { stripHtmlTags, formatLanguage } = useFileUpload()
 const { showErrorToast } = useToastComposable()
@@ -162,7 +162,7 @@ const onSubmit = async (): Promise<void> => {
 
 const submitToISCN = async (): Promise<void> => {
   uploadStatus.value = 'loading'
-  await initIfNecessary()
+  await validateWalletConsistency()
 
   if (!wallet.value || !signer.value) {
     error.value = 'MISSING_SIGNER'

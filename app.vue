@@ -28,6 +28,22 @@
       <span>{{ $t('app.restoring_session') }}</span>
       <UProgress animation="carousel" />
     </UModal>
+    <UModal
+      v-model="isAuthenticating"
+      prevent-close
+      :ui="{ width: '!max-w-[200px]' }"
+    >
+      <BlockingModal :title="loginStatus" />
+    </UModal>
+    <UModal
+      v-model="bookstoreApiStore.isShowLoginPanel"
+      :close="{ onClick: () => bookstoreApiStore.closeLoginPanel() }"
+      :ui="{ width: '!max-w-[348px]' }"
+    >
+      <LoginPanel
+        @connect="onAuthenticate"
+      />
+    </UModal>
     <WelcomeModal />
 
     <NuxtLoadingIndicator />
@@ -48,9 +64,12 @@ const { SITE_URL } = useRuntimeConfig().public
 const bookstoreApiStore = useBookstoreApiStore()
 
 const { restoreAuthSession, fetchBookListing, clearSession } = bookstoreApiStore
-const { wallet, intercomToken, isRestoringSession, isAuthenticated } = storeToRefs(bookstoreApiStore)
+const { wallet, intercomToken, isAuthenticated } = storeToRefs(bookstoreApiStore)
+const { isAuthenticating, loginStatus, onAuthenticate } = useAuth()
 const uiStore = useUIStore()
 const toast = useToast()
+
+const isRestoringSession = ref(false)
 
 const isMobileMenuOpen = computed({
   get: () => uiStore.isSiteMenuOpen,
@@ -66,6 +85,12 @@ watch(
     isMobileMenuOpen.value = false
   }
 )
+
+watch(() => bookstoreApiStore.isAuthenticated, (isAuthenticated) => {
+  if (isAuthenticated && bookstoreApiStore.isShowLoginPanel) {
+    bookstoreApiStore.closeLoginPanel()
+  }
+})
 
 useHead({
   htmlAttrs: {
@@ -96,6 +121,7 @@ useSeoMeta({
 })
 
 onMounted(async () => {
+  isRestoringSession.value = true
   try {
     await restoreAuthSession()
     if (window.Intercom && intercomToken.value) {
@@ -117,6 +143,8 @@ onMounted(async () => {
       }
     })
     clearSession()
+  } finally {
+    isRestoringSession.value = false
   }
 
   if (isAuthenticated.value) {

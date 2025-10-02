@@ -76,7 +76,7 @@ const { t: $t } = useI18n()
 
 const walletStore = useWalletStore()
 const { wallet, signer } = storeToRefs(walletStore)
-const { initIfNecessary } = walletStore
+const { validateWalletConsistency } = walletStore
 const route = useRoute()
 const localeRoute = useLocaleRoute()
 const { showErrorToast } = useToastComposable()
@@ -177,7 +177,7 @@ onMounted(() => {
 
 const nextStep = async () => {
   if (!wallet.value || !signer.value) {
-    await initIfNecessary()
+    await validateWalletConsistency()
   }
   if (!wallet.value || !signer.value) {
     showErrorToast($t('auth.login_required'))

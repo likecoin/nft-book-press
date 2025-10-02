@@ -11,11 +11,15 @@ export function useAuth () {
   const { authenticate, clearSession, fetchBookListing } = bookstoreApiStore
   const { intercomToken } = storeToRefs(bookstoreApiStore)
   const toast = useToast()
+  const { t: $t } = useI18n()
 
   const isAuthenticating = ref(false)
+  const loginStatus = ref<string | undefined>('')
 
   const onAuthenticate = async (connectorId = 'magic') => {
     let result: any
+    loginStatus.value = $t('auth_state.connecting')
+
     try {
       isAuthenticating.value = true
       setupPostAuthRedirect()
@@ -52,6 +56,7 @@ export function useAuth () {
           evm_wallet: wallet.value
         })
       }
+      loginStatus.value = $t('auth_state.success')
       try {
         await fetchBookListing()
       } catch (err) {
@@ -76,12 +81,14 @@ export function useAuth () {
       })
     } finally {
       isAuthenticating.value = false
+      loginStatus.value = ''
       clearPostAuthRedirect()
     }
   }
 
   return {
     isAuthenticating,
-    onAuthenticate
+    onAuthenticate,
+    loginStatus
   }
 }

@@ -111,7 +111,7 @@ const UPLOAD_FILESIZE_MAX = 200 * 1024 * 1024
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
-const { initIfNecessary } = store
+const { validateWalletConsistency } = store
 const { waitForTransactionReceipt } = useNFTContractWriter()
 const bookstoreApiStore = useBookstoreApiStore()
 const { token } = storeToRefs(bookstoreApiStore)
@@ -581,7 +581,7 @@ const sendArweaveFeeTx = async (record: any, memoIpfsOveride?: string): Promise<
     }
   }
   if (!wallet.value || !signer.value) {
-    await initIfNecessary()
+    await validateWalletConsistency()
   }
   if (!wallet.value || !signer.value) {
     throw new Error('SIGNER_NOT_INITED')
@@ -678,7 +678,7 @@ const setEbookCoverFromImages = async () => {
 const onSubmit = async () => {
   try {
     if (!signer.value) {
-      await initIfNecessary()
+      await validateWalletConsistency()
     }
     if (!signer.value) {
       throw new Error('SIGNER_NOT_INITED')

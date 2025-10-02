@@ -33,22 +33,10 @@
         <slot />
       </main>
     </AuthRequiredView>
-
-    <UModal
-      v-model="bookstoreApiStore.isShowLoginPanel"
-      :close="{ onClick: () => bookstoreApiStore.closeLoginPanel() }"
-      :ui="{ width: '!max-w-[348px]' }"
-    >
-      <LoginPanel
-        @connect="onAuthenticate"
-      />
-    </UModal>
   </div>
 </template>
 
 <script setup>
-const bookstoreApiStore = useBookstoreApiStore()
-const { onAuthenticate } = useAuth()
 
 const colorMode = useColorMode()
 if (colorMode.value !== 'light') {
@@ -56,11 +44,4 @@ if (colorMode.value !== 'light') {
 }
 
 const isSlideoverOpen = ref(false)
-
-// Auto close modal when authenticated
-watch(() => bookstoreApiStore.isAuthenticated, (isAuthenticated) => {
-  if (isAuthenticated && bookstoreApiStore.isShowLoginPanel) {
-    bookstoreApiStore.closeLoginPanel()
-  }
-})
 </script>

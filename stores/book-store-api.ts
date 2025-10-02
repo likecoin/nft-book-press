@@ -1,15 +1,11 @@
-import { defineStore, storeToRefs } from 'pinia'
+import { defineStore } from 'pinia'
 import { jwtDecode } from 'jwt-decode'
-import { useWalletStore } from './wallet'
 
 export const useBookstoreApiStore = defineStore('book-api', () => {
   const { LIKE_CO_API } = useRuntimeConfig().public
-  const walletStore = useWalletStore()
-  const { wallet: storeWallet } = storeToRefs(walletStore)
   const token = ref('')
   const sessionWallet = ref('')
   const intercomToken = ref('')
-  const isRestoringSession = ref(false)
   const isShowLoginPanel = ref(false)
 
   const listingList = ref([] as any[])
@@ -17,9 +13,8 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
   const getTotalPendingNFTCount = computed(() => listingList.value.reduce((acc, item) => acc + (item.pendingNFTCount || 0), 0))
 
   const isAuthenticated = computed(() => {
-    const isWalletMatch = storeWallet.value === sessionWallet.value
     const tokenExists = !!token.value
-    if (!isWalletMatch || !tokenExists) { return false }
+    if (!sessionWallet.value || !tokenExists) { return false }
     const decoded = jwtDecode(token.value)
     if (!decoded) {
       return false
@@ -45,7 +40,6 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
 
   function restoreAuthSession () {
     try {
-      isRestoringSession.value = true
       const session = loadAuthSession()
       if (!session) { return }
 
@@ -58,9 +52,7 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
       token.value = sessionToken
       sessionWallet.value = wallet
       intercomToken.value = sessionIntercomToken
-    } finally {
-      isRestoringSession.value = false
-    }
+    } catch {}
   }
 
   async function authenticate (inputWallet: string, signature: any) {
@@ -197,7 +189,6 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
     moderatedBookList,
     getTotalPendingNFTCount,
     isAuthenticated,
-    isRestoringSession,
     isShowLoginPanel,
     clearSession,
     openLoginPanel,

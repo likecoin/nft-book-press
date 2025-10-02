@@ -190,7 +190,7 @@ const { LIKE_CO_API } = useRuntimeConfig().public
 
 const store = useWalletStore()
 const { wallet, signer } = storeToRefs(store)
-const { initIfNecessary } = store
+const { validateWalletConsistency } = store
 
 const bookstoreApiStore = useBookstoreApiStore()
 const { token } = storeToRefs(bookstoreApiStore)
@@ -304,7 +304,7 @@ async function fetchNextNFTId (_count = 1) {
     nftIdError.value = ''
     isAutoFetchingNFTId.value = true
     if (!wallet.value || !signer.value) {
-      await initIfNecessary()
+      await validateWalletConsistency()
     }
     if (!ownerWallet.value) { return }
     const balance = await getBalanceOf(classId.value, ownerWallet.value) as bigint
@@ -334,7 +334,7 @@ async function onSendNFTStart () {
   try {
     isLoading.value = true
     if (!wallet.value || !signer.value) {
-      await initIfNecessary()
+      await validateWalletConsistency()
     }
     if (!wallet.value || !signer.value) { return }
     if (nftIds.value) {

@@ -14,11 +14,13 @@ export const useWalletStore = defineStore('wallet', () => {
   const { address, isConnected } = useAccount()
   const { signMessageAsync } = useSignMessage()
   const bookstoreApiStore = useBookstoreApiStore()
-
+  const { wallet: sessionWallet } = storeToRefs(bookstoreApiStore)
   const { LIKECOIN_V3_BOOK_MIGRATION_SITE_URL } = useRuntimeConfig().public
-  const { t: $t } = useI18n()
-  const modal = useModal()
+
   const toast = useToast()
+  const modal = useModal()
+  const { t: $t } = useI18n()
+
 
   const REGISTER_TIME_LIMIT_IN_TS = 15 * 60 * 1000 // 15 minutes
 
@@ -47,6 +49,32 @@ export const useWalletStore = defineStore('wallet', () => {
     if (!isConnected.value) {
       await connect()
     }
+  }
+
+  async function validateWalletConsistency () {
+    await initIfNecessary()
+
+    if (wallet.value && sessionWallet.value && wallet.value !== sessionWallet.value) {
+      toast.add({
+        icon: 'i-heroicons-exclamation-triangle',
+        title: $t('wallet_changed_warning', {
+          current: wallet.value.slice(0, 6) + '...',
+          session: sessionWallet.value.slice(0, 6) + '...'
+        }),
+        timeout: 3000,
+        color: 'amber',
+        ui: {
+          title: 'text-amber-600 dark:text-amber-400'
+        }
+      })
+
+      bookstoreApiStore.clearSession()
+      await disconnect()
+
+      throw new Error('WALLET_NOT_MATCH')
+    }
+
+    return true
   }
 
   async function connect (connectorId = 'magic') {
@@ -473,6 +501,7 @@ export const useWalletStore = defineStore('wallet', () => {
     isConnected,
     isLoginLoading,
     initIfNecessary,
+    validateWalletConsistency,
     connect,
     disconnect,
     signMessageMemo,

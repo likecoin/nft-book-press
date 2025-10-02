@@ -26,11 +26,10 @@
       <div class="flex justify-center w-[120px]">
         <UButton
           :ui="{base:'!bg-[#50E3C2] !text-black hover:!bg-[#40caa8]'}"
-          :label="isRestoringSession ? $t('auth_state.restore') : $t('auth_state.login')"
+          :label="$t('auth_state.login')"
           size="lg"
           block
           :loading="isAuthenticating"
-          :disabled="isRestoringSession"
           @click="bookstoreApiStore.openLoginPanel()"
         />
       </div>
@@ -40,11 +39,9 @@
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
 const { t: $t } = useI18n()
 
 const bookstoreApiStore = useBookstoreApiStore()
-const { isRestoringSession } = storeToRefs(bookstoreApiStore)
 const { isAuthenticating } = useAuth()
 const { BOOK3_URL } = useRuntimeConfig().public
 
