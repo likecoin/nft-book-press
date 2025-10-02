@@ -88,6 +88,8 @@
   "edit_iscn.update_failed": "An error occurred while updating metadata",
   "edit_iscn.update_success": "Metadata updated successfully",
   "edit_iscn_modal.cancel": "Cancel",
+  "error.fetch_nft_metadata_failed": "This ID is invalid",
+  "error.nft_id_reserved_for_author": "#0 is the first edition, and we’ll reserve it for you.",
   "errors.add_moderator_wallet": "Please press Add button to add moderator wallet",
   "errors.add_notification_email": "Please press Add button to add notification email",
   "errors.edition_not_found": "Edition not found",

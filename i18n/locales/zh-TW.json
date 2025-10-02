@@ -88,6 +88,8 @@
   "edit_iscn.update_failed": "更新元資料時發生錯誤",
   "edit_iscn.update_success": "成功更新元資料",
   "edit_iscn_modal.cancel": "取消",
+  "error.fetch_nft_metadata_failed": "該 ID 無效",
+  "error.nft_id_reserved_for_author": "#0 為首刷版，我們會將它保留給你",
   "errors.add_moderator_wallet": "請按「新增」按鈕來新增審核錢包",
   "errors.add_notification_email": "請按「新增」按鈕來新增通知電子郵件",
   "errors.edition_not_found": "找不到版本",

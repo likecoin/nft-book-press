@@ -24,7 +24,7 @@
     <UCard
       v-if="bookstoreApiStore.isAuthenticated"
       :ui="{
-        body: { base: 'space-y-4' },
+        body: { base: 'space-y-6' },
         footer: { base: 'flex justify-center gap-2' }
       }"
     >
@@ -112,13 +112,14 @@
       <UFormGroup
         label="Specify NFT ID"
         description="Leave empty to auto-fetch NFT ID"
+        class="mb-4"
         :error="nftIdError"
         :ui="{ description: 'text-gray-400 dark:text-gray-600' }"
       >
         <div class="flex flex-wrap items-center justify-center gap-2 w-full">
           <div
             v-if="orderInfo.quantity"
-            :class="[orderInfo.quantity > 1 ? 'w-full' : 'flex-grow', 'space-y-1']"
+            :class="[orderInfo.quantity > 1 ? 'w-full' : 'flex-grow', 'space-y-1','relative']"
           >
             <UInput
               v-for="i in orderInfo.quantity"
@@ -133,12 +134,14 @@
                 <span class="text-sm text-gray-400 dark:text-gray-600">#{{ i }}</span>
               </template>
             </UInput>
+            <span v-if="invalidateError" class="text-xs text-red-500 absolute" v-text="invalidateError" />
           </div>
           <UButton
-            :label="isEditingNFTId || (isVerifyingNFTId && !isAutoFetchingNFTId) ? 'Confirm' : 'Edit'"
+            v-if="orderInfo.quantity === 1"
+            :label="isEditingNFTId || (isVerifyingNFTId) ? 'Confirm' : 'Edit'"
             :disabled="isLoading || isVerifyingNFTId"
             variant="outline"
-            :loading="isVerifyingNFTId && !isAutoFetchingNFTId"
+            :loading="isVerifyingNFTId"
             color="gray"
             @click="handleClickEditNFTId"
           />
@@ -224,7 +227,6 @@ const { getNFTMetadata, getNFTOwner } = useNFTContractReader()
 const nftIdInput = ref([] as string[])
 const nftIds = ref([] as number[])
 const isVerifyingNFTId = ref(false)
-const isAutoFetchingNFTId = ref(false)
 const nftIdError = ref('')
 const isEditingNFTId = ref(false)
 const nftIdInputRef = ref<any[] | undefined>(undefined)
@@ -233,6 +235,7 @@ const orderInfo = ref<any>({})
 const nftImage = ref('')
 
 const showRestockModal = ref(false)
+const invalidateError = ref('')
 
 const { OPENSEA_ITEM_URL } = useRuntimeConfig().public
 const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || !!nftIdError.value || isLimitReached.value)
@@ -247,14 +250,19 @@ watch(isEditingNFTId, async (isEditing) => {
   if (isEditing) { return }
 
   if (nftIdInput.value) {
-    const ids = nftIdInput.value.filter(id => id.trim() !== '').map(id => Number(id))
-    if (orderInfo.value.quantity && ids.length > 0 && ids.length !== orderInfo.value.quantity) {
-      nftIdError.value = `Number of NFT IDs (${ids.length}) does not match the required quantity (${orderInfo.value.quantity})`
+    nftIds.value = nftIdInput.value.filter(id => id.trim() !== '').map(id => Number(id))
+    if (nftIds.value[0] === 0) {
+      invalidateError.value = $t('error.nft_id_reserved_for_author')
       nftIds.value = []
-      return
+      isEditingNFTId.value = true
+    } else {
+      const metadata = await fetchNFTMetadata()
+      if (!metadata) {
+        invalidateError.value = $t('error.fetch_nft_metadata_failed')
+        nftIds.value = []
+        isEditingNFTId.value = true
+      }
     }
-    nftIds.value = ids
-    await fetchNFTMetadata()
   } else {
     nftImage.value = ''
     nftIds.value = []
@@ -274,6 +282,7 @@ onMounted(async () => {
 })
 
 function handleClickEditNFTId () {
+  invalidateError.value = ''
   isEditingNFTId.value = !isEditingNFTId.value
   nftIdError.value = ''
   nextTick(() => {
@@ -293,6 +302,7 @@ async function fetchNFTMetadata () {
     try {
       const metadata = await getNFTMetadata(classId.value, nftIds.value[0])
       nftImage.value = parseImageURLFromMetadata(metadata?.image)
+      return metadata
     } catch (err) {
       nftImage.value = ''
       if ((err as any)?.data?.code === 2) {
@@ -312,7 +322,6 @@ async function fetchNextNFTId (_count = 1) {
   try {
     nftIds.value = []
     nftIdError.value = ''
-    isAutoFetchingNFTId.value = true
     if (!wallet.value || !signer.value) {
       await initIfNecessary()
     }
@@ -363,7 +372,7 @@ async function onSendNFTStart () {
     }
     if (!wallet.value || !signer.value) { return }
     if (nftIds.value) {
-      const owners = await Promise.all(nftIds.value.map(nftId => getNFTOwner(classId.value, nftId)))
+      const owners = await Promise.all(nftIds.value.map((nftId: number) => getNFTOwner(classId.value, nftId)))
       const mismatchNftIdIndex = owners.findIndex(owner => owner !== ownerWallet.value)
       if (mismatchNftIdIndex >= 0) {
         const mismatchNftId = nftIds.value[mismatchNftIdIndex]
