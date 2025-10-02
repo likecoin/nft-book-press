@@ -43,7 +43,7 @@ export const useWalletStore = defineStore('wallet', () => {
       bookstoreApiStore.clearSession()
       await disconnect()
 
-      throw new Error('WALLET_CHANGED')
+      throw new Error('WALLET_NOT_MATCH')
     }
 
     return true
