@@ -37,7 +37,7 @@
                 {{ orderInfo.email }}
               </td>
             </tr>
-            <tr>
+            <tr v-if="orderInfo.giftInfo?.toEmail">
               <th class="text-left px-4 py-3">
                 {{ $t('table.reader_email') }}
               </th><td class="px-4 py-3">
@@ -81,13 +81,6 @@
             </tr>
             <tr>
               <th class="text-left px-4 py-3">
-                Buyer message
-              </th><td class="px-4 py-3">
-                {{ orderInfo.message }}
-              </td>
-            </tr>
-            <tr>
-              <th class="text-left px-4 py-3">
                 Sales channel
               </th><td class="px-4 py-3">
                 {{ orderInfo.from }}
@@ -97,16 +90,22 @@
         </table>
       </UCard>
 
-      <UFormGroup
-        label="Enter Author's Message"
-        :error="isLimitReached"
-        :hint="`${messageCharCount} / ${AUTHOR_MESSAGE_LIMIT}`"
-      >
-        <UTextarea
-          v-model="memo"
-          placeholder="default memo"
-        />
-      </UFormGroup>
+      <UCard>
+        <div class="space-y-2 mb-4">
+          <h5 class="text-sm font-bold" v-text="`${$t('nft_book_form.buyer_message')}`" />
+          <p v-text="orderInfo.message" />
+        </div>
+
+        <UFormGroup
+          :label="$t('nft_book_form.author_message')"
+          :error="isLimitReached"
+          :hint="`${messageCharCount} / ${AUTHOR_MESSAGE_LIMIT}`"
+        >
+          <UTextarea
+            v-model="memo"
+          />
+        </UFormGroup>
+      </UCard>
 
       <UFormGroup
         label="Specify NFT ID"
@@ -210,7 +209,7 @@ const isLoading = ref(false)
 const classId = ref(route.params.classId as string)
 const paymentId = ref(route.query.payment_id as string)
 const ownerWallet = ref(route.query.owner_wallet as string || wallet.value)
-const memo = ref('')
+const memo = ref($t('nft_book_form.default_memo'))
 const { messageCharCount, isLimitReached } = useMessageCharCount(memo, AUTHOR_MESSAGE_LIMIT)
 const { getNFTMetadata, getNFTOwner } = useNFTContractReader()
 
