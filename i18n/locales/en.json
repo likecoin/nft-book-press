@@ -51,6 +51,8 @@
   "bookstore.liker_land_listing": "Liker Land Book Listing",
   "bookstore.new_listing": "New Listing",
   "bookstore.viewable_listing": "My managed books",
+  "button.check_all_nft_ids": "View all book numbers",
+  "button.restock_nft": "Restock now",
   "buttons.download_all_links": "Download All Links",
   "buttons.mint_new_stock": "Print new stock",
   "buttons.print_all_qr": "Print All QR Codes",

@@ -5,13 +5,14 @@
     </h1>
 
     <UAlert
-      v-if="error"
+      v-if="error.message"
       icon="i-heroicons-exclamation-triangle"
       color="red"
       variant="soft"
-      :title="`${error}`"
+      :title="`${error.message}`"
+      :actions="error.actions"
       :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'red', variant: 'link', padded: false }"
-      @close="error = ''"
+      @close="error = { message: '', actions: [] }"
     />
 
     <UProgress v-if="isLoading" animation="carousel">
@@ -171,6 +172,13 @@
         />
       </template>
     </UCard>
+    <UModal v-model="showRestockModal">
+      <LiteMintNFT
+        :is-restock="true"
+        :iscn-id="classId"
+        @submit="handleFinishRestock"
+      />
+    </UModal>
   </PageBody>
 </template>
 
@@ -204,7 +212,7 @@ const { writeContractAsync } = useWriteContract()
 const { getBalanceOf, getTokenIdByOwnerIndex } = useNFTContractReader()
 const { assertPositiveWalletBalance, waitForTransactionReceipt } = useNFTContractWriter()
 
-const error = ref('')
+const error = ref({ message: '', actions: [{}] })
 const isLoading = ref(false)
 const classId = ref(route.params.classId as string)
 const paymentId = ref(route.query.payment_id as string)
@@ -224,13 +232,15 @@ const nftIdInputRef = ref<any[] | undefined>(undefined)
 const orderInfo = ref<any>({})
 const nftImage = ref('')
 
+const showRestockModal = ref(false)
+
 const { OPENSEA_ITEM_URL } = useRuntimeConfig().public
 const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || !!nftIdError.value || isLimitReached.value)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 
 watch(isLoading, (newIsLoading) => {
-  if (newIsLoading) { error.value = '' }
+  if (newIsLoading) { error.value.message = '' }
 })
 
 watch(isEditingNFTId, async (isEditing) => {
@@ -292,7 +302,7 @@ async function fetchNFTMetadata () {
       }
     }
   } catch (err) {
-    error.value = (err as Error).toString()
+    error.value.message = (err as Error).toString()
   } finally {
     isVerifyingNFTId.value = false
   }
@@ -313,15 +323,30 @@ async function fetchNextNFTId (_count = 1) {
     }
 
     for (let i = 0; i < _count; i++) {
-      const nextNftId = await getTokenIdByOwnerIndex(classId.value, ownerWallet.value, i)
+      let nextNftId = await getTokenIdByOwnerIndex(classId.value, ownerWallet.value, i)
+      if (Number(nextNftId) === 0) {
+        // NFT ID 0 is reserved for the author, skip it
+        if (balance <= BigInt(i + 1)) {
+          throw new Error(`Insufficient balance of NFT classId: ${classId.value} for wallet: ${ownerWallet.value}`)
+        }
+        nextNftId = 1
+      }
       nftIds.value.push(Number(nextNftId))
     }
     nftIdInput.value = nftIds.value.map(id => id.toString())
     await fetchNFTMetadata()
   } catch (err) {
-    error.value = (err as Error).toString()
-  } finally {
-    isAutoFetchingNFTId.value = false
+    error.value.message = (err as Error).toString()
+    error.value.actions = [
+      {
+        label: $t('button.restock_nft'),
+        variant: 'outline',
+        color: 'red',
+        click: () => {
+          showRestockModal.value = true
+        }
+      }
+    ]
   }
 }
 
@@ -389,6 +414,11 @@ async function onSendNFTStart () {
   } finally {
     isLoading.value = false
   }
+}
+
+function handleFinishRestock () {
+  showRestockModal.value = false
+  fetchNextNFTId(orderInfo.value.quantity || 1)
 }
 
 </script>
