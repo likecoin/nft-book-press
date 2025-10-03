@@ -45,7 +45,7 @@ export const useNFTContractWriter = () => {
       address: wallet as `0x${string}`
     })
     if (balance.value <= 0n) {
-      throw new Error('Insufficient OP-ETH balance')
+      throw new Error('INSUFFICIENT_BASE_ETH_BALANCE')
     }
     return balance
   }

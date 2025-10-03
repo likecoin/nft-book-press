@@ -75,7 +75,7 @@ const uploadStatus = ref('')
 const error = ref('')
 const emit = defineEmits(['handleSubmit', 'submit', 'formValidChange'])
 
-const { payload } = useISCN({ iscnFormData })
+const { payload, computeISCNSalt } = useISCN({ iscnFormData })
 const { writeContractAsync } = useWriteContract()
 
 const formError = computed(() => validateISCNForm(iscnFormData.value))
@@ -188,11 +188,13 @@ const submitToISCN = async (): Promise<void> => {
     await assertPositiveWalletBalance({
       wallet: wallet.value
     })
+    const salt = computeISCNSalt(wallet.value)
     const txHash = await writeContractAsync({
       address: LIKE_NFT_CONTRACT_ADDRESS as `0x${string}`,
       abi: LIKE_NFT_ABI,
-      functionName: 'newBookNFTWithRoyalty',
+      functionName: 'newBookNFT',
       args: [
+        salt,
         {
           creator: wallet.value,
           updaters: [wallet.value, LIKE_EVM_NFT_TARGET_ADDRESS],

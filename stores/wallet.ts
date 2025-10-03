@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { FetchError } from 'ofetch'
 import { useAccount, useConnect, useDisconnect, useSignMessage } from '@wagmi/vue'
-import { optimism, optimismSepolia } from '@wagmi/vue/chains'
+import { base, baseSepolia } from '@wagmi/vue/chains'
 import { checksumAddress, UserRejectedRequestError } from 'viem'
 import type { Magic } from 'magic-sdk'
 import { clearUploadFileData } from '~/utils/uploadFile'
@@ -80,7 +80,7 @@ export const useWalletStore = defineStore('wallet', () => {
       await wagmiDisconnect()
 
       const { IS_TESTNET } = useRuntimeConfig().public
-      const chainId = IS_TESTNET ? optimismSepolia.id : optimism.id
+      const chainId = IS_TESTNET ? baseSepolia.id : base.id
       const connector = connectors.find(
         (c: { id: string }) => c.id === connectorId
       )

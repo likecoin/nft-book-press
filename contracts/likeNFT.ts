@@ -2,6 +2,11 @@ import type { Abi } from 'viem'
 
 export const LIKE_NFT_ABI: Abi = [
   {
+    inputs: [],
+    stateMutability: 'nonpayable',
+    type: 'constructor'
+  },
+  {
     inputs: [
       {
         internalType: 'address',
@@ -21,6 +26,11 @@ export const LIKE_NFT_ABI: Abi = [
       }
     ],
     name: 'BookNFTInvalidImplementation',
+    type: 'error'
+  },
+  {
+    inputs: [],
+    name: 'Create2EmptyBytecode',
     type: 'error'
   },
   {
@@ -46,12 +56,38 @@ export const LIKE_NFT_ABI: Abi = [
   },
   {
     inputs: [],
+    name: 'ErrInvalidSalt',
+    type: 'error'
+  },
+  {
+    inputs: [],
     name: 'ExpectedPause',
     type: 'error'
   },
   {
     inputs: [],
     name: 'FailedCall',
+    type: 'error'
+  },
+  {
+    inputs: [],
+    name: 'FailedDeployment',
+    type: 'error'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'balance',
+        type: 'uint256'
+      },
+      {
+        internalType: 'uint256',
+        name: 'needed',
+        type: 'uint256'
+      }
+    ],
+    name: 'InsufficientBalance',
     type: 'error'
   },
   {
@@ -272,11 +308,6 @@ export const LIKE_NFT_ABI: Abi = [
         internalType: 'address',
         name: 'initialOwner',
         type: 'address'
-      },
-      {
-        internalType: 'address',
-        name: 'bookNFTImplementation',
-        type: 'address'
       }
     ],
     name: 'initialize',
@@ -306,68 +337,10 @@ export const LIKE_NFT_ABI: Abi = [
   {
     inputs: [
       {
-        components: [
-          {
-            internalType: 'address',
-            name: 'creator',
-            type: 'address'
-          },
-          {
-            internalType: 'address[]',
-            name: 'updaters',
-            type: 'address[]'
-          },
-          {
-            internalType: 'address[]',
-            name: 'minters',
-            type: 'address[]'
-          },
-          {
-            components: [
-              {
-                internalType: 'string',
-                name: 'name',
-                type: 'string'
-              },
-              {
-                internalType: 'string',
-                name: 'symbol',
-                type: 'string'
-              },
-              {
-                internalType: 'string',
-                name: 'metadata',
-                type: 'string'
-              },
-              {
-                internalType: 'uint64',
-                name: 'max_supply',
-                type: 'uint64'
-              }
-            ],
-            internalType: 'struct BookConfig',
-            name: 'config',
-            type: 'tuple'
-          }
-        ],
-        internalType: 'struct MsgNewBookNFT',
-        name: 'msgNewBookNFT',
-        type: 'tuple'
-      }
-    ],
-    name: 'newBookNFT',
-    outputs: [
-      {
-        internalType: 'address',
-        name: 'bookAddress',
-        type: 'address'
-      }
-    ],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [
+        internalType: 'bytes32',
+        name: 'salt',
+        type: 'bytes32'
+      },
       {
         components: [
           {
@@ -423,7 +396,7 @@ export const LIKE_NFT_ABI: Abi = [
         type: 'uint96'
       }
     ],
-    name: 'newBookNFTWithRoyalty',
+    name: 'newBookNFT',
     outputs: [
       {
         internalType: 'address',
@@ -435,7 +408,45 @@ export const LIKE_NFT_ABI: Abi = [
     type: 'function'
   },
   {
+    inputs: [],
+    name: 'owner',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    inputs: [],
+    name: 'pause',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [],
+    name: 'paused',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
     inputs: [
+      {
+        internalType: 'bytes32',
+        name: 'salt',
+        type: 'bytes32'
+      },
       {
         components: [
           {
@@ -481,44 +492,17 @@ export const LIKE_NFT_ABI: Abi = [
             type: 'tuple'
           }
         ],
-        internalType: 'struct MsgNewBookNFT[]',
-        name: 'msgNewBookNFTs',
-        type: 'tuple[]'
+        internalType: 'struct MsgNewBookNFT',
+        name: 'msgNewBookNFT',
+        type: 'tuple'
       }
     ],
-    name: 'newBookNFTs',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: 'owner',
+    name: 'precomputeBookNFTAddress',
     outputs: [
       {
         internalType: 'address',
-        name: '',
+        name: 'bookAddress',
         type: 'address'
-      }
-    ],
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: 'pause',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    inputs: [],
-    name: 'paused',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool'
       }
     ],
     stateMutability: 'view',
@@ -611,6 +595,11 @@ export const LIKE_NFT_ABI: Abi = [
 ]
 
 export const LIKE_NFT_CLASS_ABI: Abi = [
+  {
+    inputs: [],
+    stateMutability: 'nonpayable',
+    type: 'constructor'
+  },
   {
     inputs: [],
     name: 'AccessControlBadConfirmation',
@@ -773,7 +762,17 @@ export const LIKE_NFT_CLASS_ABI: Abi = [
   },
   {
     inputs: [],
+    name: 'ErrMemoMetadataLengthMismatch',
+    type: 'error'
+  },
+  {
+    inputs: [],
     name: 'ErrNftNoSupply',
+    type: 'error'
+  },
+  {
+    inputs: [],
+    name: 'ErrSupplyDecrease',
     type: 'error'
   },
   {
@@ -1417,53 +1416,64 @@ export const LIKE_NFT_CLASS_ABI: Abi = [
   {
     inputs: [
       {
+        internalType: 'address',
+        name: 'creator',
+        type: 'address'
+      },
+      {
+        internalType: 'address[]',
+        name: 'minters',
+        type: 'address[]'
+      },
+      {
+        internalType: 'address[]',
+        name: 'updaters',
+        type: 'address[]'
+      },
+      {
         components: [
           {
-            internalType: 'address',
-            name: 'creator',
-            type: 'address'
+            internalType: 'string',
+            name: 'name',
+            type: 'string'
           },
           {
-            internalType: 'address[]',
-            name: 'updaters',
-            type: 'address[]'
+            internalType: 'string',
+            name: 'symbol',
+            type: 'string'
           },
           {
-            internalType: 'address[]',
-            name: 'minters',
-            type: 'address[]'
+            internalType: 'string',
+            name: 'metadata',
+            type: 'string'
           },
           {
-            components: [
-              {
-                internalType: 'string',
-                name: 'name',
-                type: 'string'
-              },
-              {
-                internalType: 'string',
-                name: 'symbol',
-                type: 'string'
-              },
-              {
-                internalType: 'string',
-                name: 'metadata',
-                type: 'string'
-              },
-              {
-                internalType: 'uint64',
-                name: 'max_supply',
-                type: 'uint64'
-              }
-            ],
-            internalType: 'struct BookConfig',
-            name: 'config',
-            type: 'tuple'
+            internalType: 'uint64',
+            name: 'max_supply',
+            type: 'uint64'
           }
         ],
-        internalType: 'struct MsgNewBookNFT',
-        name: 'msgNewBookNFT',
+        internalType: 'struct BookConfig',
+        name: 'config',
         type: 'tuple'
+      }
+    ],
+    name: 'initConfig',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        internalType: 'string',
+        name: 'name_',
+        type: 'string'
+      },
+      {
+        internalType: 'string',
+        name: 'symbol_',
+        type: 'string'
       }
     ],
     name: 'initialize',
