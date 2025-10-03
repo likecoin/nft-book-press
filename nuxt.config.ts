@@ -135,7 +135,7 @@ exports.randomFillSync = randomFillSync`
 
       CHAIN_EXPLORER_URL: process.env.CHAIN_EXPLORER_URL,
       OPENSEA_URL: process.env.OPENSEA_URL,
-      OPENSEA_ITEM_URL: process.env.OPENSEA_ITEM_URL,
+      NFT_ITEM_URL: process.env.NFT_ITEM_URL,
 
       LIKE_EVM_NFT_TARGET_ADDRESS: process.env.LIKE_EVM_NFT_TARGET_ADDRESS,
 

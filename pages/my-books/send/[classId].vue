@@ -236,7 +236,7 @@ const nftImage = ref('')
 const showRestockModal = ref(false)
 const validationError = ref('')
 
-const { OPENSEA_ITEM_URL } = useRuntimeConfig().public
+const { NFT_ITEM_URL } = useRuntimeConfig().public
 const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || !!nftIdError.value || isLimitReached.value)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
@@ -374,7 +374,7 @@ async function fetchNextNFTId (_count = 1) {
 }
 
 function onCheckOwnedIds () {
-  window.open(`${OPENSEA_ITEM_URL}/${classId.value}`, '_blank', 'noopener')
+  window.open(`${NFT_ITEM_URL}/${classId.value}`, '_blank', 'noopener')
 }
 
 async function onSendNFTStart () {
