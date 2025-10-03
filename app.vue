@@ -49,6 +49,7 @@
     <NuxtLoadingIndicator />
 
     <UNotifications />
+    <UModals />
   </div>
 </template>
 

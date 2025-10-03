@@ -17,6 +17,7 @@ export function useAuth () {
   const loginStatus = ref<string | undefined>('')
 
   const onAuthenticate = async (connectorId = 'magic') => {
+    let result: any
     loginStatus.value = $t('auth_state.connecting')
 
     try {
@@ -24,9 +25,17 @@ export function useAuth () {
       setupPostAuthRedirect()
 
       if (!wallet.value || !signer.value) {
-        await connect(connectorId)
+        result = await connect(connectorId)
       }
       if (!wallet.value || !signer.value) {
+        return
+      }
+
+      if (!result) {
+        clearSession()
+        if (isConnected.value) {
+          await disconnect()
+        }
         return
       }
 

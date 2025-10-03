@@ -87,3 +87,33 @@ export function checkJwtTokenValidity (token: string) {
       )
   return !isExpired && isMatchPermissions
 }
+
+export interface MigrateMagicEmailUserResponseData {
+  isMigratedBookUser: boolean
+  isMigratedBookOwner: boolean
+  isMigratedLikerId: boolean
+  isMigratedLikerLand: boolean
+}
+
+export async function migrateMagicEmailUser ({
+  wallet,
+  signature,
+  message
+}: {
+    wallet: string
+    signature: string
+    message: string
+  }) {
+  const { LIKE_CO_API } = useRuntimeConfig().public
+
+  const url = `${LIKE_CO_API}/users/new/migrate`
+  const result = await $fetch<MigrateMagicEmailUserResponseData>(url, {
+    method: 'POST',
+    body: {
+      wallet,
+      signature,
+      message
+    }
+  })
+  return result
+}
