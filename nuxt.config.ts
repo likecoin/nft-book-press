@@ -129,6 +129,7 @@ exports.randomFillSync = randomFillSync`
           app_id: ''
         }
       },
+      IS_MAINTENANCE: process.env.IS_MAINTENANCE,
       IS_TESTNET: process.env.IS_TESTNET,
 
       SITE_URL: process.env.SITE_URL,

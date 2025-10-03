@@ -214,6 +214,8 @@
   "login_panel_continue_with_email": "Log in by email",
   "login_panel_or_separator": "OR",
   "login_panel_title": "Select a login method",
+  "maintenance_page_description": "Our website is undergoing maintenance to bring you a better experience. We’ll be back shortly!",
+  "maintenance_page_title": "🚧 Under maintenance 🚧",
   "menu.authors_affiliates": "Sales Affiliate",
   "menu.batch_create_qr_codes": "Batch Create QR Codes",
   "menu.batch_create_short_links": "Batch Create Short Links",
