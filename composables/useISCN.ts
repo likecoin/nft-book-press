@@ -1,3 +1,4 @@
+import { sha256, toHex, fromHex, stringToHex } from 'viem'
 import { getApiEndpoints } from '~/constant/api'
 
 const getFileMimeType = (fileType: string): string => {
@@ -104,9 +105,28 @@ export function useISCN ({
     attributes: getAttributes(iscnFormData.value)
   }))
 
+  const computeISCNSalt = (msgSender: `0x${string}`) => {
+    const saltData: string = formattedPotentialActionList.value?.target[0].url || ''
+    const nonce = fromHex('0x0001', 'bytes') // 1 for book press
+
+    const hash = sha256(stringToHex(saltData))
+    const data = fromHex(hash, 'bytes').slice(0, 10)
+
+    const msgSenderBytes = fromHex(msgSender, 'bytes')
+
+    // Combine: msgSender (20 bytes) + nonce (2 bytes) + data (10 bytes) = 32 bytes
+    const salt = new Uint8Array(32)
+    salt.set(msgSenderBytes, 0)
+    salt.set(nonce, 20)
+    salt.set(data, 22)
+
+    return toHex(salt)
+  }
+
   return {
     getFileMimeType,
     getFileTypeFromMime,
-    payload
+    payload,
+    computeISCNSalt
   }
 }
