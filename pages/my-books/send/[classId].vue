@@ -214,7 +214,7 @@ const { writeContractAsync } = useWriteContract()
 const { getBalanceOf, getTokenIdByOwnerIndex } = useNFTContractReader()
 const { assertPositiveWalletBalance, waitForTransactionReceipt } = useNFTContractWriter()
 
-const error = ref({ message: '', actions: [{}] })
+const error = ref({ message: '', actions: [] as any[] })
 const isLoading = ref(false)
 const classId = ref(route.params.classId as string)
 const paymentId = ref(route.query.payment_id as string)
@@ -311,7 +311,10 @@ async function fetchNFTMetadata () {
       }
     }
   } catch (err) {
-    error.value.message = (err as Error).toString()
+    error.value = {
+      message: (err as Error).toString(),
+      actions: []
+    }
   } finally {
     isVerifyingNFTId.value = false
   }
@@ -430,7 +433,10 @@ async function onSendNFTStart () {
     }
   } catch (err) {
     console.error(err)
-    error.value.message = (err as Error).toString()
+    error.value = {
+      message: (err as Error).toString(),
+      actions: []
+    }
   } finally {
     isLoading.value = false
   }
