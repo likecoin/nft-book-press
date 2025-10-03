@@ -332,24 +332,24 @@ async function fetchNextNFTId (_count = 1) {
     }
 
     const balance = await getBalanceOf(classId.value, ownerWallet.value) as bigint
-    const need = BigInt(_count)
-    const transferable = balance > 0n ? balance - 1n : 0n
-    if (transferable < need) {
-      throw new Error(`Insufficient balance (exclude id=0) for classId: ${classId.value} in wallet: ${ownerWallet.value}`)
+    if (balance < BigInt(_count)) {
+      throw new Error(`No NFTs available for classId: ${classId.value} in wallet: ${ownerWallet.value}`)
     }
 
     const collected: number[] = []
-    let idx = 0n
-    while (collected.length < _count && idx < balance) {
-      const tokenId = await getTokenIdByOwnerIndex(classId.value, ownerWallet.value, Number(idx))
+
+    for (let idx = 0; idx < Number(balance); idx++) {
+      const tokenId = await getTokenIdByOwnerIndex(classId.value, ownerWallet.value, idx)
       if (tokenId !== 0n) {
         collected.push(Number(tokenId))
+        if (collected.length >= _count) {
+          break
+        }
       }
-      idx += 1n
     }
 
     if (collected.length < _count) {
-      throw new Error(`Failed to collect enough non-zero tokenIds. Collected ${collected.length}/${_count}`)
+      throw new Error(`Failed to collect enough available NFTs. Collected ${collected.length}/${_count}`)
     }
 
     nftIds.value = collected
