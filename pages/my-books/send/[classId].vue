@@ -133,11 +133,11 @@
                 <span class="text-sm text-gray-400 dark:text-gray-600">#{{ i }}</span>
               </template>
             </UInput>
-            <span v-if="invalidateError" class="text-xs text-red-500 absolute" v-text="invalidateError" />
+            <span v-if="validationError" class="text-xs text-red-500 absolute" v-text="validationError" />
           </div>
           <UButton
             v-if="orderInfo.quantity === 1"
-            :label="isEditingNFTId || (isVerifyingNFTId) ? 'Confirm' : 'Edit'"
+            :label="isEditingNFTId || isVerifyingNFTId ? 'Confirm' : 'Edit'"
             :disabled="isLoading || isVerifyingNFTId"
             variant="outline"
             :loading="isVerifyingNFTId"
@@ -234,7 +234,7 @@ const orderInfo = ref<any>({})
 const nftImage = ref('')
 
 const showRestockModal = ref(false)
-const invalidateError = ref('')
+const validationError = ref('')
 
 const { OPENSEA_ITEM_URL } = useRuntimeConfig().public
 const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || !!nftIdError.value || isLimitReached.value)
@@ -242,7 +242,7 @@ const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.va
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 
 watch(isLoading, (newIsLoading) => {
-  if (newIsLoading) { error.value.message = '' }
+  if (newIsLoading) { error.value = { message: '', actions: [] } }
 })
 
 watch(isEditingNFTId, async (isEditing) => {
@@ -251,13 +251,13 @@ watch(isEditingNFTId, async (isEditing) => {
   if (nftIdInput.value) {
     nftIds.value = nftIdInput.value.filter(id => id.trim() !== '').map(id => Number(id))
     if (nftIds.value[0] === 0) {
-      invalidateError.value = $t('error.nft_id_reserved_for_author')
+      validationError.value = $t('error.nft_id_reserved_for_author')
       nftIds.value = []
       isEditingNFTId.value = true
     } else {
       const metadata = await fetchNFTMetadata()
       if (!metadata) {
-        invalidateError.value = $t('error.fetch_nft_metadata_failed')
+        validationError.value = $t('error.fetch_nft_metadata_failed')
         nftIds.value = []
         isEditingNFTId.value = true
       }
@@ -281,7 +281,7 @@ onMounted(async () => {
 })
 
 function handleClickEditNFTId () {
-  invalidateError.value = ''
+  validationError.value = ''
   isEditingNFTId.value = !isEditingNFTId.value
   nftIdError.value = ''
   nextTick(() => {
@@ -344,17 +344,19 @@ async function fetchNextNFTId (_count = 1) {
     nftIdInput.value = nftIds.value.map(id => id.toString())
     await fetchNFTMetadata()
   } catch (err) {
-    error.value.message = (err as Error).toString()
-    error.value.actions = [
-      {
-        label: $t('button.restock_nft'),
-        variant: 'outline',
-        color: 'red',
-        click: () => {
-          showRestockModal.value = true
+    error.value = {
+      message: (err as Error).toString(),
+      actions: [
+        {
+          label: $t('button.restock_nft'),
+          variant: 'outline',
+          color: 'red',
+          click: () => {
+            showRestockModal.value = true
+          }
         }
-      }
-    ]
+      ]
+    }
   }
 }
 
