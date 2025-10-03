@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useAccount, useConnect, useDisconnect, useSignMessage } from '@wagmi/vue'
-import { optimism, optimismSepolia } from '@wagmi/vue/chains'
+import { base, baseSepolia } from '@wagmi/vue/chains'
 import { checksumAddress } from 'viem'
 import { clearUploadFileData } from '~/utils/uploadFile'
 
@@ -51,7 +51,7 @@ export const useWalletStore = defineStore('wallet', () => {
 
   async function connect (connectorId = 'magic') {
     const { IS_TESTNET } = useRuntimeConfig().public
-    const chainId = IS_TESTNET ? optimismSepolia.id : optimism.id
+    const chainId = IS_TESTNET ? baseSepolia.id : base.id
     const connector = connectors.find(
       (c: { id: string }) => c.id === connectorId
     )
