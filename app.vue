@@ -1,6 +1,7 @@
 <template>
   <div>
-    <NuxtLayout>
+    <MaintenancePage v-if="isShowMaintenancePage" />
+    <NuxtLayout v-else>
       <NuxtPage class="grow overflow-y-auto" />
     </NuxtLayout>
 
@@ -61,6 +62,7 @@ import { useUIStore } from '~/stores/ui'
 const { t: $t } = useI18n()
 
 const { SITE_URL } = useRuntimeConfig().public
+const { isShowMaintenancePage } = useMaintenanceMode()
 const bookstoreApiStore = useBookstoreApiStore()
 
 const { restoreAuthSession, fetchBookListing, clearSession } = bookstoreApiStore

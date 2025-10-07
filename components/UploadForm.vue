@@ -19,6 +19,7 @@
           type="file"
           multiple
           class="hidden"
+          accept="image/*,application/pdf,application/epub+zip"
           @change="onFileUpload"
         >
       </form>

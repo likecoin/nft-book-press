@@ -5,13 +5,14 @@
     </h1>
 
     <UAlert
-      v-if="error"
+      v-if="error.message"
       icon="i-heroicons-exclamation-triangle"
       color="red"
       variant="soft"
-      :title="`${error}`"
+      :title="`${error.message}`"
+      :actions="error.actions"
       :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'red', variant: 'link', padded: false }"
-      @close="error = ''"
+      @close="error = { message: '', actions: [] }"
     />
 
     <UProgress v-if="isLoading" animation="carousel">
@@ -23,7 +24,7 @@
     <UCard
       v-if="bookstoreApiStore.isAuthenticated"
       :ui="{
-        body: { base: 'space-y-4' },
+        body: { base: 'space-y-6' },
         footer: { base: 'flex justify-center gap-2' }
       }"
     >
@@ -37,7 +38,7 @@
                 {{ orderInfo.email }}
               </td>
             </tr>
-            <tr>
+            <tr v-if="orderInfo.giftInfo?.toEmail">
               <th class="text-left px-4 py-3">
                 {{ $t('table.reader_email') }}
               </th><td class="px-4 py-3">
@@ -81,13 +82,6 @@
             </tr>
             <tr>
               <th class="text-left px-4 py-3">
-                Buyer message
-              </th><td class="px-4 py-3">
-                {{ orderInfo.message }}
-              </td>
-            </tr>
-            <tr>
-              <th class="text-left px-4 py-3">
                 Sales channel
               </th><td class="px-4 py-3">
                 {{ orderInfo.from }}
@@ -97,27 +91,33 @@
         </table>
       </UCard>
 
-      <UFormGroup
-        label="Enter Author's Message"
-        :error="isLimitReached"
-        :hint="`${messageCharCount} / ${AUTHOR_MESSAGE_LIMIT}`"
-      >
-        <UTextarea
-          v-model="memo"
-          placeholder="default memo"
-        />
-      </UFormGroup>
+      <UCard>
+        <div class="space-y-2 mb-4">
+          <h5 class="text-sm font-bold" v-text="`${$t('nft_book_form.buyer_message')}`" />
+          <p v-text="orderInfo.message" />
+        </div>
+
+        <UFormGroup
+          :label="$t('nft_book_form.author_message')"
+          :error="isLimitReached"
+          :hint="`${messageCharCount} / ${AUTHOR_MESSAGE_LIMIT}`"
+        >
+          <UTextarea
+            v-model="memo"
+          />
+        </UFormGroup>
+      </UCard>
 
       <UFormGroup
-        label="Specify NFT ID"
-        description="Leave empty to auto-fetch NFT ID"
+        :label="$t('form.nft_id_label')"
+        class="mb-4"
         :error="nftIdError"
         :ui="{ description: 'text-gray-400 dark:text-gray-600' }"
       >
         <div class="flex flex-wrap items-center justify-center gap-2 w-full">
           <div
             v-if="orderInfo.quantity"
-            :class="[orderInfo.quantity > 1 ? 'w-full' : 'flex-grow', 'space-y-1']"
+            :class="[orderInfo.quantity > 1 ? 'w-full' : 'flex-grow', 'space-y-1', 'relative']"
           >
             <UInput
               v-for="i in orderInfo.quantity"
@@ -132,12 +132,14 @@
                 <span class="text-sm text-gray-400 dark:text-gray-600">#{{ i }}</span>
               </template>
             </UInput>
+            <span v-if="validationError" class="text-xs text-red-500 absolute" v-text="validationError" />
           </div>
           <UButton
-            :label="isEditingNFTId || (isVerifyingNFTId && !isAutoFetchingNFTId) ? 'Confirm' : 'Edit'"
+            v-if="orderInfo.quantity === 1"
+            :label="isEditingNFTId || isVerifyingNFTId ? 'Confirm' : 'Edit'"
             :disabled="isLoading || isVerifyingNFTId"
             variant="outline"
-            :loading="isVerifyingNFTId && !isAutoFetchingNFTId"
+            :loading="isVerifyingNFTId"
             color="gray"
             @click="handleClickEditNFTId"
           />
@@ -145,11 +147,10 @@
             OR
           </UDivider>
           <UButton
-            :label="`Auto-fetch NFT ID for ${orderInfo.quantity} NFTs`"
+            :label="$t('button.check_all_nft_ids')"
             :disabled="isLoading || isEditingNFTId"
-            :loading="isAutoFetchingNFTId"
             variant="outline"
-            @click="onClickFetchNextNFTId"
+            @click="onCheckOwnedIds"
           />
         </div>
       </UFormGroup>
@@ -172,6 +173,13 @@
         />
       </template>
     </UCard>
+    <UModal v-model="showRestockModal">
+      <LiteMintNFT
+        :is-restock="true"
+        :iscn-id="classId"
+        @submit="handleFinishRestock"
+      />
+    </UModal>
   </PageBody>
 </template>
 
@@ -205,19 +213,18 @@ const { writeContractAsync } = useWriteContract()
 const { getBalanceOf, getTokenIdByOwnerIndex } = useNFTContractReader()
 const { assertPositiveWalletBalance, waitForTransactionReceipt } = useNFTContractWriter()
 
-const error = ref('')
+const error = ref({ message: '', actions: [] as any[] })
 const isLoading = ref(false)
 const classId = ref(route.params.classId as string)
 const paymentId = ref(route.query.payment_id as string)
 const ownerWallet = ref(route.query.owner_wallet as string || wallet.value)
-const memo = ref('')
+const memo = ref($t('nft_book_form.default_memo'))
 const { messageCharCount, isLimitReached } = useMessageCharCount(memo, AUTHOR_MESSAGE_LIMIT)
 const { getNFTMetadata, getNFTOwner } = useNFTContractReader()
 
 const nftIdInput = ref([] as string[])
 const nftIds = ref([] as number[])
 const isVerifyingNFTId = ref(false)
-const isAutoFetchingNFTId = ref(false)
 const nftIdError = ref('')
 const isEditingNFTId = ref(false)
 const nftIdInputRef = ref<any[] | undefined>(undefined)
@@ -225,26 +232,35 @@ const nftIdInputRef = ref<any[] | undefined>(undefined)
 const orderInfo = ref<any>({})
 const nftImage = ref('')
 
-const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || isAutoFetchingNFTId.value || !!nftIdError.value || isLimitReached.value)
+const showRestockModal = ref(false)
+const validationError = ref('')
+
+const { NFT_ITEM_URL } = useRuntimeConfig().public
+const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || !!nftIdError.value || isLimitReached.value)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 
 watch(isLoading, (newIsLoading) => {
-  if (newIsLoading) { error.value = '' }
+  if (newIsLoading) { error.value = { message: '', actions: [] } }
 })
 
 watch(isEditingNFTId, async (isEditing) => {
   if (isEditing) { return }
 
   if (nftIdInput.value) {
-    const ids = nftIdInput.value.filter(id => id.trim() !== '').map(id => Number(id))
-    if (orderInfo.value.quantity && ids.length > 0 && ids.length !== orderInfo.value.quantity) {
-      nftIdError.value = `Number of NFT IDs (${ids.length}) does not match the required quantity (${orderInfo.value.quantity})`
+    nftIds.value = nftIdInput.value.filter(id => id.trim() !== '').map(id => Number(id))
+    if (nftIds.value[0] === 0) {
+      validationError.value = $t('error.nft_id_reserved_for_author')
       nftIds.value = []
-      return
+      isEditingNFTId.value = true
+    } else {
+      const metadata = await fetchNFTMetadata()
+      if (!metadata) {
+        validationError.value = $t('error.fetch_nft_metadata_failed')
+        nftIds.value = []
+        isEditingNFTId.value = true
+      }
     }
-    nftIds.value = ids
-    await fetchNFTMetadata()
   } else {
     nftImage.value = ''
     nftIds.value = []
@@ -264,6 +280,7 @@ onMounted(async () => {
 })
 
 function handleClickEditNFTId () {
+  validationError.value = ''
   isEditingNFTId.value = !isEditingNFTId.value
   nftIdError.value = ''
   nextTick(() => {
@@ -283,6 +300,7 @@ async function fetchNFTMetadata () {
     try {
       const metadata = await getNFTMetadata(classId.value, nftIds.value[0])
       nftImage.value = parseImageURLFromMetadata(metadata?.image)
+      return metadata
     } catch (err) {
       nftImage.value = ''
       if ((err as any)?.data?.code === 2) {
@@ -292,7 +310,10 @@ async function fetchNFTMetadata () {
       }
     }
   } catch (err) {
-    error.value = (err as Error).toString()
+    error.value = {
+      message: (err as Error).toString(),
+      actions: []
+    }
   } finally {
     isVerifyingNFTId.value = false
   }
@@ -302,31 +323,57 @@ async function fetchNextNFTId (_count = 1) {
   try {
     nftIds.value = []
     nftIdError.value = ''
-    isAutoFetchingNFTId.value = true
     if (!wallet.value || !signer.value) {
       await validateWalletConsistency()
     }
-    if (!ownerWallet.value) { return }
-    const balance = await getBalanceOf(classId.value, ownerWallet.value) as bigint
-    if (Number(balance) < _count) {
-      throw new Error(`Insufficient balance of NFT classId: ${classId.value} for wallet: ${ownerWallet.value}`)
+    if (!ownerWallet.value) {
+      throw new Error('Missing owner wallet')
     }
 
-    for (let i = 0; i < _count; i++) {
-      const nextNftId = await getTokenIdByOwnerIndex(classId.value, ownerWallet.value, i)
-      nftIds.value.push(Number(nextNftId))
+    const balance = await getBalanceOf(classId.value, ownerWallet.value) as bigint
+    if (balance < BigInt(_count)) {
+      throw new Error(`No NFTs available for classId: ${classId.value} in wallet: ${ownerWallet.value}`)
     }
-    nftIdInput.value = nftIds.value.map(id => id.toString())
+
+    const collected: number[] = []
+
+    for (let idx = 0; idx < Number(balance); idx++) {
+      const tokenId = await getTokenIdByOwnerIndex(classId.value, ownerWallet.value, idx)
+      if (tokenId !== 0n) {
+        collected.push(Number(tokenId))
+        if (collected.length >= _count) {
+          break
+        }
+      }
+    }
+
+    if (collected.length < _count) {
+      throw new Error(`Failed to collect enough available NFTs. Collected ${collected.length}/${_count}`)
+    }
+
+    nftIds.value = collected
+    nftIdInput.value = collected.map(String)
+
     await fetchNFTMetadata()
   } catch (err) {
-    error.value = (err as Error).toString()
-  } finally {
-    isAutoFetchingNFTId.value = false
+    error.value = {
+      message: (err as Error).toString(),
+      actions: [
+        {
+          label: $t('button.restock_nft'),
+          variant: 'outline',
+          color: 'red',
+          click: () => {
+            showRestockModal.value = true
+          }
+        }
+      ]
+    }
   }
 }
 
-function onClickFetchNextNFTId () {
-  fetchNextNFTId(orderInfo.value.quantity || 1)
+function onCheckOwnedIds () {
+  window.open(`${NFT_ITEM_URL}/${classId.value}`, '_blank', 'noopener')
 }
 
 async function onSendNFTStart () {
@@ -338,7 +385,7 @@ async function onSendNFTStart () {
     }
     if (!wallet.value || !signer.value) { return }
     if (nftIds.value) {
-      const owners = await Promise.all(nftIds.value.map(nftId => getNFTOwner(classId.value, nftId)))
+      const owners = await Promise.all(nftIds.value.map((nftId: number) => getNFTOwner(classId.value, nftId)))
       const mismatchNftIdIndex = owners.findIndex(owner => owner !== ownerWallet.value)
       if (mismatchNftIdIndex >= 0) {
         const mismatchNftId = nftIds.value[mismatchNftIdIndex]
@@ -385,10 +432,18 @@ async function onSendNFTStart () {
     }
   } catch (err) {
     console.error(err)
-    error.value = (err as Error).toString()
+    error.value = {
+      message: (err as Error).toString(),
+      actions: []
+    }
   } finally {
     isLoading.value = false
   }
+}
+
+function handleFinishRestock () {
+  showRestockModal.value = false
+  fetchNextNFTId(orderInfo.value.quantity || 1)
 }
 
 </script>
