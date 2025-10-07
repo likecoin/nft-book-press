@@ -20,8 +20,6 @@ export const useWalletStore = defineStore('wallet', () => {
   const modal = useModal()
   const { t: $t } = useI18n()
 
-  const REGISTER_TIME_LIMIT_IN_TS = 15 * 60 * 1000 // 15 minutes
-
   const isLoginLoading = ref(false)
 
   const wallet = computed(() => address.value ? checksumAddress(address.value) : undefined)
@@ -120,17 +118,8 @@ export const useWalletStore = defineStore('wallet', () => {
         }
       }
 
-      let isRegistered = await checkIsRegistered({ walletAddress, email, magicDIDToken, loginMethod })
-      if (!isRegistered) {
-        isRegistered = await register({ walletAddress, email, loginMethod, magicUserId, magicDIDToken })
-        if (!isRegistered) {
-          return false
-        // User canceled the registration
-        }
-      }
-
-      // To proceed with the authenticated flow
-      return { email, loginMethod }
+      // Return connection info for registration handling in useAuth
+      return { walletAddress, email, loginMethod, magicUserId, magicDIDToken }
     } catch (error) {
       await wagmiDisconnect().catch(() => {
       })
@@ -227,23 +216,13 @@ export const useWalletStore = defineStore('wallet', () => {
 
               }
             }
-            toast.add({
-              icon: 'i-heroicons-exclamation-circle',
-              title: getEmailAlreadyUsedErrorData({
-                email: email as string,
-                walletAddress,
-                boundEVMWallet: error.data?.evmWallet,
-                boundLikeWallet: error.data?.likeWallet,
-                loginMethod
-              })?.data.description || error.data?.message,
-              timeout: 10000,
-              color: 'red',
-              ui: {
-                title: 'text-red-400 dark:text-red-400'
-              }
-            })
-            break
-
+            throw new Error(getEmailAlreadyUsedErrorData({
+              email: email as string,
+              walletAddress,
+              boundEVMWallet: error.data?.evmWallet,
+              boundLikeWallet: error.data?.likeWallet,
+              loginMethod
+            })?.data.description || error.data?.message)
           case 'EVM_WALLET_ALREADY_EXIST':
             // Already registered
             return true
@@ -344,149 +323,108 @@ export const useWalletStore = defineStore('wallet', () => {
       }
     }
 
-    const startTime = Date.now()
-    let hasError = false
     const payload = {
       accountId: tempAccountId,
       email: prefilledEmail
     }
 
-    // Loop until registration is successful, user cancels or timeout
-    do {
-      // Check if registration time exceeds the limit
-      if (Date.now() - startTime > REGISTER_TIME_LIMIT_IN_TS) {
+    if (!payload.email) {
+      type ModalResult = { accountId: string; email: string; displayName?: string }
+      let modalResult: ModalResult | null = null
+      // Close login panel first to avoid focus trap
+      bookstoreApiStore.closeLoginPanel()
+      await nextTick()
+      await new Promise<void>((resolve) => {
+        modal.open(RegistrationModal, {
+          email: payload?.email,
+          accountId: payload?.accountId,
+          isAccountIdHidden: true,
+          isDisplayNameHidden: true,
+          onSubmit: (data: ModalResult) => {
+            modalResult = data
+            modal.close()
+            resolve()
+          },
+          onClose: () => {
+            modal.close()
+            resolve()
+          }
+        })
+      })
+      if (!modalResult) {
+        // User canceled the registration
+        return false
+      }
+      const result = modalResult as ModalResult
+      payload.accountId = result.accountId
+      payload.email = result.email
+    }
+
+    const message = JSON.stringify(
+      {
+        action: 'register',
+        evmWallet: walletAddress,
+        email: payload.email,
+        ts: Date.now()
+      },
+      null,
+      2
+    )
+
+    const signature = await signMessageAsync({ message })
+
+    try {
+      await usePostNewUser({
+        walletAddress,
+        signature,
+        message,
+        accountId: payload.accountId,
+        email: payload.email,
+        magicUserId,
+        magicDIDToken
+      })
+    } catch (error) {
+      if (error instanceof FetchError) {
+        switch (error.data) {
+          case 'INVALID_USER_ID': {
+            throw new Error($t('account_register_error_invalid_account_id', { id: payload?.accountId }))
+          }
+          case 'EMAIL_ALREADY_USED': {
+            throw new Error(getEmailAlreadyUsedErrorData({
+              email: payload?.email as string,
+              walletAddress,
+              boundEVMWallet: error.data?.evmWallet,
+              boundLikeWallet: error.data?.likeWallet,
+              loginMethod
+            })?.data.description || error.data?.message)
+          }
+          default:
+        }
+      }
+      throw error
+    }
+
+    let userInfoRes: FetchLikerInfoResult | undefined
+    try {
+      userInfoRes = await useFetchLikerInfoByWallet(walletAddress, { nocache: true })
+    } catch (error) {
+      if (error instanceof FetchError && error.statusCode === 404) {
         throw createError({
-          statusCode: 408,
-          data: { description: $t('account_register_timeout') }
+          status: 401,
+          message: 'REGISTER_USER_NOT_FOUND'
         })
       }
+      throw error
+    }
 
-      try {
-        // Skip registration modal if email is provided
-        if (!payload.email || hasError) {
-          type ModalResult = { accountId: string; email: string; displayName?: string }
-          let modalResult: ModalResult | null = null
-          // Close login panel first to avoid focus trap
-          bookstoreApiStore.closeLoginPanel()
-          await nextTick()
-          await new Promise<void>((resolve) => {
-            modal.open(RegistrationModal, {
-              email: payload?.email,
-              accountId: payload?.accountId,
-              isAccountIdHidden: true,
-              isDisplayNameHidden: true,
-              onSubmit: (data: ModalResult) => {
-                modalResult = data
-                modal.close()
-                resolve()
-              },
-              onClose: () => {
-                modal.close()
-                resolve()
-              }
-            })
-          })
-          if (!modalResult) {
-            // User canceled the registration, return false immediately
-            return false
-          }
-          const result = modalResult as ModalResult
-          payload.accountId = result.accountId
-          payload.email = result.email
-        }
-        hasError = false
+    if (!userInfoRes) {
+      throw createError({
+        status: 401,
+        message: 'CANNOT_FETCH_USER_INFO'
+      })
+    }
 
-        // Prepare signature for registration
-        const message = JSON.stringify(
-          {
-            action: 'register',
-            evmWallet: walletAddress,
-            email: payload.email,
-            ts: Date.now()
-          },
-          null,
-          2
-        )
-
-        const signature = await signMessageAsync({ message })
-        try {
-          await usePostNewUser({
-            walletAddress,
-            signature,
-            message,
-            accountId: payload.accountId,
-            email: payload.email,
-            magicUserId,
-            magicDIDToken
-          })
-        } catch (error) {
-          hasError = true
-          if (error instanceof FetchError) {
-            switch (error.data) {
-              case 'INVALID_USER_ID': {
-                toast.add({
-                  icon: 'i-heroicons-exclamation-circle',
-                  title: $t('account_register_error_invalid_account_id', { id: payload?.accountId }),
-                  timeout: 10000,
-                  color: 'red',
-                  ui: {
-                    title: 'text-red-400 dark:text-red-400'
-                  }
-                })
-                continue
-              }
-              case 'EMAIL_ALREADY_USED': {
-                toast.add({
-                  icon: 'i-heroicons-exclamation-circle',
-                  title: getEmailAlreadyUsedErrorData({
-                    email: payload?.email as string,
-                    walletAddress,
-                    boundEVMWallet: error.data?.evmWallet,
-                    boundLikeWallet: error.data?.likeWallet,
-                    loginMethod
-                  })?.data.description || error.data?.message,
-                  timeout: 10000,
-                  color: 'red',
-                  ui: {
-                    title: 'text-red-400 dark:text-red-400'
-                  }
-                })
-                continue
-              }
-              default:
-            }
-          }
-          throw error
-        }
-
-        // Fetch user info after registration
-        let userInfoRes: FetchLikerInfoResult | undefined
-        try {
-          userInfoRes = await useFetchLikerInfoByWallet(walletAddress, { nocache: true })
-        } catch (error) {
-          if (error instanceof FetchError && error.statusCode === 404) {
-            throw createError({
-              status: 401,
-              message: 'REGISTER_USER_NOT_FOUND'
-            })
-          }
-          throw error
-        }
-
-        if (!userInfoRes) {
-          throw createError({
-            status: 401,
-            message: 'CANNOT_FETCH_USER_INFO'
-          })
-        }
-
-        return true
-      } catch (error) {
-        hasError = true
-        throw error
-      }
-    } while (hasError)
-    return false
+    return true
   }
 
   return {
