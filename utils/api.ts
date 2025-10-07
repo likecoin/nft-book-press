@@ -26,7 +26,7 @@ export async function useFetchLikerInfoByWallet (wallet: string, { nocache = fal
   return result
 }
 
-export async function fetchUserRegisterCheck ({
+export async function usePostRegisterCheck ({
   accountId,
   walletAddress,
   email,
@@ -52,7 +52,36 @@ export async function fetchUserRegisterCheck ({
   return result
 }
 
-export function getLikeCoinAPIFetch () {
-  const config = useRuntimeConfig()
-  return $fetch.create({ baseURL: config.public.LIKE_CO_API })
+export async function usePostNewUser ({
+  walletAddress,
+  signature,
+  message,
+  accountId,
+  email,
+  magicUserId,
+  magicDIDToken
+}: {
+  walletAddress: string
+  signature: string
+  message: string
+  accountId: string
+  email: string
+  magicUserId?: string
+  magicDIDToken?: string
+}) {
+  const { LIKE_CO_API } = useRuntimeConfig().public
+  const result = await $fetch(`${LIKE_CO_API}/users/new`, {
+    method: 'POST',
+    body: {
+      from: walletAddress,
+      sign: signature,
+      payload: message,
+      platform: 'evmWallet',
+      user: accountId,
+      email,
+      magicUserId,
+      magicDIDToken
+    }
+  })
+  return result
 }

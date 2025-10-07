@@ -6,7 +6,6 @@ import { checksumAddress, UserRejectedRequestError } from 'viem'
 import type { Magic } from 'magic-sdk'
 import { clearUploadFileData } from '~/utils/uploadFile'
 import { RegistrationModal } from '#components'
-import { getLikeCoinAPIFetch, useFetchLikerInfoByWallet } from '~/utils/api'
 
 export const useWalletStore = defineStore('wallet', () => {
   const { connectors, connectAsync: wagmiConnect, status } = useConnect()
@@ -20,7 +19,6 @@ export const useWalletStore = defineStore('wallet', () => {
   const toast = useToast()
   const modal = useModal()
   const { t: $t } = useI18n()
-
 
   const REGISTER_TIME_LIMIT_IN_TS = 15 * 60 * 1000 // 15 minutes
 
@@ -200,7 +198,7 @@ export const useWalletStore = defineStore('wallet', () => {
       }
     }
     try {
-      await fetchUserRegisterCheck({ walletAddress, email, magicDIDToken })
+      await usePostRegisterCheck({ walletAddress, email, magicDIDToken })
       // If the request succeeds, it means there is no account associated with the wallet address and email
       return false
     } catch (error) {
@@ -337,7 +335,7 @@ export const useWalletStore = defineStore('wallet', () => {
   }) {
     let tempAccountId = generateAccountIdFromWalletAddress(walletAddress)
     try {
-      await fetchUserRegisterCheck({ accountId: tempAccountId })
+      await usePostRegisterCheck({ accountId: tempAccountId })
     } catch (error) {
       if (error instanceof FetchError && error.data?.error === 'USER_ALREADY_EXIST') {
         tempAccountId = error.data.alternative as string
@@ -412,18 +410,14 @@ export const useWalletStore = defineStore('wallet', () => {
 
         const signature = await signMessageAsync({ message })
         try {
-          await getLikeCoinAPIFetch()('/users/new', {
-            method: 'POST',
-            body: {
-              from: walletAddress,
-              sign: signature,
-              payload: message,
-              platform: 'evmWallet',
-              user: payload.accountId,
-              email: payload.email,
-              magicUserId,
-              magicDIDToken
-            }
+          await usePostNewUser({
+            walletAddress,
+            signature,
+            message,
+            accountId: payload.accountId,
+            email: payload.email,
+            magicUserId,
+            magicDIDToken
           })
         } catch (error) {
           hasError = true
