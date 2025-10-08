@@ -407,26 +407,6 @@ export const useWalletStore = defineStore('wallet', () => {
       throw error
     }
 
-    let userInfoRes: FetchLikerInfoResult | undefined
-    try {
-      userInfoRes = await useFetchLikerInfoByWallet(walletAddress, { nocache: true })
-    } catch (error) {
-      if (error instanceof FetchError && error.statusCode === 404) {
-        throw createError({
-          status: 401,
-          message: 'REGISTER_USER_NOT_FOUND'
-        })
-      }
-      throw error
-    }
-
-    if (!userInfoRes) {
-      throw createError({
-        status: 401,
-        message: 'CANNOT_FETCH_USER_INFO'
-      })
-    }
-
     return true
   }
 
