@@ -11,11 +11,12 @@ import { RegistrationModal } from '#components'
 export const useWalletStore = defineStore('wallet', () => {
   const { connectors, connectAsync: wagmiConnect, status } = useConnect()
   const { disconnectAsync: wagmiDisconnect } = useDisconnect()
-  const { address, isConnected } = useAccount()
+  const { address, isConnected, chain } = useAccount()
   const { signMessageAsync } = useSignMessage()
   const bookstoreApiStore = useBookstoreApiStore()
   const { wallet: sessionWallet } = storeToRefs(bookstoreApiStore)
   const { LIKECOIN_V3_BOOK_MIGRATION_SITE_URL } = useRuntimeConfig().public
+  const { $wagmiConfig } = useNuxtApp()
 
   const toast = useToast()
   const modal = useModal()
@@ -164,6 +165,18 @@ export const useWalletStore = defineStore('wallet', () => {
     clearUploadFileData()
     return wagmiDisconnect()
   }
+
+  // Validate chain ID on reconnect
+  watch([chain, isConnected], async ([currentChain, connected]) => {
+    if (connected && currentChain) {
+      const validChainIds = $wagmiConfig.chains.map(c => c.id)
+      const hasValidConnection = validChainIds.includes(currentChain.id)
+
+      if (!hasValidConnection) {
+        await disconnect()
+      }
+    }
+  })
 
   async function checkIsRegistered ({
     walletAddress,
