@@ -5,7 +5,6 @@ import { optimism, optimismSepolia } from '@wagmi/vue/chains'
 import { checksumAddress, UserRejectedRequestError } from 'viem'
 import type { Magic } from 'magic-sdk'
 import { clearUploadFileData } from '~/utils/uploadFile'
-// import { postRegisterCheck, postNewUser } from '~/utils/api'
 import { RegistrationModal } from '#components'
 
 export const useWalletStore = defineStore('wallet', () => {
