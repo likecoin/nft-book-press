@@ -495,6 +495,7 @@
   "qr_generator.pick_dot": "Pick a dot style",
   "qr_generator.pick_icon": "Pick an icon",
   "qr_generator.save_config": "Save Config",
+  "registration_modal_display_name_placeholder": "display name",
   "sales_pos.checkout_url": "Checkout URL",
   "sales_pos.direct_checkout": "Direct Checkout",
   "sales_pos.gift_checkout": "Gift Checkout",

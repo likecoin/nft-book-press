@@ -52,7 +52,7 @@
         <UInput
           v-model="displayName"
           class="w-full"
-          placeholder="Display Name"
+          :placeholder="$t('registration_modal_display_name_placeholder')"
         />
       </UFormGroup>
       <template #footer>

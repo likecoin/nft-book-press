@@ -26,7 +26,7 @@ export async function useFetchLikerInfoByWallet (wallet: string, { nocache = fal
   return result
 }
 
-export async function usePostRegisterCheck ({
+export async function postRegisterCheck ({
   accountId,
   walletAddress,
   email,
@@ -52,7 +52,7 @@ export async function usePostRegisterCheck ({
   return result
 }
 
-export async function usePostNewUser ({
+export async function postNewUser ({
   walletAddress,
   signature,
   message,

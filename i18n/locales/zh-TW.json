@@ -498,6 +498,7 @@
   "qr_generator.save_config": "儲存設定",
   "registration_modal_account_id_label": "帳戶 ID",
   "registration_modal_display_name_label": "顯示名稱",
+  "registration_modal_display_name_placeholder": "顯示名稱",
   "registration_modal_email_label": "電郵",
   "registration_modal_error_account_id_invalid": "帳號 ID 不符合要求",
   "registration_modal_error_account_id_required": "帳號 ID 不能為空白",

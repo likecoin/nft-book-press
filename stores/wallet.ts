@@ -5,6 +5,7 @@ import { optimism, optimismSepolia } from '@wagmi/vue/chains'
 import { checksumAddress, UserRejectedRequestError } from 'viem'
 import type { Magic } from 'magic-sdk'
 import { clearUploadFileData } from '~/utils/uploadFile'
+// import { postRegisterCheck, postNewUser } from '~/utils/api'
 import { RegistrationModal } from '#components'
 
 export const useWalletStore = defineStore('wallet', () => {
@@ -29,7 +30,7 @@ export const useWalletStore = defineStore('wallet', () => {
 
     let baseUrl = LIKECOIN_V3_BOOK_MIGRATION_SITE_URL
     if (locale.value === 'en') {
-      baseUrl = `${LIKECOIN_V3_BOOK_MIGRATION_SITE_URL}/en`
+      baseUrl = `${baseUrl}/en`
     }
 
     const migrationURL = appendUTMParamsToURL({
@@ -187,7 +188,7 @@ export const useWalletStore = defineStore('wallet', () => {
       }
     }
     try {
-      await usePostRegisterCheck({ walletAddress, email, magicDIDToken })
+      await postRegisterCheck({ walletAddress, email, magicDIDToken })
       // If the request succeeds, it means there is no account associated with the wallet address and email
       return false
     } catch (error) {
@@ -317,7 +318,7 @@ export const useWalletStore = defineStore('wallet', () => {
   }) {
     let tempAccountId = generateAccountIdFromWalletAddress(walletAddress)
     try {
-      await usePostRegisterCheck({ accountId: tempAccountId })
+      await postRegisterCheck({ accountId: tempAccountId })
     } catch (error) {
       if (error instanceof FetchError && error.data?.error === 'USER_ALREADY_EXIST') {
         tempAccountId = error.data.alternative as string
@@ -377,7 +378,7 @@ export const useWalletStore = defineStore('wallet', () => {
     const signature = await signMessageAsync({ message })
 
     try {
-      await usePostNewUser({
+      await postNewUser({
         walletAddress,
         signature,
         message,
