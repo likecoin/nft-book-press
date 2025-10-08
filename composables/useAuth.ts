@@ -44,17 +44,11 @@ export function useAuth () {
 
       if (!isRegistered) {
         const maxRetries = 2
-        let retryCount = 0
 
-        while (retryCount < maxRetries && !isRegistered) {
+        for (let retryCount = 0; retryCount < maxRetries && !isRegistered; retryCount++) {
           try {
             isRegistered = await store.register({ walletAddress, email, loginMethod, magicUserId, magicDIDToken })
-            if (isRegistered) {
-              break
-            }
-            return
           } catch (error) {
-            retryCount++
             toast.add({
               icon: 'i-heroicons-exclamation-circle',
               title: (error as Error).toString(),
@@ -64,21 +58,15 @@ export function useAuth () {
                 title: 'text-red-400 dark:text-red-400'
               }
             })
-
-            if (retryCount >= maxRetries) {
-              if (window.Intercom) {
-                window.Intercom('showNewMessage', $t('intercom.registration_failed_message', {
-                  walletAddress
-                }))
-              }
-              break
-            }
-
-            continue
           }
         }
 
         if (!isRegistered) {
+          if (window.Intercom) {
+            window.Intercom('showNewMessage', $t('intercom.registration_failed_message', {
+              walletAddress
+            }))
+          }
           return
         }
       }
