@@ -551,7 +551,7 @@ const useLikerLandPurchaseLink = ref(true)
 const shouldDisableStripeConnectSetting = ref(false)
 const isUsingDefaultAccount = ref(true)
 
-const stockBalance = ref(0)
+const stockBalance = ref(-99)
 const showRestockModal = ref(false)
 const iscnId = ref('')
 
