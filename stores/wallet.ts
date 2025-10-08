@@ -213,7 +213,10 @@ export const useWalletStore = defineStore('wallet', () => {
                   return true
                 }
               } catch (e) {
-
+                if (!(e instanceof UserRejectedRequestError)) {
+                  // eslint-disable-next-line no-console
+                  console.error('Failed to migrate email user', e)
+                }
               }
             }
             throw new Error(getEmailAlreadyUsedErrorData({
