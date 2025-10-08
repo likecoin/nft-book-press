@@ -7,10 +7,11 @@ import { clearUploadFileData } from '~/utils/uploadFile'
 export const useWalletStore = defineStore('wallet', () => {
   const { connectors, connectAsync: wagmiConnect } = useConnect()
   const { disconnectAsync: wagmiDisconnect } = useDisconnect()
-  const { address, isConnected } = useAccount()
+  const { address, isConnected, chain } = useAccount()
   const { signMessageAsync } = useSignMessage()
   const bookstoreApiStore = useBookstoreApiStore()
   const { wallet: sessionWallet } = storeToRefs(bookstoreApiStore)
+  const { $wagmiConfig } = useNuxtApp()
 
   const { t: $t } = useI18n()
   const toast = useToast()
@@ -87,6 +88,18 @@ export const useWalletStore = defineStore('wallet', () => {
     clearUploadFileData()
     return wagmiDisconnect()
   }
+
+  // Validate chain ID on reconnect
+  watch([chain, isConnected], async ([currentChain, connected]) => {
+    if (connected && currentChain) {
+      const validChainIds = $wagmiConfig.chains.map(c => c.id)
+      const hasValidConnection = validChainIds.includes(currentChain.id)
+
+      if (!hasValidConnection) {
+        await disconnect()
+      }
+    }
+  })
 
   return {
     wallet,
