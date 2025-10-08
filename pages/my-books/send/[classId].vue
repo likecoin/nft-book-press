@@ -356,8 +356,10 @@ async function fetchNextNFTId (_count = 1) {
 
     await fetchNFTMetadata()
   } catch (err) {
+    const message = (err as Error).toString();
+    nftIdError.value = message
     error.value = {
-      message: (err as Error).toString(),
+      message,
       actions: [
         {
           label: $t('button.restock_nft'),
