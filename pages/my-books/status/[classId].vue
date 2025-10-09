@@ -858,6 +858,14 @@ watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = '' }
 })
 
+watch(wallet, async (newWallet) => {
+  if (newWallet) {
+    await calculateStock()
+  } else {
+    stockBalance.value = -99
+  }
+})
+
 onMounted(async () => {
   isLoading.value = true
   try {
@@ -906,8 +914,8 @@ onMounted(async () => {
       })
 
     ordersData.value = orders
-    await calculateStock()
     if (wallet.value) {
+      await calculateStock()
       try {
         await fetchStripeConnectStatusByWallet(wallet.value)
       } catch (err) {
