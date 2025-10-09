@@ -43,5 +43,7 @@ if (colorMode.value !== 'light') {
   colorMode.preference = 'light'
 }
 
+const { isNavigationCollapsed } = useAppLayout()
+
 const isSlideoverOpen = ref(false)
 </script>
