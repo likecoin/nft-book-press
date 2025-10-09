@@ -81,7 +81,6 @@ import { useToastComposable } from '~/composables/useToast'
 
 import { LIKE_NFT_CLASS_ABI } from '~/contracts/likeNFT'
 
-const route = useRoute()
 const { t: $t } = useI18n()
 const { writeContractAsync } = useWriteContract()
 const {
@@ -96,6 +95,29 @@ const store = useWalletStore()
 const { wallet } = storeToRefs(store)
 const { validateWalletConsistency } = store
 
+const props = defineProps({
+  iscnData: {
+    type: Object,
+    default: null
+  },
+  shouldShowSubmit: {
+    type: Boolean,
+    default: true
+  },
+  iscnId: {
+    type: String,
+    default: ''
+  },
+  isRestock: {
+    type: Boolean,
+    default: false
+  },
+  restockCount: {
+    type: Number,
+    default: 0
+  }
+})
+
 const error = ref('')
 const isLoading = ref(false)
 
@@ -105,7 +127,7 @@ const localISCNId = ref('')
 const nftMintListData = ref<any>([])
 const nftMintDefaultData = ref<any>(null)
 
-const classId = ref<string>(route.params.classId as string || '')
+const classId = ref<string>(props.iscnId || '')
 
 const formState = reactive({
   mintCount: NFT_DEFAULT_MINT_AMOUNT,
@@ -153,29 +175,6 @@ watch(isLoading, (val: boolean) => {
     error.value = ''
   }
 }, { immediate: true })
-
-const props = defineProps({
-  iscnData: {
-    type: Object,
-    default: null
-  },
-  shouldShowSubmit: {
-    type: Boolean,
-    default: true
-  },
-  iscnId: {
-    type: String,
-    default: ''
-  },
-  isRestock: {
-    type: Boolean,
-    default: false
-  },
-  restockCount: {
-    type: Number,
-    default: 0
-  }
-})
 
 watchEffect(async () => {
   if (props.iscnData) {

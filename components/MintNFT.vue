@@ -13,6 +13,7 @@
     <LiteMintNFT
       ref="liteMintNFTRef"
       :iscn-data="iscnData"
+      :iscn-id="iscnId"
       :should-show-submit="false"
       @submit="handleFinishMintNFT"
     />

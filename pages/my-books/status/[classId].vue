@@ -482,7 +482,7 @@
       <LiteMintNFT
         :is-restock="true"
         :restock-count="stockBalance"
-        :iscn-id="iscnId"
+        :iscn-id="classId"
         @submit="handleMintNFTSubmit"
       />
     </UModal>
@@ -553,7 +553,6 @@ const isUsingDefaultAccount = ref(true)
 
 const stockBalance = ref(-99)
 const showRestockModal = ref(false)
-const iscnId = ref('')
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 const ownerWallet = computed(() => classListingInfo?.value?.ownerWallet)
@@ -1146,7 +1145,6 @@ async function shortenAllLinks () {
 
 function handleOpenRestockModal () {
   showRestockModal.value = true
-  iscnId.value = classId.value
 }
 
 async function handleMintNFTSubmit () {
