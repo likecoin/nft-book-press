@@ -244,6 +244,7 @@
               :stripe-connect-wallet="stripeConnectWallet"
               :should-disable-setting="shouldDisableStripeConnectSetting"
               :login-address="wallet"
+              :is-updating-stripe-account="isUpdatingStripeAccount"
 
               @save="handleSaveStripeConnectWallet"
             />
@@ -307,9 +308,8 @@ const walletStore = useWalletStore()
 const bookstoreApiStore = useBookstoreApiStore()
 const stripeStore = useStripeStore()
 const { wallet } = storeToRefs(walletStore)
-const { newBookListing, updateEditionPrice, uploadSignImages } = bookstoreApiStore
+const { newBookListing, updateEditionPrice, uploadSignImages, updateBookListingSetting } = bookstoreApiStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
-const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
 const { token } = storeToRefs(bookstoreApiStore)
 const nftStore = useNftStore()
 
@@ -336,6 +336,7 @@ const classId = computed(() => {
 const nextPriceIndex = ref(1)
 const hideDownload = ref(false)
 const isAllowCustomPrice = ref(true)
+const isUpdatingStripeAccount = ref(false)
 
 const prices = ref<any[]>([
   {
@@ -429,18 +430,6 @@ onMounted(async () => {
     ownedCount.value = Number(balance) || 0
 
     if (isEditMode.value || editionIndex.value !== undefined) {
-      if (wallet.value) {
-        try {
-          await fetchStripeConnectStatusByWallet(wallet.value)
-          if (getStripeConnectStatusByWallet.value(wallet.value).isReady) {
-            isStripeConnectChecked.value = true
-            stripeConnectWallet.value = wallet.value
-          }
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.error(err)
-        }
-      }
       const classResData: any = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`, {
         headers: {
           authorization: `Bearer ${token.value}`
@@ -449,7 +438,29 @@ onMounted(async () => {
       if (classResData) {
         if (classResData?.ownerWallet !== wallet.value) {
           throw new Error('NOT_OWNER_OF_NFT_CLASS')
+        } else if (wallet.value) {
+          try {
+            if (classResData.connectedWallets) {
+              const connectedWalletKeys = Object.keys(classResData.connectedWallets)
+              const firstConnectedWallet = connectedWalletKeys[0]
+
+              isUsingDefaultAccount.value = firstConnectedWallet === wallet.value
+              stripeConnectWallet.value = firstConnectedWallet
+              isStripeConnectChecked.value = true
+            } else {
+              const { isReady } = await fetchStripeConnectStatusByWallet(wallet.value)
+              if (isReady) {
+                isStripeConnectChecked.value = true
+                stripeConnectWallet.value = wallet.value
+                isUsingDefaultAccount.value = true
+              }
+            }
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error(err)
+          }
         }
+
         if (editionIndex.value !== undefined) {
           if (classResData.prices.length) {
             const currentEdition = classResData.prices.find((e: any) => e.index.toString() === editionIndex.value)
@@ -572,9 +583,22 @@ function deletePrice (index: number) {
   prices.value.splice(index, 1)
 }
 
-function handleSaveStripeConnectWallet (wallet: any) {
+async function handleSaveStripeConnectWallet (wallet: any) {
   stripeConnectWallet.value = wallet
-  shouldDisableStripeConnectSetting.value = true
+  const connectedWallets = { [stripeConnectWallet.value]: 100 }
+  isUpdatingStripeAccount.value = true
+  try {
+    await updateBookListingSetting(classId.value as string, {
+      connectedWallets
+    })
+    shouldDisableStripeConnectSetting.value = true
+  } catch (error) {
+    shouldDisableStripeConnectSetting.value = false
+    // eslint-disable-next-line no-console
+    console.error(error)
+  } finally {
+    isUpdatingStripeAccount.value = false
+  }
 }
 
 function mapPrices (prices: any) {
