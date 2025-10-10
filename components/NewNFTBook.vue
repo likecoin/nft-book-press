@@ -431,18 +431,6 @@ onMounted(async () => {
     ownedCount.value = Number(balance) || 0
 
     if (isEditMode.value || editionIndex.value !== undefined) {
-      if (wallet.value) {
-        try {
-          await fetchStripeConnectStatusByWallet(wallet.value)
-          if (getStripeConnectStatusByWallet.value(wallet.value).isReady) {
-            isStripeConnectChecked.value = true
-            stripeConnectWallet.value = wallet.value
-          }
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.error(err)
-        }
-      }
       const classResData: any = await $fetch(`${LIKE_CO_API}/likernft/book/store/${classId.value}`, {
         headers: {
           authorization: `Bearer ${token.value}`
@@ -451,14 +439,25 @@ onMounted(async () => {
       if (classResData) {
         if (classResData?.ownerWallet !== wallet.value) {
           throw new Error('NOT_OWNER_OF_NFT_CLASS')
-        }
-        if (classResData.connectedWallets) {
-          const connectedWalletKeys = Object.keys(classResData.connectedWallets || {})
-          const firstConnectedWallet = connectedWalletKeys[0]
+        } else if (wallet.value) {
+          try {
+            await fetchStripeConnectStatusByWallet(wallet.value)
 
-          isUsingDefaultAccount.value = firstConnectedWallet === wallet.value
-          if (!isUsingDefaultAccount.value && firstConnectedWallet) {
-            stripeConnectWallet.value = firstConnectedWallet
+            if (classResData.connectedWallets) {
+              const connectedWalletKeys = Object.keys(classResData.connectedWallets)
+              const firstConnectedWallet = connectedWalletKeys[0]
+
+              isUsingDefaultAccount.value = firstConnectedWallet === wallet.value
+              stripeConnectWallet.value = firstConnectedWallet
+              isStripeConnectChecked.value = true
+            } else if (getStripeConnectStatusByWallet.value(wallet.value).isReady) {
+              isStripeConnectChecked.value = true
+              stripeConnectWallet.value = wallet.value
+              isUsingDefaultAccount.value = true
+            }
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.error(err)
           }
         }
 
