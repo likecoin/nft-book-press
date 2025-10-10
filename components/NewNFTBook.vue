@@ -310,7 +310,6 @@ const stripeStore = useStripeStore()
 const { wallet } = storeToRefs(walletStore)
 const { newBookListing, updateEditionPrice, uploadSignImages, updateBookListingSetting } = bookstoreApiStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
-const { getStripeConnectStatusByWallet } = storeToRefs(stripeStore)
 const { token } = storeToRefs(bookstoreApiStore)
 const nftStore = useNftStore()
 
@@ -441,8 +440,6 @@ onMounted(async () => {
           throw new Error('NOT_OWNER_OF_NFT_CLASS')
         } else if (wallet.value) {
           try {
-            await fetchStripeConnectStatusByWallet(wallet.value)
-
             if (classResData.connectedWallets) {
               const connectedWalletKeys = Object.keys(classResData.connectedWallets)
               const firstConnectedWallet = connectedWalletKeys[0]
@@ -450,10 +447,13 @@ onMounted(async () => {
               isUsingDefaultAccount.value = firstConnectedWallet === wallet.value
               stripeConnectWallet.value = firstConnectedWallet
               isStripeConnectChecked.value = true
-            } else if (getStripeConnectStatusByWallet.value(wallet.value).isReady) {
-              isStripeConnectChecked.value = true
-              stripeConnectWallet.value = wallet.value
-              isUsingDefaultAccount.value = true
+            } else {
+              const { isReady } = await fetchStripeConnectStatusByWallet(wallet.value)
+              if (isReady) {
+                isStripeConnectChecked.value = true
+                stripeConnectWallet.value = wallet.value
+                isUsingDefaultAccount.value = true
+              }
             }
           } catch (err) {
             // eslint-disable-next-line no-console
