@@ -378,7 +378,6 @@ const moderatorWallets = ref<string[]>([
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
 const isStripeConnectChecked = ref(false)
-const shouldDisableStripeConnectSetting = ref(false)
 const stripeConnectWallets = ref<string[]>([])
 
 const signatureImage = ref<File | null>(null)
@@ -726,7 +725,6 @@ async function submitNewClass () {
     console.error(errorData)
     error.value = errorData
   } finally {
-    shouldDisableStripeConnectSetting.value = false
     isLoading.value = false
   }
 }
