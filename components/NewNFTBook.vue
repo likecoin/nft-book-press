@@ -377,8 +377,7 @@ const moderatorWallets = ref<string[]>([
 ])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
-const isStripeConnectChecked = ref(false)
-const stripeConnectWallets = ref<string[]>([])
+const connectedWallets = ref<Record<string, number>>({})
 
 const signatureImage = ref<File | null>(null)
 
@@ -410,6 +409,7 @@ const submitButtonText = computed(() =>
   isEditMode.value ? $t('common.save') : $t('common.submit')
 )
 const shouldShowAdvanceSettings = ref<boolean>(true)
+const stripeConnectWallets = computed(() => Object.keys(connectedWallets.value))
 
 watch(isLoading, (val: boolean) => {
   if (val) {
@@ -460,13 +460,11 @@ onMounted(async () => {
         } else if (wallet.value) {
           try {
             if (classResData.connectedWallets) {
-              stripeConnectWallets.value = Object.keys(classResData.connectedWallets || {})
-              isStripeConnectChecked.value = true
+              connectedWallets.value = classResData.connectedWallets
             } else {
               const { isReady } = await fetchStripeConnectStatusByWallet(wallet.value)
               if (isReady) {
-                stripeConnectWallets.value = [wallet.value]
-                isStripeConnectChecked.value = true
+                connectedWallets.value = { [wallet.value]: 100 }
               }
             }
           } catch (err) {
@@ -701,18 +699,11 @@ async function submitNewClass () {
 
     const p = mapPrices(prices.value)
 
-    const connectedWallets =
-      isStripeConnectChecked.value && stripeConnectWallets.value.length
-        ? {
-            [stripeConnectWallets.value[0]]: 100
-          }
-        : null
-
     const shouldEnableCustomMessagePage = p.some((price: any) => !price.isAutoDeliver || price.autoMemo)
 
     await newBookListing(classId.value as string, {
       defaultPaymentCurrency: 'USD',
-      connectedWallets,
+      connectedWallets: connectedWallets.value || null,
       moderatorWallets: moderatorWallets.value,
       prices: p,
       mustClaimToView: true,
