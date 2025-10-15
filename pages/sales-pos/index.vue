@@ -96,7 +96,7 @@
                 label: coupon.name,
                 value: coupon.code
               }))"
-              placeholder="Select Coupon"
+              :placeholder="$t('sales_pos.select_coupon')"
             />
 
             <UButton
@@ -141,13 +141,13 @@
 
                 <div class="flex justify-center items-center gap-4">
                   <UButton
-                    label="View Cart"
+                    :label="$t('sales_pos.view_cart')"
                     size="lg"
                     @click="goToCartUrl"
                   />
 
                   <UButton
-                    label="Generate QR Code"
+                    :label="$t('sales_pos.generate_qr_code')"
                     :disabled="!selectedItems.length"
                     size="lg"
                     @click="generateQRCode"
@@ -212,7 +212,7 @@
           <UFormGroup
             v-for="(input, index) in newProductIdInputs"
             :key="`input-${input.id}`"
-            label="Enter Product ID/URL(s)"
+            :label="$t('sales_pos.enter_product_id_urls')"
             :required="true"
             :error="input.error?.message"
           >
@@ -236,7 +236,7 @@
           <div class="flex justify-center gap-4">
             <UButton
               icon="i-heroicons-plus-circle"
-              label="Add"
+              :label="$t('sales_pos.add')"
               variant="outline"
               @click="addNewItemInput"
             />

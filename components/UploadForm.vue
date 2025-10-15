@@ -194,7 +194,7 @@ const computedFormClasses = computed(() => [
 ])
 
 watch(isEncryptEBookData, async () => {
-  uploadStatus.value = 'loading'
+  uploadStatus.value = $t('upload_form.loading')
   await estimateArweaveFee()
   uploadStatus.value = ''
 })
@@ -235,7 +235,7 @@ const getFileInfo = async (file: Blob) => {
 
 const onFileUpload = async (event: Event) => {
   try {
-    uploadStatus.value = 'loading'
+    uploadStatus.value = $t('upload_form.loading')
     isSizeExceeded.value = false
     const files =
       (event as InputEvent).dataTransfer?.files || (event.target as HTMLInputElement)?.files
@@ -447,7 +447,7 @@ const handleDeleteFile = (index: number) => {
 
 const estimateArweaveFee = async (): Promise<void> => {
   try {
-    uploadStatus.value = 'loading'
+    uploadStatus.value = $t('upload_form.loading')
     const results = []
     for (const record of fileRecords.value) {
       await sleep(100)
@@ -593,7 +593,7 @@ const sendArweaveFeeTx = async (record: any, memoIpfsOveride?: string): Promise<
   if (!arweaveFeeMap.value[record.ipfsHash]) {
     throw new Error('ARWEAVE_FEE_NOT_SET')
   }
-  uploadStatus.value = 'signing'
+  uploadStatus.value = $t('upload_form.signing')
   const memo = JSON.stringify({
     ipfs: memoIpfsOveride || record.ipfsHash,
     fileSize: record.fileBlob?.size || 0
@@ -616,7 +616,7 @@ const sendArweaveFeeTx = async (record: any, memoIpfsOveride?: string): Promise<
       return transactionHash
     }
   } finally {
-    uploadStatus.value = 'uploading'
+    uploadStatus.value = $t('upload_form.uploading')
   }
 
   return ''
@@ -684,7 +684,7 @@ const onSubmit = async () => {
     if (!signer.value) {
       throw new Error('SIGNER_NOT_INITED')
     }
-    uploadStatus.value = 'uploading'
+    uploadStatus.value = $t('upload_form.uploading')
 
     if (!balance?.data?.value?.value || new BigNumber(balance.data.value.value.toString()).lt(arweaveFee.value)) {
       throw new Error('INSUFFICIENT_BASE_ETH_BALANCE')
@@ -694,7 +694,7 @@ const onSubmit = async () => {
       throw new Error('NO_FILE_TO_UPLOAD')
     }
 
-    uploadStatus.value = 'uploading'
+    uploadStatus.value = $t('upload_form.uploading')
     if (
       fileRecords.value.find(file => file.fileType === 'application/pdf') &&
       !fileRecords.value.find(

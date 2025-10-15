@@ -136,7 +136,7 @@
           </div>
           <UButton
             v-if="orderInfo.quantity === 1"
-            :label="isEditingNFTId || isVerifyingNFTId ? 'Confirm' : 'Edit'"
+            :label="isEditingNFTId || isVerifyingNFTId ? $t('nft_send.confirm') : $t('nft_send.edit')"
             :disabled="isLoading || isVerifyingNFTId"
             variant="outline"
             :loading="isVerifyingNFTId"
@@ -166,7 +166,7 @@
 
       <template #footer>
         <UButton
-          label="Sign and Send"
+          :label="$t('nft_send.sign_and_send')"
           :disabled="isSendButtonDisabled"
           size="xl"
           @click="onSendNFTStart"

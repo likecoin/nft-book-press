@@ -167,7 +167,7 @@
                   v-model="p.description"
                   language="en-US"
                   :editor-id="`en-${index}`"
-                  :placeholder="mdEditorPlaceholder.en"
+                  :placeholder="mdEditorPlaceholder.zh"
                   :toolbars="toolbarOptions"
                   :sanitize="sanitizeHtml"
                   :style="{ height: '200px', width: '100%', marginTop: '0px' }"

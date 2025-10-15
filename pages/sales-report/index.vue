@@ -33,7 +33,7 @@
         />
 
         <UTooltip
-          text="Refresh Status"
+          :text="$t('user_settings.commission_history.tooltip')"
           :popper="{ placement: 'left' }"
         >
           <UButton
@@ -103,7 +103,7 @@
       >
         <template #details-data="{ row }">
           <UButton
-            label="Details"
+            :label="$t('user_settings.details')"
             size="sm"
             color="gray"
             :to="localeRoute({
