@@ -60,6 +60,8 @@
   "bookstore.new_listing": "新清單",
   "bookstore.viewable_listing": "我管理的書目",
   "button.check_all_nft_ids": "查看所有書號",
+  "button.confirm_nft_id": "檢查 ID",
+  "button.confirmed": "該 ID 有效 ✅",
   "button.restock_nft": "立即鑄造新庫存",
   "buttons.download_all_links": "下載所有連結",
   "buttons.mint_new_stock": "印鑄新庫存",

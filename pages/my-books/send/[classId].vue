@@ -125,30 +125,29 @@
               ref="nftIdInputRef"
               v-model="nftIdInput[i - 1]"
               class="font-mono"
-              :readonly="!isEditingNFTId"
-              :disabled="!isEditingNFTId"
+              @input="handleNftIdInput"
             >
               <template v-if="orderInfo.quantity > 1" #leading>
                 <span class="text-sm text-gray-400 dark:text-gray-600">#{{ i }}</span>
               </template>
             </UInput>
             <span v-if="validationError" class="text-xs text-red-500 absolute" v-text="validationError" />
+            <span v-else-if="isNftIdConfirmed" class="text-xs text-green-500 absolute" v-text="$t('button.confirmed')" />
           </div>
           <UButton
-            v-if="orderInfo.quantity === 1"
-            :label="isEditingNFTId || isVerifyingNFTId ? 'Confirm' : 'Edit'"
-            :disabled="isLoading || isVerifyingNFTId"
+            :label="$t('button.confirm_nft_id')"
+            :disabled="isLoading || isVerifyingNFTId || !hasNftIdInput"
             variant="outline"
             :loading="isVerifyingNFTId"
-            color="gray"
-            @click="handleClickEditNFTId"
+            color="primary"
+            @click="handleConfirmNFTId"
           />
           <UDivider :class="['text-sm text-gray-600', { 'sm:w-min': orderInfo.quantity <= 1 }]">
             OR
           </UDivider>
           <UButton
             :label="$t('button.check_all_nft_ids')"
-            :disabled="isLoading || isEditingNFTId"
+            :disabled="isLoading"
             variant="outline"
             @click="onCheckOwnedIds"
           />
@@ -226,7 +225,7 @@ const nftIdInput = ref([] as string[])
 const nftIds = ref([] as number[])
 const isVerifyingNFTId = ref(false)
 const nftIdError = ref('')
-const isEditingNFTId = ref(false)
+const isNftIdConfirmed = ref(false)
 const nftIdInputRef = ref<any[] | undefined>(undefined)
 
 const orderInfo = ref<any>({})
@@ -236,7 +235,8 @@ const showRestockModal = ref(false)
 const validationError = ref('')
 
 const { NFT_ITEM_URL } = useRuntimeConfig().public
-const isSendButtonDisabled = computed(() => isEditingNFTId.value || isLoading.value || isVerifyingNFTId.value || !!nftIdError.value || isLimitReached.value)
+const hasNftIdInput = computed(() => nftIdInput.value.some(id => id.trim() !== ''))
+const isSendButtonDisabled = computed(() => isLoading.value || isVerifyingNFTId.value || !!nftIdError.value || isLimitReached.value || !isNftIdConfirmed.value)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 
@@ -244,28 +244,13 @@ watch(isLoading, (newIsLoading) => {
   if (newIsLoading) { error.value = { message: '', actions: [] } }
 })
 
-watch(isEditingNFTId, async (isEditing) => {
-  if (isEditing) { return }
-
-  if (nftIdInput.value) {
-    nftIds.value = nftIdInput.value.filter(id => id.trim() !== '').map(id => Number(id))
-    if (nftIds.value[0] === 0) {
-      validationError.value = $t('error.nft_id_reserved_for_author')
-      nftIds.value = []
-      isEditingNFTId.value = true
-    } else {
-      const metadata = await fetchNFTMetadata()
-      if (!metadata) {
-        validationError.value = $t('error.fetch_nft_metadata_failed')
-        nftIds.value = []
-        isEditingNFTId.value = true
-      }
-    }
-  } else {
-    nftImage.value = ''
-    nftIds.value = []
+watch(nftIdInput, (_, oldVal) => {
+  if (oldVal && oldVal.length > 0) {
+    isNftIdConfirmed.value = false
+    validationError.value = ''
+    nftIdError.value = ''
   }
-})
+}, { deep: true })
 
 onMounted(async () => {
   const data = await $fetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/status/${paymentId.value}`,
@@ -276,18 +261,44 @@ onMounted(async () => {
     })
   orderInfo.value = (data as any)
   lazyFetchClassMetadataById(classId.value as string)
-  fetchNextNFTId(orderInfo.value.quantity || 1)
+  await fetchNextNFTId(orderInfo.value.quantity || 1)
 })
 
-function handleClickEditNFTId () {
+function handleNftIdInput () {
+  isNftIdConfirmed.value = false
   validationError.value = ''
-  isEditingNFTId.value = !isEditingNFTId.value
   nftIdError.value = ''
-  nextTick(() => {
-    if (isEditingNFTId.value) {
-      nftIdInputRef.value?.[0].$refs?.input?.focus()
+  nftImage.value = ''
+}
+
+async function handleConfirmNFTId () {
+  if (!hasNftIdInput.value) { return }
+
+  try {
+    validationError.value = ''
+    nftIdError.value = ''
+
+    nftIds.value = nftIdInput.value.filter(id => id.trim() !== '').map(id => Number(id))
+
+    if (nftIds.value.includes(0)) {
+      validationError.value = $t('error.nft_id_reserved_for_author')
+      nftIds.value = []
+      return
     }
-  })
+
+    const metadata = await fetchNFTMetadata()
+    if (!metadata) {
+      validationError.value = $t('error.fetch_nft_metadata_failed')
+      nftIds.value = []
+      return
+    }
+
+    isNftIdConfirmed.value = true
+  } catch (err) {
+    validationError.value = (err as Error).message
+    nftIds.value = []
+    isNftIdConfirmed.value = false
+  }
 }
 
 async function fetchNFTMetadata () {
@@ -353,6 +364,7 @@ async function fetchNextNFTId (_count = 1) {
 
     nftIds.value = collected
     nftIdInput.value = collected.map(String)
+    isNftIdConfirmed.value = true
 
     await fetchNFTMetadata()
   } catch (err) {
@@ -433,6 +445,7 @@ async function onSendNFTStart () {
       }))
     }
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(err)
     error.value = {
       message: (err as Error).toString(),
