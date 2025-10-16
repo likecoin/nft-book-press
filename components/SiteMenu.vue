@@ -108,6 +108,16 @@ const items = computed(() => {
       ]
     },
     {
+      label: $t('menu.bookstore_readers'),
+      links: [
+        {
+          label: $t('menu.readers_list'),
+          icon: 'i-heroicons-sparkles',
+          to: localeRoute({ name: 'readers' })
+        }
+      ]
+    },
+    {
       label: $t('menu.authors_affiliates'),
       links: [
         {
