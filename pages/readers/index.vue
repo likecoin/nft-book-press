@@ -33,8 +33,39 @@
         :columns="columns"
         :loading="isLoading"
         :progress="{ color: 'primary', animation: 'carousel' }"
-        :ui="{ th: { base: 'text-left' }, td: { base: 'text-left !min-w-[100px]' } }"
+        :ui="{ th: { base: 'text-left' }, td: { base: 'text-right !min-w-[100px]' } }"
       >
+        <!-- headers  -->
+        <template
+          v-for="column in baseColumnsConfig"
+          :key="`header-${column.key}`"
+          #[`${column.key}-header`]
+        >
+          <UButton
+            color="gray"
+            variant="ghost"
+            :label="$t(column.label)"
+            :trailing-icon="getSortIcon(column.key)"
+            @click="() => sortByColumn(column.key)"
+          />
+        </template>
+        <template
+          v-for="book in Object.values(booksInfo)"
+          :key="`header-${book.classId}`"
+          #[`book_${book.classId}-header`]
+        >
+          <UTooltip :text="book.name || book.classId" class="cursor-help">
+            <UButton
+              color="gray"
+              variant="ghost"
+              :label="book.name?.slice(0, 1) || book.classId.slice(0, 1)"
+              :trailing-icon="getSortIcon(`book_${book.classId}`)"
+              @click="() => sortByColumn(`book_${book.classId}`)"
+            />
+          </UTooltip>
+        </template>
+
+        <!-- rows -->
         <template #readerEmail-data="{ row }">
           <UButton
             :label="row.readerEmail"
@@ -76,18 +107,19 @@
             variant="soft"
           />
         </template>
-        <template v-for="book in Object.values(booksInfo)" :key="`template-${book.classId}`" #[`book_${book.classId}-data`]="{ row }">
-          <UBadge
-            :color="row.purchasedBooks[book.classId] ? 'green' : 'gray'"
-            :label="row.purchasedBooks[book.classId] ? $t('common.yes') : $t('common.no')"
-            variant="soft"
-            size="xs"
-          />
-        </template>
-        <template v-for="book in Object.values(booksInfo)" :key="`header-${book.classId}`" #[`book_${book.classId}-header`]="{ column }">
-          <UTooltip :text="book.name || book.classId" class="cursor-help">
-            <UButton color="gray" variant="ghost" :label="book.name?.slice(0, 1) || book.classId.slice(0, 1)" trailing-icon="i-heroicons-arrows-up-down" />
-          </UTooltip>
+        <template
+          v-for="book in Object.values(booksInfo)"
+          :key="`template-${book.classId}`"
+          #[`book_${book.classId}-data`]="{ row }"
+        >
+          <div class="flex justify-center w-full">
+            <UBadge
+              :color="row.purchasedBooks[book.classId] ? 'green' : 'gray'"
+              :label="row.purchasedBooks[book.classId] ? $t('common.yes') : $t('common.no')"
+              variant="soft"
+              size="xs"
+            />
+          </div>
         </template>
       </UTable>
     </UCard>
@@ -108,7 +140,16 @@ const { fetchBookListing, fetchModeratedBookList } = bookstoreApiStore
 const isLoading = ref(false)
 const error = ref('')
 const readersData = ref<any[]>([])
+const rawReadersData = ref<any[]>([])
 const booksInfo = ref<Record<string, { name: string, classId: string }>>({})
+
+const sortState = ref<{
+  column: string | null
+  direction: 'asc' | 'desc' | null
+}>({
+  column: null,
+  direction: null
+})
 
 interface OrderData {
   id: string
@@ -134,22 +175,23 @@ interface ReaderData {
   lifetimeValue: number
   hasMessage: boolean
   purchasedBooks: Record<string, boolean>
-  [key: string]: any // for purchasedBooks sorting
+  [key: string]: any
 }
 
+const baseColumnsConfig = [
+  { key: 'readerEmail', label: 'table.reader_email' },
+  { key: 'readerWallet', label: 'table.reader_wallet' },
+  { key: 'firstPurchaseTime', label: 'table.first_purchase' },
+  { key: 'lastPurchaseTime', label: 'table.last_purchase' },
+  { key: 'lifetimeValue', label: 'table.lifetime_value' },
+  { key: 'hasMessage', label: 'table.has_message' }
+]
+
 const columns = computed(() => {
-  const baseColumns = [
-    { key: 'readerEmail', label: $t('table.reader_email'), sortable: true },
-    { key: 'readerWallet', label: $t('table.reader_wallet'), sortable: true },
-    { key: 'firstPurchaseTime', label: $t('table.first_purchase'), sortable: true },
-    { key: 'lastPurchaseTime', label: $t('table.last_purchase'), sortable: true },
-    { key: 'lifetimeValue', label: $t('table.lifetime_value'), sortable: true },
-    { key: 'hasMessage', label: $t('table.has_message'), sortable: true }
-  ]
+  const baseColumns = baseColumnsConfig.map(col => ({ key: col.key }))
 
   const bookColumns = Object.values(booksInfo.value).map((book: any) => ({
     key: `book_${book.classId}`,
-    label: book.name.slice(0, 1) || book.classId.slice(0, 8) + '...',
     sortable: true
   }))
 
@@ -313,11 +355,73 @@ async function loadReadersData () {
       }
     })
 
+    rawReadersData.value = processedReaders
     readersData.value = processedReaders.sort((a, b) => b.lifetimeValue - a.lifetimeValue)
+
+    sortState.value = { column: null, direction: null }
   } catch (err) {
     error.value = (err as Error).message || 'Failed to load readers data'
   } finally {
     isLoading.value = false
   }
+}
+
+function sortByColumn (columnKey: string) {
+  if (sortState.value.column === columnKey) {
+    if (sortState.value.direction === 'asc') {
+      sortState.value.direction = 'desc'
+    } else if (sortState.value.direction === 'desc') {
+      sortState.value.direction = null
+      sortState.value.column = null
+    } else {
+      sortState.value.direction = 'asc'
+    }
+  } else {
+    sortState.value.column = columnKey
+    sortState.value.direction = 'asc'
+  }
+
+  if (sortState.value.column && sortState.value.direction) {
+    const sorted = [...rawReadersData.value].sort((a, b) => {
+      const aValue = a[sortState.value.column!]
+      const bValue = b[sortState.value.column!]
+
+      let comparison = 0
+
+      if (columnKey.includes('Time')) {
+        const aTime = new Date(aValue).getTime()
+        const bTime = new Date(bValue).getTime()
+        comparison = aTime - bTime
+      } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+        comparison = aValue.localeCompare(bValue)
+      } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+        comparison = aValue - bValue
+      } else if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
+        comparison = (aValue ? 1 : 0) - (bValue ? 1 : 0)
+      } else if (aValue == null && bValue == null) {
+        comparison = 0
+      } else if (aValue == null) {
+        comparison = -1
+      } else if (bValue == null) {
+        comparison = 1
+      } else {
+        comparison = String(aValue).localeCompare(String(bValue))
+      }
+
+      return sortState.value.direction === 'desc' ? -comparison : comparison
+    })
+    readersData.value = sorted
+  } else {
+    readersData.value = [...rawReadersData.value].sort((a, b) => b.lifetimeValue - a.lifetimeValue)
+  }
+}
+
+function getSortIcon (columnKey: string) {
+  if (sortState.value.column === columnKey) {
+    return sortState.value.direction === 'asc'
+      ? 'i-heroicons-bars-arrow-up-20-solid'
+      : 'i-heroicons-bars-arrow-down-20-solid'
+  }
+  return 'i-heroicons-arrows-up-down-20-solid'
 }
 </script>

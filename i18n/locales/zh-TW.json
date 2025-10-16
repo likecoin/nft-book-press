@@ -583,7 +583,7 @@
   "table.id": "ID",
   "table.key": "鍵值",
   "table.last_purchase": "最後購買",
-  "table.lifetime_value": "終身價值",
+  "table.lifetime_value": "累積消費",
   "table.locale": "語言",
   "table.metadata": "元資料",
   "table.name": "名稱",

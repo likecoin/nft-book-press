@@ -566,6 +566,7 @@
   "table.email": "Email",
   "table.id": "ID",
   "table.key": "Key",
+  "table.lifetime_value": "Lifetime Value",
   "table.locale": "Locale",
   "table.metadata": "Metadata",
   "table.name": "Name",
