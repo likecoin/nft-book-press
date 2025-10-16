@@ -300,7 +300,12 @@ async function loadReadersData () {
       const wallet = order.wallet
 
       if (readersMap.has(readerEmail)) {
-        const existing = readersMap.get(readerEmail)!
+        const existing = readersMap.get(readerEmail)
+        if (!existing) {
+          // This should not happen, but handle gracefully
+          console.warn(`Expected readerEmail ${readerEmail} to exist in readersMap, but got undefined.`)
+          return
+        }
 
         if (new Date(purchaseTime) < new Date(existing.firstPurchaseTime)) {
           existing.firstPurchaseTime = purchaseTime
@@ -418,10 +423,10 @@ function sortByColumn (columnKey: string) {
 function getSortIcon (columnKey: string) {
   if (sortState.value.column === columnKey) {
     return sortState.value.direction === 'asc'
-      ? 'i-heroicons-chevron-up'
-      : 'i-heroicons-chevron-down'
+      ? 'i-heroicons-bars-arrow-up-20-solid'
+      : 'i-heroicons-bars-arrow-down-20-solid'
   }
-  return 'i-heroicons-arrows-up-down'
+  return 'i-heroicons-arrows-up-down-20-solid'
 }
 
 function onSelect (rows: any[]) {
