@@ -2,15 +2,26 @@
   <PageBody class="space-y-6">
     <div class="flex justify-between items-center">
       <h1 class="text-lg font-bold font-mono" v-text="$t('menu.readers_list')" />
-      <UButton
-        icon="i-heroicons-arrow-path"
-        variant="outline"
-        :disabled="isLoading"
-        :loading="isLoading"
-        @click="loadReadersData"
-      >
-        {{ $t('common.refresh') }}
-      </UButton>
+      <div class="flex gap-2">
+        <UButton
+          v-if="selectedRows.length > 0"
+          icon="i-heroicons-arrow-down-tray"
+          color="green"
+          variant="outline"
+          @click="exportSelectedToCSV"
+        >
+          {{ $t('common.export_csv',{length:selectedRows.length}) }}
+        </UButton>
+        <UButton
+          icon="i-heroicons-arrow-path"
+          variant="outline"
+          :disabled="isLoading"
+          :loading="isLoading"
+          @click="loadReadersData"
+        >
+          {{ $t('common.refresh') }}
+        </UButton>
+      </div>
     </div>
 
     <UAlert
@@ -29,11 +40,13 @@
       </template>
 
       <UTable
+        v-model="selectedRows"
         :rows="readersData"
         :columns="columns"
         :loading="isLoading"
         :progress="{ color: 'primary', animation: 'carousel' }"
-        :ui="{ th: { base: 'text-left' }, td: { base: 'text-right !min-w-[100px]' } }"
+        :ui="{ th: { base: 'text-left' }, td: { base: 'text-right' } }"
+        @select="onSelect"
       >
         <!-- headers  -->
         <template
@@ -146,6 +159,7 @@ const error = ref('')
 const readersData = ref<any[]>([])
 const rawReadersData = ref<any[]>([])
 const booksInfo = ref<Record<string, { name: string, classId: string }>>({})
+const selectedRows = ref<any[]>([])
 
 const sortState = ref<{
   column: string | null
@@ -408,5 +422,62 @@ function getSortIcon (columnKey: string) {
       : 'i-heroicons-chevron-down'
   }
   return 'i-heroicons-arrows-up-down'
+}
+
+function onSelect (rows: any[]) {
+  selectedRows.value = rows
+}
+
+function exportSelectedToCSV () {
+  if (selectedRows.value.length === 0) {
+    return
+  }
+
+  const headers = [
+    $t('table.reader_email'),
+    $t('table.reader_wallet'),
+    $t('table.first_purchase'),
+    $t('table.last_purchase'),
+    $t('table.lifetime_value'),
+    $t('table.has_message'),
+    ...Object.values(booksInfo.value).map((book: any) => book.name || book.classId)
+  ]
+
+  const csvRows = selectedRows.value.map((row: any) => [
+    row.readerEmail,
+    row.readerWallet || '',
+    formatDate(row.firstPurchaseTime),
+    formatDate(row.lastPurchaseTime),
+    `$${row.lifetimeValue.toFixed(2)}`,
+    row.hasMessage ? $t('common.yes') : $t('common.no'),
+    ...Object.values(booksInfo.value).map(book =>
+      row.purchasedBooks[book.classId] ? $t('common.yes') : $t('common.no')
+    )
+  ])
+
+  const csvContent = [
+    headers.join(','),
+    ...csvRows.map(row =>
+      row.map(cell =>
+        typeof cell === 'string' && (cell.includes(',') || cell.includes('"') || cell.includes('\n'))
+          ? `"${cell.replace(/"/g, '""')}"`
+          : cell
+      ).join(',')
+    )
+  ].join('\n')
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const link = document.createElement('a')
+  const url = URL.createObjectURL(blob)
+
+  link.setAttribute('href', url)
+  link.setAttribute('download', `readers_export_${new Date().toISOString().split('T')[0]}.csv`)
+  link.style.visibility = 'hidden'
+
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+
+  URL.revokeObjectURL(url)
 }
 </script>
