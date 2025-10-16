@@ -85,3 +85,27 @@ export async function postNewUser ({
   })
   return result
 }
+
+export interface OrderData {
+  id: string
+  email: string
+  wallet: string
+  classId: string
+  price: number
+  timestamp: number
+  message: string
+}
+
+export interface OrdersResponse {
+  orders: OrderData[]
+}
+
+export async function fetchBookOrders (classId: string, token: string) {
+  const { LIKE_CO_API } = useRuntimeConfig().public
+  const result = await $fetch<OrdersResponse>(`${LIKE_CO_API}/likernft/book/purchase/${classId}/orders`, {
+    headers: {
+      authorization: `Bearer ${token}`
+    }
+  })
+  return result
+}

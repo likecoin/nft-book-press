@@ -25,7 +25,7 @@
 
     <UCard>
       <template #header>
-        <h3 class="font-medium" v-text="$t('readers.total_readers', { count: readersData.length })" />
+        <h3 class="font-medium" v-text="$t('readers.total_readers', { count: isLoading ? '...' : readersData.length })" />
       </template>
 
       <UTable
@@ -67,12 +67,14 @@
 
         <!-- rows -->
         <template #readerEmail-data="{ row }">
-          <UButton
-            :label="row.readerEmail"
-            :to="`mailto:${row.readerEmail}`"
-            variant="link"
-            size="sm"
-          />
+          <div class="w-full flex justify-start">
+            <UButton
+              :label="row.readerEmail"
+              :to="`mailto:${row.readerEmail}`"
+              variant="link"
+              size="sm"
+            />
+          </div>
         </template>
 
         <template #readerWallet-data="{ row }">
@@ -101,11 +103,13 @@
         </template>
 
         <template #hasMessage-data="{ row }">
-          <UBadge
-            :color="row.hasMessage ? 'green' : 'gray'"
-            :label="row.hasMessage ? $t('common.yes') : $t('common.no')"
-            variant="soft"
-          />
+          <div class="flex justify-center w-full">
+            <UBadge
+              :color="row.hasMessage ? 'green' : 'gray'"
+              :label="row.hasMessage ? $t('common.yes') : $t('common.no')"
+              variant="soft"
+            />
+          </div>
         </template>
         <template
           v-for="book in Object.values(booksInfo)"
@@ -131,7 +135,7 @@ import { storeToRefs } from 'pinia'
 import { useBookstoreApiStore } from '~/stores/book-store-api'
 
 const { t: $t } = useI18n()
-const { LIKE_CO_API, CHAIN_EXPLORER_URL } = useRuntimeConfig().public
+const { CHAIN_EXPLORER_URL } = useRuntimeConfig().public
 
 const bookstoreApiStore = useBookstoreApiStore()
 const { token } = storeToRefs(bookstoreApiStore)
@@ -150,20 +154,6 @@ const sortState = ref<{
   column: null,
   direction: null
 })
-
-interface OrderData {
-  id: string
-  email: string
-  wallet: string
-  classId: string
-  price: number
-  timestamp: number
-  message: string
-}
-
-interface OrdersResponse {
-  orders: OrderData[]
-}
 
 interface ReaderData {
   readerEmail: string
@@ -274,12 +264,7 @@ async function loadReadersData () {
 
     for (const classId of uniqueClassIds) {
       try {
-        const ordersData = await $fetch<OrdersResponse>(`${LIKE_CO_API}/likernft/book/purchase/${classId}/orders`, {
-          headers: {
-            authorization: `Bearer ${token.value}`
-          }
-        })
-
+        const ordersData = await fetchBookOrders(classId, token.value)
         const orders = ordersData?.orders || []
         if (orders && Array.isArray(orders) && orders.length > 0) {
           allOrders.push(...orders.map(order => ({ ...order, classId })))
@@ -419,9 +404,9 @@ function sortByColumn (columnKey: string) {
 function getSortIcon (columnKey: string) {
   if (sortState.value.column === columnKey) {
     return sortState.value.direction === 'asc'
-      ? 'i-heroicons-bars-arrow-up-20-solid'
-      : 'i-heroicons-bars-arrow-down-20-solid'
+      ? 'i-heroicons-chevron-up'
+      : 'i-heroicons-chevron-down'
   }
-  return 'i-heroicons-arrows-up-down-20-solid'
+  return 'i-heroicons-arrows-up-down'
 }
 </script>
