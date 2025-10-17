@@ -4,46 +4,55 @@
       <h1 class="text-lg font-bold font-mono" v-text="$t('menu.readers_list')" />
       <div class="flex gap-2">
         <UButton
-          v-if="selectedRows.length > 0"
-          icon="i-heroicons-arrow-down-tray"
-          color="green"
+          icon="i-hugeicons-csv-02"
+          :color="hasSelection ? 'primary' : 'gray'"
+          :disabled="!hasSelection"
           variant="outline"
           @click="exportSelectedToCSV"
         >
-          {{ $t('common.export_csv',{length:selectedRows.length}) }}
+          {{ $t('common.export_csv',{ length: selectionCount }) }}
         </UButton>
         <UButton
           icon="i-heroicons-arrow-path"
           variant="outline"
-          :disabled="isLoading"
-          :loading="isLoading"
-          @click="loadReadersData"
-        >
-          {{ $t('common.refresh') }}
-        </UButton>
+          :disabled="readersStore.isLoading"
+          :loading="readersStore.isLoading"
+          @click="refreshData"
+        />
       </div>
     </div>
 
     <UAlert
-      v-if="error"
+      v-if="readersStore.error"
       icon="i-heroicons-exclamation-triangle"
       color="red"
       variant="soft"
-      :title="error"
+      :title="readersStore.error"
       :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'red', variant: 'link', padded: false }"
-      @close="error = ''"
+      @close="readersStore.clearError()"
     />
 
     <UCard>
       <template #header>
-        <h3 class="font-medium" v-text="$t('readers.total_readers', { count: isLoading ? '...' : readersData.length })" />
+        <div class="flex justify-between items-center">
+          <h3 class="font-medium" v-text="$t('readers.total_readers', { count: readersStore.isLoading ? '...' : readersStore.readers.length })" />
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500" v-text="$t('common.page_size')" />
+            <USelect
+              v-model="pageSize"
+              :options="pageSizeOptions"
+              size="sm"
+              @change="onPageSizeChange"
+            />
+          </div>
+        </div>
       </template>
 
       <UTable
         v-model="selectedRows"
-        :rows="readersData"
+        :rows="paginatedReaders"
         :columns="columns"
-        :loading="isLoading"
+        :loading="readersStore.isLoading"
         :progress="{ color: 'primary', animation: 'carousel' }"
         :ui="{ th: { base: 'text-left' }, td: { base: 'text-right' } }"
         @select="onSelect"
@@ -55,15 +64,25 @@
           #[`${column.key}-header`]
         >
           <UButton
+            v-if="column.key !== 'lifetimeValue'"
             color="gray"
             variant="ghost"
-            :label="$t(column.label)"
-            :trailing-icon="getSortIcon(column.key)"
+            :label="column.label"
+            :trailing-icon="getSortIcon(sortState.column, sortState.direction, column.key)"
             @click="() => sortByColumn(column.key)"
           />
+          <UTooltip v-else text="USD">
+            <UButton
+              color="gray"
+              variant="ghost"
+              :label="column.label"
+              :trailing-icon="getSortIcon(sortState.column, sortState.direction, column.key)"
+              @click="() => sortByColumn(column.key)"
+            />
+          </UTooltip>
         </template>
         <template
-          v-for="book in Object.values(booksInfo)"
+          v-for="book in Object.values(readersStore.booksInfo)"
           :key="`header-${book.classId}`"
           #[`book_${book.classId}-header`]
         >
@@ -72,7 +91,7 @@
               color="gray"
               variant="ghost"
               :label="book.name?.slice(0, 1) || book.classId.slice(0, 1)"
-              :trailing-icon="getSortIcon(`book_${book.classId}`)"
+              :trailing-icon="getSortIcon(sortState.column, sortState.direction, `book_${book.classId}`)"
               @click="() => sortByColumn(`book_${book.classId}`)"
             />
           </UTooltip>
@@ -94,8 +113,8 @@
           <UButton
             v-if="row.readerWallet"
             class="font-mono"
-            :label="row.shortenWallet"
-            :to="row.walletLink"
+            :label="shortenWallet(row.readerWallet)"
+            :to="getWalletLink(row.readerWallet)"
             variant="link"
             size="sm"
             target="_blank"
@@ -112,377 +131,123 @@
         </template>
 
         <template #lifetimeValue-data="{ row }">
-          <span class="font-medium" v-text="`$${row.lifetimeValue.toFixed(2)}`" />
+          <span class="font-medium" v-text="`$${formatValue(row.lifetimeValue)}`" />
         </template>
 
         <template #hasMessage-data="{ row }">
           <div class="flex justify-center w-full">
             <UBadge
-              :color="row.hasMessage ? 'green' : 'gray'"
-              :label="row.hasMessage ? $t('common.yes') : $t('common.no')"
+              :color="row.hasMessage ? 'primary' : 'gray'"
+              :label="row.hasMessage ? 'Y' : 'N'"
               variant="soft"
             />
           </div>
         </template>
         <template
-          v-for="book in Object.values(booksInfo)"
+          v-for="book in Object.values(readersStore.booksInfo)"
           :key="`template-${book.classId}`"
           #[`book_${book.classId}-data`]="{ row }"
         >
           <div class="flex justify-center w-full">
             <UBadge
-              :color="row.purchasedBooks[book.classId] ? 'green' : 'gray'"
-              :label="row.purchasedBooks[book.classId] ? $t('common.yes') : $t('common.no')"
+              :color="row[`book_${book.classId}`] ? 'green' : 'gray'"
+              :label="row[`book_${book.classId}`] ? 'Y' : 'N'"
               variant="soft"
               size="xs"
             />
           </div>
         </template>
       </UTable>
+
+      <template #footer>
+        <div class="flex justify-end items-center">
+          <UPagination
+            v-model="currentPage"
+            :page-count="pagination.limit"
+            :total="readersStore.readers.length"
+            :max="7"
+            show-last
+            show-first
+          />
+        </div>
+      </template>
     </UCard>
   </PageBody>
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { useBookstoreApiStore } from '~/stores/book-store-api'
-
 const { t: $t } = useI18n()
-const { CHAIN_EXPLORER_URL } = useRuntimeConfig().public
 
 const bookstoreApiStore = useBookstoreApiStore()
-const { token } = storeToRefs(bookstoreApiStore)
-const { fetchBookListing, fetchModeratedBookList } = bookstoreApiStore
 
-const isLoading = ref(false)
-const error = ref('')
-const readersData = ref<any[]>([])
-const rawReadersData = ref<any[]>([])
-const booksInfo = ref<Record<string, { name: string, classId: string }>>({})
-const selectedRows = ref<any[]>([])
+const {
+  readersStore,
+  paginatedReaders,
+  columns,
+  pagination,
+  sortState,
+  selectedRows,
+  hasSelection,
+  selectionCount,
+  setSortState,
+  setPage,
+  setPageSize,
+  onSelect,
+  clearSelection,
+  formatDate,
+  formatCurrency: formatValue,
+  shortenWallet,
+  getWalletLink,
+  getSortIcon,
+  baseColumnsConfig,
+  pageSizeOptions,
+  exportReadersToCSV
+} = useReaders()
 
-const sortState = ref<{
-  column: string | null
-  direction: 'asc' | 'desc' | null
-}>({
-  column: null,
-  direction: null
+const pageSize = ref(100)
+const currentPage = ref(1)
+
+watch(currentPage, (newPage: number) => {
+  setPage(newPage)
 })
 
-interface ReaderData {
-  readerEmail: string
-  readerWallet?: string
-  shortenWallet?: string
-  walletLink?: string
-  firstPurchaseTime: string
-  lastPurchaseTime: string
-  lifetimeValue: number
-  hasMessage: boolean
-  purchasedBooks: Record<string, boolean>
-  [key: string]: any
-}
-
-const baseColumnsConfig = [
-  { key: 'readerEmail', label: 'table.reader_email' },
-  { key: 'readerWallet', label: 'table.reader_wallet' },
-  { key: 'firstPurchaseTime', label: 'table.first_purchase' },
-  { key: 'lastPurchaseTime', label: 'table.last_purchase' },
-  { key: 'lifetimeValue', label: 'table.lifetime_value' },
-  { key: 'hasMessage', label: 'table.has_message' }
-]
-
-const columns = computed(() => {
-  const baseColumns = baseColumnsConfig.map(col => ({ key: col.key }))
-
-  const bookColumns = Object.values(booksInfo.value).map((book: any) => ({
-    key: `book_${book.classId}`,
-    sortable: true
-  }))
-
-  return [...baseColumns, ...bookColumns]
-})
-
-onMounted(() => {
+onMounted(async () => {
   if (bookstoreApiStore.isAuthenticated) {
-    loadReadersData()
+    await loadReadersData()
   }
 })
-
-function formatDate (dateString: string | number) {
-  if (!dateString) { return '-' }
-  const date = new Date(dateString)
-
-  return date.toLocaleDateString('zh-TW', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit'
-  })
-}
-
-function shortenWallet (wallet: string) {
-  if (!wallet) { return '' }
-  return `${wallet.slice(0, 6)}...${wallet.slice(-4)}`
-}
-
-function getWalletLink (wallet: string) {
-  if (!wallet) { return '' }
-  return `${CHAIN_EXPLORER_URL}/address/${wallet}`
-}
 
 async function loadReadersData () {
-  try {
-    isLoading.value = true
-    error.value = ''
+  await readersStore.fetchReaders()
+}
 
-    await fetchBookListing()
-    await fetchModeratedBookList()
+async function refreshData () {
+  await readersStore.fetchReaders(true)
+  clearSelection()
+}
 
-    const allClassIds = [
-      ...bookstoreApiStore.listingList.map((book: any) => book.classId),
-      ...bookstoreApiStore.moderatedBookList.map((book: any) => book.classId)
-    ]
-
-    const uniqueClassIds = [...new Set(allClassIds)]
-
-    if (uniqueClassIds.length === 0) {
-      readersData.value = []
-      booksInfo.value = {}
-      return
-    }
-
-    const tempBooksInfo: Record<string, { name: string, classId: string }> = {}
-
-    // Get book names from listingList
-    bookstoreApiStore.listingList.forEach((book: any) => {
-      if (uniqueClassIds.includes(book.classId)) {
-        tempBooksInfo[book.classId] = {
-          name: book.name || book.classId,
-          classId: book.classId
-        }
-      }
-    })
-
-    // Get book names from moderatedBookList
-    bookstoreApiStore.moderatedBookList.forEach((book) => {
-      if (uniqueClassIds.includes(book.classId)) {
-        tempBooksInfo[book.classId] = {
-          name: book.name || book.classId,
-          classId: book.classId
-        }
-      }
-    })
-
-    booksInfo.value = tempBooksInfo
-
-    const allOrders: any[] = []
-
-    for (const classId of uniqueClassIds) {
-      try {
-        const ordersData = await fetchBookOrders(classId, token.value)
-        const orders = ordersData?.orders || []
-        if (orders && Array.isArray(orders) && orders.length > 0) {
-          allOrders.push(...orders.map(order => ({ ...order, classId })))
-        }
-      } catch (err) {
-        console.error(`Failed to fetch orders for classId ${classId}:`, err)
-      }
-    }
-
-    const readersMap = new Map<string, ReaderData>()
-
-    allOrders.forEach((order) => {
-      const readerEmail = order.email
-      if (!readerEmail) { return }
-
-      const purchaseTime = new Date(order.timestamp).toISOString()
-      const amount = order.price || 0
-      const hasMessage = !!(order.message && order.message.trim())
-      const wallet = order.wallet
-
-      if (readersMap.has(readerEmail)) {
-        const existing = readersMap.get(readerEmail)
-        if (!existing) {
-          // This should not happen, but handle gracefully
-          console.warn(`Expected readerEmail ${readerEmail} to exist in readersMap, but got undefined.`)
-          return
-        }
-
-        if (new Date(purchaseTime) < new Date(existing.firstPurchaseTime)) {
-          existing.firstPurchaseTime = purchaseTime
-        }
-        if (new Date(purchaseTime) > new Date(existing.lastPurchaseTime)) {
-          existing.lastPurchaseTime = purchaseTime
-        }
-
-        existing.lifetimeValue += amount
-
-        if (hasMessage) {
-          existing.hasMessage = true
-        }
-
-        existing.purchasedBooks[order.classId] = true
-
-        if (wallet && !existing.readerWallet) {
-          existing.readerWallet = wallet
-          existing.shortenWallet = shortenWallet(wallet)
-          existing.walletLink = getWalletLink(wallet)
-        }
-      } else {
-        const purchasedBooks: Record<string, boolean> = {}
-        uniqueClassIds.forEach((classId) => {
-          purchasedBooks[classId] = false
-        })
-        purchasedBooks[order.classId] = true
-
-        readersMap.set(readerEmail, {
-          readerEmail,
-          readerWallet: wallet,
-          shortenWallet: wallet ? shortenWallet(wallet) : undefined,
-          walletLink: wallet ? getWalletLink(wallet) : undefined,
-          firstPurchaseTime: purchaseTime,
-          lastPurchaseTime: purchaseTime,
-          lifetimeValue: amount,
-          hasMessage,
-          purchasedBooks
-        })
-      }
-    })
-    const processedReaders = Array.from(readersMap.values()).map((reader) => {
-      const bookSortFields: Record<string, number> = {}
-      uniqueClassIds.forEach((classId) => {
-        bookSortFields[`book_${classId}`] = reader.purchasedBooks[classId] ? 1 : 0
-      })
-
-      return {
-        ...reader,
-        ...bookSortFields
-      }
-    })
-
-    rawReadersData.value = processedReaders
-    readersData.value = processedReaders.sort((a, b) => b.lifetimeValue - a.lifetimeValue)
-
-    sortState.value = { column: null, direction: null }
-  } catch (err) {
-    error.value = (err as Error).message || 'Failed to load readers data'
-  } finally {
-    isLoading.value = false
-  }
+function onPageSizeChange (newSize: number) {
+  setPageSize(newSize)
+  currentPage.value = 1
 }
 
 function sortByColumn (columnKey: string) {
-  if (sortState.value.column === columnKey) {
-    if (sortState.value.direction === 'asc') {
-      sortState.value.direction = 'desc'
-    } else if (sortState.value.direction === 'desc') {
-      sortState.value.direction = null
-      sortState.value.column = null
+  const currentSort = sortState.value
+
+  if (currentSort.column === columnKey) {
+    if (currentSort.direction === 'asc') {
+      setSortState(columnKey, 'desc')
+    } else if (currentSort.direction === 'desc') {
+      setSortState(null, null)
     } else {
-      sortState.value.direction = 'asc'
+      setSortState(columnKey, 'asc')
     }
   } else {
-    sortState.value.column = columnKey
-    sortState.value.direction = 'asc'
+    setSortState(columnKey, 'asc')
   }
-
-  if (sortState.value.column && sortState.value.direction) {
-    const sorted = [...rawReadersData.value].sort((a, b) => {
-      const aValue = a[sortState.value.column!]
-      const bValue = b[sortState.value.column!]
-
-      let comparison = 0
-
-      if (columnKey.includes('Time')) {
-        const aTime = new Date(aValue).getTime()
-        const bTime = new Date(bValue).getTime()
-        comparison = aTime - bTime
-      } else if (typeof aValue === 'string' && typeof bValue === 'string') {
-        comparison = aValue.localeCompare(bValue)
-      } else if (typeof aValue === 'number' && typeof bValue === 'number') {
-        comparison = aValue - bValue
-      } else if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
-        comparison = (aValue ? 1 : 0) - (bValue ? 1 : 0)
-      } else if (aValue == null && bValue == null) {
-        comparison = 0
-      } else if (aValue == null) {
-        comparison = -1
-      } else if (bValue == null) {
-        comparison = 1
-      } else {
-        comparison = String(aValue).localeCompare(String(bValue))
-      }
-
-      return sortState.value.direction === 'desc' ? -comparison : comparison
-    })
-    readersData.value = sorted
-  } else {
-    readersData.value = [...rawReadersData.value].sort((a, b) => b.lifetimeValue - a.lifetimeValue)
-  }
-}
-
-function getSortIcon (columnKey: string) {
-  if (sortState.value.column === columnKey) {
-    return sortState.value.direction === 'asc'
-      ? 'i-heroicons-bars-arrow-up-20-solid'
-      : 'i-heroicons-bars-arrow-down-20-solid'
-  }
-  return 'i-heroicons-arrows-up-down-20-solid'
-}
-
-function onSelect (rows: any[]) {
-  selectedRows.value = rows
 }
 
 function exportSelectedToCSV () {
-  if (selectedRows.value.length === 0) {
-    return
-  }
-
-  const headers = [
-    $t('table.reader_email'),
-    $t('table.reader_wallet'),
-    $t('table.first_purchase'),
-    $t('table.last_purchase'),
-    $t('table.lifetime_value'),
-    $t('table.has_message'),
-    ...Object.values(booksInfo.value).map((book: any) => book.name || book.classId)
-  ]
-
-  const csvRows = selectedRows.value.map((row: any) => [
-    row.readerEmail,
-    row.readerWallet || '',
-    formatDate(row.firstPurchaseTime),
-    formatDate(row.lastPurchaseTime),
-    `$${row.lifetimeValue.toFixed(2)}`,
-    row.hasMessage ? $t('common.yes') : $t('common.no'),
-    ...Object.values(booksInfo.value).map(book =>
-      row.purchasedBooks[book.classId] ? $t('common.yes') : $t('common.no')
-    )
-  ])
-
-  const csvContent = [
-    headers.join(','),
-    ...csvRows.map(row =>
-      row.map(cell =>
-        typeof cell === 'string' && (cell.includes(',') || cell.includes('"') || cell.includes('\n'))
-          ? `"${cell.replace(/"/g, '""')}"`
-          : cell
-      ).join(',')
-    )
-  ].join('\n')
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-  const link = document.createElement('a')
-  const url = URL.createObjectURL(blob)
-
-  link.setAttribute('href', url)
-  link.setAttribute('download', `readers_export_${new Date().toISOString().split('T')[0]}.csv`)
-  link.style.visibility = 'hidden'
-
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-
-  URL.revokeObjectURL(url)
+  exportReadersToCSV()
 }
 </script>
