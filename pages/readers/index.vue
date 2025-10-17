@@ -49,13 +49,23 @@
       </template>
 
       <UTable
-        v-model="selectedRows"
+        :model-value="selectedRows"
         :rows="paginatedReaders"
         :columns="columns"
         :loading="readersStore.isLoading"
         :progress="{ color: 'primary', animation: 'carousel' }"
-        :ui="{ th: { base: 'text-left' }, td: { base: 'text-right' } }"
+        :ui="{
+          th: { base: 'text-left' },
+          td: { base: 'text-right' },
+          tr: {
+            // Prevent JSON.stringify error when user clicks a row
+            base: 'cursor-default [&>td]:pointer-events-none [&>td>*]:pointer-events-auto [&>td>input]:pointer-events-auto hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors duration-200',
+            selected: 'bg-gray-50 dark:bg-gray-800/50',
+            active: ''
+          }
+        }"
         @select="onSelect"
+        @update:model-value="onSelect"
       >
         <!-- headers  -->
         <template
