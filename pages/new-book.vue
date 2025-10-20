@@ -209,8 +209,12 @@ const nextStep = async () => {
   }
 }
 
-const handleUploadSubmit = (uploadFileData: any) => {
-  setUploadFileData(uploadFileData)
+const handleUploadSubmit = (uploadFileData: UploadFileData) => {
+  const { fileRecords, epubMetadata } = uploadFileData
+  if (epubMetadata?.coverData) {
+    epubMetadata.coverData = undefined
+  }
+  setUploadFileData({ fileRecords, epubMetadata })
   step.value = 1
 }
 

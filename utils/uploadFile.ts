@@ -4,7 +4,7 @@ export interface UploadFileData {
     title: string
     author: string
     language: string
-    coverData: string
+    coverData?: string
     description: string
     tags: string[]
     thumbnailArweaveId: string
