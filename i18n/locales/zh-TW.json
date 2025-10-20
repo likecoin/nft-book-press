@@ -308,7 +308,7 @@
   "nft_book_form.settings": "設定",
   "nft_book_form.share_sales_data": "分享銷售數據給特定地址",
   "nft_book_form.stock": "庫存",
-  "nft_book_form.stripe_connect_wallets": "已連接的 Stripe 帳戶：",
+  "nft_book_form.stripe_connect_wallets": "已連接的 Stripe 帳戶",
   "nft_book_form.unit_price_label": "售價（0 - USD 99.99）",
   "nft_book_form.unlimited": "不限量、隨需即鑄、自動發送",
   "nft_book_form.wallet_placeholder": "0x...",
