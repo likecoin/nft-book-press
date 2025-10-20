@@ -1,6 +1,5 @@
 export function useReaders () {
   const { t } = useI18n()
-  const { OPENSEA_URL } = useRuntimeConfig().public
 
   const readersStore = useReadersStore()
 
@@ -153,7 +152,7 @@ export function useReaders () {
 
   function getWalletLink (wallet: string): string {
     if (!wallet) { return '' }
-    return `${OPENSEA_URL}${wallet}`
+    return `https://opensea.io/${wallet}`
   }
 
   function getSortIcon (currentColumn: string | null, currentDirection: 'asc' | 'desc' | null, columnKey: string) {

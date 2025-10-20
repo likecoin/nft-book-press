@@ -15,6 +15,7 @@
         <UButton
           icon="i-heroicons-arrow-path"
           variant="outline"
+          color="gray"
           :disabled="readersStore.isLoading"
           :loading="readersStore.isLoading"
           @click="refreshData"
@@ -112,9 +113,9 @@
           <div class="w-full flex justify-start">
             <UButton
               :label="row.readerEmail"
-              :to="`mailto:${row.readerEmail}`"
               variant="link"
               size="sm"
+              @click.stop="openMailto(row.readerEmail)"
             />
           </div>
         </template>
@@ -124,10 +125,9 @@
             v-if="row.readerWallet"
             class="font-mono"
             :label="shortenWallet(row.readerWallet)"
-            :to="getWalletLink(row.readerWallet)"
             variant="link"
             size="sm"
-            target="_blank"
+            @click.stop="openWalletLink(row.readerWallet)"
           />
           <span v-else class="text-gray-400">-</span>
         </template>
@@ -259,5 +259,13 @@ function sortByColumn (columnKey: string) {
 
 function exportSelectedToCSV () {
   exportReadersToCSV()
+}
+
+function openMailto (email: string) {
+  window.open(`mailto:${email}`, '_self')
+}
+
+function openWalletLink (wallet: string) {
+  window.open(getWalletLink(wallet), '_blank')
 }
 </script>

@@ -510,6 +510,7 @@
   "qr_generator.pick_dot": "Pick a dot style",
   "qr_generator.pick_icon": "Pick an icon",
   "qr_generator.save_config": "Save Config",
+  "readers.total_readers": "{count} total readers",
   "registration_modal_display_name_placeholder": "display name",
   "sales_pos.add": "Add",
   "sales_pos.checkout_url": "Checkout URL",
