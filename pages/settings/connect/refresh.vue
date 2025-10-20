@@ -9,7 +9,7 @@
 
       <template #footer>
         <UButton
-          label="Go Back"
+          :label="$t('common.go_back')"
           :to="localeRoute({ name: 'settings' })"
         />
       </template>

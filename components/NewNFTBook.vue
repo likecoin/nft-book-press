@@ -167,7 +167,7 @@
                   v-model="p.description"
                   language="en-US"
                   :editor-id="`en-${index}`"
-                  :placeholder="mdEditorPlaceholder.en"
+                  :placeholder="mdEditorPlaceholder.zh"
                   :toolbars="toolbarOptions"
                   :sanitize="sanitizeHtml"
                   :style="{ height: '200px', width: '100%', marginTop: '0px' }"
@@ -202,7 +202,7 @@
       <UCard
         :ui="{
           header: { base: 'flex justify-between items-center' },
-          body: { padding: '12px' },
+          body: { padding: '12px', base: 'space-y-4' },
         }"
       >
         <div class="flex justify-between items-center w-full">
@@ -236,18 +236,40 @@
               </UTooltip>
             </UFormGroup>
 
-            <!-- Stripe connect -->
-            <StripeConnectCard
-              v-if="isEditMode"
-              v-model:is-stripe-connect-checked="isStripeConnectChecked"
-              v-model:is-using-default-account="isUsingDefaultAccount"
-              :stripe-connect-wallet="stripeConnectWallet"
-              :should-disable-setting="shouldDisableStripeConnectSetting"
-              :login-address="wallet"
-              :is-updating-stripe-account="isUpdatingStripeAccount"
-
-              @save="handleSaveStripeConnectWallet"
-            />
+            <!-- Stripe connect list -->
+            <UFormGroup :label="$t('nft_book_form.stripe_connect_wallets')">
+              <div
+                v-for="(stripeWallet) in stripeConnectWallets"
+                :key="stripeWallet"
+                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
+                <div class="flex items-center gap-2">
+                  <UIcon name="i-heroicons-wallet" class="text-gray-500" />
+                  <span class="font-mono text-sm" v-text="stripeWallet" />
+                  <UBadge
+                    v-if="stripeWallet === wallet"
+                    variant="soft"
+                    color="green"
+                    size="xs"
+                  >
+                    {{ $t('nft_book_form.current_wallet') }}
+                  </UBadge>
+                </div>
+              </div>
+              <div
+                v-if="stripeConnectWallets.length === 0"
+                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm"
+              >
+                {{ $t('nft_book_form.no_wallets') }}
+                <UButton
+                  variant="outline"
+                  color="red"
+                  size="xs"
+                  :label="$t('nft_book_form.connect_wallet')"
+                  @click="navigateToSettings"
+                />
+              </div>
+            </UFormGroup>
           </div>
         </template>
       </UCard>
@@ -308,7 +330,7 @@ const walletStore = useWalletStore()
 const bookstoreApiStore = useBookstoreApiStore()
 const stripeStore = useStripeStore()
 const { wallet } = storeToRefs(walletStore)
-const { newBookListing, updateEditionPrice, uploadSignImages, updateBookListingSetting } = bookstoreApiStore
+const { newBookListing, updateEditionPrice, uploadSignImages } = bookstoreApiStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
 const { token } = storeToRefs(bookstoreApiStore)
 const nftStore = useNftStore()
@@ -336,7 +358,6 @@ const classId = computed(() => {
 const nextPriceIndex = ref(1)
 const hideDownload = ref(false)
 const isAllowCustomPrice = ref(true)
-const isUpdatingStripeAccount = ref(false)
 
 const prices = ref<any[]>([
   {
@@ -356,10 +377,7 @@ const moderatorWallets = ref<string[]>([
 ])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
-const isStripeConnectChecked = ref(false)
-const stripeConnectWallet = ref('')
-const shouldDisableStripeConnectSetting = ref(false)
-const isUsingDefaultAccount = ref(true)
+const connectedWallets = ref<Record<string, number>>({})
 
 const signatureImage = ref<File | null>(null)
 
@@ -391,6 +409,7 @@ const submitButtonText = computed(() =>
   isEditMode.value ? $t('common.save') : $t('common.submit')
 )
 const shouldShowAdvanceSettings = ref<boolean>(true)
+const stripeConnectWallets = computed(() => Object.keys(connectedWallets.value))
 
 watch(isLoading, (val: boolean) => {
   if (val) {
@@ -441,18 +460,11 @@ onMounted(async () => {
         } else if (wallet.value) {
           try {
             if (classResData.connectedWallets) {
-              const connectedWalletKeys = Object.keys(classResData.connectedWallets)
-              const firstConnectedWallet = connectedWalletKeys[0]
-
-              isUsingDefaultAccount.value = firstConnectedWallet === wallet.value
-              stripeConnectWallet.value = firstConnectedWallet
-              isStripeConnectChecked.value = true
+              connectedWallets.value = classResData.connectedWallets
             } else {
               const { isReady } = await fetchStripeConnectStatusByWallet(wallet.value)
               if (isReady) {
-                isStripeConnectChecked.value = true
-                stripeConnectWallet.value = wallet.value
-                isUsingDefaultAccount.value = true
+                connectedWallets.value = { [wallet.value]: 100 }
               }
             }
           } catch (err) {
@@ -583,24 +595,6 @@ function deletePrice (index: number) {
   prices.value.splice(index, 1)
 }
 
-async function handleSaveStripeConnectWallet (wallet: any) {
-  stripeConnectWallet.value = wallet
-  const connectedWallets = { [stripeConnectWallet.value]: 100 }
-  isUpdatingStripeAccount.value = true
-  try {
-    await updateBookListingSetting(classId.value as string, {
-      connectedWallets
-    })
-    shouldDisableStripeConnectSetting.value = true
-  } catch (error) {
-    shouldDisableStripeConnectSetting.value = false
-    // eslint-disable-next-line no-console
-    console.error(error)
-  } finally {
-    isUpdatingStripeAccount.value = false
-  }
-}
-
 function mapPrices (prices: any) {
   return prices.map((p: any) => ({
     name: {
@@ -705,18 +699,11 @@ async function submitNewClass () {
 
     const p = mapPrices(prices.value)
 
-    const connectedWallets =
-      isStripeConnectChecked.value && stripeConnectWallet.value
-        ? {
-            [stripeConnectWallet.value]: 100
-          }
-        : null
-
     const shouldEnableCustomMessagePage = p.some((price: any) => !price.isAutoDeliver || price.autoMemo)
 
     await newBookListing(classId.value as string, {
       defaultPaymentCurrency: 'USD',
-      connectedWallets,
+      connectedWallets: connectedWallets.value || null,
       moderatorWallets: moderatorWallets.value,
       prices: p,
       mustClaimToView: true,
@@ -729,7 +716,6 @@ async function submitNewClass () {
     console.error(errorData)
     error.value = errorData
   } finally {
-    shouldDisableStripeConnectSetting.value = false
     isLoading.value = false
   }
 }
@@ -780,6 +766,10 @@ function handleManualDeliveryClick (index: number) {
   const price = prices.value[index]
   price.deliveryMethod = 'manual'
   price.enableCustomMessagePage = true
+}
+
+function navigateToSettings () {
+  navigateTo('/settings')
 }
 
 </script>

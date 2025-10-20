@@ -167,7 +167,7 @@
 
       <template #footer>
         <UButton
-          label="Sign and Send"
+          :label="$t('nft_send.sign_and_send')"
           :disabled="isSendButtonDisabled"
           size="xl"
           @click="onSendNFTStart"

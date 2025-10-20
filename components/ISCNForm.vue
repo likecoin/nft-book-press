@@ -93,17 +93,17 @@
       </UFormGroup>
     </div>
 
-    <UFormGroup label="License" class="flex-1">
+    <UFormGroup :label="$t('iscn_form.license')" class="flex-1">
       <div class="space-y-2">
         <USelect
           v-model="formData.license"
           :options="licenseOptions"
-          placeholder="Select license"
+          :placeholder="$t('iscn_form.select_license')"
         />
         <UInput
           v-if="modelValue.license === 'Other'"
           v-model="formData.customLicense"
-          placeholder="Enter custom license"
+          :placeholder="$t('iscn_form.enter_custom_license')"
         />
       </div>
     </UFormGroup>
@@ -111,9 +111,7 @@
     <!-- Content Fingerprints -->
     <div class="flex flex-col border p-4 rounded-lg gap-4">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="font-medium">
-          Content Fingerprint
-        </h3>
+        <h3 class="font-medium" v-text="$t('iscn_form.content_fingerprint')" />
       </div>
       <div
         v-for="(fingerprint, index) in formData.contentFingerprints"
@@ -125,7 +123,7 @@
             <UInput
               v-model="fingerprint.url"
               class="w-full"
-              placeholder="Enter fingerprint URL"
+              :placeholder="$t('iscn_form.enter_content_fingerprint_url')"
             />
           </UFormGroup>
           <UButton
@@ -149,7 +147,7 @@
       <div class="flex items-center justify-center">
         <UButton
           variant="soft"
-          label="update Content Fingerprint"
+          :label="$t('form.upload_update_content')"
           @click="shouldShowUploadModal = true"
         />
       </div>
@@ -158,9 +156,7 @@
     <!-- Downloadable URLs -->
     <div class="border p-4 rounded-lg">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="font-medium">
-          Downloadable URL
-        </h3>
+        <h3 class="font-medium" v-text="$t('iscn_form.downloadable_url')" />
       </div>
       <div
         v-for="(download, index) in formData.downloadableUrls"
@@ -168,18 +164,18 @@
         class="flex gap-4 items-end"
       >
         <div class="grid grid-cols-3 gap-4 flex-1">
-          <UFormGroup label="Type">
+          <UFormGroup :label="$t('iscn_form.type')">
             <USelect
               v-model="download.type"
               :options="downloadTypeOptions"
               placeholder="Select file type"
             />
           </UFormGroup>
-          <UFormGroup label="URL">
-            <UInput v-model="download.url" placeholder="Enter download URL" />
+          <UFormGroup :label="$t('iscn_form.url')">
+            <UInput v-model="download.url" :placeholder="$t('iscn_form.enter_download_url')" />
           </UFormGroup>
-          <UFormGroup label="Filename">
-            <UInput v-model="download.fileName" placeholder="Enter filename" />
+          <UFormGroup :label="$t('iscn_form.filename')">
+            <UInput v-model="download.fileName" :placeholder="$t('iscn_form.enter_filename')" />
           </UFormGroup>
         </div>
       </div>
@@ -211,9 +207,7 @@
         }"
       >
         <template #header>
-          <h2 class="font-bold font-mono">
-            Upload Files
-          </h2>
+          <h2 class="font-bold font-mono" v-text="$t('iscn_form.upload_files')" />
         </template>
         <UploadForm
           ref="uploadFormRef"
@@ -231,10 +225,9 @@
               color="primary"
               :loading="false"
               :disabled="!hasFiles || shouldDisableAction"
+              :label="$t('iscn_form.confirm_upload')"
               @click="startUpload"
-            >
-              Confirm Upload
-            </UButton>
+            />
           </div>
         </template>
       </UCard>
