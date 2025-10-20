@@ -132,22 +132,22 @@
               </template>
             </UInput>
             <span v-if="validationError" class="text-xs text-red-500 absolute" v-text="validationError" />
-            <span v-else-if="isNftIdConfirmed && orderInfo.quantity === 1" class="text-xs text-green-500 absolute" v-text="$t('button.confirmed')" />
+            <span v-else-if="isNftIdConfirmed && isSingleQuantity" class="text-xs text-green-500 absolute" v-text="$t('button.confirmed')" />
           </div>
           <UButton
-            v-if="orderInfo.quantity === 1"
+            v-if="isSingleQuantity"
             :label="$t('button.confirm_nft_id')"
-            :disabled="isLoading || isVerifyingNFTId || !hasNftIdInput"
+            :disabled="isLoading || isVerifyingNFTId || !hasValidNftInput"
             variant="outline"
             :loading="isVerifyingNFTId"
             color="primary"
             @click="handleConfirmNFTId"
           />
-          <UDivider v-if="orderInfo.quantity === 1" :class="['text-sm text-gray-600', 'sm:w-min']">
+          <UDivider v-if="isSingleQuantity" :class="['text-sm text-gray-600', 'sm:w-min']">
             OR
           </UDivider>
           <UButton
-            v-if="orderInfo.quantity === 1"
+            v-if="isSingleQuantity"
             :label="$t('button.check_all_nft_ids')"
             :disabled="isLoading"
             variant="outline"
@@ -237,8 +237,9 @@ const showRestockModal = ref(false)
 const validationError = ref('')
 
 const { NFT_ITEM_URL } = useRuntimeConfig().public
-const hasNftIdInput = computed(() => orderInfo.value.quantity > 1 || nftIdInput.value.some(id => id.trim() !== ''))
+const hasValidNftInput = computed(() => nftIdInput.value.some(id => id.trim() !== ''))
 const isSendButtonDisabled = computed(() => isLoading.value || isVerifyingNFTId.value || !!nftIdError.value || isLimitReached.value || !isNftIdConfirmed.value)
+const isSingleQuantity = computed(() => orderInfo.value.quantity === 1)
 
 const nftClassName = computed(() => nftStore.getClassMetadataById(classId.value as string)?.name)
 
@@ -247,7 +248,7 @@ watch(isLoading, (newIsLoading) => {
 })
 
 watch(nftIdInput, (_, oldVal) => {
-  if (oldVal && oldVal.length > 0 && orderInfo.value.quantity === 1) {
+  if (oldVal && oldVal.length > 0 && isSingleQuantity.value) {
     isNftIdConfirmed.value = false
     validationError.value = ''
     nftIdError.value = ''
@@ -267,7 +268,7 @@ onMounted(async () => {
 })
 
 async function handleConfirmNFTId () {
-  if (!hasNftIdInput.value) { return }
+  if (!hasValidNftInput.value) { return }
 
   try {
     validationError.value = ''
