@@ -124,7 +124,7 @@
               :key="`nft-id-input-${i}`"
               ref="nftIdInputRef"
               v-model="nftIdInput[i - 1]"
-              :disabled="orderInfo.quantity > 1"
+              :disabled="!isSingleQuantity"
               class="font-mono"
             >
               <template v-if="orderInfo.quantity > 1" #leading>
