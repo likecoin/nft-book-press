@@ -48,7 +48,7 @@ export const useReadersStore = defineStore('readers', () => {
           orders.push(...classOrders.map(order => ({ ...order, classId })))
         }
       } catch (err) {
-
+        console.error(`Failed to fetch orders for classId ${classId}:`, err)
       }
     }
 
@@ -76,7 +76,8 @@ export const useReadersStore = defineStore('readers', () => {
       const wallet = order.wallet
 
       if (readersMap.has(readerEmail)) {
-        const existing = readersMap.get(readerEmail)!
+        const existing = readersMap.get(readerEmail)
+        if (!existing) { return }
 
         if (new Date(purchaseTime) < new Date(existing.firstPurchaseTime)) {
           existing.firstPurchaseTime = purchaseTime
