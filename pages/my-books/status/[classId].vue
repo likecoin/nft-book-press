@@ -493,10 +493,6 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { useBookstoreApiStore } from '~/stores/book-store-api'
-import { useNftStore } from '~/stores/nft'
-import { useWalletStore } from '~/stores/wallet'
-import { useStripeStore } from '~/stores/stripe'
 import { getPortfolioURL, downloadFile, convertArrayOfObjectsToCSV, getPurchaseLink } from '~/utils'
 import { shortenWalletAddress } from '~/utils/cosmos'
 import { getApiEndpoints } from '~/constant/api'
@@ -510,8 +506,10 @@ const store = useWalletStore()
 const bookstoreApiStore = useBookstoreApiStore()
 const nftStore = useNftStore()
 const stripeStore = useStripeStore()
+const readersStore = useReadersStore()
 const { token } = storeToRefs(bookstoreApiStore)
 const { wallet } = storeToRefs(store)
+const { ordersByClassIdMap } = storeToRefs(readersStore)
 const { updateBookListingSetting, reduceListingPendingNFTCountById } = bookstoreApiStore
 const { lazyFetchClassMetadataById } = nftStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
@@ -529,7 +527,6 @@ const priceIndex = ref(0)
 const classListingInfo = ref<any>({})
 const prices = ref<any[]>([])
 const isUpdatingPricesOrder = ref(false)
-const ordersData = ref<any>({})
 const shouldShowAdvanceSettings = ref<boolean>(false)
 const showEditISCN = ref(false)
 
@@ -613,8 +610,8 @@ const salesChannelMap = computed(() => {
 })
 
 const purchaseList = computed(() => {
-  if (ordersData.value?.orders) {
-    return ordersData.value.orders.map((purchase: any) => {
+  if (ordersData.value?.length) {
+    return ordersData.value.map((purchase: any) => {
       const timestamp = purchase.timestamp
       const date = new Date(timestamp)
       const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
@@ -639,6 +636,11 @@ const orderTableColumns = computed(() => {
     { key: 'wallet', label: $t('table.reader_wallet'), sortable: true },
     { key: 'message', label: $t('table.reader_message'), sortable: false }
   ]
+})
+
+const ordersData = computed(() => {
+  const orders = ordersByClassIdMap.value.get(classId.value) || []
+  return orders
 })
 
 function getQRCodeFilename (channel = '') {
@@ -905,14 +907,8 @@ onMounted(async () => {
     hideDownload.value = classHideDownload
     enableCustomMessagePage.value = classEnableCustomMessagePage
     tableOfContents.value = classTableOfContent
-    const orders = await $fetch(`${LIKE_CO_API}/likernft/book/purchase/${classId.value}/orders`,
-      {
-        headers: {
-          authorization: `Bearer ${token.value}`
-        }
-      })
+    await readersStore.fetchAllOrders([classId.value])
 
-    ordersData.value = orders
     if (wallet.value) {
       await calculateStock()
       try {
@@ -983,7 +979,7 @@ async function movePrice (fromIndex: number, toIndex: number) {
 }
 
 async function sendReminderEmail (purchase: any) {
-  const orderData = ordersData.value?.orders?.find((p: any) => p.id === purchase.id)
+  const orderData = ordersData.value?.find((p: any) => p.id === purchase.id)
   if (!orderData) {
     throw new Error('ORDER_NOT_FOUND')
   }
@@ -1010,7 +1006,7 @@ async function hardSetStatusToCompleted (purchase: any) {
     return
   }
 
-  const orderData = ordersData.value?.orders?.find((p: any) => p.id === purchase.id)
+  const orderData = ordersData.value?.find((p: any) => p.id === purchase.id)
   if (!orderData) {
     throw new Error('ORDER_NOT_FOUND')
   }

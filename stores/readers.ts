@@ -200,6 +200,18 @@ export const useReadersStore = defineStore('readers', () => {
     return readers.value
   }
 
+  const ordersByClassIdMap = computed(() => {
+    const map = new Map<string, any[]>()
+    allOrders.value.forEach((order) => {
+      const classId = order.classId
+      if (!map.has(classId)) {
+        map.set(classId, [])
+      }
+      map.get(classId)!.push(order)
+    })
+    return map
+  })
+
   const shouldRefetch = computed(() => {
     const CACHE_DURATION = 120 * 60 * 1000 // 120 minutes
     return !lastFetchTime.value || (Date.now() - lastFetchTime.value > CACHE_DURATION)
@@ -220,6 +232,7 @@ export const useReadersStore = defineStore('readers', () => {
     readers: readonly(readers),
     booksInfo: readonly(booksInfo),
     allOrders: readonly(allOrders),
+    ordersByClassIdMap: readonly(ordersByClassIdMap),
     isLoading: readonly(isLoading),
     error: readonly(error),
     lastFetchTime: readonly(lastFetchTime),
