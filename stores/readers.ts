@@ -37,36 +37,27 @@ export const useReadersStore = defineStore('readers', () => {
     }
   })
 
-  async function fetchAllOrders (classIds: string[]) {
-    const orders: any[] = []
-
-    for (const classId of classIds) {
-      try {
-        const ordersData = await fetchBookOrders(classId, token.value)
-        const classOrders = ordersData?.orders || []
-        if (classOrders && Array.isArray(classOrders) && classOrders.length > 0) {
-          orders.push(...classOrders.map(order => ({ ...order, classId })))
-        }
-      } catch (err) {
-        console.error(`Failed to fetch orders for classId ${classId}:`, err)
+  const ordersByClassIdMap = computed(() => {
+    const map = new Map<string, any[]>()
+    allOrders.value.forEach((order) => {
+      const classId = order.classId
+      if (!map.has(classId)) {
+        map.set(classId, [])
       }
+      map.get(classId)!.push(order)
+    })
+    return map
+  })
+
+  const processedReaders = computed(() => {
+    const uniqueClassIds = Object.keys(booksInfo.value)
+    if (uniqueClassIds.length === 0 || allOrders.value.length === 0) {
+      return []
     }
 
-    allOrders.value = orders
-    return orders
-  }
-
-  async function lazyFetchAllOrders (classIds: string[], force = false) {
-    if (!force && allOrders.value.length > 0 && !shouldRefetch.value) {
-      return allOrders.value
-    }
-    return await fetchAllOrders(classIds)
-  }
-
-  function processOrdersToReaders (orders: any[], uniqueClassIds: string[]) {
     const readersMap = new Map<string, ReaderData>()
 
-    orders.forEach((order) => {
+    allOrders.value.forEach((order) => {
       const readerEmail = order.email
       if (!readerEmail) { return }
 
@@ -116,7 +107,7 @@ export const useReadersStore = defineStore('readers', () => {
       }
     })
 
-    const processedReaders = Array.from(readersMap.values()).map((reader) => {
+    return Array.from(readersMap.values()).map((reader) => {
       const bookSortFields: Record<string, number> = {}
       uniqueClassIds.forEach((classId) => {
         bookSortFields[`book_${classId}`] = reader.purchasedBooks[classId] ? 1 : 0
@@ -127,8 +118,37 @@ export const useReadersStore = defineStore('readers', () => {
         ...bookSortFields
       }
     })
+  })
 
-    return processedReaders
+  const shouldRefetch = computed(() => {
+    const CACHE_DURATION = 120 * 60 * 1000 // 120 minutes
+    return !lastFetchTime.value || (Date.now() - lastFetchTime.value > CACHE_DURATION)
+  })
+
+  async function fetchAllOrders (classIds: string[]) {
+    const orders: any[] = []
+
+    for (const classId of classIds) {
+      try {
+        const ordersData = await fetchBookOrders(classId, token.value)
+        const classOrders = ordersData?.orders || []
+        if (classOrders && Array.isArray(classOrders) && classOrders.length > 0) {
+          orders.push(...classOrders.map(order => ({ ...order, classId })))
+        }
+      } catch (err) {
+        console.error(`Failed to fetch orders for classId ${classId}:`, err)
+      }
+    }
+
+    allOrders.value = orders
+    return orders
+  }
+
+  async function lazyFetchAllOrders (classIds: string[], force = false) {
+    if (!force && allOrders.value.length > 0 && !shouldRefetch.value) {
+      return allOrders.value
+    }
+    return await fetchAllOrders(classIds)
   }
 
   async function fetchReaders (force = false) {
@@ -178,11 +198,9 @@ export const useReadersStore = defineStore('readers', () => {
 
       booksInfo.value = tempBooksInfo
 
-      const orders = await lazyFetchAllOrders(uniqueClassIds, force)
+      await lazyFetchAllOrders(uniqueClassIds, force)
 
-      const processedReaders = processOrdersToReaders(orders, uniqueClassIds)
-
-      readers.value = processedReaders
+      readers.value = processedReaders.value
       lastFetchTime.value = Date.now()
     } catch (err) {
       error.value = (err as Error).message || 'Failed to load readers data'
@@ -199,23 +217,6 @@ export const useReadersStore = defineStore('readers', () => {
     await fetchReaders()
     return readers.value
   }
-
-  const ordersByClassIdMap = computed(() => {
-    const map = new Map<string, any[]>()
-    allOrders.value.forEach((order) => {
-      const classId = order.classId
-      if (!map.has(classId)) {
-        map.set(classId, [])
-      }
-      map.get(classId)!.push(order)
-    })
-    return map
-  })
-
-  const shouldRefetch = computed(() => {
-    const CACHE_DURATION = 120 * 60 * 1000 // 120 minutes
-    return !lastFetchTime.value || (Date.now() - lastFetchTime.value > CACHE_DURATION)
-  })
 
   function clearError () {
     error.value = ''
