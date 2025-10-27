@@ -27,7 +27,6 @@ export const useOrdersStore = defineStore('orders', () => {
   const allOrders = ref<any[]>([])
   const isLoading = ref(false)
   const error = ref('')
-  const lastFetchTime = ref<number | null>(null)
 
   watch(isAuthenticated, () => {
     if (isAuthenticated.value) {
@@ -120,11 +119,6 @@ export const useOrdersStore = defineStore('orders', () => {
     })
   })
 
-  const shouldRefetch = computed(() => {
-    const CACHE_DURATION = 120 * 60 * 1000 // 120 minutes
-    return !lastFetchTime.value || (Date.now() - lastFetchTime.value > CACHE_DURATION)
-  })
-
   async function fetchAllOrders (classIds: string[]) {
     const orders: any[] = []
 
@@ -145,14 +139,14 @@ export const useOrdersStore = defineStore('orders', () => {
   }
 
   async function lazyFetchAllOrders (classIds: string[], force = false) {
-    if (!force && allOrders.value.length > 0 && !shouldRefetch.value) {
+    if (!force && allOrders.value.length > 0) {
       return allOrders.value
     }
     return await fetchAllOrders(classIds)
   }
 
   async function fetchReaders (force = false) {
-    if (!force && !shouldRefetch.value && readers.value.length > 0) {
+    if (!force && readers.value.length > 0) {
       return
     }
 
@@ -201,7 +195,6 @@ export const useOrdersStore = defineStore('orders', () => {
       await lazyFetchAllOrders(uniqueClassIds, force)
 
       readers.value = processedReaders.value
-      lastFetchTime.value = Date.now()
     } catch (err) {
       error.value = (err as Error).message || 'Failed to load readers data'
       throw err
@@ -211,7 +204,7 @@ export const useOrdersStore = defineStore('orders', () => {
   }
 
   async function lazyFetchReaders () {
-    if (readers.value.length > 0 && !shouldRefetch.value) {
+    if (readers.value.length > 0) {
       return readers.value
     }
     await fetchReaders()
@@ -226,7 +219,6 @@ export const useOrdersStore = defineStore('orders', () => {
     readers.value = []
     allOrders.value = []
     booksInfo.value = {}
-    lastFetchTime.value = null
   }
 
   return {
@@ -236,9 +228,6 @@ export const useOrdersStore = defineStore('orders', () => {
     ordersByClassIdMap: readonly(ordersByClassIdMap),
     isLoading: readonly(isLoading),
     error: readonly(error),
-    lastFetchTime: readonly(lastFetchTime),
-
-    shouldRefetch,
 
     fetchReaders,
     lazyFetchReaders,
