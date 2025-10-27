@@ -908,7 +908,7 @@ onMounted(async () => {
     hideDownload.value = classHideDownload
     enableCustomMessagePage.value = classEnableCustomMessagePage
     tableOfContents.value = classTableOfContent
-    await ordersStore.fetchAllOrders([classId.value])
+    await ordersStore.fetchOrdersByClassId([classId.value])
 
     if (wallet.value) {
       await calculateStock()
