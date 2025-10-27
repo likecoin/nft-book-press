@@ -1,7 +1,9 @@
+import { useOrdersStore } from '~/stores/orders'
+
 export function useReaders () {
   const { t } = useI18n()
 
-  const readersStore = useReadersStore()
+  const ordersStore = useOrdersStore()
 
   const pagination = ref({
     page: 1,
@@ -44,7 +46,7 @@ export function useReaders () {
       sortable: true
     }))
 
-    const bookColumns = Object.values(readersStore.booksInfo).map((book: any) => ({
+    const bookColumns = Object.values(ordersStore.booksInfo).map((book: any) => ({
       key: `book_${book.classId}`,
       label: book.name?.slice(0, 1) || book.classId.slice(0, 1),
       sortable: true
@@ -54,7 +56,7 @@ export function useReaders () {
   })
 
   const sortedReaders = computed(() => {
-    const readers = [...readersStore.readers]
+    const readers = [...ordersStore.readers]
 
     if (!sortState.value.column || !sortState.value.direction) {
       return readers.sort((a, b) => b.lifetimeValue - a.lifetimeValue)
@@ -91,7 +93,7 @@ export function useReaders () {
   })
 
   const paginatedReaders = computed(() => {
-    pagination.value.total = readersStore.readers.length
+    pagination.value.total = ordersStore.readers.length
 
     const start = (pagination.value.page - 1) * pagination.value.limit
     const end = start + pagination.value.limit
@@ -235,7 +237,7 @@ export function useReaders () {
       { key: 'lastPurchaseTime', label: t('table.last_purchase'), formatter: formatDate },
       { key: 'lifetimeValue', label: `${t('table.lifetime_value')} (USD)`, formatter: (val: number) => formatValue(val) },
       { key: 'hasMessage', label: t('table.has_message'), formatter: (val: boolean) => val ? 'Y' : 'N' },
-      ...Object.values(readersStore.booksInfo).map((book: any) => ({
+      ...Object.values(ordersStore.booksInfo).map((book: any) => ({
         key: `purchasedBooks.${book.classId}`,
         label: book.name || book.classId,
         formatter: (val: boolean) => val ? 'Y' : 'N'
@@ -247,7 +249,7 @@ export function useReaders () {
   }
 
   return {
-    readersStore,
+    ordersStore,
 
     sortedReaders,
     paginatedReaders,

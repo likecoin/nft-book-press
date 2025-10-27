@@ -18,7 +18,7 @@ export interface BookInfo {
   classId: string
 }
 
-export const useReadersStore = defineStore('readers', () => {
+export const useOrdersStore = defineStore('orders', () => {
   const bookstoreApiStore = useBookstoreApiStore()
   const { token, isAuthenticated } = storeToRefs(bookstoreApiStore)
 

@@ -496,6 +496,7 @@ import { storeToRefs } from 'pinia'
 import { getPortfolioURL, downloadFile, convertArrayOfObjectsToCSV, getPurchaseLink } from '~/utils'
 import { shortenWalletAddress } from '~/utils/cosmos'
 import { getApiEndpoints } from '~/constant/api'
+import { useOrdersStore } from '~/stores/orders'
 const { t: $t } = useI18n()
 
 const MAX_EDITION_COUNT = 2
@@ -506,10 +507,10 @@ const store = useWalletStore()
 const bookstoreApiStore = useBookstoreApiStore()
 const nftStore = useNftStore()
 const stripeStore = useStripeStore()
-const readersStore = useReadersStore()
+const ordersStore = useOrdersStore()
 const { token } = storeToRefs(bookstoreApiStore)
 const { wallet } = storeToRefs(store)
-const { ordersByClassIdMap } = storeToRefs(readersStore)
+const { ordersByClassIdMap } = storeToRefs(ordersStore)
 const { updateBookListingSetting, reduceListingPendingNFTCountById } = bookstoreApiStore
 const { lazyFetchClassMetadataById } = nftStore
 const { fetchStripeConnectStatusByWallet } = stripeStore
@@ -907,7 +908,7 @@ onMounted(async () => {
     hideDownload.value = classHideDownload
     enableCustomMessagePage.value = classEnableCustomMessagePage
     tableOfContents.value = classTableOfContent
-    await readersStore.fetchAllOrders([classId.value])
+    await ordersStore.fetchAllOrders([classId.value])
 
     if (wallet.value) {
       await calculateStock()
