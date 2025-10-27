@@ -125,7 +125,7 @@ export const useOrdersStore = defineStore('orders', () => {
       try {
         const ordersData = await fetchBookOrders(classId, token.value)
         const classOrders = ordersData?.orders || []
-        if (classOrders && Array.isArray(classOrders) && classOrders.length > 0) {
+        if (classOrders.length > 0) {
           orders.push(...classOrders.map(order => ({ ...order, classId })))
         }
       } catch (err) {
