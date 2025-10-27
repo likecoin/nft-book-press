@@ -65,7 +65,6 @@
             active: ''
           }
         }"
-        @select="onSelect"
         @update:model-value="onSelect"
       >
         <!-- headers  -->
