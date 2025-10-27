@@ -1,6 +1,6 @@
 import { useOrdersStore } from '~/stores/orders'
 
-export function useReaders () {
+export function useReadersTable () {
   const { t } = useI18n()
 
   const ordersStore = useOrdersStore()

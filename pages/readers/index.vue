@@ -16,27 +16,27 @@
           icon="i-heroicons-arrow-path"
           variant="outline"
           color="gray"
-          :disabled="readersStore.isLoading"
-          :loading="readersStore.isLoading"
+          :disabled="ordersStore.isLoading"
+          :loading="ordersStore.isLoading"
           @click="refreshData"
         />
       </div>
     </div>
 
     <UAlert
-      v-if="readersStore.error"
+      v-if="ordersStore.error"
       icon="i-heroicons-exclamation-triangle"
       color="red"
       variant="soft"
-      :title="readersStore.error"
+      :title="ordersStore.error"
       :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'red', variant: 'link', padded: false }"
-      @close="readersStore.clearError()"
+      @close="ordersStore.clearError()"
     />
 
     <UCard>
       <template #header>
         <div class="flex justify-between items-center">
-          <h3 class="font-medium" v-text="$t('readers.total_readers', { count: readersStore.isLoading ? '...' : readersStore.readers.length })" />
+          <h3 class="font-medium" v-text="$t('readers.total_readers', { count: ordersStore.isLoading ? '...' : ordersStore.readers.length })" />
           <div class="flex items-center gap-2">
             <span class="text-sm text-gray-500" v-text="$t('common.page_size')" />
             <USelect
@@ -53,7 +53,7 @@
         :model-value="selectedRows"
         :rows="paginatedReaders"
         :columns="columns"
-        :loading="readersStore.isLoading"
+        :loading="ordersStore.isLoading"
         :progress="{ color: 'primary', animation: 'carousel' }"
         :ui="{
           th: { base: 'text-left' },
@@ -93,7 +93,7 @@
           </UTooltip>
         </template>
         <template
-          v-for="book in Object.values(readersStore.booksInfo)"
+          v-for="book in Object.values(ordersStore.booksInfo)"
           :key="`header-${book.classId}`"
           #[`book_${book.classId}-header`]
         >
@@ -154,7 +154,7 @@
           </div>
         </template>
         <template
-          v-for="book in Object.values(readersStore.booksInfo)"
+          v-for="book in Object.values(ordersStore.booksInfo)"
           :key="`template-${book.classId}`"
           #[`book_${book.classId}-data`]="{ row }"
         >
@@ -174,7 +174,7 @@
           <UPagination
             v-model="currentPage"
             :page-count="pagination.limit"
-            :total="readersStore.readers.length"
+            :total="ordersStore.readers.length"
             :max="7"
             show-last
             show-first
@@ -191,7 +191,7 @@ const { t: $t } = useI18n()
 const bookstoreApiStore = useBookstoreApiStore()
 
 const {
-  readersStore,
+  ordersStore,
   paginatedReaders,
   columns,
   pagination,
@@ -212,7 +212,7 @@ const {
   baseColumnsConfig,
   pageSizeOptions,
   exportReadersToCSV
-} = useReaders()
+} = useReadersTable()
 
 const pageSize = ref(100)
 const currentPage = ref(1)
@@ -228,11 +228,11 @@ onMounted(async () => {
 })
 
 async function loadReadersData () {
-  await readersStore.fetchReaders()
+  await ordersStore.fetchReaders()
 }
 
 async function refreshData () {
-  await readersStore.fetchReaders(true)
+  await ordersStore.fetchReaders(true)
   clearSelection()
 }
 
