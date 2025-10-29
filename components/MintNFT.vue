@@ -31,7 +31,6 @@ const {
 
 const error = ref('')
 const isLoading = ref(false)
-const retryCount = ref(0)
 const maxRetries = 3
 
 const iscnOwner = ref('')
@@ -77,14 +76,12 @@ watch(() => props.iscnId, async (val: string) => {
   }
 }, { immediate: true })
 
-async function fetchISCNById (iscnId?: string, isRetry = false) {
+async function fetchISCNById (iscnId?: string, retryCount = 0) {
   if (!iscnId) {
     return
   }
+
   try {
-    if (!isRetry) {
-      retryCount.value = 0
-    }
     isLoading.value = true
     const isBookNFT = await checkNFTClassIsBookNFT(iscnId)
     if (!isBookNFT) {
@@ -101,14 +98,13 @@ async function fetchISCNById (iscnId?: string, isRetry = false) {
     iscnOwner.value = owner as string
     classId.value = iscnId
     error.value = ''
-    retryCount.value = 0
     isLoading.value = false
   } catch (err) {
-    if (retryCount.value < maxRetries) {
-      retryCount.value++
-      const delay = retryCount.value * 1000
+    if (retryCount < maxRetries) {
+      const nextRetryCount = retryCount + 1
+      const delay = nextRetryCount * 1000
       setTimeout(() => {
-        fetchISCNById(iscnId, true)
+        fetchISCNById(iscnId, nextRetryCount)
       }, delay)
     } else {
       error.value = $t('error.fetch_classid_failed') + err
