@@ -78,7 +78,7 @@
   "common.description": "描述",
   "common.edit": "編輯",
   "common.email": "電子郵件",
-  "common.export_csv": "匯出 csv （{length} 筆）",
+  "common.export_csv": "匯出 CSV （{length} 筆）",
   "common.go_back": "返回",
   "common.link": "連結",
   "common.loading": "載入中...",

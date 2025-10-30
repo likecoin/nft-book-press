@@ -77,7 +77,7 @@
   "common.description": "Description",
   "common.edit": "Edit",
   "common.email": "Email",
-  "common.export_csv": "Export csv ({length} items)",
+  "common.export_csv": "Export CSV ({length} items)",
   "common.go_back": "Go Back",
   "common.link": "Link",
   "common.loading": "Loading...",

@@ -33,7 +33,7 @@
       @close="ordersStore.clearError()"
     />
 
-    <UCard>
+    <UCard :ui="{ body: { padding: '!p-0' }}">
       <template #header>
         <div class="flex justify-between items-center">
           <h3 class="font-medium" v-text="$t('readers.total_readers', { count: ordersStore.isLoading ? '...' : ordersStore.readers.length })" />
@@ -56,7 +56,7 @@
         :loading="ordersStore.isLoading"
         :progress="{ color: 'primary', animation: 'carousel' }"
         :ui="{
-          th: { base: 'text-left' },
+          th: { base: 'text-left text-nowrap whitespace-nowrap' },
           td: { base: 'text-right' },
           tr: {
             // Prevent JSON.stringify error when user clicks a row
@@ -67,7 +67,7 @@
         }"
         @update:model-value="onSelect"
       >
-        <!-- headers  -->
+        <!-- headers -->
         <template
           v-for="column in baseColumnsConfig"
           :key="`header-${column.key}`"
@@ -146,7 +146,7 @@
         <template #hasMessage-data="{ row }">
           <div class="flex justify-center w-full">
             <UBadge
-              :color="row.hasMessage ? 'primary' : 'gray'"
+              :color="row.hasMessage ? 'green' : 'gray'"
               :label="row.hasMessage ? 'Y' : 'N'"
               variant="soft"
             />
@@ -162,7 +162,6 @@
               :color="row[`book_${book.classId}`] ? 'green' : 'gray'"
               :label="row[`book_${book.classId}`] ? 'Y' : 'N'"
               variant="soft"
-              size="xs"
             />
           </div>
         </template>
