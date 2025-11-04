@@ -72,7 +72,8 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
   async function fetchBookListing (params: { key?: number, limit?: number } = {}) {
     const qsPayload: any = {
       wallet: sessionWallet.value,
-      limit: params.limit || 100
+      limit: params.limit || 100,
+      chain: 'base'
     }
     if (params.key) {
       qsPayload.key = params.key
@@ -96,8 +97,16 @@ export const useBookstoreApiStore = defineStore('book-api', () => {
     }
   }
 
-  async function fetchModeratedBookList () {
-    const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/list/moderated?wallet=${sessionWallet.value}`,
+  async function fetchModeratedBookList (params: { key?: number, limit?: number } = {}) {
+    const qsPayload: any = {
+      wallet: sessionWallet.value,
+      limit: params.limit || 100,
+      chain: 'base'
+    }
+    if (params.key) {
+      qsPayload.key = params.key
+    }
+    const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/list/moderated?${Object.entries(qsPayload).map(([key, value]) => `${key}=${value}`).join('&')}`,
       {
         headers: {
           authorization: `Bearer ${token.value}`

@@ -175,7 +175,7 @@ onMounted(async () => {
 })
 
 async function fetchBookList () {
-  const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/list?limit=100`)
+  const data = await $fetch(`${LIKE_CO_API}/likernft/book/store/list?chain=base&limit=100`)
   latestBookList.value = (data as any)?.list || []
 }
 
