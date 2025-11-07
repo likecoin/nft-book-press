@@ -135,7 +135,7 @@
                     <UInput
                       type="file"
                       accept="image/png"
-                      @change="(e) => onImgUpload(e, 'signatureImage')"
+                      @change="(e: FileList | null) => onImgUpload(e, 'signatureImage')"
                     />
                   </UFormGroup>
                 </div>

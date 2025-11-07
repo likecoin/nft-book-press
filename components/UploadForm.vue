@@ -119,7 +119,7 @@ const { token } = storeToRefs(bookstoreApiStore)
 const toast = useToast()
 const imageFile = ref<HTMLInputElement | null>(null)
 
-interface FileRecord {
+export interface FileRecord {
   fileName?: string;
   fileSize?: number;
   fileType?: string;

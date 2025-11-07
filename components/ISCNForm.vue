@@ -217,8 +217,8 @@
         <UploadForm
           ref="uploadFormRef"
           :default-encrypted="isContentFingerprintsEncrypted"
-          @file-upload-status="(status) => (uploadStatus = status)"
-          @file-ready="(records) => (fileRecords = records)"
+          @file-upload-status="(status: string) => (uploadStatus = status)"
+          @file-ready="(records: FileRecord[]) => (fileRecords = records)"
           @submit="handleUploadSubmit"
         />
         <template #footer>
@@ -242,6 +242,7 @@
 
 <script setup lang="ts">
 import type { ISCNFormData } from '~/utils/iscn.type'
+import type { FileRecord } from '~/components/UploadForm.vue'
 
 import { licenseOptions, languageOptions, MAX_DESCRIPTION_LENGTH } from '~/constant/index'
 import { useFileUpload } from '~/composables/useFileUpload'
@@ -257,7 +258,7 @@ const downloadTypeOptions = [
 
 const shouldShowUploadModal = ref(false)
 const uploadFormRef = ref()
-const fileRecords = ref([])
+const fileRecords = ref<FileRecord[]>([])
 const uploadStatus = ref('')
 
 const formData = defineModel<ISCNFormData>({ required: true })

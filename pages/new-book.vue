@@ -23,15 +23,15 @@
         <div v-if="step === 0">
           <UploadForm
             ref="uploadFormRef"
-            @file-upload-status="(status) => (uploadStatus = status)"
-            @file-ready="(records) => (fileRecords = records)"
+            @file-upload-status="(status: string) => (uploadStatus = status)"
+            @file-ready="(records: FileRecord[]) => (fileRecords = records)"
             @submit="handleUploadSubmit"
           />
         </div>
         <div v-else-if="step === 1">
           <RegisterISCN
             ref="registerISCN"
-            @form-valid-change="(valid) => (isISCNFormValid = valid)"
+            @form-valid-change="(valid: boolean) => (isISCNFormValid = valid)"
             @submit="handleIscnSubmit"
           />
         </div>
@@ -39,7 +39,7 @@
           <MintNFT
             ref="mintNFT"
             :iscn-id="iscnId"
-            @loading-change="(isLoading) => (isMintLoading = isLoading)"
+            @loading-change="(isLoading: boolean) => (isMintLoading = isLoading)"
             @submit="handleMintNFTSubmit"
           />
         </div>
@@ -69,6 +69,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import type { FileRecord } from '~/components/UploadForm.vue'
 import { useWalletStore } from '~/stores/wallet'
 import { clearUploadFileData, setUploadFileData } from '~/utils/uploadFile'
 import { useToastComposable } from '~/composables/useToast'
@@ -91,7 +92,7 @@ const bookName = ref('')
 const iscnId = ref(route.query.iscn_id?.toString() || '')
 const classId = ref(route.query.class_id?.toString() || '')
 
-const fileRecords = ref([])
+const fileRecords = ref<FileRecord[]>([])
 const uploadStatus = ref('')
 const isISCNFormValid = ref(false)
 const isMintLoading = ref(false)
