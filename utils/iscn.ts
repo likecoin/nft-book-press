@@ -53,5 +53,9 @@ export function validateISCNForm (data: any, maxDescriptionLength = MAX_DESCRIPT
     errors.push('Please provide at least one content URL')
   }
 
+  if (!data.coverUrl) {
+    errors.push('Please provide a cover image URL')
+  }
+
   return errors
 }

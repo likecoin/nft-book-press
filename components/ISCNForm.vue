@@ -54,7 +54,12 @@
         />
       </UFormGroup>
 
-      <UFormGroup required :label="$t('form.cover_image')">
+      <UFormGroup
+        required
+        :label="$t('form.cover_image')"
+        :error="!formData.coverUrl && $t('iscn_form.cover_image_required')"
+        class="text-left"
+      >
         <UInput
           v-model="formData.coverUrl"
           placeholder="ar://{arweave_id}"

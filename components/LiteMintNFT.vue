@@ -220,7 +220,6 @@ function generateNFTMintListData ({
 
 async function startNFTMintFlow () {
   try {
-    isLoading.value = true
     const { contentMetadata } = localISCNData.value
 
     if (!isFormValid.value) {
@@ -228,6 +227,8 @@ async function startNFTMintFlow () {
       showErrorToast($t('errors.required_field_missing', { fields: missingFields }))
       return
     }
+
+    isLoading.value = true
 
     const nftsDefaultData = {
       metadata: {
