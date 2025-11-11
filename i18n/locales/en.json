@@ -14,7 +14,7 @@
   "auth.signin_description": "Please sign in to continue.",
   "auth.signin_required": "Sign in required",
   "auth_state.close": "Close",
-  "auth_state.connecting": "Loging",
+  "auth_state.connecting": "Signing In",
   "auth_state.copy_address": "Copy address",
   "auth_state.login": "Login",
   "auth_state.migrate": "Migrate",
