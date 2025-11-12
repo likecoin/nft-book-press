@@ -60,7 +60,7 @@
     "nuxt-gtag": "^3.0.3",
     "nuxt-security": "2.2.0",
     "typescript": "^5.8.3",
-    "vite-plugin-node-polyfills": "^0.22.0",
+    "vite-plugin-node-polyfills": "^0.24.0",
     "vite-plugin-replace": "^0.1.1",
     "vue-tsc": "^2.2.10"
   }
