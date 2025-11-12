@@ -126,7 +126,7 @@ watch([selectedIcon, selectedColor, selectedDotStyle, () => props.data], () => {
 onMounted(async () => {
   const { default: QRCodeStyling } = await import('@likecoin/qr-code-styling')
   qrCode.value = new QRCodeStyling(options.value)
-  if (qrCodeRef.value) {
+  if (qrCode.value && qrCodeRef.value) {
     qrCode.value.append(qrCodeRef.value)
   }
 })

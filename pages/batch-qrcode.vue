@@ -209,7 +209,7 @@ async function drawQRCodes () {
       data: item.url,
       ...getQRCodeStyleOptions()
     }))
-    const element = qrCodeRef.value?.[index]
+    const element = qrCodeRef.value?.[index] as HTMLElement | undefined
     if (element) {
       element.querySelector('svg')?.remove()
       qrcode.append(element)
