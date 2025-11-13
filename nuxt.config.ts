@@ -166,5 +166,9 @@ exports.randomFillSync = randomFillSync`
     cssPath: '~/assets/css/tailwind.css'
   },
 
+  future: {
+    compatibilityVersion: 4
+  },
+
   compatibilityDate: '2024-12-06'
 })
