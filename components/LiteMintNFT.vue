@@ -329,7 +329,7 @@ async function mintNFTs () {
     // eslint-disable-next-line no-console
     console.log(receipt)
     if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
-    if (receipt.logs[0].topics[3] === undefined) { throw new Error('INVALID_NFT_ID') }
+    if (!receipt.logs?.[0]?.topics?.[3]) { throw new Error('INVALID_NFT_ID') }
   } catch (err) {
     throw new Error('MINT_NFT_ERROR:' + (err as Error).toString())
   } finally {

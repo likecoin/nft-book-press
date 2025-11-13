@@ -213,7 +213,7 @@ const submitToISCN = async (): Promise<void> => {
     // eslint-disable-next-line no-console
     console.log(receipt)
     if (!receipt || receipt.status !== 'success') { throw new Error('INVALID_RECEIPT') }
-    if (!receipt.logs[0].address) { throw new Error('INVALID_CLASS_ID') }
+    if (!receipt.logs?.[0]?.address) { throw new Error('INVALID_CLASS_ID') }
     const classId = receipt.logs[0].address
     uploadStatus.value = 'success'
     emit('submit', {

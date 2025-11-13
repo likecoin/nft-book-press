@@ -45,7 +45,7 @@ const mimeType = computed(() => {
 
   // Extract MIME type from data URL
   const dataUrl = props.fileData || ''
-  const mimeType = dataUrl.split(';')[0].split(':')[1] || ''
+  const mimeType = dataUrl.split(';')[0]?.split(':')[1] || ''
 
   return mimeType
 })

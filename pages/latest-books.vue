@@ -124,7 +124,7 @@ const tableColumns = computed(() => [
     sortable: false
   }
 ])
-const selectedTabItemKey = computed(() => tabItems.value[selectedTabItemIndex.value].key)
+const selectedTabItemKey = computed(() => tabItems.value[selectedTabItemIndex.value]?.key || 'latest')
 const bookList = computed(() => selectedTabItemKey.value === 'latest' ? latestBookList.value : bestSellerBookList.value)
 const tableRows = computed(() => bookList.value.map((b: any) => {
   const className = b.name || b.title

@@ -427,6 +427,7 @@ const processEPub = async ({ buffer, file }: { buffer: ArrayBuffer; file: File }
 
 const handleDeleteFile = (index: number) => {
   const [removedFile] = fileRecords.value.splice(index, 1)
+  if (!removedFile) { return }
   if (removedFile.fileType?.startsWith('image/')) {
     epubMetadataList.value = epubMetadataList.value
       .map((metadata: any) => {
@@ -643,36 +644,35 @@ const setEbookCoverFromImages = async () => {
 
   for (let i = 0; i < fileRecords.value.length; i += 1) {
     const file = fileRecords.value[i]
-    if (file.fileType?.startsWith('image')) {
-      const existingData = sentArweaveTransactionInfo.value.get(file.ipfsHash) || {}
-      let { transactionHash, arweaveId, arweaveLink } = existingData
+    if (!file || !file.fileType?.startsWith('image')) { continue }
+    const existingData = sentArweaveTransactionInfo.value.get(file.ipfsHash) || {}
+    let { transactionHash, arweaveId, arweaveLink } = existingData
 
-      if (!arweaveId) {
-        if (!transactionHash) {
-          transactionHash = await sendArweaveFeeTx(file)
-        }
-        const uploadResult = await uploadFileAndGetArweaveId(file, transactionHash)
-        arweaveId = uploadResult.arweaveId
-        arweaveLink = uploadResult.arweaveLink
-        if (arweaveId) {
-          sentArweaveTransactionInfo.value.set(file.ipfsHash, {
-            transactionHash,
-            arweaveId,
-            arweaveLink
-          })
-        }
+    if (!arweaveId) {
+      if (!transactionHash) {
+        transactionHash = await sendArweaveFeeTx(file)
       }
-
+      const uploadResult = await uploadFileAndGetArweaveId(file, transactionHash)
+      arweaveId = uploadResult.arweaveId
+      arweaveLink = uploadResult.arweaveLink
       if (arweaveId) {
-        if (metadata && file.ipfsHash === metadata.thumbnailIpfsHash) {
-          metadata.thumbnailArweaveId = arweaveId
-        }
-        break
+        sentArweaveTransactionInfo.value.set(file.ipfsHash, {
+          transactionHash,
+          arweaveId,
+          arweaveLink
+        })
       }
-
-      // eslint-disable-next-line no-console
-      console.error(`Failed to upload image file ${file.fileName} to Arweave`)
     }
+
+    if (arweaveId) {
+      if (metadata && file.ipfsHash === metadata.thumbnailIpfsHash) {
+        metadata.thumbnailArweaveId = arweaveId
+      }
+      break
+    }
+
+    // eslint-disable-next-line no-console
+    console.error(`Failed to upload image file ${file.fileName} to Arweave`)
   }
 }
 
@@ -706,7 +706,9 @@ const onSubmit = async () => {
 
     for (let i = 0; i < fileRecords.value.length; i += 1) {
       const record = fileRecords.value[i]
-      await submitToArweave(record)
+      if (record) {
+        await submitToArweave(record)
+      }
     }
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -725,6 +727,7 @@ const onSubmit = async () => {
   }
 
   fileRecords.value.forEach((record: any, index: number) => {
+    if (!record || !fileRecords.value[index]) { return }
     if (sentArweaveTransactionInfo.value.has(record.ipfsHash)) {
       const info = sentArweaveTransactionInfo.value.get(record.ipfsHash)
       if (info) {

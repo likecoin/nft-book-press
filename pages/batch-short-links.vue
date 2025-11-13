@@ -346,8 +346,9 @@ async function convertToQRCode () {
 }
 
 function handleFileChange (files: FileList) {
-  if (!files) { return }
-  const [file] = files
+  if (!files?.length) { return }
+  const file = files[0]
+  if (!file) { return }
   const reader = new FileReader()
   reader.onload = (e) => {
     const text = e.target?.result

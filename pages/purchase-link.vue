@@ -332,7 +332,7 @@
               </template>
               <template v-if="!hasMoreThanOneChannel" #selectedEditionLabel-data="{ row }">
                 <USelect
-                  v-if="productEditionOptionsMap?.[row.productId].length"
+                  v-if="productEditionOptionsMap?.[row.productId]?.length"
                   class="min-w-[200px]"
                   :model-value="productEditionSelectModelValue[row.productId] || 0"
                   :options="productEditionOptionsMap?.[row.productId] || []"
@@ -591,7 +591,7 @@ const destinationSettings = computed(() => [
     value: 'custom'
   }
 ])
-const destinationSetting = ref(destinationSettings.value[0].value)
+const destinationSetting = ref(destinationSettings.value[0]?.value || 'liker_land')
 const isUsingCustomDestination = computed(() => destinationSetting.value === 'custom')
 const customDestinationURLInput = ref(route.query.custom_link as string || '')
 
@@ -776,8 +776,8 @@ const linkTableRowsMapByChannel = computed(() => {
         channelId: channel.id,
         channelName: channel.name,
         utmCampaign,
-        utmMedium: mergedQueryStringObject.value.utm_medium,
-        utmSource: mergedQueryStringObject.value.utm_source,
+        utmMedium: mergedQueryStringObject.value.utm_medium || '',
+        utmSource: mergedQueryStringObject.value.utm_source || '',
         url: getPurchaseLink(urlConfig),
         qrCodeUrl: getPurchaseLink({
           ...urlConfig,

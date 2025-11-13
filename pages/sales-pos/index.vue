@@ -494,8 +494,11 @@ function deleteNewItemInput (index: number) {
 }
 
 function handleNewItemInputUpdate (index: number, value: string) {
-  newProductIdInputs.value[index].error = undefined
-  newProductIdInputs.value[index].value = value
+  const input = newProductIdInputs.value[index]
+  if (input) {
+    input.error = undefined
+    input.value = value
+  }
 }
 
 function addSaleItem () {

@@ -559,6 +559,7 @@ function onImgUpload (
   if (!files?.length) { return }
 
   const file = files[0]
+  if (!file) { return }
   if (file.type !== 'image/png') {
     error.value = $t('errors.png_only')
     return

@@ -7,11 +7,15 @@ function isFullWidthChar (char: string): boolean {
   return char.charCodeAt(0) > 255
 }
 
-export function useMessageCharCount (memo: Ref<string>, limit: number): UseMessageCharCountReturn {
+export function useMessageCharCount (memo: Ref<string | undefined>, limit: number): UseMessageCharCountReturn {
   const messageCharCount = computed((): number => {
+    const value = memo.value || ''
     let count = 0
-    for (let i = 0; i < memo.value.length; i++) {
-      count += isFullWidthChar(memo.value[i]) ? 2 : 1
+    for (let i = 0; i < value.length; i++) {
+      const char = value[i]
+      if (char) {
+        count += isFullWidthChar(char) ? 2 : 1
+      }
     }
     return count
   })

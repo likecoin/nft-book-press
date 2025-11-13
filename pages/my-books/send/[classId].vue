@@ -282,9 +282,15 @@ async function handleConfirmNFTId () {
       return
     }
 
+    const firstNftId = nftIds.value[0]
+    if (!firstNftId) {
+      validationError.value = $t('error.invalid_nft_id')
+      return
+    }
+
     const [metadata, ownerResult] = await Promise.all([
       fetchNFTMetadata(),
-      getNFTOwner(classId.value, nftIds.value[0])
+      getNFTOwner(classId.value, firstNftId)
     ])
     const owner = ownerResult as string
     if (!metadata || owner !== wallet.value) {

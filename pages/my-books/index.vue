@@ -130,7 +130,10 @@ const selectedTabItemIndex = computed({
     return index
   },
   set (value) {
-    navigateTo(localeRoute({ query: { tab: tabItems.value[value].key } }), { replace: true })
+    const item = tabItems.value[value]
+    if (item) {
+      navigateTo(localeRoute({ query: { tab: item.key } }), { replace: true })
+    }
   }
 })
 
@@ -150,7 +153,7 @@ const tablePageRowFrom = computed(() => (tablePage.value - 1) * tableRowsPerPage
 const tablePageRowTo = computed(() => Math.min(tablePage.value * tableRowsPerPage.value, tableRows.value.length))
 
 // Rows
-const tableRows = computed(() => (tabItems.value[selectedTabItemIndex.value].key === 'viewable' ? moderatedBookList : bookList).value.map(b => ({
+const tableRows = computed(() => (tabItems.value[selectedTabItemIndex.value]?.key === 'viewable' ? moderatedBookList : bookList).value.map(b => ({
   classId: b.classId,
   className: nftStore.getClassMetadataById(b.classId)?.name,
   priceInUSD: b.prices?.[0].price,

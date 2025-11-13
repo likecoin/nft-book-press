@@ -18,7 +18,8 @@ export const useLikerStore = defineStore('liker', () => {
   })
 
   const getLikerInfoByWallet = computed(() => (wallet: string) => {
-    return getLikerInfoById.value(likerIdMapByWallet.value[wallet])
+    const likerId = likerIdMapByWallet.value[wallet]
+    return likerId ? getLikerInfoById.value(likerId) : null
   })
 
   const getChannelInfoById = computed(() => (channelId: string) => {
