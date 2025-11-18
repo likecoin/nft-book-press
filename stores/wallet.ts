@@ -205,7 +205,7 @@ export const useWalletStore = defineStore('wallet', () => {
       return false
     } catch (error) {
       if (error instanceof FetchError) {
-        switch (error.data) {
+        switch (error.data?.error) {
           case 'EMAIL_ALREADY_USED':
             if (!error.data?.evmWallet && error.data?.likeWallet) {
               try {
