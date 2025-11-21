@@ -373,7 +373,7 @@ const prices = ref<any[]>([
 ])
 const hasMultiplePrices = computed(() => prices.value.length > 1)
 const moderatorWallets = ref<string[]>([
-  'like1rclg677y2jqt8x4ylj0kjlqjjmnn6w63uflpgr'
+  '0xa037Feb6508A8C2F93bb19f6721730C45921f2D0'
 ])
 const moderatorWalletInput = ref('')
 const notificationEmailInput = ref('')
